@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="wrap_content"
+	android:layout_height="fill_parent"
+	android:background="@drawable/table_cell_bg">
+	<ImageView
+		android:id="@+id/blogs_row_user_icon"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignParentTop="true"
+		android:layout_alignParentLeft="true"
+		android:paddingTop="@dimen/blogs_row_icon_padding_top"
+		android:paddingLeft="@dimen/blogs_row_icon_padding_left">
+	</ImageView>
+	<TextView
+		android:id="@+id/blogs_row_title"
+		android:layout_toRightOf="@id/blogs_row_user_icon"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:padding="@dimen/blogs_row_title_padding"
+		android:textColor="@color/blogs_table_text_title"></TextView>
+	<TextView
+		android:id="@+id/blogs_row_date"
+		android:layout_below="@id/blogs_row_title"
+		android:layout_toRightOf="@id/blogs_row_user_icon"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:paddingLeft="@dimen/blogs_row_date_padding_left"
+		android:textColor="@color/blogs_table_text_date"></TextView>
+	<TextView
+		android:id="@+id/blogs_row_author_cmmnts"
+		android:layout_below="@id/blogs_row_title"
+		android:layout_toRightOf="@id/blogs_row_date"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:marqueeRepeatLimit="marquee_forever"
+		android:singleLine="true"
+		android:ellipsize="marquee"
+		android:paddingLeft="@dimen/blogs_row_author_padding_left"></TextView>
+</RelativeLayout>

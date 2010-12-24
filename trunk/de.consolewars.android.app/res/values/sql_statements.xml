@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string
+		name="db_name">cw.db</string>
+	<string
+		name="db_version">1</string>
+	<string
+		name="db_table_userdata_name">Userdata</string>
+	<string
+		name="db_id_attribute">id</string>
+	<string
+		name="db_date_attribute">date</string>
+	<string
+		name="db_username_attribute">username</string>
+	<string
+		name="db_password_attribute">passw</string>
+	<string
+		name="db_wherearg_id">id=?</string>
+	<string
+		name="db_create_table_userdata">CREATE TABLE %1$s (id INTEGER PRIMARY KEY, username TEXT NOT NULL, passw TEXT NOT NULL, date FLOAT NOT NULL)</string>
+	<string
+		name="db_cry">Dhhilzekiubdhiqsuzmaxnstjhwrp5</string>
+	<string
+		name="db_drop_table">DROP TABLE IF EXISTS %1$s</string>
+	<string
+		name="db_id_desc">id desc</string>
+</resources>
