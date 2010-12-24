@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string
+		name="app_name">CWApp</string>
+	<string
+		name="api_key">F021DC4D41665F75</string>
+	<string
+		name="general_splashtext">Consolewars-App Prototyp</string>
+	<string
+		name="tab_news_tag">news</string>
+	<string
+		name="tab_news_head">News</string>
+	<string
+		name="tab_blogs_tag">blogs</string>
+	<string
+		name="tab_blogs_head">Blogs</string>
+	<string
+		name="tab_msgs_tag">message</string>
+	<string
+		name="tab_msgs_head">Nachrichten</string>
+	<string
+		name="tab_shout_tag">shoutbox</string>
+	<string
+		name="tab_shout_head">Shoutbox</string>
+	<string
+		name="tab_overv_tag">overview</string>
+	<string
+		name="tab_overv_head">Übersicht</string>
+	<string
+		name="overview_logged_as">Eingeloggt als:</string>
+	<string
+		name="overview_confirm">Bestätigen</string>
+	<string
+		name="news_author_by">von</string>
+	<string
+		name="comments_abrv">Cmmnts:</string>
+	<string
+		name="news_author_unknown">[Newseditor]</string>
+	<string
+		name="blogs_userpic_url">http://%1$s.consolewars.de/gen/fetchavatars.php?type=profile&amp;u=%2$d&amp;sizex=%3$d
+	</string>
+	<string
+		name="news_filter">Filterfunktion</string>
+	<string-array
+		name="news_filter_options">
+		<item>Alle News</item>
+		<item>Nur Microsoftnews und \"andere\"</item>
+		<item>Nur Nintendonews und \"andere\"</item>
+		<item>Nur Sonynews und \"andere\"</item>
+	</string-array>
+
+</resources>

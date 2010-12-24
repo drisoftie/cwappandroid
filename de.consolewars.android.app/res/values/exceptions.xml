@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string
+		name="splash_exception_thread_tag">Splashscreen thread</string>
+	<string
+		name="splash_exception_thread_msg">Thread was interrupted</string>
+
+	<!-- General exceptions -->
+	<string
+		name="exc_auth_tag">AuthError</string>
+	<string
+		name="exc_group_tag">GroupNull</string>
+	<string
+		name="exc_group_msg">a CwBasicActivityGroup instance is null. This shouldn\'t happen if used
+		properly:</string>
+
+	<!-- News specific exceptions -->
+
+</resources>
