@@ -59,7 +59,8 @@
 				android:layout_below="@id/overview_logged_user_layout"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:layout_centerHorizontal="true"></ImageView>
+				android:layout_centerHorizontal="true"
+				android:background="@drawable/image_border"></ImageView>
 			<TextView
 				android:id="@+id/overview_info_text"
 				android:layout_below="@id/overview_usericon"

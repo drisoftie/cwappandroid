@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -15,12 +16,14 @@ import android.app.ActivityGroup;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.style.ForegroundColorSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import de.consolewars.android.app.R;
@@ -51,10 +54,8 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
 public class BlogsActivity extends Activity {
 
 	private List<Blog> blogs;
-
 	// remember last selected table row to draw the background
 	private View selectedRow;
-
 	// text styling
 	private StyleSpannableStringBuilder styleStringBuilder;
 
@@ -63,8 +64,6 @@ public class BlogsActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.blogs_layout);
-
 		/*
 		 * TODO: Might become a source of error someday, if activity design changes. Would be better
 		 * to handle it with intents.
@@ -72,32 +71,26 @@ public class BlogsActivity extends Activity {
 		if (getParent().getParent() instanceof CwNavigationMainTabActivity) {
 			mainTabs = (CwNavigationMainTabActivity) getParent().getParent();
 		}
-
-		loadBlogsTable();
+		new BuildBlogsAsyncTask().execute();
 	}
 
 	/**
-	 * Create the ui for displaying blogs in a table.
-	 * 
+	 * Create rows displaying single blogs to be displayed in a table.
 	 */
-	private void loadBlogsTable() {
+	private List<View> createBlogRows() {
 		// create table based on current blogs
-		TableLayout blogsTable = (TableLayout) findViewById(R.id.blogs_table);
-		try {
-			mainTabs.getApiCaller().authenticateOnCW();
-			blogs = mainTabs.getApiCaller().getApi().getBlogsList(-1, 15, 0);
-		} catch (ConsolewarsAPIException e) {
-			Log.e(getString(R.string.exc_auth_tag), e.getMessage(), e);
-			e.printStackTrace();
-		}
+		View blogsView = LayoutInflater.from(BlogsActivity.this.getParent()).inflate(
+				R.layout.blogs_layout, null);
+		TableLayout blogsTable = (TableLayout) blogsView.findViewById(R.id.blogs_table);
 
 		styleStringBuilder = new StyleSpannableStringBuilder();
 
-		for (Blog blog : this.blogs) {
-			// get the table row by an inflater and set the needed information
-			final View tableRow = LayoutInflater.from(this).inflate(R.layout.blogs_row_layout,
-					blogsTable, false);
+		List<View> rows = new ArrayList<View>();
 
+		for (Blog blog : blogs) {
+			// get the table row by an inflater and set the needed information
+			final View tableRow = LayoutInflater.from(BlogsActivity.this).inflate(
+					R.layout.blogs_row_layout, blogsTable, false);
 			tableRow.setId(blog.getId());
 			tableRow.setOnClickListener(new View.OnClickListener() {
 				@Override
@@ -124,9 +117,10 @@ public class BlogsActivity extends Activity {
 			author.setSelected(true);
 			author.setText(createCommentAndAuthor(blog.getComments(), blog.getAuthor()));
 
-			blogsTable.addView(tableRow);
+			rows.add(tableRow);
 		}
 		styleStringBuilder = null;
+		return rows;
 	}
 
 	/**
@@ -227,5 +221,59 @@ public class BlogsActivity extends Activity {
 	private CharSequence createTitle(String title) {
 		// TODO text formatting
 		return title;
+	}
+
+	/**
+	 * Asynchronous task to receive blogs from the API and build up the ui.
+	 * 
+	 * @author Alexander Dridiger
+	 */
+	private class BuildBlogsAsyncTask extends AsyncTask<Void, Integer, List<View>> {
+
+		private ProgressBar progressBar;
+
+		@Override
+		protected void onPreExecute() {
+			// first set progressbar view
+			RelativeLayout progress_layout = (RelativeLayout) LayoutInflater.from(
+					BlogsActivity.this.getParent()).inflate(R.layout.centered_progressbar, null);
+			setContentView(progress_layout);
+
+			TextView text = (TextView) progress_layout.findViewById(R.id.centered_progressbar_text);
+			text.setText(getString(R.string.blogs_loading));
+
+			progressBar = (ProgressBar) progress_layout.findViewById(R.id.centered_progressbar);
+			progressBar.setProgress(0);
+		}
+
+		@Override
+		protected List<View> doInBackground(Void... params) {
+			try {
+				mainTabs.getApiCaller().authenticateOnCW();
+				blogs = mainTabs.getApiCaller().getApi().getBlogsList(-1, 15, 0);
+			} catch (ConsolewarsAPIException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return createBlogRows();
+		}
+
+		@Override
+		protected void onProgressUpdate(Integer... values) {
+			progressBar.setProgress(values[0]);
+		}
+
+		@Override
+		protected void onPostExecute(List<View> result) {
+			// sets the blogs view for this Activity
+			RelativeLayout blogs_layout = (RelativeLayout) LayoutInflater.from(
+					BlogsActivity.this.getParent()).inflate(R.layout.blogs_layout, null);
+
+			TableLayout blogsTable = (TableLayout) blogs_layout.findViewById(R.id.blogs_table);
+			for (View row : result) {
+				blogsTable.addView(row);
+			}
+			setContentView(blogs_layout);
+		}
 	}
 }

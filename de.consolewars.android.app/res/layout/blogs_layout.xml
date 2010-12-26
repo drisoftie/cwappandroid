@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:orientation="vertical"
-	android:layout_width="wrap_content"
-	android:layout_height="fill_parent">	
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent">
 	<ScrollView
 		android:id="@+id/blogs_scroll_view"
 		android:layout_width="wrap_content"
 		android:layout_height="fill_parent">
 		<TableLayout
 			android:id="@+id/blogs_table"
-			xmlns:android="http://schemas.android.com/apk/res/android"
 			android:layout_width="wrap_content"
 			android:layout_height="fill_parent"
 			android:padding="3dip">
 		</TableLayout>
-	</ScrollView>
-</LinearLayout>
+	</ScrollView>	
+</RelativeLayout>
