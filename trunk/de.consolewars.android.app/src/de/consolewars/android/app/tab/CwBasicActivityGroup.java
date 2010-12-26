@@ -3,6 +3,7 @@ package de.consolewars.android.app.tab;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.app.Activity;
 import android.app.ActivityGroup;
 import android.view.View;
 
@@ -30,6 +31,7 @@ public abstract class CwBasicActivityGroup extends ActivityGroup implements ICwA
 
 	private List<View> viewCache;
 
+	@Override
 	public void replaceView(View view) {
 		if (viewCache == null) {
 			viewCache = new ArrayList<View>();
@@ -38,6 +40,7 @@ public abstract class CwBasicActivityGroup extends ActivityGroup implements ICwA
 		setContentView(view);
 	}
 
+	@Override
 	public void back() {
 		if (viewCache.size() > 1) {
 			viewCache.remove(viewCache.size() - 1);

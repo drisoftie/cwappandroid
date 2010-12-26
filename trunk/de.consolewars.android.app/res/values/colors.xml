@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+	<!-- general colours -->
+
 	<color
 		name="app_background">#ff1c171c</color>
 	<color
@@ -17,17 +20,22 @@
 	<color
 		name="table_cell_unselected_down">#efefef</color>
 	<color
-		name="overview_bg_up">#c8e9fa</color>
-	<color
-		name="overview_bg_down">#c4c4c4</color>
-	<color
-		name="overview_text">#514a4a</color>
+		name="progressbar_text">#FFeeeeee</color>
 	<color
 		name="table_cell_selected_up">#ffffffff</color>
 	<color
 		name="table_cell_selected_center">#ff68b5da</color>
 	<color
 		name="table_cell_selected_down">#efefef</color>
+
+	<!-- view specific colours -->
+
+	<color
+		name="overview_bg_up">#c8e9fa</color>
+	<color
+		name="overview_bg_down">#c4c4c4</color>
+	<color
+		name="overview_text">#514a4a</color>
 	<color
 		name="news_table_text_title">#514a4a</color>
 	<color
