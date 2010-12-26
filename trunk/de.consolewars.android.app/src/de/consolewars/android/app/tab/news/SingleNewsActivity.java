@@ -3,8 +3,13 @@ package de.consolewars.android.app.tab.news;
 import java.util.IllegalFormatException;
 
 import android.app.Activity;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
@@ -37,7 +42,6 @@ public class SingleNewsActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.singlenews_layout);
 
 		/*
 		 * TODO: Might become a source of error someday, if activity design changes. Would be better
@@ -46,8 +50,14 @@ public class SingleNewsActivity extends Activity {
 		if (getParent().getParent() instanceof CwNavigationMainTabActivity) {
 			mainTabs = (CwNavigationMainTabActivity) getParent().getParent();
 		}
+		new BuildSingleNewsAsyncTask().execute();
+	}
 
-		TextView text = (TextView) findViewById(R.id.singlenews_content);
+	private View createNewsView() {
+		View newsView = LayoutInflater.from(SingleNewsActivity.this.getParent()).inflate(
+				R.layout.singlenews_layout, null);
+
+		TextView text = (TextView) newsView.findViewById(R.id.singlenews_content);
 		int id = -1;
 
 		// looking for the correct intent
@@ -75,6 +85,47 @@ public class SingleNewsActivity extends Activity {
 				// FIXME Wrong format handling
 				text.setText(news.getArticle());
 			}
+		}
+		return newsView;
+	}
+
+	/**
+	 * Asynchronous task to receive a single news from the API and build up the ui.
+	 * 
+	 * @author Alexander Dridiger
+	 */
+	private class BuildSingleNewsAsyncTask extends AsyncTask<Void, Integer, View> {
+
+		private ProgressBar progressBar;
+
+		@Override
+		protected void onPreExecute() {
+			// first set progressbar view
+			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(
+					SingleNewsActivity.this.getParent()).inflate(R.layout.centered_progressbar,
+					null);
+			setContentView(progress_layout);
+
+			TextView text = (TextView) progress_layout.findViewById(R.id.centered_progressbar_text);
+			text.setText(getString(R.string.loading, "Einzelnews"));
+
+			progressBar = (ProgressBar) progress_layout.findViewById(R.id.centered_progressbar);
+			progressBar.setProgress(0);
+		}
+
+		@Override
+		protected View doInBackground(Void... params) {
+			return createNewsView();
+		}
+
+		@Override
+		protected void onProgressUpdate(Integer... values) {
+			progressBar.setProgress(values[0]);
+		}
+
+		@Override
+		protected void onPostExecute(View result) {
+			setContentView(result);
 		}
 	}
 }

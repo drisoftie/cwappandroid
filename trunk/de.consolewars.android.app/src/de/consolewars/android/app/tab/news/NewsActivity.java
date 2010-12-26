@@ -1,6 +1,7 @@
 package de.consolewars.android.app.tab.news;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -10,15 +11,19 @@ import java.util.TimeZone;
 import android.app.Activity;
 import android.app.ActivityGroup;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TextView;
@@ -50,7 +55,6 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
 public class NewsActivity extends Activity {
 
 	private List<News> news;
-	private TableLayout newsTable;
 
 	// remember last selected table row to draw the background
 	private View selectedRow;
@@ -68,7 +72,6 @@ public class NewsActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
 		/*
 		 * TODO: Might become a source of error someday, if activity design changes. Would be better
 		 * to handle it with intents.
@@ -76,36 +79,26 @@ public class NewsActivity extends Activity {
 		if (getParent().getParent() instanceof CwNavigationMainTabActivity) {
 			mainTabs = (CwNavigationMainTabActivity) getParent().getParent();
 		}
-
-		View newsView = LayoutInflater.from(getParent()).inflate(R.layout.news_layout, null);
-		initFilter(newsView);
-		loadNewsTable(newsView);
+		new BuildNewsAsyncTask().execute();
 	}
 
 	/**
-	 * Create the ui for displaying news in a table.
-	 * 
-	 * @param parenView
-	 *            to find the inflated view elements.
+	 * Create rows displaying single news to be displayed in a table.
 	 */
-	private void loadNewsTable(View parenView) {
-		try {
-			mainTabs.getApiCaller().authenticateOnCW();
-			// only 15 news are displayed right now
-			news = mainTabs.getApiCaller().getApi().getNewsList(15, currentFilter);
-		} catch (ConsolewarsAPIException e) {
-			Log.e(getString(R.string.exc_auth_tag), e.getMessage(), e);
-			e.printStackTrace();
-		}
+	private List<View> createNewsRows() {
+		// create table based on current news
+		View newsView = LayoutInflater.from(NewsActivity.this.getParent()).inflate(
+				R.layout.news_layout, null);
+		TableLayout newsTable = (TableLayout) newsView.findViewById(R.id.news_table);
+
 		styleStringBuilder = new StyleSpannableStringBuilder();
 
-		// create table based on current news
-		newsTable = (TableLayout) parenView.findViewById(R.id.news_table);
+		List<View> rows = new ArrayList<View>();
+
 		for (News news : this.news) {
 			// get the table row by an inflater and set the needed information
 			final View tableRow = LayoutInflater.from(this).inflate(R.layout.news_row_layout,
 					newsTable, false);
-
 			tableRow.setId(news.getId());
 			tableRow.setOnClickListener(new View.OnClickListener() {
 				@Override
@@ -120,7 +113,6 @@ public class NewsActivity extends Activity {
 					getSingleNews(tableRow.getId());
 				}
 			});
-
 			((ImageView) tableRow.findViewById(R.id.news_row_category_icon))
 					.setImageResource(createCategoryIcon(news.getCategoryshort()));
 			((TextView) tableRow.findViewById(R.id.news_row_title)).setText(createTitle(news
@@ -131,11 +123,10 @@ public class NewsActivity extends Activity {
 			author.setSelected(true);
 			author.setText(createCommentAndAuthor(news.getComments(), news.getAuthor()));
 
-			newsTable.addView(tableRow);
+			rows.add(tableRow);
 		}
 		styleStringBuilder = null;
-
-		setContentView(parenView);
+		return rows;
 	}
 
 	/**
@@ -149,30 +140,34 @@ public class NewsActivity extends Activity {
 		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getParent(),
 				R.array.news_filter_options, android.R.layout.simple_spinner_item);
 		spinner.setAdapter(adapter);
-		spinner.setSelection(0);
-
+		spinner.setSelection(currentFilter);
 		spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
 			@Override
 			public void onItemSelected(AdapterView<?> aView, View view, int position, long id) {
+				int selected;
 				switch (position) {
 				case NOFILTER:
-					currentFilter = NOFILTER;
+					selected = NOFILTER;
 					break;
 				case MSFILTER:
-					currentFilter = MSFILTER;
+					selected = MSFILTER;
 					break;
 				case NINFILTER:
-					currentFilter = NINFILTER;
+					selected = NINFILTER;
 					break;
 				case SONYFILTER:
-					currentFilter = SONYFILTER;
+					selected = SONYFILTER;
 					break;
 				default:
-					currentFilter = NOFILTER;
+					selected = NOFILTER;
 					break;
 				}
-				newsTable.removeAllViews();
-				loadNewsTable(parentView);
+				if (currentFilter != selected) {
+					currentFilter = selected;
+					TableLayout newsTable = (TableLayout) parentView.findViewById(R.id.news_table);
+					newsTable.removeAllViews();
+					new BuildNewsAsyncTask().execute();
+				}
 			}
 
 			@Override
@@ -201,7 +196,7 @@ public class NewsActivity extends Activity {
 	}
 
 	/**
-	 * Creates the string for the ui cell showing the author of a blog and the amount of comments.
+	 * Creates the string for the ui cell showing the author of a news and the amount of comments.
 	 * 
 	 * @param commentAmount
 	 * @param author
@@ -321,5 +316,60 @@ public class NewsActivity extends Activity {
 			imageResource = R.drawable.cat_xbox;
 		}
 		return imageResource;
+	}
+
+	/**
+	 * Asynchronous task to receive news from the API and build up the ui.
+	 * 
+	 * @author Alexander Dridiger
+	 */
+	private class BuildNewsAsyncTask extends AsyncTask<Void, Integer, List<View>> {
+
+		private ProgressBar progressBar;
+
+		@Override
+		protected void onPreExecute() {
+			// first set progressbar view
+			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(
+					NewsActivity.this.getParent()).inflate(R.layout.centered_progressbar, null);
+			setContentView(progress_layout);
+
+			TextView text = (TextView) progress_layout.findViewById(R.id.centered_progressbar_text);
+			text.setText(getString(R.string.loading, "News"));
+
+			progressBar = (ProgressBar) progress_layout.findViewById(R.id.centered_progressbar);
+			progressBar.setProgress(0);
+		}
+
+		@Override
+		protected List<View> doInBackground(Void... params) {
+			try {
+				mainTabs.getApiCaller().authenticateOnCW();
+				news = mainTabs.getApiCaller().getApi().getNewsList(15, currentFilter);
+			} catch (ConsolewarsAPIException e) {
+				e.printStackTrace();
+				Log.e(getString(R.string.exc_auth_tag), e.getMessage(), e);
+			}
+			return createNewsRows();
+		}
+
+		@Override
+		protected void onProgressUpdate(Integer... values) {
+			progressBar.setProgress(values[0]);
+		}
+
+		@Override
+		protected void onPostExecute(List<View> result) {
+			// sets the news view for this Activity
+			LinearLayout news_layout = (LinearLayout) LayoutInflater.from(
+					NewsActivity.this.getParent()).inflate(R.layout.news_layout, null);
+
+			TableLayout newsTable = (TableLayout) news_layout.findViewById(R.id.news_table);
+			for (View row : result) {
+				newsTable.addView(row);
+			}
+			initFilter(news_layout);
+			setContentView(news_layout);
+		}
 	}
 }
