@@ -11,11 +11,11 @@
 	<string
 		name="tab_news_head">News</string>
 	<string
+		name="loading">Lade %1$s im Hintergrund</string>
+	<string
 		name="tab_blogs_tag">blogs</string>
 	<string
 		name="tab_blogs_head">Blogs</string>
-	<string
-		name="blogs_loading">Lade Blogs im Hintergrund</string>
 	<string
 		name="tab_msgs_tag">message</string>
 	<string

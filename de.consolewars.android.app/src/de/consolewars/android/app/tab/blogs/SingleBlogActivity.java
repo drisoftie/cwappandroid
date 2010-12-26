@@ -3,8 +3,13 @@ package de.consolewars.android.app.tab.blogs;
 import java.util.IllegalFormatException;
 
 import android.app.Activity;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
@@ -37,8 +42,6 @@ public class SingleBlogActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.singleblog_layout);
-
 		/*
 		 * TODO: Might become a source of error someday, if activity design changes. Would be better
 		 * to handle it with intents.
@@ -46,8 +49,14 @@ public class SingleBlogActivity extends Activity {
 		if (getParent().getParent() instanceof CwNavigationMainTabActivity) {
 			mainTabs = (CwNavigationMainTabActivity) getParent().getParent();
 		}
+		new BuildSingleNewsAsyncTask().execute();
+	}
 
-		TextView text = (TextView) findViewById(R.id.singleblog_content);
+	private View createBlogView() {
+		View blogView = LayoutInflater.from(SingleBlogActivity.this.getParent()).inflate(
+				R.layout.singleblog_layout, null);
+
+		TextView text = (TextView) blogView.findViewById(R.id.singleblog_content);
 		int id = -1;
 
 		// looking for the correct intent
@@ -75,6 +84,47 @@ public class SingleBlogActivity extends Activity {
 				// FIXME Wrong format handling
 				text.setText(blog.getArticle());
 			}
+		}
+		return blogView;
+	}
+
+	/**
+	 * Asynchronous task to receive a single news from the API and build up the ui.
+	 * 
+	 * @author Alexander Dridiger
+	 */
+	private class BuildSingleNewsAsyncTask extends AsyncTask<Void, Integer, View> {
+
+		private ProgressBar progressBar;
+
+		@Override
+		protected void onPreExecute() {
+			// first set progressbar view
+			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(
+					SingleBlogActivity.this.getParent()).inflate(R.layout.centered_progressbar,
+					null);
+			setContentView(progress_layout);
+
+			TextView text = (TextView) progress_layout.findViewById(R.id.centered_progressbar_text);
+			text.setText(getString(R.string.loading, "Einzelblog"));
+
+			progressBar = (ProgressBar) progress_layout.findViewById(R.id.centered_progressbar);
+			progressBar.setProgress(0);
+		}
+
+		@Override
+		protected View doInBackground(Void... params) {
+			return createBlogView();
+		}
+
+		@Override
+		protected void onProgressUpdate(Integer... values) {
+			progressBar.setProgress(values[0]);
+		}
+
+		@Override
+		protected void onPostExecute(View result) {
+			setContentView(result);
 		}
 	}
 }

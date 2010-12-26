@@ -21,9 +21,9 @@ import android.os.Bundle;
 import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import de.consolewars.android.app.R;
@@ -235,12 +235,12 @@ public class BlogsActivity extends Activity {
 		@Override
 		protected void onPreExecute() {
 			// first set progressbar view
-			RelativeLayout progress_layout = (RelativeLayout) LayoutInflater.from(
+			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(
 					BlogsActivity.this.getParent()).inflate(R.layout.centered_progressbar, null);
 			setContentView(progress_layout);
 
 			TextView text = (TextView) progress_layout.findViewById(R.id.centered_progressbar_text);
-			text.setText(getString(R.string.blogs_loading));
+			text.setText(getString(R.string.loading, "Blogs"));
 
 			progressBar = (ProgressBar) progress_layout.findViewById(R.id.centered_progressbar);
 			progressBar.setProgress(0);
@@ -266,9 +266,8 @@ public class BlogsActivity extends Activity {
 		@Override
 		protected void onPostExecute(List<View> result) {
 			// sets the blogs view for this Activity
-			RelativeLayout blogs_layout = (RelativeLayout) LayoutInflater.from(
-					BlogsActivity.this.getParent()).inflate(R.layout.blogs_layout, null);
-
+			ViewGroup blogs_layout = (ViewGroup) LayoutInflater
+					.from(BlogsActivity.this.getParent()).inflate(R.layout.blogs_layout, null);
 			TableLayout blogsTable = (TableLayout) blogs_layout.findViewById(R.id.blogs_table);
 			for (View row : result) {
 				blogsTable.addView(row);

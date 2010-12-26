@@ -189,11 +189,11 @@ public class API {
 	 * 
 	 * @param id
 	 *            blog ide
-	 * @return one single blog
+	 * @return one single blog; null if no blog is available
 	 */
 	public Blog getBlog(int id) throws ConsolewarsAPIException {
 		ArrayList<Blog> blogs = this.getBlogs(new int[] { id });
-		return blogs.get(0);
+		return (blogs.isEmpty()) ? (null) : (blogs.get(0));
 	}
 
 	/**
@@ -288,15 +288,14 @@ public class API {
 		return msgs;
 	}
 
-	
 	/**
 	 * Delivers a list of the latest news.
 	 * 
-	 * @param count the amount of news
-	 * @param filter optional filter. Current filter rules:
-	 * 1=only Microsoftnews and "others"
-	 * 2=only Nintendonews and "others"
-	 * 3=only Sonynews and "others"
+	 * @param count
+	 *            the amount of news
+	 * @param filter
+	 *            optional filter. Current filter rules: 1=only Microsoftnews and "others" 2=only
+	 *            Nintendonews and "others" 3=only Sonynews and "others"
 	 * @return
 	 * @throws ConsolewarsAPIException
 	 */
@@ -362,11 +361,11 @@ public class API {
 	 * 
 	 * @param id
 	 *            news-id
-	 * @return a single news
+	 * @return a single news; null if no news is available
 	 */
 	public News getNews(int id) throws ConsolewarsAPIException {
 		ArrayList<News> news = getNews(new int[] { id });
-		return news.get(0);
+		return (news.isEmpty()) ? (null) : (news.get(0));
 	}
 
 	/**
@@ -590,7 +589,7 @@ public class API {
 					lastUpdate = new Date();
 					sleep(checkInterval);
 				} catch (InterruptedException e) {
-					System.out.println("Wartevorgang vor dem nächsten Update abgebrochen.");
+					System.out.println("Wartevorgang vor dem nï¿½chsten Update abgebrochen.");
 				} catch (ConsolewarsAPIException e) {
 					e.printStackTrace();
 				}

@@ -1,6 +1,7 @@
 package de.consolewars.android.app.tab.msgs;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -11,12 +12,14 @@ import android.app.Activity;
 import android.app.ActivityGroup;
 import android.content.Intent;
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.style.ForegroundColorSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import de.consolewars.android.app.R;
@@ -65,7 +68,6 @@ public class MessagesActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.msgs_layout);
 		/*
 		 * TODO: Might become a source of error someday, if activity design changes. Would be better
 		 * to handle it with intents.
@@ -73,24 +75,21 @@ public class MessagesActivity extends Activity {
 		if (getParent().getParent() instanceof CwNavigationMainTabActivity) {
 			mainTabs = (CwNavigationMainTabActivity) getParent().getParent();
 		}
-
-		loadMessagesTable();
+		new BuildMessagesAsyncTask().execute();
 	}
 
 	/**
 	 * Create the ui for displaying messages in a table.
 	 */
-	private void loadMessagesTable() {
+	private List<View> createMsgsRows() {
 		// create table based on current messages
-		TableLayout msgsTable = (TableLayout) findViewById(R.id.msgs_table);
-		try {
-			this.setCurrentMessages();
-		} catch (ConsolewarsAPIException e) {
-			Log.e(getString(R.string.exc_auth_tag), e.getMessage(), e);
-			e.printStackTrace();
-		}
+		View msgsView = LayoutInflater.from(MessagesActivity.this.getParent()).inflate(
+				R.layout.msgs_layout, null);
+		TableLayout msgsTable = (TableLayout) msgsView.findViewById(R.id.msgs_table);
 
 		styleStringBuilder = new StyleSpannableStringBuilder();
+
+		List<View> rows = new ArrayList<View>();
 
 		for (final Message msg : this.msgs) {
 			// get the table row by an inflater and set the needed information
@@ -111,7 +110,6 @@ public class MessagesActivity extends Activity {
 					getSingleMessage(msg.getMessage());
 				}
 			});
-
 			((ImageView) tableRow.findViewById(R.id.msgs_row_read_icon))
 					.setImageResource(createMessageIcon(msg.isMessageread()));
 			((TextView) tableRow.findViewById(R.id.msgs_row_title)).setText(createTitle(msg
@@ -120,10 +118,10 @@ public class MessagesActivity extends Activity {
 					.getUnixtime() * 1000L));
 			((TextView) tableRow.findViewById(R.id.msgs_row_author)).setText(createFromUser(msg
 					.getFromusername()));
-
-			msgsTable.addView(tableRow);
+			rows.add(tableRow);
 		}
 		styleStringBuilder = null;
+		return rows;
 	}
 
 	/**
@@ -161,7 +159,6 @@ public class MessagesActivity extends Activity {
 			}
 		}
 		cursor.close();
-
 		AuthenticatedUser user = mainTabs.getApiCaller().getAuthUser(userName, hashpw);
 		msgs = mainTabs.getApiCaller().getApi()
 				.getMessages(user.getUid(), user.getPasswordHash(), 0, 10);
@@ -242,5 +239,57 @@ public class MessagesActivity extends Activity {
 		styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0x3e3e3e), author);
 
 		return styleStringBuilder;
+	}
+
+	/**
+	 * Asynchronous task to receive messages from the API and build up the ui.
+	 * 
+	 * @author Alexander Dridiger
+	 */
+	private class BuildMessagesAsyncTask extends AsyncTask<Void, Integer, List<View>> {
+
+		private ProgressBar progressBar;
+
+		@Override
+		protected void onPreExecute() {
+			// first set progressbar view
+			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(
+					MessagesActivity.this.getParent()).inflate(R.layout.centered_progressbar, null);
+			setContentView(progress_layout);
+
+			TextView text = (TextView) progress_layout.findViewById(R.id.centered_progressbar_text);
+			text.setText(getString(R.string.loading, "Nachrichten"));
+
+			progressBar = (ProgressBar) progress_layout.findViewById(R.id.centered_progressbar);
+			progressBar.setProgress(0);
+		}
+
+		@Override
+		protected List<View> doInBackground(Void... params) {
+			try {
+				mainTabs.getApiCaller().authenticateOnCW();
+				setCurrentMessages();
+			} catch (ConsolewarsAPIException e) {
+				e.printStackTrace();
+			}
+			return createMsgsRows();
+		}
+
+		@Override
+		protected void onProgressUpdate(Integer... values) {
+			progressBar.setProgress(values[0]);
+		}
+
+		@Override
+		protected void onPostExecute(List<View> result) {
+			// sets the messages view for this Activity
+			ViewGroup msgs_layout = (ViewGroup) LayoutInflater.from(
+					MessagesActivity.this.getParent()).inflate(R.layout.msgs_layout, null);
+			TableLayout msgsTable = (TableLayout) msgs_layout.findViewById(R.id.msgs_table);
+			for (View row : result) {
+				msgsTable.addView(row);
+			}
+			setContentView(msgs_layout);
+		}
 	}
 }
