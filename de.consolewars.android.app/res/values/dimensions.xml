@@ -11,6 +11,12 @@
 	<dimen
 		name="overview_edittxt_usrname_padding_top">4dp</dimen>
 	<dimen
+		name="overview_banner_title_margin">2dp</dimen>
+	<dimen
+		name="overview_banner_icon_margin">2dp</dimen>
+	<dimen
+		name="overview_banner_descr_margin">2dp</dimen>
+	<dimen
 		name="news_row_title_padding">2dp</dimen>
 	<dimen
 		name="news_row_icon_padding_top">2dp</dimen>

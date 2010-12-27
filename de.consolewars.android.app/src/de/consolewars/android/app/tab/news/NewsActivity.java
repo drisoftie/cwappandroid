@@ -25,6 +25,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
+import android.widget.TabHost.OnTabChangeListener;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import de.consolewars.android.app.R;
@@ -78,6 +79,11 @@ public class NewsActivity extends Activity {
 		 */
 		if (getParent().getParent() instanceof CwNavigationMainTabActivity) {
 			mainTabs = (CwNavigationMainTabActivity) getParent().getParent();
+			mainTabs.getUsedTabHost().setOnTabChangedListener(new OnTabChangeListener() {
+				@Override
+				public void onTabChanged(String tabId) {
+				}
+			});
 		}
 		new BuildNewsAsyncTask().execute();
 	}

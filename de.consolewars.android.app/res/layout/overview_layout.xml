@@ -5,6 +5,12 @@
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent"
 	android:background="@drawable/overview_bg">
+	<ViewFlipper
+		android:id="@+id/overview_banner_flipper"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:background="@drawable/overview_banner_bg">
+	</ViewFlipper>
 	<ScrollView
 		android:id="@+id/overview_scroll_view"
 		android:layout_width="fill_parent"

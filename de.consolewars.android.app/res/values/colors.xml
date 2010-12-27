@@ -31,9 +31,13 @@
 	<!-- view specific colours -->
 
 	<color
-		name="overview_bg_up">#c8e9fa</color>
+		name="overview_bg_up">#b8d9ea</color>
 	<color
-		name="overview_bg_down">#c4c4c4</color>
+		name="overview_bg_down">#a4a4a4</color>
+	<color
+		name="overview_banner_bg_down">#077fb8</color>
+	<color
+		name="overview_banner_bg_up">#00baff</color>
 	<color
 		name="overview_text">#514a4a</color>
 	<color

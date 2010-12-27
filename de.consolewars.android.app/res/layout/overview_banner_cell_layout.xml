@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="wrap_content"
+	android:layout_height="fill_parent">
+	<ImageView
+		android:id="@+id/overview_banner_icon"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignParentTop="true"
+		android:layout_alignParentLeft="true"
+		android:layout_marginTop="@dimen/overview_banner_icon_margin"
+		android:layout_marginLeft="@dimen/overview_banner_icon_margin">
+	</ImageView>
+	<TextView
+		android:id="@+id/overview_banner_title"
+		android:layout_toRightOf="@id/overview_banner_icon"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:textColor="@color/light_red"
+		android:layout_marginTop="@dimen/overview_banner_title_margin"
+		android:layout_marginLeft="@dimen/overview_banner_icon_margin"></TextView>
+	<TextView
+		android:id="@+id/overview_banner_details"
+		android:layout_below="@id/overview_banner_icon"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:textColor="@color/overview_text"
+		android:layout_marginLeft="@dimen/overview_banner_descr_margin"></TextView>
+</RelativeLayout>

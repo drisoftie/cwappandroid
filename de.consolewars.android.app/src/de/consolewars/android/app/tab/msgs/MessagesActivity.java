@@ -74,6 +74,8 @@ public class MessagesActivity extends Activity {
 		 */
 		if (getParent().getParent() instanceof CwNavigationMainTabActivity) {
 			mainTabs = (CwNavigationMainTabActivity) getParent().getParent();
+		} else if (getParent().getParent().getParent() instanceof CwNavigationMainTabActivity) {
+			mainTabs = (CwNavigationMainTabActivity) getParent().getParent().getParent();
 		}
 		new BuildMessagesAsyncTask().execute();
 	}
@@ -246,7 +248,7 @@ public class MessagesActivity extends Activity {
 	 * 
 	 * @author Alexander Dridiger
 	 */
-	private class BuildMessagesAsyncTask extends AsyncTask<Void, Integer, List<View>> {
+	public class BuildMessagesAsyncTask extends AsyncTask<Void, Integer, List<View>> {
 
 		private ProgressBar progressBar;
 
