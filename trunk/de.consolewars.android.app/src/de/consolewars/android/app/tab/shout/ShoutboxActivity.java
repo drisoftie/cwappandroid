@@ -2,7 +2,7 @@ package de.consolewars.android.app.tab.shout;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.webkit.WebSettings;
+import android.webkit.WebSettings.PluginState;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import de.consolewars.android.app.R;
@@ -35,19 +35,44 @@ public class ShoutboxActivity extends Activity {
 		setContentView(R.layout.shoutbox_layout);
 
 		WebView webView = (WebView) findViewById(R.id.shoutbox);
-		webView.loadUrl("http://www.consolewars.de/chat");
+		// webView.loadUrl("http://www.consolewars.de/chat");
 
-		WebSettings webSettings = webView.getSettings();
-		webSettings.setSavePassword(false);
-		webSettings.setSaveFormData(false);
-		webSettings.setJavaScriptEnabled(true);
+		// WebSettings webSettings = webView.getSettings();
+		// webSettings.setSavePassword(false);
+		// webSettings.setSaveFormData(false);
+		// webSettings.setJavaScriptEnabled(true);
+
+		webView.getSettings().setUseWideViewPort(true);
+		webView.getSettings().setPluginsEnabled(true);
+		webView.getSettings().setPluginState(PluginState.ON);
+		webView.getSettings().setJavaScriptEnabled(true);
+		webView.getSettings().setBuiltInZoomControls(false);
 
 		webView.setWebViewClient(new WebViewClient() {
 			@Override
 			public boolean shouldOverrideUrlLoading(WebView view, String url) {
 				view.loadUrl(url);
-				return false;
+				return true;
 			}
 		});
+
+		webView.loadUrl("http://www.consolewars.de/chat/popup.php");
+
+		// switch(mode) {
+		// case MODE_LOGIN:
+		// web.loadUrl("http://www.consolewars.de");
+		// break;
+		//
+		// case MODE_SHOUTBOX:
+		// web.loadUrl("http://www.consolewars.de/chat/popup.php");
+		// break;
+
+		// webView.setWebViewClient(new WebViewClient() {
+		// @Override
+		// public boolean shouldOverrideUrlLoading(WebView view, String url) {
+		// view.loadUrl(url);
+		// return false;
+		// }
+		// });
 	}
 }

@@ -125,7 +125,7 @@ public class CwNavigationMainTabActivity extends TabActivity {
 		// create an Intent to launch an Activity for the tab (to be reused)
 		Intent intent = new Intent().setClass(this, activity);
 		// initialize a TabSpec for each tab and add it to the TabHost
-		TabHost.TabSpec spec = usedTabHost.newTabSpec(getString(labelId));
+		TabHost.TabSpec spec = usedTabHost.newTabSpec(getString(tagId));
 		// use layout inflater to get a view of the tab to be added
 		View tabIndicator = LayoutInflater.from(this).inflate(R.layout.tab_indicator,
 				getTabWidget(), false);
