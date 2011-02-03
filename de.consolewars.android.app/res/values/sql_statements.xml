@@ -17,7 +17,7 @@
 	<string
 		name="db_wherearg_id">id=?</string>
 	<string
-		name="db_create_table_userdata">CREATE TABLE %1$s (id INTEGER PRIMARY KEY, username TEXT NOT NULL, passw TEXT NOT NULL, date FLOAT NOT NULL)</string>
+		name="db_create_table_userdata">CREATE TABLE %1$s (id INTEGER PRIMARY KEY, username TEXT NOT NULL, passw TEXT NOT NULL, date INTEGER NOT NULL)</string>
 	<string
 		name="db_cry">Dhhilzekiubdhiqsuzmaxnstjhwrp5</string>
 	<string

@@ -71,17 +71,32 @@ public class DatabaseManager {
 	 * @param id
 	 *            the id of the entity to be updated; mandatory
 	 * @param username
-	 *            username (nickname) of the user; mandatory
+	 *            username (nickname) of the user
 	 * @param hashPw
-	 *            password of the user as a hash; mandatory
+	 *            password of the user as a hash
 	 * @param date
-	 *            mandatory
 	 * @return the number of rows affected
 	 */
 	public int updateUserData(int id, String username, String hashPw, long date) {
 		ContentValues update = new ContentValues();
 		update.put(context.getString(R.string.db_username_attribute), username);
 		update.put(context.getString(R.string.db_password_attribute), hashPw);
+		update.put(context.getString(R.string.db_date_attribute), date);
+		return db.update(userdata_table, update, context.getString(R.string.db_wherearg_id),
+				new String[] { Long.toString(id) });
+	}
+
+	/**
+	 * Convenient method to update date.
+	 * 
+	 * @param id
+	 *            the id of the entity to be updated; mandatory
+	 * @param date
+	 *            mandatory
+	 * @return the number of rows affected
+	 */
+	public int updateDate(int id, long date) {
+		ContentValues update = new ContentValues();
 		update.put(context.getString(R.string.db_date_attribute), date);
 		return db.update(userdata_table, update, context.getString(R.string.db_wherearg_id),
 				new String[] { Long.toString(id) });
@@ -104,6 +119,12 @@ public class DatabaseManager {
 		Cursor cursor = this.db.query(table, columns, selection, selectionArgs, groupBy, having,
 				orderBy);
 		return cursor;
+	}
+
+	public void closeDB() {
+		if (db.isOpen()) {
+			db.close();
+		}
 	}
 
 	/**

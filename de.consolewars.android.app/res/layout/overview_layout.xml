@@ -9,8 +9,7 @@
 		android:id="@+id/overview_banner_flipper"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:background="@drawable/overview_banner_bg">
-	</ViewFlipper>
+		android:background="@drawable/overview_banner_bg"></ViewFlipper>
 	<ScrollView
 		android:id="@+id/overview_scroll_view"
 		android:layout_width="fill_parent"
@@ -18,8 +17,7 @@
 		<RelativeLayout
 			android:id="@+id/overview_inner_layout"
 			android:layout_width="fill_parent"
-			android:layout_height="fill_parent"
-			android:background="@drawable/overview_bg">
+			android:layout_height="fill_parent">
 			<TextView
 				android:id="@+id/overview_logged_as_text"
 				android:layout_width="fill_parent"
@@ -29,54 +27,47 @@
 				android:textStyle="bold"
 				android:text="@string/overview_logged_as"></TextView>
 			<LinearLayout
-				android:id="@+id/overview_logged_user_layout"
-				android:layout_below="@id/overview_logged_as_text"
-				android:orientation="horizontal"
-				android:layout_width="fill_parent"
-				android:layout_height="wrap_content">
-				<LinearLayout
-					android:id="@+id/overview_logged_user_layout2"
-					android:orientation="vertical"
-					android:layout_weight="25"
-					android:layout_width="fill_parent"
-					android:layout_height="wrap_content">
-					<EditText
-						android:id="@+id/overview_edttxt_username"
-						android:layout_width="fill_parent"
-						android:layout_height="wrap_content"
-						android:singleLine="true"
-						android:ellipsize="start"></EditText>
-					<EditText
-						android:id="@+id/overview_edttxt_passw"
-						android:layout_width="fill_parent"
-						android:layout_height="wrap_content"
-						android:inputType="textPassword"></EditText>
-				</LinearLayout>
-				<Button
-					android:id="@+id/overview_set_user_bttn"
-					android:layout_weight="50"
-					android:layout_width="fill_parent"
-					android:layout_height="wrap_content"
-					android:gravity="center_vertical"
-					android:text="@string/overview_confirm"></Button>
-			</LinearLayout>
-			<ImageView
-				android:id="@+id/overview_usericon"
-				android:layout_below="@id/overview_logged_user_layout"
+				android:id="@+id/overview_usericon_layout"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:layout_centerHorizontal="true"
-				android:background="@drawable/image_border"></ImageView>
-			<TextView
-				android:id="@+id/overview_info_text"
-				android:layout_below="@id/overview_usericon"
-				android:layout_width="fill_parent"
+				android:layout_below="@id/overview_logged_as_text"
+				android:background="@drawable/image_border">
+				<ImageView
+					android:id="@+id/overview_usericon"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_below="@id/overview_logged_as_text"
+					android:layout_margin="4dp"></ImageView>
+			</LinearLayout>
+			<Button
+				android:id="@+id/overview_set_user_bttn"
+				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:marqueeRepeatLimit="marquee_forever"
-				android:singleLine="true"
-				android:ellipsize="marquee"
-				android:paddingTop="40dp"
-				android:textColor="@color/light_red"></TextView>
+				android:layout_alignBaseline="@id/overview_usericon_layout"
+				android:layout_alignParentRight="true"
+				android:background="@drawable/def_overview_login_bttn"></Button>
+			<LinearLayout
+				android:id="@+id/overview_logged_user_layout2"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_toRightOf="@id/overview_usericon_layout"
+				android:layout_toLeftOf="@id/overview_set_user_bttn"
+				android:layout_below="@id/overview_logged_as_text"
+				android:orientation="vertical">
+				<EditText
+					android:id="@+id/overview_edttxt_username"
+					android:layout_width="fill_parent"
+					android:layout_height="wrap_content"
+					android:height="2dp"
+					android:singleLine="true"
+					android:ellipsize="start"
+					android:textSize="15dp"></EditText>
+				<EditText
+					android:id="@+id/overview_edttxt_passw"
+					android:layout_width="fill_parent"
+					android:layout_height="wrap_content"
+					android:inputType="textPassword"></EditText>
+			</LinearLayout>
 		</RelativeLayout>
 	</ScrollView>
 </LinearLayout>

@@ -1,5 +1,6 @@
 package de.consolewars.android.app.tab.msgs;
 
+import java.security.GeneralSecurityException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -11,7 +12,6 @@ import java.util.TimeZone;
 import android.app.Activity;
 import android.app.ActivityGroup;
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.style.ForegroundColorSpan;
@@ -59,11 +59,6 @@ public class MessagesActivity extends Activity {
 	private StyleSpannableStringBuilder styleStringBuilder;
 
 	private CwNavigationMainTabActivity mainTabs;
-
-	private String userName;
-	private String hashpw;
-	@SuppressWarnings("unused")
-	private int id;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -132,36 +127,17 @@ public class MessagesActivity extends Activity {
 	 * @throws ConsolewarsAPIException
 	 */
 	private void setCurrentMessages() throws ConsolewarsAPIException {
-
-		// database access to the the current user data
-		String tableName = getString(R.string.db_table_userdata_name);
-		String columnId = getString(R.string.db_id_attribute);
-		String columnUsername = getString(R.string.db_username_attribute);
-		String columnPassw = getString(R.string.db_password_attribute);
-
-		Cursor cursor = mainTabs.getDatabaseManager().fireQuery(tableName,
-				new String[] { columnId, columnUsername, columnPassw }, null, null, null, null,
-				getString(R.string.db_id_desc));
-
-		if (cursor.getCount() > 0 && cursor.moveToFirst()) {
-			for (String columnName : cursor.getColumnNames()) {
-				if (columnName.matches(columnUsername)) {
-					userName = cursor.getString(cursor.getColumnIndex(columnName));
-				} else if (columnName.matches(columnPassw)) {
-					try {
-						hashpw = HashEncrypter.decrypt(getString(R.string.db_cry),
-								cursor.getString(cursor.getColumnIndex(columnName)));
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				} else if (columnName.matches(columnId)) {
-					id = cursor.getInt(cursor.getColumnIndex(columnName));
-				}
-			}
+		mainTabs.getDataHandler().loadCurrentUser();
+		AuthenticatedUser user = null;
+		try {
+			user = mainTabs.getApiCaller().getAuthUser(
+					mainTabs.getDataHandler().getUserName(),
+					HashEncrypter.decrypt(getString(R.string.db_cry), mainTabs.getDataHandler()
+							.getHashPw()));
+		} catch (GeneralSecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		cursor.close();
-		AuthenticatedUser user = mainTabs.getApiCaller().getAuthUser(userName, hashpw);
 		msgs = mainTabs.getApiCaller().getApi()
 				.getMessages(user.getUid(), user.getPasswordHash(), 0, 10);
 	}

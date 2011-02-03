@@ -12,6 +12,7 @@ import android.widget.TabHost;
 import android.widget.TextView;
 import de.consolewars.android.app.APICaller;
 import de.consolewars.android.app.R;
+import de.consolewars.android.app.db.AppDataHandler;
 import de.consolewars.android.app.db.DatabaseManager;
 import de.consolewars.android.app.tab.blogs.BlogsActivityGroup;
 import de.consolewars.android.app.tab.msgs.MessagesActivityGroup;
@@ -37,7 +38,7 @@ import de.consolewars.android.app.tab.shout.ShoutboxActivityGroup;
  * Activity to manage the main navigation of the app, i.e. its tabs. Initializes the tabs and their
  * corresponding {@link ActivityGroup}s and exposes the {@link TabHost} for tab management. The
  * {@link TabHost} is managed by the Android activity lifecycle. It also grants access to the
- * {@link APICaller} and {@link DatabaseManager} to facilitate Consolewars-API calls and database
+ * {@link APICaller} and {@link AppDataHandler} to facilitate Consolewars-API calls and database
  * handling. No switching or further application logic is provided here.
  * 
  * @author Alexander Dridiger
@@ -48,7 +49,7 @@ public class CwNavigationMainTabActivity extends TabActivity {
 	private TabHost usedTabHost;
 
 	private APICaller apiCaller;
-	private DatabaseManager db;
+	private AppDataHandler dataHandler;
 
 	/**
 	 * The {@link TabHost} for this {@link TabActivity}. Before used, check for null since the
@@ -68,10 +69,10 @@ public class CwNavigationMainTabActivity extends TabActivity {
 	}
 
 	/**
-	 * @return database manager
+	 * @return data handler
 	 */
-	public DatabaseManager getDatabaseManager() {
-		return db;
+	public AppDataHandler getDataHandler() {
+		return dataHandler;
 	}
 
 	@Override
@@ -88,7 +89,7 @@ public class CwNavigationMainTabActivity extends TabActivity {
 	 * Initialize helper classes like the {@link DatabaseManager}.
 	 */
 	private void initHelper() {
-		db = new DatabaseManager(getApplicationContext());
+		dataHandler = new AppDataHandler(getApplicationContext());
 		apiCaller = new APICaller(getApplicationContext());
 	}
 

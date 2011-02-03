@@ -17,12 +17,13 @@ import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TabHost.OnTabChangeListener;
@@ -86,6 +87,16 @@ public class NewsActivity extends Activity {
 			});
 		}
 		new BuildNewsAsyncTask().execute();
+	}
+
+	private void initRefreshBttn(ViewGroup parent) {
+		Button refresh = (Button) parent.findViewById(R.id.news_bttn_refresh);
+		refresh.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				new BuildNewsAsyncTask().execute();
+			}
+		});
 	}
 
 	/**
@@ -367,14 +378,15 @@ public class NewsActivity extends Activity {
 		@Override
 		protected void onPostExecute(List<View> result) {
 			// sets the news view for this Activity
-			LinearLayout news_layout = (LinearLayout) LayoutInflater.from(
-					NewsActivity.this.getParent()).inflate(R.layout.news_layout, null);
+			ViewGroup news_layout = (ViewGroup) LayoutInflater.from(NewsActivity.this.getParent())
+					.inflate(R.layout.news_layout, null);
 
 			TableLayout newsTable = (TableLayout) news_layout.findViewById(R.id.news_table);
 			for (View row : result) {
 				newsTable.addView(row);
 			}
 			initFilter(news_layout);
+			initRefreshBttn(news_layout);
 			setContentView(news_layout);
 		}
 	}

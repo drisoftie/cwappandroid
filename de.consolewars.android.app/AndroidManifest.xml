@@ -65,15 +65,10 @@
 			android:name=".tab.overview.OverviewActivityGroup"
 			android:configChanges="keyboardHidden|orientation"></activity>
 
-		<service
-			android:name=".APICaller"
-			android:enabled="true"></service>
-		<service
-			android:name=".db.DatabaseManager" android:enabled="true"></service>
+		
+		
 	</application>
 	<uses-permission
 		android:name="android.permission.INTERNET"></uses-permission>
-	<uses-sdk
-		android:targetSdkVersion="8"
-		android:minSdkVersion="6"></uses-sdk>
+	<uses-sdk android:minSdkVersion="6" android:targetSdkVersion="8"></uses-sdk>
 </manifest> 

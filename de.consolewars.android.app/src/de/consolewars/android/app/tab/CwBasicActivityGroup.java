@@ -1,6 +1,7 @@
 package de.consolewars.android.app.tab;
 
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import android.app.Activity;
@@ -46,6 +47,16 @@ public abstract class CwBasicActivityGroup extends ActivityGroup implements ICwA
 			viewCache.remove(viewCache.size() - 1);
 			setContentView(viewCache.get(viewCache.size() - 1));
 		} else {
+			if (getParent() instanceof CwNavigationMainTabActivity) {
+				CwNavigationMainTabActivity parent = (CwNavigationMainTabActivity) getParent();
+				if (parent.getDataHandler().loadCurrentUser()) {
+					parent.getDataHandler()
+							.getDatabaseManager()
+							.updateDate(parent.getDataHandler().getUserDBId(),
+									GregorianCalendar.getInstance().getTimeInMillis());
+				}
+				parent.getDataHandler().getDatabaseManager().closeDB();
+			}
 			finish();
 		}
 	}
