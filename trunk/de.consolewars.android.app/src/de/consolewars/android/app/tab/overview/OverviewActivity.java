@@ -3,13 +3,15 @@ package de.consolewars.android.app.tab.overview;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.GeneralSecurityException;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 
 import android.app.Activity;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,13 +21,14 @@ import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
 import de.consolewars.android.app.util.HashEncrypter;
-import de.consolewars.android.app.util.StyleSpannableStringBuilder;
 import de.consolewars.api.data.AuthenticatedUser;
+import de.consolewars.api.data.Message;
 import de.consolewars.api.exception.ConsolewarsAPIException;
 
 /*
@@ -43,7 +46,7 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
  * limitations under the License.
  */
 /**
- * Central Activity to handle the ui for blogs.
+ * Central Activity to handle the ui for the overvieew.
  * 
  * @author Alexander Dridiger
  */
@@ -51,10 +54,10 @@ public class OverviewActivity extends Activity {
 
 	private CwNavigationMainTabActivity mainTabs;
 
-	private StyleSpannableStringBuilder styleStringBuilder;
-	private String userName;
-	private String hashpw;
-	private int id = -1;
+	ViewGroup overview;
+
+	// private String userName;
+	// private String pw;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -66,151 +69,168 @@ public class OverviewActivity extends Activity {
 		if (getParent().getParent() instanceof CwNavigationMainTabActivity) {
 			mainTabs = (CwNavigationMainTabActivity) getParent().getParent();
 		}
-		styleStringBuilder = new StyleSpannableStringBuilder();
-
-		ViewGroup overview = (ViewGroup) LayoutInflater.from(getParent()).inflate(
-				R.layout.overview_layout, null);
-		buildUsernameView(overview);
-		createBanner(overview);
-		setContentView(overview);
+		overview = (ViewGroup) LayoutInflater.from(getParent()).inflate(R.layout.overview_layout,
+				null);
+		new BuildOverviewAsyncTask().execute();
 	}
 
 	private void createBanner(final View parent) {
 		ViewFlipper flipper = (ViewFlipper) parent.findViewById(R.id.overview_banner_flipper);
-		for (int i = 0; i < 3; i++) {
-			ViewGroup cell = (ViewGroup) LayoutInflater.from(getParent()).inflate(
-					R.layout.overview_banner_cell_layout, null);
-			int icon = 0;
-			String title = null;
-			String details = null;
-			if (i == 0) {
-				icon = R.drawable.banner_news;
-				title = "News";
-				details = "0 neue News";
-				cell.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						mainTabs.getUsedTabHost().setCurrentTabByTag(
-								getString(R.string.tab_news_tag));
+		int newsAmount = 0;
+		int blogsAmount = 0;
+		int msgsAmount = 0;
+		if (mainTabs.getDataHandler().getDate() != -1) {
+			try {
+				newsAmount = mainTabs.getApiCaller().getApi()
+						.getNewsList(15, 0, new Date(mainTabs.getDataHandler().getDate())).size();
+				blogsAmount = mainTabs.getApiCaller().getApi()
+						.getBlogsList(-1, 15, 0, new Date(mainTabs.getDataHandler().getDate()))
+						.size();
+				blogsAmount += mainTabs.getApiCaller().getApi()
+						.getBlogsList(-1, 15, 1, new Date(mainTabs.getDataHandler().getDate()))
+						.size();
+				blogsAmount += mainTabs.getApiCaller().getApi()
+						.getBlogsList(-1, 15, 2, new Date(mainTabs.getDataHandler().getDate()))
+						.size();
+				AuthenticatedUser user = null;
+				user = mainTabs.getApiCaller().getAuthUser(
+						mainTabs.getDataHandler().getUserName(),
+						HashEncrypter.decrypt(getString(R.string.db_cry), mainTabs.getDataHandler()
+								.getHashPw()));
+				for (Message msg : mainTabs.getApiCaller().getApi()
+						.getMessages(user.getUid(), user.getPasswordHash(), 0, 20)) {
+					if (msg.getUnixtime() > mainTabs.getDataHandler().getDate()) {
+						msgsAmount++;
 					}
-				});
-			} else if (i == 1) {
-				icon = R.drawable.banner_blogs;
-				title = "Blogs";
-				details = "0 neue Blogs";
-				cell.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						mainTabs.getUsedTabHost().setCurrentTabByTag(
-								getString(R.string.tab_blogs_tag));
+				}
+				for (Message msg : mainTabs.getApiCaller().getApi()
+						.getMessages(user.getUid(), user.getPasswordHash(), 1, 20)) {
+					if (msg.getUnixtime() > mainTabs.getDataHandler().getDate()) {
+						msgsAmount++;
 					}
-				});
-			} else if (i == 2) {
-				icon = R.drawable.banner_msgs;
-				title = "Nachrichten";
-				details = "0 neue Nachrichten";
-				cell.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						mainTabs.getUsedTabHost().setCurrentTabByTag(
-								getString(R.string.tab_msgs_tag));
-					}
-				});
+				}
+			} catch (ConsolewarsAPIException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (GeneralSecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			((ImageView) cell.findViewById(R.id.overview_banner_icon)).setImageResource(icon);
-			((TextView) cell.findViewById(R.id.overview_banner_title)).setText(title);
-			((TextView) cell.findViewById(R.id.overview_banner_details)).setText(details);
-			flipper.addView(cell);
 		}
+		flipper.addView(createBannerCell(getString(R.string.tab_news_tag), R.drawable.banner_news,
+				getString(R.string.overview_banner_news_title),
+				getString(R.string.overview_banner_details, newsAmount, "News")));
+		flipper.addView(createBannerCell(getString(R.string.tab_blogs_tag),
+				R.drawable.banner_blogs, getString(R.string.overview_banner_blogs_title),
+				getString(R.string.overview_banner_details, blogsAmount, "Blogs")));
+		flipper.addView(createBannerCell(getString(R.string.tab_msgs_tag), R.drawable.banner_msgs,
+				getString(R.string.overview_banner_msgs_title),
+				getString(R.string.overview_banner_details, msgsAmount, "Nachrichten")));
 		flipper.setInAnimation(AnimationUtils.loadAnimation(this, R.anim.overview_marquee_in));
 		flipper.setOutAnimation(AnimationUtils.loadAnimation(this, R.anim.overview_marquee_out));
 		flipper.setFlipInterval(3000);
 		flipper.startFlipping();
 	}
 
+	private ViewGroup createBannerCell(final String tag, int icon, String title, String details) {
+		ViewGroup cell = (ViewGroup) LayoutInflater.from(getParent()).inflate(
+				R.layout.overview_banner_cell_layout, null);
+		((ImageView) cell.findViewById(R.id.overview_banner_icon)).setImageResource(icon);
+		((TextView) cell.findViewById(R.id.overview_banner_title)).setText(title);
+		((TextView) cell.findViewById(R.id.overview_banner_details)).setText(details);
+
+		cell.setTag(tag);
+		cell.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (v.getTag() instanceof String && ((String) v.getTag()).matches(tag)) {
+					mainTabs.getUsedTabHost().setCurrentTabByTag(tag);
+				}
+			}
+		});
+		return cell;
+	}
+
 	/**
-	 * Needs to be rewritten. Does too much.
+	 * Builds and fills the view for displaying user data.
 	 * 
 	 * @param parent
-	 * @deprecated
 	 */
-	private void buildUsernameView(final View parent) {
-		userName = "Kein User gespeichert";
+	private void buildUserView(final View parent) {
 		final EditText usrnmEdttxt = (EditText) parent.findViewById(R.id.overview_edttxt_username);
 		final EditText passwEdttxt = (EditText) parent.findViewById(R.id.overview_edttxt_passw);
 		final ImageView icon = (ImageView) parent.findViewById(R.id.overview_usericon);
-
-		String tableName = getString(R.string.db_table_userdata_name);
-		String columnId = getString(R.string.db_id_attribute);
-		String columnUsername = getString(R.string.db_username_attribute);
-		String columnPassw = getString(R.string.db_password_attribute);
-
-		Cursor cursor = mainTabs.getDatabaseManager().fireQuery(tableName,
-				new String[] { columnId, columnUsername, columnPassw }, null, null, null, null,
-				getString(R.string.db_id_desc));
-		if (cursor.getCount() > 0 && cursor.moveToFirst()) {
-			for (String columnName : cursor.getColumnNames()) {
-				if (columnName.matches(columnUsername)) {
-					userName = cursor.getString(cursor.getColumnIndex(columnName));
-				} else if (columnName.matches(columnPassw)) {
-					try {
-						hashpw = HashEncrypter.decrypt(getString(R.string.db_cry),
-								cursor.getString(cursor.getColumnIndex(columnName)));
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				} else if (columnName.matches(columnId)) {
-					id = cursor.getInt(cursor.getColumnIndex(columnName));
-				}
-			}
-			AuthenticatedUser authUser = null;
+		if (mainTabs.getDataHandler().getHashPw() != null) {
 			try {
-				authUser = mainTabs.getApiCaller().getApi().authenticate(userName, hashpw);
-			} catch (ConsolewarsAPIException e) {
+				AuthenticatedUser authUser = mainTabs
+						.getApiCaller()
+						.getApi()
+						.authenticate(
+								mainTabs.getDataHandler().getUserName(),
+								HashEncrypter.decrypt(getString(R.string.db_cry), mainTabs
+										.getDataHandler().getHashPw()));
+				loadPicture(icon, authUser.getUid());
+			} catch (GeneralSecurityException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			} catch (ConsolewarsAPIException e) {
+				e.printStackTrace();
 			}
-			loadPicture(icon, authUser.getUid());
 		}
-		cursor.close();
-		usrnmEdttxt.setText(userName);
+		if (mainTabs.getDataHandler().getUserName() != null) {
+			usrnmEdttxt.setText(mainTabs.getDataHandler().getUserName());
+		} else {
+			usrnmEdttxt.setText("Kein User gespeichert");
+		}
+
 		Button confirmBttn = (Button) parent.findViewById(R.id.overview_set_user_bttn);
 		confirmBttn.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				userName = usrnmEdttxt.getText().toString();
-				hashpw = passwEdttxt.getText().toString();
-				Calendar calendar = GregorianCalendar.getInstance();
-				if (id != -1) {
-					try {
-						mainTabs.getDatabaseManager().updateUserData(id, userName,
-								HashEncrypter.encrypt(getString(R.string.db_cry), hashpw),
-								calendar.getTimeInMillis());
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				} else {
-					try {
-						mainTabs.getDatabaseManager().insertUserData(userName,
-								HashEncrypter.encrypt(getString(R.string.db_cry), hashpw),
-								calendar.getTimeInMillis());
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
+				persistUser(usrnmEdttxt.getText().toString(), passwEdttxt.getText().toString());
+				AuthenticatedUser authUser = null;
 				try {
-					// TODO bad, please rewrite
-					AuthenticatedUser authUser = mainTabs.getApiCaller().getApi()
-							.authenticate(userName, hashpw);
-					loadPicture(icon, authUser.getUid());
+					authUser = mainTabs
+							.getApiCaller()
+							.getApi()
+							.authenticate(mainTabs.getDataHandler().getUserName(),
+									passwEdttxt.getText().toString());
 				} catch (ConsolewarsAPIException e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				loadPicture(icon, authUser.getUid());
 			}
 		});
+	}
+
+	private void persistUser(String userName, String pw) {
+		Calendar calendar = GregorianCalendar.getInstance();
+		if (mainTabs.getDataHandler().getUserDBId() != -1) {
+			try {
+				mainTabs.getDataHandler()
+						.getDatabaseManager()
+						.updateUserData(mainTabs.getDataHandler().getUserDBId(), userName,
+								HashEncrypter.encrypt(getString(R.string.db_cry), pw),
+								calendar.getTimeInMillis());
+				mainTabs.getDataHandler().loadCurrentUser();
+			} catch (GeneralSecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {
+			try {
+				mainTabs.getDataHandler()
+						.getDatabaseManager()
+						.insertUserData(userName,
+								HashEncrypter.encrypt(getString(R.string.db_cry), pw),
+								calendar.getTimeInMillis());
+				mainTabs.getDataHandler().loadCurrentUser();
+			} catch (GeneralSecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 
 	/**
@@ -225,7 +245,8 @@ public class OverviewActivity extends Activity {
 		URL newurl;
 		Bitmap mIcon_val = null;
 		try {
-			newurl = new URL(getString(R.string.blogs_userpic_url, userName, uid, 100));
+			newurl = new URL(getString(R.string.blogs_userpic_url, mainTabs.getDataHandler()
+					.getUserName(), uid, 60));
 			mIcon_val = BitmapFactory.decodeStream(newurl.openConnection().getInputStream());
 			view.setImageBitmap(mIcon_val);
 		} catch (MalformedURLException e) {
@@ -238,36 +259,44 @@ public class OverviewActivity extends Activity {
 	}
 
 	/**
-	 * Method to check if a user exists in the database.
+	 * Asynchronous task to receive news from the API and build up the ui.
 	 * 
-	 * @param user
-	 *            the user
-	 * @return
+	 * @author Alexander Dridiger
 	 */
-	@SuppressWarnings("unused")
-	private int existsUser(String user) {
-		String tableName = getString(R.string.db_table_userdata_name);
-		String columnId = getString(R.string.db_id_attribute);
-		String columnUsername = getString(R.string.db_username_attribute);
-		String columnPassw = getString(R.string.db_password_attribute);
+	private class BuildOverviewAsyncTask extends AsyncTask<Void, Integer, Void> {
 
-		Cursor cursor = mainTabs.getDatabaseManager().fireQuery(tableName,
-				new String[] { columnId, columnUsername, columnPassw }, null, null, null, null,
-				getString(R.string.db_id_desc));
-		if (cursor.getCount() > 0 && cursor.moveToFirst()) {
-			do {
-				for (String columnName : cursor.getColumnNames()) {
-					if (columnName.matches(columnUsername)) {
-						if (cursor.getString(cursor.getColumnIndex(columnName)).matches(user)) {
-							int id = cursor.getInt(cursor.getColumnIndex(columnName));
-							cursor.close();
-							return id;
-						}
-					}
-				}
-			} while (cursor.moveToNext());
+		private ProgressBar progressBar;
+
+		@Override
+		protected void onPreExecute() {
+			// first set progressbar view
+			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(
+					OverviewActivity.this.getParent()).inflate(R.layout.centered_progressbar, null);
+			setContentView(progress_layout);
+
+			TextView text = (TextView) progress_layout.findViewById(R.id.centered_progressbar_text);
+			text.setText(getString(R.string.loading, "Überblick"));
+
+			progressBar = (ProgressBar) progress_layout.findViewById(R.id.centered_progressbar);
+			progressBar.setProgress(0);
 		}
-		cursor.close();
-		return -1;
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			mainTabs.getDataHandler().loadCurrentUser();
+			buildUserView(overview);
+			createBanner(overview);
+			return null;
+		}
+
+		@Override
+		protected void onProgressUpdate(Integer... values) {
+			progressBar.setProgress(values[0]);
+		}
+
+		@Override
+		protected void onPostExecute(Void params) {
+			setContentView(overview);
+		}
 	}
 }

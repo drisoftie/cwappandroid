@@ -1,5 +1,6 @@
 package de.consolewars.android.app.util;
 
+import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 
 import javax.crypto.Cipher;
@@ -34,20 +35,20 @@ import javax.crypto.spec.SecretKeySpec;
  */
 public class HashEncrypter {
 
-	public static String encrypt(String seed, String cleartext) throws Exception {
+	public static String encrypt(String seed, String cleartext) throws GeneralSecurityException {
 		byte[] rawKey = getRawKey(seed.getBytes());
 		byte[] result = encrypt(rawKey, cleartext.getBytes());
 		return toHex(result);
 	}
 
-	public static String decrypt(String seed, String encrypted) throws Exception {
+	public static String decrypt(String seed, String encrypted) throws GeneralSecurityException {
 		byte[] rawKey = getRawKey(seed.getBytes());
 		byte[] enc = toByte(encrypted);
 		byte[] result = decrypt(rawKey, enc);
 		return new String(result);
 	}
 
-	private static byte[] getRawKey(byte[] seed) throws Exception {
+	private static byte[] getRawKey(byte[] seed) throws GeneralSecurityException {
 		KeyGenerator kgen = KeyGenerator.getInstance("AES");
 		SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
 		sr.setSeed(seed);
@@ -57,7 +58,7 @@ public class HashEncrypter {
 		return raw;
 	}
 
-	private static byte[] encrypt(byte[] raw, byte[] clear) throws Exception {
+	private static byte[] encrypt(byte[] raw, byte[] clear) throws GeneralSecurityException {
 		SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");
 		Cipher cipher = Cipher.getInstance("AES");
 		cipher.init(Cipher.ENCRYPT_MODE, skeySpec);
@@ -65,7 +66,7 @@ public class HashEncrypter {
 		return encrypted;
 	}
 
-	private static byte[] decrypt(byte[] raw, byte[] encrypted) throws Exception {
+	private static byte[] decrypt(byte[] raw, byte[] encrypted) throws GeneralSecurityException {
 		SecretKeySpec skeySpec = new SecretKeySpec(raw, "AES");
 		Cipher cipher = Cipher.getInstance("AES");
 		cipher.init(Cipher.DECRYPT_MODE, skeySpec);

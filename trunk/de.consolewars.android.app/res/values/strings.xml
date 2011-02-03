@@ -33,6 +33,14 @@
 	<string
 		name="overview_confirm">Bestätigen</string>
 	<string
+		name="overview_banner_details">%1$d neue %2$s</string>
+	<string
+		name="overview_banner_news_title">News</string>
+	<string
+		name="overview_banner_blogs_title">Blogs</string>
+	<string
+		name="overview_banner_msgs_title">Nachrichten</string>
+	<string
 		name="news_author_by">von</string>
 	<string
 		name="comments_abrv">Cmmnts:</string>

@@ -22,7 +22,8 @@
 		android:layout_marginLeft="@dimen/overview_banner_icon_margin"></TextView>
 	<TextView
 		android:id="@+id/overview_banner_details"
-		android:layout_below="@id/overview_banner_icon"
+		android:layout_below="@id/overview_banner_title"
+		android:layout_toRightOf="@id/overview_banner_icon"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:textColor="@color/overview_text"

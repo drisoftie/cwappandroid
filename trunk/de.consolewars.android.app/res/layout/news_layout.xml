@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:orientation="vertical"
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent">
 	<Spinner
@@ -12,13 +11,23 @@
 	<ScrollView
 		android:id="@+id/news_scroll_view"
 		android:layout_width="fill_parent"
-		android:layout_height="fill_parent">
-		<TableLayout
-			xmlns:android="http://schemas.android.com/apk/res/android"
+		android:layout_height="fill_parent"
+		android:layout_below="@id/news_filter_spinner">
+		<RelativeLayout
 			android:layout_width="fill_parent"
-			android:layout_height="fill_parent"
-			android:padding="3dip"
-			android:id="@+id/news_table">
-		</TableLayout>
+			android:layout_height="fill_parent">
+			<TableLayout
+				android:id="@+id/news_table"
+				android:layout_width="fill_parent"
+				android:layout_height="fill_parent"
+				android:padding="3dip"/>
+			<Button
+				android:id="@+id/news_bttn_refresh"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_alignParentRight="true"
+				android:layout_alignParentBottom="true"
+				android:background="@drawable/refresh_bump"/>
+		</RelativeLayout>
 	</ScrollView>
-</LinearLayout>
+</RelativeLayout>
