@@ -43,17 +43,17 @@ public class NewsActivityGroup extends CwBasicActivityGroup {
 		replaceView(view);
 	}
 
-	@Override
-	public void onConfigurationChanged(Configuration newConfig) {
-		super.onConfigurationChanged(newConfig);
-
-		// handling rotation
-		resetCache();
-
-		// reset the ui
-		View view = getLocalActivityManager().startActivity(NewsActivity.class.getSimpleName(),
-				new Intent(this, NewsActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
-				.getDecorView();
-		replaceView(view);
-	}
+//	@Override
+//	public void onConfigurationChanged(Configuration newConfig) {
+//		super.onConfigurationChanged(newConfig);
+//
+//		// handling rotation
+//		resetCache();
+//
+//		// reset the ui
+//		View view = getLocalActivityManager().startActivity(NewsActivity.class.getSimpleName(),
+//				new Intent(this, NewsActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
+//				.getDecorView();
+//		replaceView(view);
+//	}
 }

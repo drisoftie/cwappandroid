@@ -34,5 +34,5 @@
 		android:layout_toRightOf="@id/msgs_row_date"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:paddingLeft="@dimen/news_row_author_padding_left"></TextView>
+		android:paddingLeft="@dimen/news_row_author_margin"></TextView>
 </RelativeLayout>

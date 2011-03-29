@@ -11,6 +11,7 @@ import java.util.TimeZone;
 import android.app.Activity;
 import android.app.ActivityGroup;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.style.ForegroundColorSpan;
@@ -58,7 +59,11 @@ public class NewsActivity extends Activity {
 
 	private List<News> news;
 
-	// remember last selected table row to draw the background
+	private ViewGroup news_layout;
+	private Calendar oldestNewsDate;
+	private Calendar currentNewsDate;
+
+	// remember last selected table row to draw the background for that row
 	private View selectedRow;
 
 	private int currentFilter = 0;
@@ -74,6 +79,9 @@ public class NewsActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		resetDates();
+
 		/*
 		 * TODO: Might become a source of error someday, if activity design changes. Would be better
 		 * to handle it with intents.
@@ -86,6 +94,8 @@ public class NewsActivity extends Activity {
 				}
 			});
 		}
+		news_layout = (ViewGroup) LayoutInflater.from(NewsActivity.this.getParent()).inflate(
+				R.layout.news_layout, null);
 		new BuildNewsAsyncTask().execute();
 	}
 
@@ -94,6 +104,8 @@ public class NewsActivity extends Activity {
 		refresh.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
+				TableLayout newsTable = (TableLayout) news_layout.findViewById(R.id.news_table);
+				newsTable.removeAllViews();
 				new BuildNewsAsyncTask().execute();
 			}
 		});
@@ -104,15 +116,16 @@ public class NewsActivity extends Activity {
 	 */
 	private List<View> createNewsRows() {
 		// create table based on current news
-		View newsView = LayoutInflater.from(NewsActivity.this.getParent()).inflate(
-				R.layout.news_layout, null);
-		TableLayout newsTable = (TableLayout) newsView.findViewById(R.id.news_table);
+		TableLayout newsTable = (TableLayout) news_layout.findViewById(R.id.news_table);
 
 		styleStringBuilder = new StyleSpannableStringBuilder();
 
 		List<View> rows = new ArrayList<View>();
 
 		for (News news : this.news) {
+			if (currentNewsDate.getTimeInMillis() > oldestNewsDate.getTimeInMillis()) {
+
+			}
 			// get the table row by an inflater and set the needed information
 			final View tableRow = LayoutInflater.from(this).inflate(R.layout.news_row_layout,
 					newsTable, false);
@@ -131,14 +144,19 @@ public class NewsActivity extends Activity {
 				}
 			});
 			((ImageView) tableRow.findViewById(R.id.news_row_category_icon))
-					.setImageResource(createCategoryIcon(news.getCategoryshort()));
+					.setImageResource(this.getResources().getIdentifier(
+							getString(R.string.cat_drawable, news.getCategoryshort()),
+							getString(R.string.drawable), getApplicationContext().getPackageName()));
 			((TextView) tableRow.findViewById(R.id.news_row_title)).setText(createTitle(news
 					.getTitle()));
 			((TextView) tableRow.findViewById(R.id.news_row_date)).setText(createDate(news
 					.getUnixtime() * 1000L));
-			TextView author = (TextView) tableRow.findViewById(R.id.news_row_author_cmmnts);
+			TextView amount = (TextView) tableRow.findViewById(R.id.news_row_cmmts_amount);
+			amount.setText(createCommentsamount(news.getComments()));
+
+			TextView author = (TextView) tableRow.findViewById(R.id.news_row_author);
+			author.setText(createAuthor(news.getAuthor()));
 			author.setSelected(true);
-			author.setText(createCommentAndAuthor(news.getComments(), news.getAuthor()));
 
 			rows.add(tableRow);
 		}
@@ -219,7 +237,7 @@ public class NewsActivity extends Activity {
 	 * @param author
 	 * @return a formatted {@link CharSequence}
 	 */
-	private CharSequence createCommentAndAuthor(int commentAmount, String author) {
+	private CharSequence createAuthor(String author) {
 		// TODO more text formatting
 		// an empty author string means that the news was not written by a
 		if (author.matches("")) {
@@ -230,10 +248,21 @@ public class NewsActivity extends Activity {
 				getString(R.string.news_author_by));
 		styleStringBuilder.append(" ");
 		styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF009933), author);
-		styleStringBuilder.append(" ");
-		styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFFf3d135),
-				getString(R.string.comments_abrv));
-		styleStringBuilder.append(" ");
+
+		return styleStringBuilder;
+	}
+
+	/**
+	 * Creates the string for the ui cell showing the author of a news and the amount of comments.
+	 * 
+	 * @param commentAmount
+	 * @param author
+	 * @return a formatted {@link CharSequence}
+	 */
+	private CharSequence createCommentsamount(int commentAmount) {
+		// TODO more text formatting
+		// an empty author string means that the news was not written by a
+		styleStringBuilder.clear();
 		styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF7e6003),
 				String.valueOf(commentAmount));
 
@@ -263,76 +292,18 @@ public class NewsActivity extends Activity {
 		return title;
 	}
 
-	/**
-	 * Simply checks for categories and assigns the corresponding icon to the given view.
-	 * 
-	 * @param category
-	 *            the category to be checked
-	 * @param icon
-	 *            the view that holds the icon
-	 * @return the view assigned with the icon
-	 */
-	private int createCategoryIcon(String category) {
-		// TODO default icon is "sidewatch" so far, get perhaps another one
-		int imageResource = R.drawable.cat_side;
-		if (category.matches(getString(R.string.cat_360))) {
-			imageResource = R.drawable.cat_360;
-		} else if (category.matches(getString(R.string.cat_3ds))) {
-			imageResource = R.drawable.cat_3ds;
-		} else if (category.matches(getString(R.string.cat_cmmt))) {
-			imageResource = R.drawable.cat_cmmt;
-		} else if (category.matches(getString(R.string.cat_con))) {
-			imageResource = R.drawable.cat_con;
-		} else if (category.matches(getString(R.string.cat_dc))) {
-			imageResource = R.drawable.cat_dc;
-		} else if (category.matches(getString(R.string.cat_ds))) {
-			imageResource = R.drawable.cat_ds;
-		} else if (category.matches(getString(R.string.cat_emu))) {
-			imageResource = R.drawable.cat_emu;
-		} else if (category.matches(getString(R.string.cat_fun))) {
-			imageResource = R.drawable.cat_fun;
-		} else if (category.matches(getString(R.string.cat_gba))) {
-			imageResource = R.drawable.cat_gba;
-		} else if (category.matches(getString(R.string.cat_int))) {
-			imageResource = R.drawable.cat_int;
-		} else if (category.matches(getString(R.string.cat_iphn))) {
-			imageResource = R.drawable.cat_iphn;
-		} else if (category.matches(getString(R.string.cat_mov))) {
-			imageResource = R.drawable.cat_mov;
-		} else if (category.matches(getString(R.string.cat_ms))) {
-			imageResource = R.drawable.cat_ms;
-		} else if (category.matches(getString(R.string.cat_ngc))) {
-			imageResource = R.drawable.cat_ngc;
-		} else if (category.matches(getString(R.string.cat_nin))) {
-			imageResource = R.drawable.cat_nin;
-		} else if (category.matches(getString(R.string.cat_ps))) {
-			imageResource = R.drawable.cat_ps;
-		} else if (category.matches(getString(R.string.cat_ps2))) {
-			imageResource = R.drawable.cat_ps2;
-		} else if (category.matches(getString(R.string.cat_ps3))) {
-			imageResource = R.drawable.cat_ps3;
-		} else if (category.matches(getString(R.string.cat_ps4))) {
-			imageResource = R.drawable.cat_ps4;
-		} else if (category.matches(getString(R.string.cat_psn))) {
-			imageResource = R.drawable.cat_psn;
-		} else if (category.matches(getString(R.string.cat_psp))) {
-			imageResource = R.drawable.cat_psp;
-		} else if (category.matches(getString(R.string.cat_sega))) {
-			imageResource = R.drawable.cat_sega;
-		} else if (category.matches(getString(R.string.cat_side))) {
-			imageResource = R.drawable.cat_side;
-		} else if (category.matches(getString(R.string.cat_son))) {
-			imageResource = R.drawable.cat_son;
-		} else if (category.matches(getString(R.string.cat_wii))) {
-			imageResource = R.drawable.cat_wii;
-		} else if (category.matches(getString(R.string.cat_ww))) {
-			imageResource = R.drawable.cat_ww;
-		} else if (category.matches(getString(R.string.cat_xbla))) {
-			imageResource = R.drawable.cat_xbla;
-		} else if (category.matches(getString(R.string.cat_xbox))) {
-			imageResource = R.drawable.cat_xbox;
-		}
-		return imageResource;
+	private void resetDates() {
+		TimeZone zone = TimeZone.getDefault();
+
+		oldestNewsDate = Calendar.getInstance(zone, Locale.GERMANY);
+		oldestNewsDate = Calendar.getInstance();
+		getDaysBefore(oldestNewsDate, 1);
+		currentNewsDate = Calendar.getInstance(zone, Locale.GERMANY);
+	}
+
+	private Date getDaysBefore(Calendar date, int days) {
+		date.add(Calendar.DATE, -days);
+		return date.getTime();
 	}
 
 	/**
@@ -352,7 +323,7 @@ public class NewsActivity extends Activity {
 			setContentView(progress_layout);
 
 			TextView text = (TextView) progress_layout.findViewById(R.id.centered_progressbar_text);
-			text.setText(getString(R.string.loading, "News"));
+			text.setText(getString(R.string.loading, getString(R.string.tab_news_head)));
 
 			progressBar = (ProgressBar) progress_layout.findViewById(R.id.centered_progressbar);
 			progressBar.setProgress(0);
@@ -362,11 +333,14 @@ public class NewsActivity extends Activity {
 		protected List<View> doInBackground(Void... params) {
 			try {
 				mainTabs.getApiCaller().authenticateOnCW();
-				news = mainTabs.getApiCaller().getApi().getNewsList(15, currentFilter);
+				news = mainTabs.getApiCaller().getApi()
+						.getNewsList(100, currentFilter, getDaysBefore(oldestNewsDate, 1));
 			} catch (ConsolewarsAPIException e) {
 				e.printStackTrace();
 				Log.e(getString(R.string.exc_auth_tag), e.getMessage(), e);
+				return new ArrayList<View>();
 			}
+
 			return createNewsRows();
 		}
 
@@ -378,16 +352,24 @@ public class NewsActivity extends Activity {
 		@Override
 		protected void onPostExecute(List<View> result) {
 			// sets the news view for this Activity
-			ViewGroup news_layout = (ViewGroup) LayoutInflater.from(NewsActivity.this.getParent())
-					.inflate(R.layout.news_layout, null);
-
 			TableLayout newsTable = (TableLayout) news_layout.findViewById(R.id.news_table);
 			for (View row : result) {
 				newsTable.addView(row);
 			}
 			initFilter(news_layout);
 			initRefreshBttn(news_layout);
+
+			ViewGroup lastrowLayout = (ViewGroup) LayoutInflater
+					.from(NewsActivity.this.getParent()).inflate(R.layout.news_row_down_layout,
+							null);
+			newsTable.addView(lastrowLayout);
+
 			setContentView(news_layout);
 		}
+	}
+
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
 	}
 }

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string
+		name="drawable">drawable</string>
+	<string
+		name="string">string</string>
+	<string
+		name="cat_drawable">cat_%1$s</string>
+	<string
+		name="blogs_userpic_url">http://%1$s.consolewars.de/gen/fetchavatars.php?type=profile&amp;u=%2$d&amp;sizex=%3$s
+	</string>
+	<string
+		name="general_picture">http://www.consolewars.de/gen/fetchpics.php?aidx=%1$d&amp;database=attachments&amp;noborder=0&amp;sizex=%2$s
+	</string>
+</resources>

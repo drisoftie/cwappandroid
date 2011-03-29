@@ -60,4 +60,18 @@
 		name="msg_content_bg">#cce4f7</color>
 	<color
 		name="msg_text_fromUser">#3e3e3e</color>
+	<color
+		name="header_up">#9bd1fa</color>
+	<color
+		name="header_down">#60b7f5</color>
+	<color
+		name="header_descr_up">#cccccc</color>	
+	<color
+		name="header_descr_down">#e4e4e4</color>	
+	<color
+		name="header_descr_title">#198dde</color>		
+	<color
+		name="header_descr_info">#9e9999</color>
+	<color
+		name="header_descr">#666666</color>		
 </resources>
