@@ -15,6 +15,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -236,7 +237,7 @@ public class MessagesActivity extends Activity {
 			setContentView(progress_layout);
 
 			TextView text = (TextView) progress_layout.findViewById(R.id.centered_progressbar_text);
-			text.setText(getString(R.string.loading, "Nachrichten"));
+			text.setText(getString(R.string.loading, getString(R.string.tab_msgs_head)));
 
 			progressBar = (ProgressBar) progress_layout.findViewById(R.id.centered_progressbar);
 			progressBar.setProgress(0);
@@ -249,6 +250,8 @@ public class MessagesActivity extends Activity {
 				setCurrentMessages();
 			} catch (ConsolewarsAPIException e) {
 				e.printStackTrace();
+				Log.e(getString(R.string.exc_auth_tag), e.getMessage(), e);
+				return new ArrayList<View>();
 			}
 			return createMsgsRows();
 		}

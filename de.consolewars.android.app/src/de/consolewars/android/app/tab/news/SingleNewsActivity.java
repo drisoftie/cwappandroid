@@ -1,14 +1,25 @@
 package de.consolewars.android.app.tab.news;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.IllegalFormatException;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import de.consolewars.android.app.R;
@@ -57,7 +68,6 @@ public class SingleNewsActivity extends Activity {
 		View newsView = LayoutInflater.from(SingleNewsActivity.this.getParent()).inflate(
 				R.layout.singlenews_layout, null);
 
-		TextView text = (TextView) newsView.findViewById(R.id.singlenews_content);
 		int id = -1;
 
 		// looking for the correct intent
@@ -73,6 +83,7 @@ public class SingleNewsActivity extends Activity {
 			e.printStackTrace();
 		}
 
+		TextView text = (TextView) newsView.findViewById(R.id.singlenews_newstext);
 		// up to now only the text of the blog is shown
 		if (id == -1) {
 			text.setText("Fehler");
@@ -85,8 +96,68 @@ public class SingleNewsActivity extends Activity {
 				// FIXME Wrong format handling
 				text.setText(news.getArticle());
 			}
+			createHeader(newsView, news);
 		}
 		return newsView;
+	}
+
+	private void createHeader(View parent, News news) {
+		ImageView icon = (ImageView) parent.findViewById(R.id.header_icon);
+		icon.setImageResource(this.getResources().getIdentifier(
+				getString(R.string.cat_drawable, news.getCategoryshort()),
+				getString(R.string.drawable), getApplicationContext().getPackageName()));
+
+		ImageView usericon = (ImageView) parent.findViewById(R.id.header_descr_usericon);
+		loadPicture(usericon, news);
+		TextView cattxt = (TextView) parent.findViewById(R.id.header_title);
+		cattxt.setText(news.getCategory());
+		TextView title = (TextView) parent.findViewById(R.id.header_descr_title);
+		title.setText(news.getTitle());
+		TextView info = (TextView) parent.findViewById(R.id.header_descr_info);
+		info.setText(createDate(news.getUnixtime() * 1000L) + " von " + news.getAuthor());
+		TextView descr = (TextView) parent.findViewById(R.id.header_descr);
+		descr.setText(news.getDescription());
+	}
+
+	/**
+	 * Downloads the user picture and decodes it into a {@link Bitmap} to be set into an ImageView.
+	 * 
+	 * @param view
+	 *            the ImageView
+	 * @param uid
+	 *            user id is needed to get the appropriate picture
+	 */
+	private void loadPicture(ImageView view, News news) {
+		URL newurl;
+		Bitmap mIcon_val = null;
+		try {
+			newurl = new URL(getString(R.string.general_picture, news.getPicid(), 60));
+			mIcon_val = BitmapFactory.decodeStream(newurl.openConnection().getInputStream());
+			view.setImageBitmap(mIcon_val);
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * @param unixtime
+	 * @return
+	 */
+	private CharSequence createDate(long unixtime) {
+		Date date = new Date(unixtime);
+		TimeZone zone = TimeZone.getDefault();
+
+		Calendar cal = Calendar.getInstance(zone, Locale.GERMANY);
+		SimpleDateFormat dateformat = new SimpleDateFormat("HH:mm dd.MM.yyyy");
+		dateformat.setCalendar(cal);
+		String formattedDate = dateformat.format(date);
+		return (formattedDate.matches("")) ? ("")
+				: (formattedDate.subSequence(0, 5) + " Uhr " + formattedDate.subSequence(6,
+						formattedDate.length()));
 	}
 
 	/**

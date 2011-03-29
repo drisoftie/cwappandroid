@@ -19,6 +19,7 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -113,9 +114,12 @@ public class BlogsActivity extends Activity {
 					.getTitle()));
 			((TextView) tableRow.findViewById(R.id.blogs_row_date)).setText(createDate(blog
 					.getUnixtime() * 1000L));
-			TextView author = (TextView) tableRow.findViewById(R.id.blogs_row_author_cmmnts);
+			TextView amount = (TextView) tableRow.findViewById(R.id.blogs_row_cmmts_amount);
+			amount.setText(createCommentsamount(blog.getComments()));
+
+			TextView author = (TextView) tableRow.findViewById(R.id.blogs_row_author);
+			author.setText(createAuthor(blog.getAuthor()));
 			author.setSelected(true);
-			author.setText(createCommentAndAuthor(blog.getComments(), blog.getAuthor()));
 
 			rows.add(tableRow);
 		}
@@ -175,7 +179,7 @@ public class BlogsActivity extends Activity {
 	 * @param author
 	 * @return a formatted {@link CharSequence}
 	 */
-	private CharSequence createCommentAndAuthor(int commentAmount, String author) {
+	private CharSequence createAuthor(String author) {
 		// TODO more text formatting
 		// an empty author string means that the news was not written by a
 		if (author.matches("")) {
@@ -186,10 +190,21 @@ public class BlogsActivity extends Activity {
 				getString(R.string.news_author_by));
 		styleStringBuilder.append(" ");
 		styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF009933), author);
-		styleStringBuilder.append(" ");
-		styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFFf3d135),
-				getString(R.string.comments_abrv));
-		styleStringBuilder.append(" ");
+
+		return styleStringBuilder;
+	}
+
+	/**
+	 * Creates the string for the ui cell showing the author of a blog and the amount of comments.
+	 * 
+	 * @param commentAmount
+	 * @param author
+	 * @return a formatted {@link CharSequence}
+	 */
+	private CharSequence createCommentsamount(int commentAmount) {
+		// TODO more text formatting
+		// an empty author string means that the news was not written by a
+		styleStringBuilder.clear();
 		styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF7e6003),
 				String.valueOf(commentAmount));
 
@@ -240,7 +255,7 @@ public class BlogsActivity extends Activity {
 			setContentView(progress_layout);
 
 			TextView text = (TextView) progress_layout.findViewById(R.id.centered_progressbar_text);
-			text.setText(getString(R.string.loading, "Blogs"));
+			text.setText(getString(R.string.loading, getString(R.string.tab_blogs_head)));
 
 			progressBar = (ProgressBar) progress_layout.findViewById(R.id.centered_progressbar);
 			progressBar.setProgress(0);
@@ -252,8 +267,9 @@ public class BlogsActivity extends Activity {
 				mainTabs.getApiCaller().authenticateOnCW();
 				blogs = mainTabs.getApiCaller().getApi().getBlogsList(-1, 15, 0);
 			} catch (ConsolewarsAPIException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
+				Log.e(getString(R.string.exc_auth_tag), e.getMessage(), e);
+				return new ArrayList<View>();
 			}
 			return createBlogRows();
 		}

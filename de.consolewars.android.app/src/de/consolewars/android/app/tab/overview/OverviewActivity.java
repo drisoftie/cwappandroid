@@ -195,11 +195,11 @@ public class OverviewActivity extends Activity {
 							.getApi()
 							.authenticate(mainTabs.getDataHandler().getUserName(),
 									passwEdttxt.getText().toString());
+					loadPicture(icon, authUser.getUid());
 				} catch (ConsolewarsAPIException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				loadPicture(icon, authUser.getUid());
 			}
 		});
 	}
@@ -275,7 +275,7 @@ public class OverviewActivity extends Activity {
 			setContentView(progress_layout);
 
 			TextView text = (TextView) progress_layout.findViewById(R.id.centered_progressbar_text);
-			text.setText(getString(R.string.loading, "Überblick"));
+			text.setText(getString(R.string.loading, getString(R.string.tab_overv_head)));
 
 			progressBar = (ProgressBar) progress_layout.findViewById(R.id.centered_progressbar);
 			progressBar.setProgress(0);
