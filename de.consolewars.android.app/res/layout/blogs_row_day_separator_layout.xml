@@ -5,7 +5,7 @@
 	android:layout_height="fill_parent"
 	android:background="@drawable/table_row_separator_bg">
 	<ImageView
-		android:id="@+id/news_row_day_separator_icon"
+		android:id="@+id/blogs_row_day_separator_icon"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_centerVertical="true"
@@ -13,8 +13,8 @@
 		android:layout_margin="@dimen/news_row_day_separator_margin"
 		android:src="@drawable/day_separator"/>
 	<TextView
-		android:id="@+id/news_row_day_separator_text"
-		android:layout_toRightOf="@id/news_row_day_separator_icon"
+		android:id="@+id/blogs_row_day_separator_text"
+		android:layout_toRightOf="@id/blogs_row_day_separator_icon"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:layout_centerVertical="true"

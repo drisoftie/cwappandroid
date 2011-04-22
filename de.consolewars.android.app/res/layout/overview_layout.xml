@@ -9,7 +9,7 @@
 		android:id="@+id/overview_banner_flipper"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:background="@drawable/overview_banner_bg"></ViewFlipper>
+		android:background="@drawable/overview_banner_bg"/>
 	<ScrollView
 		android:id="@+id/overview_scroll_view"
 		android:layout_width="fill_parent"
@@ -25,7 +25,7 @@
 				android:padding="@dimen/overview_logged_as_padding"
 				android:textColor="@color/overview_text"
 				android:textStyle="bold"
-				android:text="@string/overview_logged_as"></TextView>
+				android:text="@string/overview_logged_as"/>
 			<LinearLayout
 				android:id="@+id/overview_usericon_layout"
 				android:layout_width="wrap_content"
@@ -37,7 +37,7 @@
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:layout_below="@id/overview_logged_as_text"
-					android:layout_margin="4dp"></ImageView>
+					android:layout_margin="4dp"/>
 			</LinearLayout>
 			<Button
 				android:id="@+id/overview_set_user_bttn"
@@ -45,7 +45,7 @@
 				android:layout_height="wrap_content"
 				android:layout_alignBaseline="@id/overview_usericon_layout"
 				android:layout_alignParentRight="true"
-				android:background="@drawable/def_overview_login_bttn"></Button>
+				android:background="@drawable/def_overview_login_bttn"/>
 			<LinearLayout
 				android:id="@+id/overview_logged_user_layout2"
 				android:layout_width="wrap_content"
@@ -61,12 +61,12 @@
 					android:height="2dp"
 					android:singleLine="true"
 					android:ellipsize="start"
-					android:textSize="15dp"></EditText>
+					android:textSize="15dp"/>
 				<EditText
 					android:id="@+id/overview_edttxt_passw"
 					android:layout_width="fill_parent"
 					android:layout_height="wrap_content"
-					android:inputType="textPassword"></EditText>
+					android:inputType="textPassword"/>
 			</LinearLayout>
 		</RelativeLayout>
 	</ScrollView>

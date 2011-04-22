@@ -139,8 +139,12 @@ public class MessagesActivity extends Activity {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		msgs = mainTabs.getApiCaller().getApi()
-				.getMessages(user.getUid(), user.getPasswordHash(), 0, 10);
+		if (user != null) {
+			msgs = mainTabs.getApiCaller().getApi()
+					.getMessages(user.getUid(), user.getPasswordHash(), 0, 10);
+		} else {
+			msgs = new ArrayList<Message>();
+		}
 	}
 
 	/**

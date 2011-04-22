@@ -1,6 +1,5 @@
 package de.consolewars.android.app.tab;
 
-import android.app.Activity;
 import android.app.ActivityGroup;
 import android.app.TabActivity;
 import android.content.Intent;
@@ -84,7 +83,7 @@ public class CwNavigationMainTabActivity extends TabActivity {
 		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.titlebar_layout);
 
 		initHelper();
-		
+
 		usedTabHost = getTabHost();
 		setTabs();
 	}
@@ -126,7 +125,8 @@ public class CwNavigationMainTabActivity extends TabActivity {
 	 * @param activity
 	 *            the activity to be added
 	 */
-	private void addTab(int labelId, int tagId, int drawableId, Class<? extends Activity> activity) {
+	private void addTab(int labelId, int tagId, int drawableId,
+			Class<? extends ICwActivityGroup> activity) {
 		// create an Intent to launch an Activity for the tab (to be reused)
 		Intent intent = new Intent().setClass(this, activity);
 		// initialize a TabSpec for each tab and add it to the TabHost

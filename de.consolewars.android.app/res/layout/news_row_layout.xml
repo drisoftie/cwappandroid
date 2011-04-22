@@ -42,12 +42,27 @@
 		android:layout_below="@id/news_row_title"
 		android:layout_toRightOf="@id/news_row_cmmts_icon"
 		android:layout_margin="@dimen/news_row_author_margin"/>
+	<ImageView
+		android:id="@+id/news_row_pics_icon"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_below="@id/news_row_title"
+		android:layout_toRightOf="@id/news_row_cmmts_amount"
+		android:layout_margin="@dimen/news_row_cmmts_icon_margin"
+		android:src="@drawable/pics"/>
+	<TextView
+		android:id="@+id/news_row_pics_amount"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_below="@id/news_row_title"
+		android:layout_toRightOf="@id/news_row_pics_icon"
+		android:layout_margin="@dimen/news_row_author_margin"/>	
 	<TextView
 		android:id="@+id/news_row_author"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_below="@id/news_row_title"
-		android:layout_toRightOf="@id/news_row_cmmts_amount"
+		android:layout_toRightOf="@id/news_row_pics_amount"
 		android:marqueeRepeatLimit="marquee_forever"
 		android:singleLine="true"
 		android:ellipsize="marquee"

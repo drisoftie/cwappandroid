@@ -21,23 +21,26 @@ package de.consolewars.api.data;
  * @author cerpin (arrewk@gmail.com)
  */
 public class User {
-	
+
 	protected int uid;
 	protected String username;
-	
+
 	public int getUid() {
 		return uid;
 	}
+
 	public void setUid(int uid) {
 		this.uid = uid;
 	}
+
 	public String getUsername() {
 		return username;
 	}
+
 	public void setUsername(String username) {
 		this.username = username;
 	}
-	
+
 	public String toString() {
 		String sUser = "uid: " + uid;
 		sUser += "\nusername: " + username;

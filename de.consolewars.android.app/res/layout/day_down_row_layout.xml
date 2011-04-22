@@ -5,7 +5,7 @@
 	android:layout_height="fill_parent"
 	android:background="@drawable/table_cell_bg">
 	<Button
-		android:id="@+id/news_row_down_bttn"
+		android:id="@+id/day_down_row_bttn"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_centerInParent="true"

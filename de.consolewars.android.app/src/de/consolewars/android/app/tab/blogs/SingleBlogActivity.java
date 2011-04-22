@@ -1,18 +1,30 @@
 package de.consolewars.android.app.tab.blogs;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.IllegalFormatException;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
+import de.consolewars.android.app.util.TextViewHandler;
 import de.consolewars.api.data.Blog;
 import de.consolewars.api.exception.ConsolewarsAPIException;
 
@@ -56,7 +68,6 @@ public class SingleBlogActivity extends Activity {
 		View blogView = LayoutInflater.from(SingleBlogActivity.this.getParent()).inflate(
 				R.layout.singleblog_layout, null);
 
-		TextView text = (TextView) blogView.findViewById(R.id.singleblog_content);
 		int id = -1;
 
 		// looking for the correct intent
@@ -72,20 +83,76 @@ public class SingleBlogActivity extends Activity {
 			e.printStackTrace();
 		}
 
-		// up to now only the text of the blog is shown
+		TextView text = (TextView) blogView.findViewById(R.id.singleblog_text_content);
 		if (id == -1) {
 			text.setText("Fehler");
 		} else if (blog != null) {
 			try {
-				String fString = String.format(blog.getArticle(), "");
-				CharSequence styledString = Html.fromHtml(fString);
-				text.setText(styledString);
+				// String fString = String.format(blog.getArticle(), "");
+				// CharSequence styledString = Html.fromHtml(fString);
+				// text.setText(styledString);
+				text.setText(Html.fromHtml(blog.getArticle(true), new TextViewHandler(
+						SingleBlogActivity.this.getApplicationContext()), null));
 			} catch (IllegalFormatException ife) {
 				// FIXME Wrong format handling
 				text.setText(blog.getArticle());
 			}
+			createHeader(blogView, blog);
 		}
 		return blogView;
+	}
+
+	private void createHeader(View parent, Blog blog) {
+		ImageView icon = (ImageView) parent.findViewById(R.id.singleblog_header_usericon);
+		loadPicture(icon, blog.getUid());
+
+		TextView text = (TextView) parent.findViewById(R.id.singleblog_header_title);
+		text.setText(getString(R.string.singleblogs_author, blog.getAuthor().toUpperCase()));
+
+		TextView title = (TextView) parent.findViewById(R.id.header_descr_title);
+		title.setText(blog.getTitle());
+		TextView info = (TextView) parent.findViewById(R.id.header_descr_info);
+		info.setText(createDate(blog.getUnixtime() * 1000L));
+	}
+
+	/**
+	 * Downloads the user picture and decodes it into a {@link Bitmap} to be set into an ImageView.
+	 * 
+	 * @param view
+	 *            the ImageView
+	 * @param uid
+	 *            user id is needed to get the appropriate picture
+	 */
+	private void loadPicture(ImageView view, int uid) {
+		URL newurl;
+		Bitmap mIcon_val = null;
+		try {
+			newurl = new URL(getString(R.string.blogs_userpic_url, uid, 60));
+			mIcon_val = BitmapFactory.decodeStream(newurl.openConnection().getInputStream());
+			view.setImageBitmap(mIcon_val);
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * @param unixtime
+	 * @return
+	 */
+	private CharSequence createDate(long unixtime) {
+		Date date = new Date(unixtime);
+		TimeZone zone = TimeZone.getDefault();
+
+		Calendar cal = Calendar.getInstance(zone, Locale.GERMANY);
+		// formatting day of week in EEEE format like Sunday, Monday etc.
+		SimpleDateFormat dateformat = new SimpleDateFormat("EEEE, dd. MMMMM yyyy 'um' HH:mm 'Uhr'",
+				Locale.GERMANY);
+		dateformat.setCalendar(cal);
+		return dateformat.format(date);
 	}
 
 	/**

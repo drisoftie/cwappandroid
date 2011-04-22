@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string
+		name="cw_url">http://www.consolewars.de%1$s</string>
+	<string
+		name="cw_url_slash">http://www.consolewars.de/</string>	
+	<string
+		name="xpath_get_author">//div[@class=\'author\']/a[@href]</string>
+	<string
+		name="xpath_get_video">//param[@name=\'movie\']</string>
+	<string
+		name="href">href</string>
+	<string
+		name="value">value</string>
+	<string
+		name="prefix_userpic">/userpages/?uid=</string>	
+	<string
+		name="youtube_embedding">"&lt;object width=\"%1$d\" height=\"%2$d\"&gt;&lt;param name=\"movie\" value=\"%3$s\"&gt;&lt;/param&gt;&lt;param name=\"allowFullScreen\" value=\"true\"&gt;&lt;/param&gt;&lt;param name=\"allowscriptaccess\" value=\"always\"&gt;&lt;/param&gt;&lt;embed src=\"%3$s\" type=\"application/x-shockwave-flash\" allowscriptaccess=\"always\" allowfullscreen=\"true\" width=\"%1$d\" height=\"%2$d\"&gt;&lt;/embed&gt;"</string>	
+</resources>

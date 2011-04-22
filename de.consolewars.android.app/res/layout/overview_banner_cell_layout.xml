@@ -10,8 +10,7 @@
 		android:layout_alignParentTop="true"
 		android:layout_alignParentLeft="true"
 		android:layout_marginTop="@dimen/overview_banner_icon_margin"
-		android:layout_marginLeft="@dimen/overview_banner_icon_margin">
-	</ImageView>
+		android:layout_marginLeft="@dimen/overview_banner_icon_margin"/>
 	<TextView
 		android:id="@+id/overview_banner_title"
 		android:layout_toRightOf="@id/overview_banner_icon"
@@ -19,7 +18,7 @@
 		android:layout_height="wrap_content"
 		android:textColor="@color/light_red"
 		android:layout_marginTop="@dimen/overview_banner_title_margin"
-		android:layout_marginLeft="@dimen/overview_banner_icon_margin"></TextView>
+		android:layout_marginLeft="@dimen/overview_banner_icon_margin"/>
 	<TextView
 		android:id="@+id/overview_banner_details"
 		android:layout_below="@id/overview_banner_title"
@@ -27,5 +26,5 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:textColor="@color/overview_text"
-		android:layout_marginLeft="@dimen/overview_banner_descr_margin"></TextView>
+		android:layout_marginLeft="@dimen/overview_banner_descr_margin"/>
 </RelativeLayout>

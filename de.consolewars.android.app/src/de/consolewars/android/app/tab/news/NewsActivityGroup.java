@@ -1,7 +1,6 @@
 package de.consolewars.android.app.tab.news;
 
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.View;
 import de.consolewars.android.app.tab.CwBasicActivityGroup;
@@ -43,17 +42,17 @@ public class NewsActivityGroup extends CwBasicActivityGroup {
 		replaceView(view);
 	}
 
-//	@Override
-//	public void onConfigurationChanged(Configuration newConfig) {
-//		super.onConfigurationChanged(newConfig);
-//
-//		// handling rotation
-//		resetCache();
-//
-//		// reset the ui
-//		View view = getLocalActivityManager().startActivity(NewsActivity.class.getSimpleName(),
-//				new Intent(this, NewsActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
-//				.getDecorView();
-//		replaceView(view);
-//	}
+	// @Override
+	// public void onConfigurationChanged(Configuration newConfig) {
+	// super.onConfigurationChanged(newConfig);
+	//
+	// // handling rotation
+	// resetCache();
+	//
+	// // reset the ui
+	// View view = getLocalActivityManager().startActivity(NewsActivity.class.getSimpleName(),
+	// new Intent(this, NewsActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
+	// .getDecorView();
+	// replaceView(view);
+	// }
 }

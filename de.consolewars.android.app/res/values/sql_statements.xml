@@ -7,6 +7,14 @@
 	<string
 		name="db_table_userdata_name">Userdata</string>
 	<string
+		name="db_table_newsdata_name">Newsdata</string>
+	<string
+		name="db_table_blogdata_name">Blogdata</string>
+	<string
+		name="db_table_picdata_name">Picturedata</string>
+	<string
+		name="db_table_viddata_name">Videodata</string>
+	<string
 		name="db_id_attribute">id</string>
 	<string
 		name="db_date_attribute">date</string>
@@ -15,9 +23,51 @@
 	<string
 		name="db_password_attribute">passw</string>
 	<string
+		name="db_savednews_attribute">savedWholeNews</string>
+	<string
+		name="db_savedblog_attribute">savedWholeBlog</string>
+	<string
+		name="db_newsid_attribute">newsID</string>
+	<string
+		name="db_blogid_attribute">blogID</string>
+	<string
+		name="db_article_attribute">article</string>
+	<string
+		name="db_cat_attribute">category</string>
+	<string
+		name="db_catshort_attribute">catShort</string>
+	<string
+		name="db_descr_attribute">descr</string>
+	<string
+		name="db_title_attribute">title</string>
+	<string
+		name="db_url_attribute">url</string>
+	<string
+		name="db_pictype_attribute">pictype</string>	
+	<string
+		name="db_vidtype_attribute">vidtype</string>	
+	<string
+		name="db_refid_attribute">refid</string>	
+	<string
+		name="db_picsexist_attribute">picsExist</string>
+	<string
+		name="db_vidsexist_attribute">vidsExist</string>
+	<string
+		name="db_picsaved_attribute">picSaved</string>
+	<string
+		name="db_data_attribute">data</string>
+	<string
 		name="db_wherearg_id">id=?</string>
 	<string
 		name="db_create_table_userdata">CREATE TABLE %1$s (id INTEGER PRIMARY KEY, username TEXT NOT NULL, passw TEXT NOT NULL, date INTEGER NOT NULL)</string>
+	<string
+		name="db_create_table_newsdata">CREATE TABLE %1$s (id INTEGER PRIMARY KEY, savedWholeNews INTEGER NOT NULL, newsID INTEGER, article TEXT, author TEXT, category TEXT, catShort TEXT, descr TEXT, title TEXT, date INTEGER, url TEXT, picsExist INTEGER, vidsExist INTEGER)</string>
+	<string
+		name="db_create_table_blogdata">CREATE TABLE %1$s (id INTEGER PRIMARY KEY, savedWholeBlog INTEGER NOT NULL, blogID INTEGER, article TEXT, author TEXT, authorID INTEGER, title TEXT, date INTEGER, url TEXT, picsExist INTEGER, vidsExist INTEGER)</string>
+	<string
+		name="db_create_table_picdata">CREATE TABLE %1$s (id INTEGER PRIMARY KEY, pictype TEXT NOT NULL, refid INTEGER NOT NULL, picSaved INTEGER NOT NULL, data BLOB, url TEXT)</string>
+	<string
+		name="db_create_table_viddata">CREATE TABLE %1$s (id INTEGER PRIMARY KEY, vidtype TEXT NOT NULL, refid INTEGER NOT NULL, url TEXT)</string>
 	<string
 		name="db_cry">Dhhilzekiubdhiqsuzmaxnstjhwrp5</string>
 	<string

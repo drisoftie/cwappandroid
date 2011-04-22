@@ -16,15 +16,19 @@
 			android:orientation="vertical">
 			<include
 				android:id="@+id/singlenews_header"
-				layout="@layout/header_layout"/>
+				layout="@layout/singlenews_header_layout"/>
 			<include
 				android:id="@+id/singlenews_header_descr"
-				layout="@layout/header_descr_layout"/>
+				layout="@layout/singlenews_header_descr_layout"/>
 			<TextView
 				android:id="@+id/singlenews_newstext"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:textColor="@color/news_table_text_title"/>
+			<WebView
+				android:id="@+id/singlenews_video"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"/>
 		</LinearLayout>
 	</ScrollView>
 </LinearLayout>

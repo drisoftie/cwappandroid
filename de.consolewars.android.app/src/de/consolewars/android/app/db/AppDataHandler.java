@@ -9,8 +9,8 @@ public class AppDataHandler {
 	private Context context;
 	private DatabaseManager db;
 
-	private String userName;
-	private String hashPw;
+	private String userName = "";
+	private String hashPw = "";
 	private int cwUserID = -1;
 	private int id = -1;
 	private long date = -1;

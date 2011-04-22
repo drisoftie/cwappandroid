@@ -245,8 +245,7 @@ public class OverviewActivity extends Activity {
 		URL newurl;
 		Bitmap mIcon_val = null;
 		try {
-			newurl = new URL(getString(R.string.blogs_userpic_url, mainTabs.getDataHandler()
-					.getUserName(), uid, 60));
+			newurl = new URL(getString(R.string.blogs_userpic_url, uid, 60));
 			mIcon_val = BitmapFactory.decodeStream(newurl.openConnection().getInputStream());
 			view.setImageBitmap(mIcon_val);
 		} catch (MalformedURLException e) {
