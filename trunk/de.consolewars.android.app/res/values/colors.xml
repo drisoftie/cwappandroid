@@ -27,6 +27,10 @@
 		name="table_cell_selected_center">#ff68b5da</color>
 	<color
 		name="table_cell_selected_down">#efefef</color>
+	<color
+		name="table_row_separator_up">#bbbbbb</color>
+	<color
+		name="table_row_separator_down">#d3d3d3</color>	
 
 	<!-- view specific colours -->
 

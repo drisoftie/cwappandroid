@@ -22,7 +22,9 @@ import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TableLayout;
@@ -60,11 +62,17 @@ public class BlogsActivity extends Activity {
 	// text styling
 	private StyleSpannableStringBuilder styleStringBuilder;
 
+	private ViewGroup blogs_layout;
+	private Calendar oldestBlogsDate;
+	private Calendar currentBlogsDate;
+
 	private CwNavigationMainTabActivity mainTabs;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		resetDates();
+
 		/*
 		 * TODO: Might become a source of error someday, if activity design changes. Would be better
 		 * to handle it with intents.
@@ -72,6 +80,8 @@ public class BlogsActivity extends Activity {
 		if (getParent().getParent() instanceof CwNavigationMainTabActivity) {
 			mainTabs = (CwNavigationMainTabActivity) getParent().getParent();
 		}
+		blogs_layout = (ViewGroup) LayoutInflater.from(BlogsActivity.this.getParent()).inflate(
+				R.layout.blogs_layout, null);
 		new BuildBlogsAsyncTask().execute();
 	}
 
@@ -80,48 +90,71 @@ public class BlogsActivity extends Activity {
 	 */
 	private List<View> createBlogRows() {
 		// create table based on current blogs
-		View blogsView = LayoutInflater.from(BlogsActivity.this.getParent()).inflate(
-				R.layout.blogs_layout, null);
-		TableLayout blogsTable = (TableLayout) blogsView.findViewById(R.id.blogs_table);
+		TableLayout blogsTable = (TableLayout) blogs_layout.findViewById(R.id.blogs_table);
 
 		styleStringBuilder = new StyleSpannableStringBuilder();
 
 		List<View> rows = new ArrayList<View>();
 
+		ViewGroup separator = (ViewGroup) LayoutInflater.from(BlogsActivity.this.getParent())
+				.inflate(R.layout.blogs_row_day_separator_layout, null);
+		TextView separatorTxt = (TextView) separator
+				.findViewById(R.id.blogs_row_day_separator_text);
+		separatorTxt
+				.setText(createDate(currentBlogsDate.getTimeInMillis(), "EEEE, dd. MMMMM yyyy"));
+		rows.add(separator);
+
+		Calendar tempCal = Calendar.getInstance(Locale.GERMANY);
+		tempCal.setTimeInMillis(currentBlogsDate.getTimeInMillis() + 1L);
+
 		for (Blog blog : blogs) {
-			// get the table row by an inflater and set the needed information
-			final View tableRow = LayoutInflater.from(BlogsActivity.this).inflate(
-					R.layout.blogs_row_layout, blogsTable, false);
-			tableRow.setId(blog.getId());
-			tableRow.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					// set the correct background when a table row was selected by the user
-					if (selectedRow != null) {
-						selectedRow.setBackgroundDrawable(getResources().getDrawable(
-								R.drawable.table_cell_bg));
+			if (getDay(tempCal, -1).getTimeInMillis() > blog.getUnixtime() * 1000L) {
+				currentBlogsDate.setTimeInMillis(currentBlogsDate.getTimeInMillis() + 1L);
+				currentBlogsDate
+						.setTimeInMillis(getDay(currentBlogsDate, -1).getTimeInMillis() - 1L);
+				tempCal.setTimeInMillis(currentBlogsDate.getTimeInMillis() + 1L);
+				separator = (ViewGroup) LayoutInflater.from(BlogsActivity.this.getParent())
+						.inflate(R.layout.blogs_row_day_separator_layout, null);
+				separatorTxt = (TextView) separator.findViewById(R.id.blogs_row_day_separator_text);
+				separatorTxt.setText(createDate(currentBlogsDate.getTimeInMillis(),
+						"EEEE, dd. MMMMM yyyy"));
+				rows.add(separator);
+			} else if ((currentBlogsDate.getTimeInMillis() >= blog.getUnixtime() * 1000L)
+					&& (getDay(tempCal, -1).getTimeInMillis() <= blog.getUnixtime() * 1000L)) {
+				// get the table row by an inflater and set the needed information
+				final View tableRow = LayoutInflater.from(BlogsActivity.this).inflate(
+						R.layout.blogs_row_layout, blogsTable, false);
+				tableRow.setId(blog.getId());
+				tableRow.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						// set the correct background when a table row was selected by the user
+						if (selectedRow != null) {
+							selectedRow.setBackgroundDrawable(getResources().getDrawable(
+									R.drawable.table_cell_bg));
+						}
+						tableRow.setBackgroundDrawable(getResources().getDrawable(
+								R.drawable.table_cell_bg_selected));
+						selectedRow = tableRow;
+						getSingleBlog(tableRow.getId());
 					}
-					tableRow.setBackgroundDrawable(getResources().getDrawable(
-							R.drawable.table_cell_bg_selected));
-					selectedRow = tableRow;
-					getSingleBlog(tableRow.getId());
-				}
-			});
-			// set each table row with the given information from the returned blogs
-			((ImageView) tableRow.findViewById(R.id.blogs_row_user_icon))
-					.setImageBitmap(getUserPic(blog.getAuthor(), blog.getUid()));
-			((TextView) tableRow.findViewById(R.id.blogs_row_title)).setText(createTitle(blog
-					.getTitle()));
-			((TextView) tableRow.findViewById(R.id.blogs_row_date)).setText(createDate(blog
-					.getUnixtime() * 1000L));
-			TextView amount = (TextView) tableRow.findViewById(R.id.blogs_row_cmmts_amount);
-			amount.setText(createCommentsamount(blog.getComments()));
+				});
+				// set each table row with the given information from the returned blogs
+				((ImageView) tableRow.findViewById(R.id.blogs_row_user_icon))
+						.setImageBitmap(getUserPic(blog.getUid()));
+				((TextView) tableRow.findViewById(R.id.blogs_row_title)).setText(createTitle(blog
+						.getTitle()));
+				((TextView) tableRow.findViewById(R.id.blogs_row_date)).setText(createDate(
+						blog.getUnixtime() * 1000L, "'um' HH:mm'Uhr'"));
+				TextView amount = (TextView) tableRow.findViewById(R.id.blogs_row_cmmts_amount);
+				amount.setText(createCommentsamount(blog.getComments()));
 
-			TextView author = (TextView) tableRow.findViewById(R.id.blogs_row_author);
-			author.setText(createAuthor(blog.getAuthor()));
-			author.setSelected(true);
+				TextView author = (TextView) tableRow.findViewById(R.id.blogs_row_author);
+				author.setText(createAuthor(blog.getAuthor()));
+				author.setSelected(true);
 
-			rows.add(tableRow);
+				rows.add(tableRow);
+			}
 		}
 		styleStringBuilder = null;
 		return rows;
@@ -135,14 +168,14 @@ public class BlogsActivity extends Activity {
 	 */
 	private void getSingleBlog(int id) {
 		// setting the correct intent awaited by the SingleBlogActivity
-		Intent singleNewsIntent = new Intent(BlogsActivity.this, SingleBlogActivity.class);
+		Intent singleBlogIntent = new Intent(BlogsActivity.this, SingleBlogActivity.class);
 
-		singleNewsIntent.putExtra(BlogsActivity.class.getName(), id);
+		singleBlogIntent.putExtra(BlogsActivity.class.getName(), id);
 
 		View view = ((ActivityGroup) getParent())
 				.getLocalActivityManager()
 				.startActivity(SingleBlogActivity.class.getSimpleName(),
-						singleNewsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
+						singleBlogIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
 		// replace the view
 		((BlogsActivityGroup) getParent()).replaceView(view);
 	}
@@ -150,17 +183,15 @@ public class BlogsActivity extends Activity {
 	/**
 	 * Downloads the user picture and decodes it into a {@link Bitmap} to be set into an ImageView.
 	 * 
-	 * @param author
-	 *            the user the picture belongs to
 	 * @param uid
 	 *            the user id
 	 * @return the picture
 	 */
-	private Bitmap getUserPic(String author, int uid) {
+	private Bitmap getUserPic(int uid) {
 		URL newurl;
 		Bitmap icon = null;
 		try {
-			newurl = new URL(getString(R.string.blogs_userpic_url, author, uid, 30));
+			newurl = new URL(getString(R.string.blogs_userpic_url, uid, 30));
 			icon = BitmapFactory.decodeStream(newurl.openConnection().getInputStream());
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
@@ -181,7 +212,7 @@ public class BlogsActivity extends Activity {
 	 */
 	private CharSequence createAuthor(String author) {
 		// TODO more text formatting
-		// an empty author string means that the news was not written by a
+		// an empty author string means that the blog was not written by a
 		if (author.matches("")) {
 			author = getString(R.string.news_author_unknown);
 		}
@@ -203,28 +234,12 @@ public class BlogsActivity extends Activity {
 	 */
 	private CharSequence createCommentsamount(int commentAmount) {
 		// TODO more text formatting
-		// an empty author string means that the news was not written by a
+		// an empty author string means that the blog was not written by a
 		styleStringBuilder.clear();
 		styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF7e6003),
 				String.valueOf(commentAmount));
 
 		return styleStringBuilder;
-	}
-
-	/**
-	 * Creates a readable formatted string from unixtime.
-	 * 
-	 * @param unixtime
-	 * @return a formatted {@link CharSequence}
-	 */
-	private CharSequence createDate(long unixtime) {
-		Date date = new Date(unixtime);
-		TimeZone zone = TimeZone.getDefault();
-
-		Calendar cal = Calendar.getInstance(zone, Locale.GERMANY);
-		SimpleDateFormat dateformat = new SimpleDateFormat("HH:mm dd.MM.yyyy");
-		dateformat.setCalendar(cal);
-		return dateformat.format(date);
 	}
 
 	/**
@@ -236,6 +251,51 @@ public class BlogsActivity extends Activity {
 	private CharSequence createTitle(String title) {
 		// TODO text formatting
 		return title;
+	}
+
+	private Calendar createCalendarFromUnixtime(long unixtime) {
+		Date date = new Date(unixtime);
+		TimeZone zone = TimeZone.getDefault();
+
+		Calendar cal = Calendar.getInstance(zone, Locale.GERMANY);
+		// Log.i("****TIMEZONE*****", zone.getDisplayName());
+		cal.setTimeInMillis(date.getTime());
+
+		return cal;
+	}
+
+	/**
+	 * @param unixtime
+	 * @return
+	 */
+	private CharSequence createDate(long unixtime, String format) {
+		SimpleDateFormat dateformat = new SimpleDateFormat(format, Locale.GERMANY);
+		Calendar cal = createCalendarFromUnixtime(unixtime);
+		dateformat.setTimeZone(cal.getTimeZone());
+		dateformat.setCalendar(cal);
+		return dateformat.format(cal.getTime());
+	}
+
+	private void resetDates() {
+		// TimeZone zone = TimeZone.getTimeZone("ECT");
+		TimeZone zone = TimeZone.getDefault();
+
+		oldestBlogsDate = Calendar.getInstance(zone, Locale.GERMANY);
+		oldestBlogsDate.setTimeInMillis(getDay(oldestBlogsDate, 0).getTimeInMillis());
+		currentBlogsDate = Calendar.getInstance(zone, Locale.GERMANY);
+		currentBlogsDate.setTimeInMillis(getDay(currentBlogsDate, 1).getTimeInMillis() - 1L);
+	}
+
+	private Calendar getDay(Calendar date, int days) {
+		Calendar cal = Calendar.getInstance(Locale.GERMANY);
+		cal.setTimeInMillis(date.getTimeInMillis());
+		cal.add(Calendar.DATE, days);
+		cal.set(Calendar.HOUR_OF_DAY, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
+
+		return cal;
 	}
 
 	/**
@@ -264,8 +324,10 @@ public class BlogsActivity extends Activity {
 		@Override
 		protected List<View> doInBackground(Void... params) {
 			try {
+				oldestBlogsDate.setTimeInMillis(getDay(oldestBlogsDate, 0).getTimeInMillis());
 				mainTabs.getApiCaller().authenticateOnCW();
-				blogs = mainTabs.getApiCaller().getApi().getBlogsList(-1, 15, 0);
+				blogs = mainTabs.getApiCaller().getApi()
+						.getBlogsList(-1, 100, 0, oldestBlogsDate.getTime());
 			} catch (ConsolewarsAPIException e) {
 				e.printStackTrace();
 				Log.e(getString(R.string.exc_auth_tag), e.getMessage(), e);
@@ -282,12 +344,26 @@ public class BlogsActivity extends Activity {
 		@Override
 		protected void onPostExecute(List<View> result) {
 			// sets the blogs view for this Activity
-			ViewGroup blogs_layout = (ViewGroup) LayoutInflater
-					.from(BlogsActivity.this.getParent()).inflate(R.layout.blogs_layout, null);
 			TableLayout blogsTable = (TableLayout) blogs_layout.findViewById(R.id.blogs_table);
 			for (View row : result) {
 				blogsTable.addView(row);
 			}
+			ViewGroup lastrowLayout = (ViewGroup) LayoutInflater.from(
+					BlogsActivity.this.getParent()).inflate(R.layout.day_down_row_layout, null);
+			Button downBttn = (Button) lastrowLayout.findViewById(R.id.day_down_row_bttn);
+			downBttn.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					currentBlogsDate.setTimeInMillis(oldestBlogsDate.getTimeInMillis() - 1L);
+					oldestBlogsDate.setTimeInMillis(getDay(oldestBlogsDate, -1).getTimeInMillis());
+					TableLayout blogsTable = (TableLayout) blogs_layout
+							.findViewById(R.id.blogs_table);
+					blogsTable.removeViewAt(blogsTable.getChildCount() - 1);
+					new BuildBlogsAsyncTask().execute();
+				}
+			});
+			blogsTable.addView(lastrowLayout);
+
 			setContentView(blogs_layout);
 		}
 	}

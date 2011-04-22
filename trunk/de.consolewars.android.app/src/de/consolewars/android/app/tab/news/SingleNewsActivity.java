@@ -16,14 +16,19 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebSettings.PluginState;
+import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
+import de.consolewars.android.app.util.MediaSnapper;
+import de.consolewars.android.app.util.TextViewHandler;
 import de.consolewars.api.data.News;
 import de.consolewars.api.exception.ConsolewarsAPIException;
 
@@ -50,6 +55,12 @@ public class SingleNewsActivity extends Activity {
 
 	private CwNavigationMainTabActivity mainTabs;
 
+	private ViewGroup newsView;
+
+	private News news;
+
+	String vidURL = "";
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -61,44 +72,70 @@ public class SingleNewsActivity extends Activity {
 		if (getParent().getParent() instanceof CwNavigationMainTabActivity) {
 			mainTabs = (CwNavigationMainTabActivity) getParent().getParent();
 		}
+		newsView = (ViewGroup) LayoutInflater.from(SingleNewsActivity.this.getParent()).inflate(
+				R.layout.singlenews_layout, null);
 		new BuildSingleNewsAsyncTask().execute();
 	}
 
 	private View createNewsView() {
-		View newsView = LayoutInflater.from(SingleNewsActivity.this.getParent()).inflate(
-				R.layout.singlenews_layout, null);
-
 		int id = -1;
 
 		// looking for the correct intent
 		if (getIntent().hasExtra(NewsActivity.class.getName())) {
 			id = getIntent().getIntExtra(NewsActivity.class.getName(), -1);
 		}
-
-		News news = null;
-
+		news = null;
 		try {
 			news = mainTabs.getApiCaller().getApi().getNews(id);
 		} catch (ConsolewarsAPIException e) {
 			e.printStackTrace();
 		}
-
 		TextView text = (TextView) newsView.findViewById(R.id.singlenews_newstext);
 		// up to now only the text of the blog is shown
 		if (id == -1) {
-			text.setText("Fehler");
+			text.setText(getString(R.string.failure));
 		} else if (news != null) {
 			try {
-				String fString = String.format(news.getArticle(), "");
-				CharSequence styledString = Html.fromHtml(fString);
-				text.setText(styledString);
+				// String fString = String.format(news.getArticle(), "");
+				// CharSequence styledString = Html.fromHtml(news.getArticle(), new TextViewHandler(
+				// SingleNewsActivity.this.getApplicationContext()), null);
+				// text.setText(styledString);
+				text.setText(Html.fromHtml(news.getArticle(), new TextViewHandler(
+						SingleNewsActivity.this.getApplicationContext()), null));
 			} catch (IllegalFormatException ife) {
 				// FIXME Wrong format handling
 				text.setText(news.getArticle());
 			}
 			createHeader(newsView, news);
+			vidURL = MediaSnapper.snapFromCleanedHTMLWithXPath(
+					getString(R.string.cw_url, news.getUrl()), getString(R.string.xpath_get_video),
+					getString(R.string.value));
 		}
 		return newsView;
+	}
+
+	/**
+	 * Sets a video, if one exists in a news. Can't be invoked without calling Looper.prepare().
+	 * Don't use this within an AsyncTask!
+	 * 
+	 * @param url
+	 */
+	private void initVideos(String url) {
+		if (vidURL != "") {
+			WebView localWebView = (WebView) newsView.findViewById(R.id.singlenews_video);
+
+			localWebView.getSettings().setUseWideViewPort(false);
+			localWebView.getSettings().setPluginState(PluginState.ON);
+			localWebView.getSettings().setPluginsEnabled(true);
+			localWebView.getSettings().setJavaScriptEnabled(true);
+			localWebView.getSettings().setBuiltInZoomControls(false);
+
+			Log.i("******YOUTUBE*******", getString(R.string.youtube_embedding, 300, 200, vidURL));
+
+			localWebView.loadDataWithBaseURL(getString(R.string.cw_url_slash),
+					getString(R.string.youtube_embedding, 300, 200, vidURL), "text/html", "utf-8",
+					null);
+		}
 	}
 
 	private void createHeader(View parent, News news) {
@@ -109,12 +146,14 @@ public class SingleNewsActivity extends Activity {
 
 		ImageView usericon = (ImageView) parent.findViewById(R.id.header_descr_usericon);
 		loadPicture(usericon, news);
+
 		TextView cattxt = (TextView) parent.findViewById(R.id.header_title);
 		cattxt.setText(news.getCategory());
 		TextView title = (TextView) parent.findViewById(R.id.header_descr_title);
 		title.setText(news.getTitle());
 		TextView info = (TextView) parent.findViewById(R.id.header_descr_info);
-		info.setText(createDate(news.getUnixtime() * 1000L) + " von " + news.getAuthor());
+		info.setText(getString(R.string.singlenews_info, createDate(news.getUnixtime() * 1000L),
+				news.getAuthor()));
 		TextView descr = (TextView) parent.findViewById(R.id.header_descr);
 		descr.setText(news.getDescription());
 	}
@@ -128,11 +167,16 @@ public class SingleNewsActivity extends Activity {
 	 *            user id is needed to get the appropriate picture
 	 */
 	private void loadPicture(ImageView view, News news) {
-		URL newurl;
-		Bitmap mIcon_val = null;
+		int userID = -1;
+
+		String picURL = MediaSnapper.snapFromCleanedHTMLWithXPath(
+				getString(R.string.cw_url, news.getUrl()), getString(R.string.xpath_get_author),
+				getString(R.string.href));
+		userID = Integer.valueOf(picURL.subSequence(getString(R.string.prefix_userpic).length(),
+				picURL.length()).toString());
 		try {
-			newurl = new URL(getString(R.string.general_picture, news.getPicid(), 60));
-			mIcon_val = BitmapFactory.decodeStream(newurl.openConnection().getInputStream());
+			URL newurl = new URL(getString(R.string.blogs_userpic_url, userID, 50));
+			Bitmap mIcon_val = BitmapFactory.decodeStream(newurl.openConnection().getInputStream());
 			view.setImageBitmap(mIcon_val);
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
@@ -152,12 +196,11 @@ public class SingleNewsActivity extends Activity {
 		TimeZone zone = TimeZone.getDefault();
 
 		Calendar cal = Calendar.getInstance(zone, Locale.GERMANY);
-		SimpleDateFormat dateformat = new SimpleDateFormat("HH:mm dd.MM.yyyy");
+		// formatting day of week in EEEE format like Sunday, Monday etc.
+		SimpleDateFormat dateformat = new SimpleDateFormat(getString(R.string.dateformat_detailed),
+				Locale.GERMANY);
 		dateformat.setCalendar(cal);
-		String formattedDate = dateformat.format(date);
-		return (formattedDate.matches("")) ? ("")
-				: (formattedDate.subSequence(0, 5) + " Uhr " + formattedDate.subSequence(6,
-						formattedDate.length()));
+		return dateformat.format(date);
 	}
 
 	/**
@@ -178,7 +221,7 @@ public class SingleNewsActivity extends Activity {
 			setContentView(progress_layout);
 
 			TextView text = (TextView) progress_layout.findViewById(R.id.centered_progressbar_text);
-			text.setText(getString(R.string.loading, "Einzelnews"));
+			text.setText(getString(R.string.loading, getString(R.string.singlenews)));
 
 			progressBar = (ProgressBar) progress_layout.findViewById(R.id.centered_progressbar);
 			progressBar.setProgress(0);
@@ -196,6 +239,7 @@ public class SingleNewsActivity extends Activity {
 
 		@Override
 		protected void onPostExecute(View result) {
+			initVideos(news.getUrl());
 			setContentView(result);
 		}
 	}

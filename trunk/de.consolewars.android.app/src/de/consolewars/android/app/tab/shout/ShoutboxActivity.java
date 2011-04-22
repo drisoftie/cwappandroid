@@ -42,9 +42,9 @@ public class ShoutboxActivity extends Activity {
 		// webSettings.setSaveFormData(false);
 		// webSettings.setJavaScriptEnabled(true);
 
-		webView.getSettings().setUseWideViewPort(true);
-		webView.getSettings().setPluginsEnabled(true);
+		webView.getSettings().setUseWideViewPort(false);
 		webView.getSettings().setPluginState(PluginState.ON);
+		webView.getSettings().setPluginsEnabled(true);
 		webView.getSettings().setJavaScriptEnabled(true);
 		webView.getSettings().setBuiltInZoomControls(false);
 
@@ -56,7 +56,7 @@ public class ShoutboxActivity extends Activity {
 			}
 		});
 
-		webView.loadUrl("http://www.consolewars.de/chat/popup.php");
+		webView.loadUrl("http://www.consolewars.de/chat/");
 
 		// switch(mode) {
 		// case MODE_LOGIN:

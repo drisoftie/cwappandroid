@@ -35,6 +35,8 @@
 	<dimen
 		name="overview_banner_descr_margin">2dp</dimen>
 	<dimen
+		name="news_row_day_separator_margin">4dp</dimen>
+	<dimen
 		name="news_row_title_padding">2dp</dimen>
 	<dimen
 		name="news_row_icon_padding_top">2dp</dimen>
@@ -43,7 +45,7 @@
 	<dimen
 		name="news_row_date_padding_left">2dp</dimen>
 	<dimen
-		name="news_row_cmmts_icon_margin">2dp</dimen>	
+		name="news_row_cmmts_icon_margin">2dp</dimen>
 	<dimen
 		name="news_row_author_margin">2dp</dimen>
 	<dimen
@@ -55,7 +57,7 @@
 	<dimen
 		name="blogs_row_date_padding_left">2dp</dimen>
 	<dimen
-		name="blogs_row_cmmts_icon_margin">2dp</dimen>		
+		name="blogs_row_cmmts_icon_margin">2dp</dimen>
 	<dimen
 		name="blogs_row_author_margin">2dp</dimen>
 	<dimen

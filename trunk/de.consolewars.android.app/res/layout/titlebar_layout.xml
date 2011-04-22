@@ -5,18 +5,18 @@
 	android:layout_height="fill_parent"
 	android:background="@drawable/titlebar_bg">
 	<ImageView
-		android:id="@+id/titlebar_headline"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_marginLeft="3dp"
-		android:layout_centerVertical="true"
-		android:layout_alignParentLeft="true"
-		android:src="@drawable/cw_title_font"/>
-	<ImageView
 		android:id="@+id/titlebar_icon"
-		android:layout_alignParentRight="true"
+		android:layout_alignParentLeft="true"
 		android:layout_centerVertical="true"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:src="@drawable/cw_white_logo"/>
+	<ImageView
+		android:id="@+id/titlebar_headline"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_toRightOf="@id/titlebar_icon"
+		android:layout_marginLeft="3dp"
+		android:layout_centerVertical="true"
+		android:src="@drawable/cw_title_font"/>
 </RelativeLayout>

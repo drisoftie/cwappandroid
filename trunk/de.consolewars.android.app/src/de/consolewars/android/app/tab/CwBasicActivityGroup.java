@@ -6,6 +6,9 @@ import java.util.List;
 
 import android.app.Activity;
 import android.app.ActivityGroup;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.view.View;
 
 /*
@@ -47,17 +50,32 @@ public abstract class CwBasicActivityGroup extends ActivityGroup implements ICwA
 			viewCache.remove(viewCache.size() - 1);
 			setContentView(viewCache.get(viewCache.size() - 1));
 		} else {
-			if (getParent() instanceof CwNavigationMainTabActivity) {
-				CwNavigationMainTabActivity parent = (CwNavigationMainTabActivity) getParent();
-				if (parent.getDataHandler().loadCurrentUser()) {
-					parent.getDataHandler()
-							.getDatabaseManager()
-							.updateDate(parent.getDataHandler().getUserDBId(),
-									GregorianCalendar.getInstance().getTimeInMillis());
-				}
-				parent.getDataHandler().getDatabaseManager().closeDB();
-			}
-			finish();
+			AlertDialog.Builder dialog = new AlertDialog.Builder(this)
+					.setMessage("CW-App beenden?").setCancelable(false)
+					.setPositiveButton("Ja", new OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							if (getParent() instanceof CwNavigationMainTabActivity) {
+								CwNavigationMainTabActivity parent = (CwNavigationMainTabActivity) getParent();
+								if (parent.getDataHandler().loadCurrentUser()) {
+									parent.getDataHandler()
+											.getDatabaseManager()
+											.updateDate(
+													parent.getDataHandler().getUserDBId(),
+													GregorianCalendar.getInstance()
+															.getTimeInMillis());
+								}
+								parent.getDataHandler().getDatabaseManager().closeDB();
+							}
+							finish();
+						}
+					}).setNegativeButton("Nein", new OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							dialog.cancel();
+						}
+					});
+			dialog.create().show();
 		}
 	}
 
@@ -71,5 +89,12 @@ public abstract class CwBasicActivityGroup extends ActivityGroup implements ICwA
 	@Override
 	public void onBackPressed() {
 		this.back();
+	}
+
+	public CwNavigationMainTabActivity getMainTabActivity() {
+		if (getParent() instanceof CwNavigationMainTabActivity) {
+			return (CwNavigationMainTabActivity) getParent();
+		}
+		return null;
 	}
 }

@@ -79,7 +79,6 @@ public class NewsActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
 		resetDates();
 
 		/*
@@ -106,6 +105,7 @@ public class NewsActivity extends Activity {
 			public void onClick(View arg0) {
 				TableLayout newsTable = (TableLayout) news_layout.findViewById(R.id.news_table);
 				newsTable.removeAllViews();
+				resetDates();
 				new BuildNewsAsyncTask().execute();
 			}
 		});
@@ -122,43 +122,64 @@ public class NewsActivity extends Activity {
 
 		List<View> rows = new ArrayList<View>();
 
+		ViewGroup separator = (ViewGroup) LayoutInflater.from(NewsActivity.this.getParent())
+				.inflate(R.layout.news_row_day_separator_layout, null);
+		TextView separatorTxt = (TextView) separator.findViewById(R.id.news_row_day_separator_text);
+		separatorTxt.setText(createDate(currentNewsDate.getTimeInMillis(), "EEEE, dd. MMMMM yyyy"));
+		rows.add(separator);
+
+		Calendar tempCal = Calendar.getInstance(Locale.GERMANY);
+		tempCal.setTimeInMillis(currentNewsDate.getTimeInMillis() + 1L);
+
 		for (News news : this.news) {
-			if (currentNewsDate.getTimeInMillis() > oldestNewsDate.getTimeInMillis()) {
-
-			}
-			// get the table row by an inflater and set the needed information
-			final View tableRow = LayoutInflater.from(this).inflate(R.layout.news_row_layout,
-					newsTable, false);
-			tableRow.setId(news.getId());
-			tableRow.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					if (selectedRow != null) {
-						selectedRow.setBackgroundDrawable(getResources().getDrawable(
-								R.drawable.table_cell_bg));
+			if (getDay(tempCal, -1).getTimeInMillis() > news.getUnixtime() * 1000L) {
+				currentNewsDate.setTimeInMillis(currentNewsDate.getTimeInMillis() + 1L);
+				currentNewsDate.setTimeInMillis(getDay(currentNewsDate, -1).getTimeInMillis() - 1L);
+				tempCal.setTimeInMillis(currentNewsDate.getTimeInMillis() + 1L);
+				separator = (ViewGroup) LayoutInflater.from(NewsActivity.this.getParent()).inflate(
+						R.layout.news_row_day_separator_layout, null);
+				separatorTxt = (TextView) separator.findViewById(R.id.news_row_day_separator_text);
+				separatorTxt.setText(createDate(currentNewsDate.getTimeInMillis(),
+						"EEEE, dd. MMMMM yyyy"));
+				rows.add(separator);
+			} else if ((currentNewsDate.getTimeInMillis() >= news.getUnixtime() * 1000L)
+					&& (getDay(tempCal, -1).getTimeInMillis() <= news.getUnixtime() * 1000L)) {
+				// get the table row by an inflater and set the needed information
+				final View tableRow = LayoutInflater.from(this).inflate(R.layout.news_row_layout,
+						newsTable, false);
+				tableRow.setId(news.getId());
+				tableRow.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						if (selectedRow != null) {
+							selectedRow.setBackgroundDrawable(getResources().getDrawable(
+									R.drawable.table_cell_bg));
+						}
+						tableRow.setBackgroundDrawable(getResources().getDrawable(
+								R.drawable.table_cell_bg_selected));
+						selectedRow = tableRow;
+						getSingleNews(tableRow.getId());
 					}
-					tableRow.setBackgroundDrawable(getResources().getDrawable(
-							R.drawable.table_cell_bg_selected));
-					selectedRow = tableRow;
-					getSingleNews(tableRow.getId());
-				}
-			});
-			((ImageView) tableRow.findViewById(R.id.news_row_category_icon))
-					.setImageResource(this.getResources().getIdentifier(
-							getString(R.string.cat_drawable, news.getCategoryshort()),
-							getString(R.string.drawable), getApplicationContext().getPackageName()));
-			((TextView) tableRow.findViewById(R.id.news_row_title)).setText(createTitle(news
-					.getTitle()));
-			((TextView) tableRow.findViewById(R.id.news_row_date)).setText(createDate(news
-					.getUnixtime() * 1000L));
-			TextView amount = (TextView) tableRow.findViewById(R.id.news_row_cmmts_amount);
-			amount.setText(createCommentsamount(news.getComments()));
+				});
+				((ImageView) tableRow.findViewById(R.id.news_row_category_icon))
+						.setImageResource(this.getResources().getIdentifier(
+								getString(R.string.cat_drawable, news.getCategoryshort()),
+								getString(R.string.drawable),
+								getApplicationContext().getPackageName()));
+				((TextView) tableRow.findViewById(R.id.news_row_title)).setText(createTitle(news
+						.getTitle()));
+				((TextView) tableRow.findViewById(R.id.news_row_date)).setText(createDate(
+						news.getUnixtime() * 1000L, "'um' HH:mm'Uhr'"));
+				TextView cmtAmount = (TextView) tableRow.findViewById(R.id.news_row_cmmts_amount);
+				cmtAmount.setText(createAamount(news.getComments()));
+				TextView picAmount = (TextView) tableRow.findViewById(R.id.news_row_pics_amount);
+				picAmount.setText(createAamount(news.getPiclist().length));
+				TextView author = (TextView) tableRow.findViewById(R.id.news_row_author);
+				author.setText(createAuthor(news.getAuthor()));
+				author.setSelected(true);
 
-			TextView author = (TextView) tableRow.findViewById(R.id.news_row_author);
-			author.setText(createAuthor(news.getAuthor()));
-			author.setSelected(true);
-
-			rows.add(tableRow);
+				rows.add(tableRow);
+			}
 		}
 		styleStringBuilder = null;
 		return rows;
@@ -201,6 +222,7 @@ public class NewsActivity extends Activity {
 					currentFilter = selected;
 					TableLayout newsTable = (TableLayout) parentView.findViewById(R.id.news_table);
 					newsTable.removeAllViews();
+					resetDates();
 					new BuildNewsAsyncTask().execute();
 				}
 			}
@@ -259,7 +281,7 @@ public class NewsActivity extends Activity {
 	 * @param author
 	 * @return a formatted {@link CharSequence}
 	 */
-	private CharSequence createCommentsamount(int commentAmount) {
+	private CharSequence createAamount(int commentAmount) {
 		// TODO more text formatting
 		// an empty author string means that the news was not written by a
 		styleStringBuilder.clear();
@@ -269,18 +291,27 @@ public class NewsActivity extends Activity {
 		return styleStringBuilder;
 	}
 
-	/**
-	 * @param unixtime
-	 * @return
-	 */
-	private CharSequence createDate(long unixtime) {
+	private Calendar createCalendarFromUnixtime(long unixtime) {
 		Date date = new Date(unixtime);
 		TimeZone zone = TimeZone.getDefault();
 
 		Calendar cal = Calendar.getInstance(zone, Locale.GERMANY);
-		SimpleDateFormat dateformat = new SimpleDateFormat("HH:mm dd.MM.yyyy");
+		// Log.i("****TIMEZONE*****", zone.getDisplayName());
+		cal.setTimeInMillis(date.getTime());
+
+		return cal;
+	}
+
+	/**
+	 * @param unixtime
+	 * @return
+	 */
+	private CharSequence createDate(long unixtime, String format) {
+		SimpleDateFormat dateformat = new SimpleDateFormat(format, Locale.GERMANY);
+		Calendar cal = createCalendarFromUnixtime(unixtime);
+		dateformat.setTimeZone(cal.getTimeZone());
 		dateformat.setCalendar(cal);
-		return dateformat.format(date);
+		return dateformat.format(cal.getTime());
 	}
 
 	/**
@@ -293,17 +324,25 @@ public class NewsActivity extends Activity {
 	}
 
 	private void resetDates() {
+		// TimeZone zone = TimeZone.getTimeZone("ECT");
 		TimeZone zone = TimeZone.getDefault();
 
 		oldestNewsDate = Calendar.getInstance(zone, Locale.GERMANY);
-		oldestNewsDate = Calendar.getInstance();
-		getDaysBefore(oldestNewsDate, 1);
+		oldestNewsDate.setTimeInMillis(getDay(oldestNewsDate, 0).getTimeInMillis());
 		currentNewsDate = Calendar.getInstance(zone, Locale.GERMANY);
+		currentNewsDate.setTimeInMillis(getDay(currentNewsDate, 1).getTimeInMillis() - 1L);
 	}
 
-	private Date getDaysBefore(Calendar date, int days) {
-		date.add(Calendar.DATE, -days);
-		return date.getTime();
+	private Calendar getDay(Calendar date, int days) {
+		Calendar cal = Calendar.getInstance(Locale.GERMANY);
+		cal.setTimeInMillis(date.getTimeInMillis());
+		cal.add(Calendar.DATE, days);
+		cal.set(Calendar.HOUR_OF_DAY, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
+
+		return cal;
 	}
 
 	/**
@@ -332,15 +371,15 @@ public class NewsActivity extends Activity {
 		@Override
 		protected List<View> doInBackground(Void... params) {
 			try {
+				oldestNewsDate.setTimeInMillis(getDay(oldestNewsDate, 0).getTimeInMillis());
 				mainTabs.getApiCaller().authenticateOnCW();
 				news = mainTabs.getApiCaller().getApi()
-						.getNewsList(100, currentFilter, getDaysBefore(oldestNewsDate, 1));
+						.getNewsList(100, currentFilter, oldestNewsDate.getTime());
 			} catch (ConsolewarsAPIException e) {
 				e.printStackTrace();
 				Log.e(getString(R.string.exc_auth_tag), e.getMessage(), e);
 				return new ArrayList<View>();
 			}
-
 			return createNewsRows();
 		}
 
@@ -360,8 +399,19 @@ public class NewsActivity extends Activity {
 			initRefreshBttn(news_layout);
 
 			ViewGroup lastrowLayout = (ViewGroup) LayoutInflater
-					.from(NewsActivity.this.getParent()).inflate(R.layout.news_row_down_layout,
+					.from(NewsActivity.this.getParent()).inflate(R.layout.day_down_row_layout,
 							null);
+			Button downBttn = (Button) lastrowLayout.findViewById(R.id.day_down_row_bttn);
+			downBttn.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					currentNewsDate.setTimeInMillis(oldestNewsDate.getTimeInMillis() - 1L);
+					oldestNewsDate.setTimeInMillis(getDay(oldestNewsDate, -1).getTimeInMillis());
+					TableLayout newsTable = (TableLayout) news_layout.findViewById(R.id.news_table);
+					newsTable.removeViewAt(newsTable.getChildCount() - 1);
+					new BuildNewsAsyncTask().execute();
+				}
+			});
 			newsTable.addView(lastrowLayout);
 
 			setContentView(news_layout);

@@ -15,7 +15,7 @@
 			android:id="@+id/header_descr_usericon"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_margin="4dp"/>
+			android:layout_margin="2dp"/>
 	</LinearLayout>
 	<TextView
 		android:id="@+id/header_descr_title"
@@ -31,6 +31,7 @@
 		android:id="@+id/header_descr_info"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
+		android:layout_toLeftOf="@id/header_descr_usericon_layout"
 		android:layout_below="@id/header_descr_title"
 		android:layout_marginLeft="@dimen/header_descr_margin"
 		android:textColor="@color/header_descr_info"
@@ -39,6 +40,7 @@
 		android:id="@+id/header_descr"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
+		android:layout_toLeftOf="@id/header_descr_usericon_layout"
 		android:layout_below="@id/header_descr_info"
 		android:layout_marginLeft="@dimen/header_descr_margin"
 		android:textColor="@color/header_descr"

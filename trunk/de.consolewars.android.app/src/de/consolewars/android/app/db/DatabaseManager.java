@@ -29,6 +29,10 @@ import de.consolewars.android.app.R;
 public class DatabaseManager {
 
 	private String userdata_table;
+	private String newsdata_table;
+	private String blogdata_table;
+	private String picdata_table;
+	private String viddata_table;
 	private SQLiteDatabase db;
 	private Context context;
 
@@ -41,6 +45,10 @@ public class DatabaseManager {
 	public DatabaseManager(Context context) {
 		this.context = context;
 		userdata_table = context.getString(R.string.db_table_userdata_name);
+		newsdata_table = context.getString(R.string.db_table_newsdata_name);
+		blogdata_table = context.getString(R.string.db_table_blogdata_name);
+		picdata_table = context.getString(R.string.db_table_picdata_name);
+		viddata_table = context.getString(R.string.db_table_viddata_name);
 		CwSQLiteOpenHelper openHelper = new CwSQLiteOpenHelper(context);
 		this.db = openHelper.getWritableDatabase();
 	}
@@ -87,7 +95,7 @@ public class DatabaseManager {
 	}
 
 	/**
-	 * Convenient method to update date.
+	 * Convenient method to update dates.
 	 * 
 	 * @param id
 	 *            the id of the entity to be updated; mandatory
@@ -148,11 +156,19 @@ public class DatabaseManager {
 		@Override
 		public void onCreate(SQLiteDatabase db) {
 			db.execSQL(context.getString(R.string.db_create_table_userdata, userdata_table));
+			db.execSQL(context.getString(R.string.db_create_table_newsdata, newsdata_table));
+			db.execSQL(context.getString(R.string.db_create_table_blogdata, blogdata_table));
+			db.execSQL(context.getString(R.string.db_create_table_picdata, picdata_table));
+			db.execSQL(context.getString(R.string.db_create_table_viddata, viddata_table));
 		}
 
 		@Override
 		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 			db.execSQL(context.getString(R.string.db_drop_table, userdata_table));
+			db.execSQL(context.getString(R.string.db_drop_table, newsdata_table));
+			db.execSQL(context.getString(R.string.db_drop_table, blogdata_table));
+			db.execSQL(context.getString(R.string.db_drop_table, picdata_table));
+			db.execSQL(context.getString(R.string.db_drop_table, viddata_table));
 			onCreate(db);
 		}
 	}
