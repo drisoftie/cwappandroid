@@ -11,6 +11,8 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import android.app.Activity;
+import android.app.ActivityGroup;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -18,12 +20,15 @@ import android.os.Bundle;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
+import de.consolewars.android.app.tab.cmts.CommentsActivity;
 import de.consolewars.android.app.util.TextViewHandler;
 import de.consolewars.api.data.Blog;
 import de.consolewars.api.exception.ConsolewarsAPIException;
@@ -97,9 +102,30 @@ public class SingleBlogActivity extends Activity {
 				// FIXME Wrong format handling
 				text.setText(blog.getArticle());
 			}
+			createCommentBttn(blogView, blog.getId());
 			createHeader(blogView, blog);
 		}
 		return blogView;
+	}
+
+	private void createCommentBttn(View blogView, final int id) {
+		Button bttn = (Button) blogView.findViewById(R.id.singleblog_comments_bttn);
+		bttn.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent commentsIntent = new Intent(SingleBlogActivity.this, CommentsActivity.class);
+
+				commentsIntent.putExtra(SingleBlogActivity.class.getName(), id);
+
+				View view = ((ActivityGroup) getParent())
+						.getLocalActivityManager()
+						.startActivity(CommentsActivity.class.getSimpleName(),
+								commentsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
+						.getDecorView();
+				// replace the view
+				((BlogsActivityGroup) getParent()).replaceView(view);
+			}
+		});
 	}
 
 	private void createHeader(View parent, Blog blog) {
