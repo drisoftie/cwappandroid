@@ -11,6 +11,8 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import android.app.Activity;
+import android.app.ActivityGroup;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -19,14 +21,17 @@ import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.webkit.WebSettings.PluginState;
 import android.webkit.WebView;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
+import de.consolewars.android.app.tab.cmts.CommentsActivity;
 import de.consolewars.android.app.util.MediaSnapper;
 import de.consolewars.android.app.util.TextViewHandler;
 import de.consolewars.api.data.News;
@@ -59,12 +64,11 @@ public class SingleNewsActivity extends Activity {
 
 	private News news;
 
-	String vidURL = "";
+	private String vidURL = "";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
 		/*
 		 * TODO: Might become a source of error someday, if activity design changes. Would be better
 		 * to handle it with intents.
@@ -96,10 +100,6 @@ public class SingleNewsActivity extends Activity {
 			text.setText(getString(R.string.failure));
 		} else if (news != null) {
 			try {
-				// String fString = String.format(news.getArticle(), "");
-				// CharSequence styledString = Html.fromHtml(news.getArticle(), new TextViewHandler(
-				// SingleNewsActivity.this.getApplicationContext()), null);
-				// text.setText(styledString);
 				text.setText(Html.fromHtml(news.getArticle(), new TextViewHandler(
 						SingleNewsActivity.this.getApplicationContext()), null));
 			} catch (IllegalFormatException ife) {
@@ -107,11 +107,33 @@ public class SingleNewsActivity extends Activity {
 				text.setText(news.getArticle());
 			}
 			createHeader(newsView, news);
+			createCommentBttn();
 			vidURL = MediaSnapper.snapFromCleanedHTMLWithXPath(
 					getString(R.string.cw_url, news.getUrl()), getString(R.string.xpath_get_video),
 					getString(R.string.value));
 		}
 		return newsView;
+	}
+
+	private void createCommentBttn() {
+		Button bttn = (Button) newsView.findViewById(R.id.singlenews_comments_bttn);
+		bttn.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent commentsIntent = new Intent(SingleNewsActivity.this,
+						CommentsActivity.class);
+
+				commentsIntent.putExtra(SingleNewsActivity.class.getName(), news.getId());
+
+				View view = ((ActivityGroup) getParent())
+						.getLocalActivityManager()
+						.startActivity(CommentsActivity.class.getSimpleName(),
+								commentsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
+						.getDecorView();
+				// replace the view
+				((NewsActivityGroup) getParent()).replaceView(view);
+			}
+		});
 	}
 
 	/**
