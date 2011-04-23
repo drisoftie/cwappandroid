@@ -61,6 +61,7 @@
 			android:name=".tab.overview.OverviewActivityGroup"
 			android:configChanges="keyboardHidden|orientation"></activity>
 		<activity android:name=".tab.news.NewsPicViewerActivity"></activity>
+		<activity android:name=".tab.cmts.CommentsActivity"></activity>
 
 		
 		

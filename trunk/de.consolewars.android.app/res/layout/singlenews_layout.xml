@@ -29,6 +29,11 @@
 				android:id="@+id/singlenews_video"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"/>
+			<Button
+				android:id="@+id/singlenews_comments_bttn"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:background="@drawable/def_bttn_comments"/>
 		</LinearLayout>
 	</ScrollView>
 </LinearLayout>

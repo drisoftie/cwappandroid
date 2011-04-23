@@ -43,21 +43,25 @@
 	<string
 		name="news">News</string>
 	<string
-		name="singlenews">Einzelnews</string>			
+		name="singlenews">Einzelnews</string>
+	<string
+		name="comments">Kommentare</string>	
 	<string
 		name="news_author_by">von</string>
 	<string
-		name="singlenews_info">%1$s von %2$s</string>	
+		name="singlenews_info">%1$s von %2$s</string>
 	<string
-		name="singleblogs_author">%1$s\'S BLOG</string>	
+		name="singleblogs_author">%1$s\'S BLOG</string>
 	<string
 		name="news_author_unknown">[Newseditor]</string>
 	<string
 		name="news_filter">Filterfunktion</string>
 	<string
-		name="failure">Fehler</string>	
+		name="failure">Fehler</string>
 	<string
-		name="dateformat_detailed">EEEE, dd. MMMMM yyyy \'um\' HH:mm \'Uhr\'</string>	
+		name="ok">OK</string>
+	<string
+		name="dateformat_detailed">EEEE, dd. MMMMM yyyy \'um\' HH:mm \'Uhr\'</string>
 	<string-array
 		name="news_filter_options">
 		<item>Alle News</item>

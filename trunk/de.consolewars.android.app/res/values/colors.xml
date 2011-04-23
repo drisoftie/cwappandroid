@@ -77,5 +77,15 @@
 	<color
 		name="header_descr_info">#9e9999</color>
 	<color
-		name="header_descr">#666666</color>		
+		name="header_descr">#666666</color>
+	<color
+		name="comments_cell_bg">#eff3ef</color>				
+	<color
+		name="comments_bg_up">#bed4e6</color>	
+	<color
+		name="comments_bg_down">#def4f6</color>				
+	<color
+		name="comments_author_bg_up">#cee4f6</color>	
+	<color
+		name="comments_author_bg_down">#def4f6</color>	
 </resources>

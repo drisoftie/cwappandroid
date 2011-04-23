@@ -64,4 +64,6 @@
 		name="overview_logged_as_padding">2dp</dimen>
 	<dimen
 		name="overview_usericon_margin_left">25dp</dimen>
+	<dimen
+		name="comments_cell_margin">5dp</dimen>	
 </resources>
