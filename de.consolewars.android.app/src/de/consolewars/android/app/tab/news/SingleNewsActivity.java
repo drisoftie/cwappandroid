@@ -111,6 +111,7 @@ public class SingleNewsActivity extends Activity {
 			vidURL = MediaSnapper.snapFromCleanedHTMLWithXPath(
 					getString(R.string.cw_url, news.getUrl()), getString(R.string.xpath_get_video),
 					getString(R.string.value));
+			initVideos(news.getUrl());
 		}
 		return newsView;
 	}
@@ -120,8 +121,7 @@ public class SingleNewsActivity extends Activity {
 		bttn.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Intent commentsIntent = new Intent(SingleNewsActivity.this,
-						CommentsActivity.class);
+				Intent commentsIntent = new Intent(SingleNewsActivity.this, CommentsActivity.class);
 
 				commentsIntent.putExtra(SingleNewsActivity.class.getName(), news.getId());
 
@@ -261,7 +261,6 @@ public class SingleNewsActivity extends Activity {
 
 		@Override
 		protected void onPostExecute(View result) {
-			initVideos(news.getUrl());
 			setContentView(result);
 		}
 	}
