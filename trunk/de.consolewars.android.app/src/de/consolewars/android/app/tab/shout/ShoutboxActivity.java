@@ -1,11 +1,25 @@
 package de.consolewars.android.app.tab.shout;
 
+import java.security.GeneralSecurityException;
+
 import android.app.Activity;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.webkit.WebSettings.PluginState;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Button;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import de.consolewars.android.app.R;
+import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
+import de.consolewars.android.app.util.HashEncrypter;
+import de.consolewars.api.data.AuthenticatedUser;
+import de.consolewars.api.exception.ConsolewarsAPIException;
 
 /*
  * Copyright [2010] [Alexander Dridiger]
@@ -29,18 +43,34 @@ import de.consolewars.android.app.R;
  */
 public class ShoutboxActivity extends Activity {
 
+	private CwNavigationMainTabActivity mainTabs;
+
+	private ViewGroup shoutbox_layout;
+
+	private AuthenticatedUser user;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.shoutbox_layout);
 
-		WebView webView = (WebView) findViewById(R.id.shoutbox);
-		// webView.loadUrl("http://www.consolewars.de/chat");
+		if (getParent().getParent() instanceof CwNavigationMainTabActivity) {
+			mainTabs = (CwNavigationMainTabActivity) getParent().getParent();
+		}
+		shoutbox_layout = (ViewGroup) LayoutInflater.from(ShoutboxActivity.this.getParent())
+				.inflate(R.layout.shoutbox_layout, null);
 
-		// WebSettings webSettings = webView.getSettings();
-		// webSettings.setSavePassword(false);
-		// webSettings.setSaveFormData(false);
-		// webSettings.setJavaScriptEnabled(true);
+		new BuildShoutboxAsyncTask().execute();
+	}
+
+	private View loginAndOpenShoutbox() {
+		Button refresh = (Button) shoutbox_layout.findViewById(R.id.shoutbox_refresh);
+		refresh.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				new BuildShoutboxAsyncTask().execute();
+			}
+		});
+		WebView webView = (WebView) shoutbox_layout.findViewById(R.id.shoutbox);
 
 		webView.getSettings().setUseWideViewPort(false);
 		webView.getSettings().setPluginState(PluginState.ON);
@@ -55,24 +85,74 @@ public class ShoutboxActivity extends Activity {
 				return true;
 			}
 		});
+		if (mainTabs.getDataHandler().loadCurrentUser()
+				&& mainTabs.getDataHandler().getHashPw().matches("")
+				&& mainTabs.getDataHandler().getUserName().matches("")) {
+			webView.loadUrl(getString(R.string.cw_url_slash));
+		} else {
+			try {
+				user = mainTabs
+						.getApiCaller()
+						.getApi()
+						.authenticate(
+								mainTabs.getDataHandler().getUserName(),
+								HashEncrypter.decrypt(getString(R.string.db_cry), mainTabs
+										.getDataHandler().getHashPw()));
+			} catch (GeneralSecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ConsolewarsAPIException e) {
+				e.printStackTrace();
+			}
+		}
+		return shoutbox_layout;
+	}
 
-		webView.loadUrl("http://www.consolewars.de/chat/");
+	/**
+	 * Asynchronous task to login into consolewars.de and open the shoutbox.
+	 * 
+	 * @author Alexander Dridiger
+	 */
+	private class BuildShoutboxAsyncTask extends AsyncTask<Void, Integer, View> {
 
-		// switch(mode) {
-		// case MODE_LOGIN:
-		// web.loadUrl("http://www.consolewars.de");
-		// break;
-		//
-		// case MODE_SHOUTBOX:
-		// web.loadUrl("http://www.consolewars.de/chat/popup.php");
-		// break;
+		private ProgressBar progressBar;
 
-		// webView.setWebViewClient(new WebViewClient() {
-		// @Override
-		// public boolean shouldOverrideUrlLoading(WebView view, String url) {
-		// view.loadUrl(url);
-		// return false;
-		// }
-		// });
+		@Override
+		protected void onPreExecute() {
+			// first set progressbar view
+			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(
+					ShoutboxActivity.this.getParent()).inflate(R.layout.centered_progressbar, null);
+			setContentView(progress_layout);
+
+			TextView text = (TextView) progress_layout.findViewById(R.id.centered_progressbar_text);
+			text.setText(getString(R.string.loading, getString(R.string.shoutbox)));
+
+			progressBar = (ProgressBar) progress_layout.findViewById(R.id.centered_progressbar);
+			progressBar.setProgress(0);
+		}
+
+		@Override
+		protected View doInBackground(Void... params) {
+			return loginAndOpenShoutbox();
+		}
+
+		@Override
+		protected void onProgressUpdate(Integer... values) {
+			progressBar.setProgress(values[0]);
+		}
+
+		@Override
+		protected void onPostExecute(View result) {
+			setContentView(result);
+			WebView webView = (WebView) ShoutboxActivity.this.findViewById(R.id.shoutbox);
+			if (user.getSuccess().matches("YES")) {
+				webView.postUrl(getString(R.string.cw_url_slash),
+						getString(R.string.cw_login, user.getPasswordHash(), user.getUsername())
+								.getBytes());
+				webView.loadUrl(getString(R.string.cw_shoutbox));
+			} else {
+				webView.loadUrl(getString(R.string.cw_url_slash));
+			}
+		}
 	}
 }

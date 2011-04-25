@@ -47,6 +47,8 @@
 	<string
 		name="comments">Kommentare</string>	
 	<string
+		name="shoutbox">Shoutbox</string>	
+	<string
 		name="news_author_by">von</string>
 	<string
 		name="singlenews_info">%1$s von %2$s</string>

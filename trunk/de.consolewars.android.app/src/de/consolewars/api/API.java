@@ -6,6 +6,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
 
+import android.util.Log;
+
 import de.consolewars.api.data.AuthStatus;
 import de.consolewars.api.data.AuthenticatedUser;
 import de.consolewars.api.data.Blog;
