@@ -26,5 +26,8 @@
 	</string>
 	<string
 		name="cw_login">http://www.consolewars.de/messageboard/login.php?do=login&amp;cookieuser=1&amp;do=login&amp;s=&amp;vb_login_md5password=%1$s&amp;vb_login_md5password_utf=%1$s&amp;vb_login_password=&amp;vb_login_username=%2$s
-	</string>		
+	</string>
+	<string
+		name="cw_cmmt">http://www.consolewars.de/gen/processtalkback.php?reference_area=11&amp;reference_id=32690&amp;talkback_cid=0&amp;talkback_command=newentry&amp;talkback_content=goil&amp;talkback_uid=0&amp;talkback_viewpage=5
+	</string>			
 </resources>

@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import android.util.Log;
-
 import de.consolewars.api.data.AuthStatus;
 import de.consolewars.api.data.AuthenticatedUser;
 import de.consolewars.api.data.Blog;
@@ -274,15 +273,17 @@ public class API {
 		// name of the api-php file
 		String apiname = "getmessages";
 
-		URLCreator commentsURL = new URLCreator(BASEURL + apiname + ".php");
+		URLCreator messageURL = new URLCreator(BASEURL + apiname + ".php");
 
-		commentsURL.addArgument("apitoken", APIKey);
-		commentsURL.addArgument("user", uid);
-		commentsURL.addArgument("pass", pass);
-		commentsURL.addArgument("folder", folder);
-		commentsURL.addArgument("count", count);
+		messageURL.addArgument("apitoken", APIKey);
+		messageURL.addArgument("user", uid);
+		messageURL.addArgument("pass", pass);
+		messageURL.addArgument("folder", folder);
+		messageURL.addArgument("count", count);
 
-		SAXMessageParser parser = new SAXMessageParser(commentsURL.toString());
+		Log.i("********MSGSSURL*******", messageURL.toString());
+
+		SAXMessageParser parser = new SAXMessageParser(messageURL.toString(), uid, pass);
 		msgs = parser.parseDocument();
 
 		parser = null;
@@ -480,6 +481,9 @@ public class API {
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		}
+
+		Log.i("********PW*******", passwordHash);
+
 		return passwordHash;
 	}
 

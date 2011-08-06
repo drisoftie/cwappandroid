@@ -1,7 +1,6 @@
 package de.consolewars.android.app.tab.news;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -18,18 +17,18 @@ import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
-import android.widget.TabHost.OnTabChangeListener;
 import android.widget.TableLayout;
 import android.widget.TextView;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.TabHost.OnTabChangeListener;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
 import de.consolewars.android.app.util.StyleSpannableStringBuilder;
@@ -94,6 +93,7 @@ public class NewsActivity extends Activity {
 		}
 		news_layout = (ViewGroup) LayoutInflater.from(NewsActivity.this.getParent()).inflate(
 				R.layout.news_layout, null);
+		setContentView(news_layout);
 		new BuildNewsAsyncTask().execute();
 	}
 
@@ -108,80 +108,6 @@ public class NewsActivity extends Activity {
 				new BuildNewsAsyncTask().execute();
 			}
 		});
-	}
-
-	/**
-	 * Create rows displaying single news to be displayed in a table.
-	 */
-	private List<View> createNewsRows() {
-		// create table based on current news
-		TableLayout newsTable = (TableLayout) news_layout.findViewById(R.id.news_table);
-
-		styleStringBuilder = new StyleSpannableStringBuilder();
-
-		List<View> rows = new ArrayList<View>();
-
-		ViewGroup separator = (ViewGroup) LayoutInflater.from(NewsActivity.this.getParent())
-				.inflate(R.layout.news_row_day_separator_layout, null);
-		TextView separatorTxt = (TextView) separator.findViewById(R.id.news_row_day_separator_text);
-		separatorTxt.setText(createDate(currentNewsDate.getTimeInMillis(), "EEEE, dd. MMMMM yyyy"));
-		rows.add(separator);
-
-		Calendar tempCal = Calendar.getInstance(Locale.GERMANY);
-		tempCal.setTimeInMillis(currentNewsDate.getTimeInMillis() + 1L);
-
-		for (News news : this.news) {
-			if (getDay(tempCal, -1).getTimeInMillis() > news.getUnixtime() * 1000L) {
-				currentNewsDate.setTimeInMillis(currentNewsDate.getTimeInMillis() + 1L);
-				currentNewsDate.setTimeInMillis(getDay(currentNewsDate, -1).getTimeInMillis() - 1L);
-				tempCal.setTimeInMillis(currentNewsDate.getTimeInMillis() + 1L);
-				separator = (ViewGroup) LayoutInflater.from(NewsActivity.this.getParent()).inflate(
-						R.layout.news_row_day_separator_layout, null);
-				separatorTxt = (TextView) separator.findViewById(R.id.news_row_day_separator_text);
-				separatorTxt.setText(createDate(currentNewsDate.getTimeInMillis(),
-						"EEEE, dd. MMMMM yyyy"));
-				rows.add(separator);
-			} else if ((currentNewsDate.getTimeInMillis() >= news.getUnixtime() * 1000L)
-					&& (getDay(tempCal, -1).getTimeInMillis() <= news.getUnixtime() * 1000L)) {
-				// get the table row by an inflater and set the needed information
-				final View tableRow = LayoutInflater.from(this).inflate(R.layout.news_row_layout,
-						newsTable, false);
-				tableRow.setId(news.getId());
-				tableRow.setOnClickListener(new View.OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						if (selectedRow != null) {
-							selectedRow.setBackgroundDrawable(getResources().getDrawable(
-									R.drawable.table_cell_bg));
-						}
-						tableRow.setBackgroundDrawable(getResources().getDrawable(
-								R.drawable.table_cell_bg_selected));
-						selectedRow = tableRow;
-						getSingleNews(tableRow.getId());
-					}
-				});
-				((ImageView) tableRow.findViewById(R.id.news_row_category_icon))
-						.setImageResource(this.getResources().getIdentifier(
-								getString(R.string.cat_drawable, news.getCategoryshort()),
-								getString(R.string.drawable),
-								getApplicationContext().getPackageName()));
-				((TextView) tableRow.findViewById(R.id.news_row_title)).setText(createTitle(news
-						.getTitle()));
-				((TextView) tableRow.findViewById(R.id.news_row_date)).setText(createDate(
-						news.getUnixtime() * 1000L, "'um' HH:mm'Uhr'"));
-				TextView cmtAmount = (TextView) tableRow.findViewById(R.id.news_row_cmmts_amount);
-				cmtAmount.setText(createAamount(news.getComments()));
-				TextView picAmount = (TextView) tableRow.findViewById(R.id.news_row_pics_amount);
-				picAmount.setText(createAamount(news.getPiclist().length));
-				TextView author = (TextView) tableRow.findViewById(R.id.news_row_author);
-				author.setText(createAuthor(news.getAuthor()));
-				author.setSelected(true);
-
-				rows.add(tableRow);
-			}
-		}
-		styleStringBuilder = null;
-		return rows;
 	}
 
 	/**
@@ -243,10 +169,9 @@ public class NewsActivity extends Activity {
 
 		singleNewsIntent.putExtra(NewsActivity.class.getName(), id);
 
-		View view = ((ActivityGroup) getParent())
-				.getLocalActivityManager()
-				.startActivity(SingleNewsActivity.class.getSimpleName(),
-						singleNewsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
+		View view = ((ActivityGroup) getParent()).getLocalActivityManager().startActivity(
+				SingleNewsActivity.class.getSimpleName(),
+				singleNewsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
 		// replace the view
 		((NewsActivityGroup) getParent()).replaceView(view);
 	}
@@ -284,8 +209,8 @@ public class NewsActivity extends Activity {
 		// TODO more text formatting
 		// an empty author string means that the news was not written by a
 		styleStringBuilder.clear();
-		styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF7e6003),
-				String.valueOf(commentAmount));
+		styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF7e6003), String
+				.valueOf(commentAmount));
 
 		return styleStringBuilder;
 	}
@@ -349,57 +274,58 @@ public class NewsActivity extends Activity {
 	 * 
 	 * @author Alexander Dridiger
 	 */
-	private class BuildNewsAsyncTask extends AsyncTask<Void, Integer, List<View>> {
+	private class BuildNewsAsyncTask extends AsyncTask<Void, View, Void> {
 
 		private ProgressBar progressBar;
 
 		@Override
 		protected void onPreExecute() {
-			// first set progressbar view
+			// first set progressbar
 			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(
 					NewsActivity.this.getParent()).inflate(R.layout.centered_progressbar, null);
-			setContentView(progress_layout);
 
 			TextView text = (TextView) progress_layout.findViewById(R.id.centered_progressbar_text);
 			text.setText(getString(R.string.loading, getString(R.string.tab_news_head)));
 
 			progressBar = (ProgressBar) progress_layout.findViewById(R.id.centered_progressbar);
 			progressBar.setProgress(0);
+			TableLayout newsTable = (TableLayout) news_layout.findViewById(R.id.news_table);
+			newsTable.addView(progress_layout);
 		}
 
 		@Override
-		protected List<View> doInBackground(Void... params) {
+		protected Void doInBackground(Void... params) {
 			try {
 				oldestNewsDate.setTimeInMillis(getDay(oldestNewsDate, 0).getTimeInMillis());
 				mainTabs.getApiCaller().authenticateOnCW();
-				news = mainTabs.getApiCaller().getApi()
-						.getNewsList(100, currentFilter, oldestNewsDate.getTime());
+				news = mainTabs.getApiCaller().getApi().getNewsList(50, currentFilter,
+						oldestNewsDate.getTime());
 			} catch (ConsolewarsAPIException e) {
 				e.printStackTrace();
 				Log.e(getString(R.string.exc_auth_tag), e.getMessage(), e);
-				return new ArrayList<View>();
 			}
-			return createNewsRows();
+			createNewsRows();
+			return null;
 		}
 
 		@Override
-		protected void onProgressUpdate(Integer... values) {
-			progressBar.setProgress(values[0]);
+		protected void onProgressUpdate(View... rows) {
+			TableLayout newsTable = (TableLayout) news_layout.findViewById(R.id.news_table);
+			newsTable.addView(rows[0], newsTable.getChildCount() - 1);
 		}
 
 		@Override
-		protected void onPostExecute(List<View> result) {
+		protected void onPostExecute(Void result) {
 			// sets the news view for this Activity
 			TableLayout newsTable = (TableLayout) news_layout.findViewById(R.id.news_table);
-			for (View row : result) {
-				newsTable.addView(row);
-			}
+
+			newsTable.removeViewAt(newsTable.getChildCount() - 1);
 			initFilter(news_layout);
 			initRefreshBttn(news_layout);
 
 			ViewGroup lastrowLayout = (ViewGroup) LayoutInflater
-					.from(NewsActivity.this.getParent()).inflate(R.layout.day_down_row_layout,
-							null);
+					.from(NewsActivity.this.getParent())
+					.inflate(R.layout.day_down_row_layout, null);
 			Button downBttn = (Button) lastrowLayout.findViewById(R.id.day_down_row_bttn);
 			downBttn.setOnClickListener(new OnClickListener() {
 				@Override
@@ -412,8 +338,82 @@ public class NewsActivity extends Activity {
 				}
 			});
 			newsTable.addView(lastrowLayout);
+		}
 
-			setContentView(news_layout);
+		/**
+		 * Create rows displaying single news to be displayed in a table.
+		 */
+		private void createNewsRows() {
+			// create table based on current news
+			TableLayout newsTable = (TableLayout) news_layout.findViewById(R.id.news_table);
+
+			styleStringBuilder = new StyleSpannableStringBuilder();
+
+			ViewGroup separator = (ViewGroup) LayoutInflater.from(NewsActivity.this.getParent())
+					.inflate(R.layout.news_row_day_separator_layout, null);
+			TextView separatorTxt = (TextView) separator
+					.findViewById(R.id.news_row_day_separator_text);
+			separatorTxt.setText(createDate(currentNewsDate.getTimeInMillis(),
+					"EEEE, dd. MMMMM yyyy"));
+			publishProgress(separator);
+
+			Calendar tempCal = Calendar.getInstance(Locale.GERMANY);
+			tempCal.setTimeInMillis(currentNewsDate.getTimeInMillis() + 1L);
+
+			for (News newsToAdd : news) {
+				if (getDay(tempCal, -1).getTimeInMillis() > newsToAdd.getUnixtime() * 1000L) {
+					currentNewsDate.setTimeInMillis(currentNewsDate.getTimeInMillis() + 1L);
+					currentNewsDate
+							.setTimeInMillis(getDay(currentNewsDate, -1).getTimeInMillis() - 1L);
+					tempCal.setTimeInMillis(currentNewsDate.getTimeInMillis() + 1L);
+					separator = (ViewGroup) LayoutInflater.from(NewsActivity.this.getParent())
+							.inflate(R.layout.news_row_day_separator_layout, null);
+					separatorTxt = (TextView) separator
+							.findViewById(R.id.news_row_day_separator_text);
+					separatorTxt.setText(createDate(currentNewsDate.getTimeInMillis(),
+							"EEEE, dd. MMMMM yyyy"));
+					publishProgress(separator);
+				} else if ((currentNewsDate.getTimeInMillis() >= newsToAdd.getUnixtime() * 1000L)
+						&& (getDay(tempCal, -1).getTimeInMillis() <= newsToAdd.getUnixtime() * 1000L)) {
+					// get the table row by an inflater and set the needed information
+					final View tableRow = LayoutInflater.from(NewsActivity.this).inflate(
+							R.layout.news_row_layout, newsTable, false);
+					tableRow.setId(newsToAdd.getId());
+					tableRow.setOnClickListener(new View.OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							if (selectedRow != null) {
+								selectedRow.setBackgroundDrawable(getResources().getDrawable(
+										R.drawable.table_cell_bg));
+							}
+							tableRow.setBackgroundDrawable(getResources().getDrawable(
+									R.drawable.table_cell_bg_selected));
+							selectedRow = tableRow;
+							getSingleNews(tableRow.getId());
+						}
+					});
+					((ImageView) tableRow.findViewById(R.id.news_row_category_icon))
+							.setImageResource(NewsActivity.this.getResources().getIdentifier(
+									getString(R.string.cat_drawable, newsToAdd.getCategoryshort()),
+									getString(R.string.drawable),
+									getApplicationContext().getPackageName()));
+					((TextView) tableRow.findViewById(R.id.news_row_title))
+							.setText(createTitle(newsToAdd.getTitle()));
+					((TextView) tableRow.findViewById(R.id.news_row_date)).setText(createDate(
+							newsToAdd.getUnixtime() * 1000L, "'um' HH:mm'Uhr'"));
+					TextView cmtAmount = (TextView) tableRow
+							.findViewById(R.id.news_row_cmmts_amount);
+					cmtAmount.setText(createAamount(newsToAdd.getComments()));
+					TextView picAmount = (TextView) tableRow
+							.findViewById(R.id.news_row_pics_amount);
+					picAmount.setText(createAamount(newsToAdd.getPiclist().length));
+					TextView author = (TextView) tableRow.findViewById(R.id.news_row_author);
+					author.setText(createAuthor(newsToAdd.getAuthor()));
+					author.setSelected(true);
+
+					publishProgress(tableRow);
+				}
+			}
 		}
 	}
 

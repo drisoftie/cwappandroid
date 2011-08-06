@@ -15,8 +15,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.View.OnClickListener;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
@@ -81,30 +81,27 @@ public class OverviewActivity extends Activity {
 		int msgsAmount = 0;
 		if (mainTabs.getDataHandler().getDate() != -1) {
 			try {
-				newsAmount = mainTabs.getApiCaller().getApi()
-						.getNewsList(15, 0, new Date(mainTabs.getDataHandler().getDate())).size();
-				blogsAmount = mainTabs.getApiCaller().getApi()
-						.getBlogsList(-1, 15, 0, new Date(mainTabs.getDataHandler().getDate()))
-						.size();
-				blogsAmount += mainTabs.getApiCaller().getApi()
-						.getBlogsList(-1, 15, 1, new Date(mainTabs.getDataHandler().getDate()))
-						.size();
-				blogsAmount += mainTabs.getApiCaller().getApi()
-						.getBlogsList(-1, 15, 2, new Date(mainTabs.getDataHandler().getDate()))
-						.size();
+				newsAmount = mainTabs.getApiCaller().getApi().getNewsList(5, 0,
+						new Date(mainTabs.getDataHandler().getDate())).size();
+				blogsAmount = mainTabs.getApiCaller().getApi().getBlogsList(-1, 5, 0,
+						new Date(mainTabs.getDataHandler().getDate())).size();
+				blogsAmount += mainTabs.getApiCaller().getApi().getBlogsList(-1, 5, 1,
+						new Date(mainTabs.getDataHandler().getDate())).size();
+				blogsAmount += mainTabs.getApiCaller().getApi().getBlogsList(-1, 5, 2,
+						new Date(mainTabs.getDataHandler().getDate())).size();
 				AuthenticatedUser user = null;
 				user = mainTabs.getApiCaller().getAuthUser(
 						mainTabs.getDataHandler().getUserName(),
 						HashEncrypter.decrypt(getString(R.string.db_cry), mainTabs.getDataHandler()
 								.getHashPw()));
-				for (Message msg : mainTabs.getApiCaller().getApi()
-						.getMessages(user.getUid(), user.getPasswordHash(), 0, 20)) {
+				for (Message msg : mainTabs.getApiCaller().getApi().getMessages(user.getUid(),
+						user.getPasswordHash(), 0, 5)) {
 					if (msg.getUnixtime() > mainTabs.getDataHandler().getDate()) {
 						msgsAmount++;
 					}
 				}
-				for (Message msg : mainTabs.getApiCaller().getApi()
-						.getMessages(user.getUid(), user.getPasswordHash(), 1, 20)) {
+				for (Message msg : mainTabs.getApiCaller().getApi().getMessages(user.getUid(),
+						user.getPasswordHash(), -1, 5)) {
 					if (msg.getUnixtime() > mainTabs.getDataHandler().getDate()) {
 						msgsAmount++;
 					}
@@ -118,14 +115,14 @@ public class OverviewActivity extends Activity {
 			}
 		}
 		flipper.addView(createBannerCell(getString(R.string.tab_news_tag), R.drawable.banner_news,
-				getString(R.string.overview_banner_news_title),
-				getString(R.string.overview_banner_details, newsAmount, "News")));
+				getString(R.string.overview_banner_news_title), getString(
+						R.string.overview_banner_details, newsAmount, "News")));
 		flipper.addView(createBannerCell(getString(R.string.tab_blogs_tag),
 				R.drawable.banner_blogs, getString(R.string.overview_banner_blogs_title),
 				getString(R.string.overview_banner_details, blogsAmount, "Blogs")));
 		flipper.addView(createBannerCell(getString(R.string.tab_msgs_tag), R.drawable.banner_msgs,
-				getString(R.string.overview_banner_msgs_title),
-				getString(R.string.overview_banner_details, msgsAmount, "Nachrichten")));
+				getString(R.string.overview_banner_msgs_title), getString(
+						R.string.overview_banner_details, msgsAmount, "Nachrichten")));
 		flipper.setInAnimation(AnimationUtils.loadAnimation(this, R.anim.overview_marquee_in));
 		flipper.setOutAnimation(AnimationUtils.loadAnimation(this, R.anim.overview_marquee_out));
 		flipper.setFlipInterval(3000);
@@ -162,13 +159,10 @@ public class OverviewActivity extends Activity {
 		final ImageView icon = (ImageView) parent.findViewById(R.id.overview_usericon);
 		if (mainTabs.getDataHandler().getHashPw() != null) {
 			try {
-				AuthenticatedUser authUser = mainTabs
-						.getApiCaller()
-						.getApi()
-						.authenticate(
-								mainTabs.getDataHandler().getUserName(),
-								HashEncrypter.decrypt(getString(R.string.db_cry), mainTabs
-										.getDataHandler().getHashPw()));
+				AuthenticatedUser authUser = mainTabs.getApiCaller().getApi().authenticate(
+						mainTabs.getDataHandler().getUserName(),
+						HashEncrypter.decrypt(getString(R.string.db_cry), mainTabs.getDataHandler()
+								.getHashPw()));
 				loadPicture(icon, authUser.getUid());
 			} catch (GeneralSecurityException e) {
 				// TODO Auto-generated catch block
@@ -190,11 +184,9 @@ public class OverviewActivity extends Activity {
 				persistUser(usrnmEdttxt.getText().toString(), passwEdttxt.getText().toString());
 				AuthenticatedUser authUser = null;
 				try {
-					authUser = mainTabs
-							.getApiCaller()
-							.getApi()
-							.authenticate(mainTabs.getDataHandler().getUserName(),
-									passwEdttxt.getText().toString());
+					authUser = mainTabs.getApiCaller().getApi().authenticate(
+							mainTabs.getDataHandler().getUserName(),
+							passwEdttxt.getText().toString());
 					loadPicture(icon, authUser.getUid());
 				} catch (ConsolewarsAPIException e) {
 					// TODO Auto-generated catch block
@@ -208,11 +200,10 @@ public class OverviewActivity extends Activity {
 		Calendar calendar = GregorianCalendar.getInstance();
 		if (mainTabs.getDataHandler().getUserDBId() != -1) {
 			try {
-				mainTabs.getDataHandler()
-						.getDatabaseManager()
-						.updateUserData(mainTabs.getDataHandler().getUserDBId(), userName,
-								HashEncrypter.encrypt(getString(R.string.db_cry), pw),
-								calendar.getTimeInMillis());
+				mainTabs.getDataHandler().getDatabaseManager().updateUserData(
+						mainTabs.getDataHandler().getUserDBId(), userName,
+						HashEncrypter.encrypt(getString(R.string.db_cry), pw),
+						calendar.getTimeInMillis());
 				mainTabs.getDataHandler().loadCurrentUser();
 			} catch (GeneralSecurityException e) {
 				// TODO Auto-generated catch block
@@ -220,11 +211,9 @@ public class OverviewActivity extends Activity {
 			}
 		} else {
 			try {
-				mainTabs.getDataHandler()
-						.getDatabaseManager()
-						.insertUserData(userName,
-								HashEncrypter.encrypt(getString(R.string.db_cry), pw),
-								calendar.getTimeInMillis());
+				mainTabs.getDataHandler().getDatabaseManager().insertUserData(userName,
+						HashEncrypter.encrypt(getString(R.string.db_cry), pw),
+						calendar.getTimeInMillis());
 				mainTabs.getDataHandler().loadCurrentUser();
 			} catch (GeneralSecurityException e) {
 				// TODO Auto-generated catch block

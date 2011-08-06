@@ -6,13 +6,13 @@
 	android:layout_height="fill_parent">
 	<ScrollView
 		android:id="@+id/blogs_scroll_view"
-		android:layout_width="wrap_content"
+		android:layout_width="fill_parent"
 		android:layout_height="fill_parent">
 		<TableLayout
 			android:id="@+id/blogs_table"
-			android:layout_width="wrap_content"
+			android:layout_width="fill_parent"
 			android:layout_height="fill_parent"
-			android:padding="3dip">
+			android:layout_margin="3dip">
 		</TableLayout>
-	</ScrollView>	
+	</ScrollView>
 </LinearLayout>

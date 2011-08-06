@@ -59,6 +59,8 @@
 	<string
 		name="news_filter">Filterfunktion</string>
 	<string
+		name="msg_option">Postauswahl</string>	
+	<string
 		name="failure">Fehler</string>
 	<string
 		name="ok">OK</string>
@@ -71,5 +73,9 @@
 		<item>Nur Nintendonews und \"andere\"</item>
 		<item>Nur Sonynews und \"andere\"</item>
 	</string-array>
-
+	<string-array
+		name="msgs_filter_options">
+		<item>Posteingang</item>
+		<item>Postausgang</item>
+	</string-array>
 </resources>

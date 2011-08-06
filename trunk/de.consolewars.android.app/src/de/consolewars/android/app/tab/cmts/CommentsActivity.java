@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -85,40 +84,6 @@ public class CommentsActivity extends Activity {
 	}
 
 	/**
-	 * Create rows displaying single comments to be displayed in a table.
-	 */
-	private List<View> createCommentsRows() {
-		cmmts_layout = (ViewGroup) LayoutInflater.from(CommentsActivity.this.getParent()).inflate(
-				R.layout.comments_layout, null);
-
-		List<View> rows = new ArrayList<View>();
-
-		// create table based on current comment
-		TableLayout comtsTable = (TableLayout) cmmts_layout.findViewById(R.id.comments_table);
-
-		for (Comment comment : comments) {
-			// get the table row by an inflater and set the needed information
-			final View tableRow = LayoutInflater.from(CommentsActivity.this).inflate(
-					R.layout.comments_row_layout, comtsTable, false);
-
-			((TextView) tableRow.findViewById(R.id.cmts_username)).setText(comment.getUsername());
-			((ImageView) tableRow.findViewById(R.id.cmts_usericon))
-					.setImageBitmap(getUserPic(comment.getUid()));
-			((TextView) tableRow.findViewById(R.id.cmts_date)).setText(createDate(comment
-					.getUnixtime() * 1000L));
-			TextView content = (TextView) tableRow.findViewById(R.id.comment_content);
-			content.setText(Html.fromHtml(comment.getStatement(), new TextViewHandler(
-					CommentsActivity.this.getApplicationContext()), null));
-			//
-			// TextView author = (TextView) tableRow.findViewById(R.id.blogs_row_author);
-			// author.setText(createAuthor(blog.getAuthor()));
-			// author.setSelected(true);
-			rows.add(tableRow);
-		}
-		return rows;
-	}
-
-	/**
 	 * Downloads the user picture and decodes it into a {@link Bitmap} to be set into an ImageView.
 	 * 
 	 * @param uid
@@ -150,7 +115,7 @@ public class CommentsActivity extends Activity {
 		TimeZone zone = TimeZone.getDefault();
 
 		Calendar cal = Calendar.getInstance(zone, Locale.GERMANY);
-		SimpleDateFormat dateformat = new SimpleDateFormat("dd.MM.yyyy 'um' HH:mm 'Uhr'",
+		SimpleDateFormat dateformat = new SimpleDateFormat("dd.MM.yyyy, HH:mm 'Uhr'",
 				Locale.GERMANY);
 		dateformat.setCalendar(cal);
 		return dateformat.format(date);
@@ -161,26 +126,29 @@ public class CommentsActivity extends Activity {
 	 * 
 	 * @author Alexander Dridiger
 	 */
-	private class BuildCommentsAsyncTask extends AsyncTask<Void, Integer, List<View>> {
+	private class BuildCommentsAsyncTask extends AsyncTask<Void, View, Void> {
 
 		private ProgressBar progressBar;
 
 		@Override
 		protected void onPreExecute() {
-			// first set progressbar view
+			cmmts_layout = (ViewGroup) LayoutInflater.from(CommentsActivity.this.getParent())
+					.inflate(R.layout.comments_layout, null);
+			setContentView(cmmts_layout);
+			// first set progressbar
 			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(
 					CommentsActivity.this.getParent()).inflate(R.layout.centered_progressbar, null);
-			setContentView(progress_layout);
-
 			TextView text = (TextView) progress_layout.findViewById(R.id.centered_progressbar_text);
 			text.setText(getString(R.string.loading, getString(R.string.comments)));
 
 			progressBar = (ProgressBar) progress_layout.findViewById(R.id.centered_progressbar);
 			progressBar.setProgress(0);
+			TableLayout comtsTable = (TableLayout) cmmts_layout.findViewById(R.id.comments_table);
+			comtsTable.addView(progress_layout);
 		}
 
 		@Override
-		protected List<View> doInBackground(Void... params) {
+		protected Void doInBackground(Void... params) {
 			resolveID();
 			try {
 				mainTabs.getApiCaller().authenticateOnCW();
@@ -190,24 +158,53 @@ public class CommentsActivity extends Activity {
 			} catch (ConsolewarsAPIException e) {
 				e.printStackTrace();
 				Log.e(getString(R.string.exc_auth_tag), e.getMessage(), e);
-				return new ArrayList<View>();
+				// return new ArrayList<View>();
 			}
-			return createCommentsRows();
+			createCommentsRows();
+			return null;
 		}
 
 		@Override
-		protected void onProgressUpdate(Integer... values) {
-			progressBar.setProgress(values[0]);
+		protected void onProgressUpdate(View... rows) {
+			TableLayout cmtsTable = (TableLayout) cmmts_layout.findViewById(R.id.comments_table);
+			cmtsTable.addView(rows[0], cmtsTable.getChildCount() - 1);
 		}
 
 		@Override
-		protected void onPostExecute(List<View> result) {
+		protected void onPostExecute(Void result) {
 			// sets the comments view for this Activity
 			TableLayout cmtsTable = (TableLayout) cmmts_layout.findViewById(R.id.comments_table);
-			for (View row : result) {
-				cmtsTable.addView(row);
+			cmtsTable.removeViewAt(cmtsTable.getChildCount() - 1);
+		}
+
+		/**
+		 * Create rows displaying single comments to be displayed in a table.
+		 */
+		private void createCommentsRows() {
+			// create table based on current comment
+			TableLayout comtsTable = (TableLayout) cmmts_layout.findViewById(R.id.comments_table);
+
+			for (Comment comment : comments) {
+				// get the table row by an inflater and set the needed information
+				final View tableRow = LayoutInflater.from(CommentsActivity.this).inflate(
+						R.layout.comments_row_layout, comtsTable, false);
+
+				((TextView) tableRow.findViewById(R.id.cmts_username)).setText(comment
+						.getUsername());
+				((ImageView) tableRow.findViewById(R.id.cmts_usericon))
+						.setImageBitmap(getUserPic(comment.getUid()));
+				((TextView) tableRow.findViewById(R.id.cmts_date)).setText(createDate(comment
+						.getUnixtime() * 1000L));
+				((TextView) tableRow.findViewById(R.id.cmts_date)).setSelected(true);
+				TextView content = (TextView) tableRow.findViewById(R.id.comment_content);
+				content.setText(Html.fromHtml(comment.getStatement(), new TextViewHandler(
+						CommentsActivity.this.getApplicationContext()), null));
+				//
+				// TextView author = (TextView) tableRow.findViewById(R.id.blogs_row_author);
+				// author.setText(createAuthor(blog.getAuthor()));
+				// author.setSelected(true);
+				publishProgress(tableRow);
 			}
-			setContentView(cmmts_layout);
 		}
 	}
 }

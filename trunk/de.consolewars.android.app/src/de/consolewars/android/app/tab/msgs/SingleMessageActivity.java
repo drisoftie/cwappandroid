@@ -1,9 +1,13 @@
 package de.consolewars.android.app.tab.msgs;
 
+import java.util.IllegalFormatException;
+
 import android.app.Activity;
 import android.os.Bundle;
+import android.text.Html;
 import android.widget.TextView;
 import de.consolewars.android.app.R;
+import de.consolewars.android.app.util.TextViewHandler;
 
 /*
  * Copyright [2010] [Alexander Dridiger]
@@ -39,8 +43,10 @@ public class SingleMessageActivity extends Activity {
 			text = getIntent().getStringExtra(MessagesActivity.class.getName());
 		}
 
-		// up to now only the text of the blog is shown
-		if (text != null) {
+		try {
+			msg_view.setText(Html.fromHtml(text, new TextViewHandler(SingleMessageActivity.this
+					.getApplicationContext()), null));
+		} catch (IllegalFormatException ife) {
 			msg_view.setText(text);
 		}
 	}

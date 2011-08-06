@@ -1,6 +1,20 @@
 package de.consolewars.api.parser;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.ArrayList;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
+import org.xml.sax.SAXException;
+
 import de.consolewars.api.data.Message;
+import de.consolewars.api.exception.ConsolewarsAPIException;
 
 /*
  * Copyright [2009] Dimitrios Kapanikis
@@ -22,12 +36,17 @@ import de.consolewars.api.data.Message;
 /**
  * 
  * @author cerpin (arrewk@gmail.com)
- *
+ * 
  */
 public class SAXMessageParser extends AbstractSAXParser<Message> {
-	
-	public SAXMessageParser(String APIURL) {
+
+	private int uid;
+	private String pass;
+
+	public SAXMessageParser(String APIURL, int uid, String pass) {
 		super(APIURL);
+		this.uid = uid;
+		this.pass = pass;
 	}
 
 	@Override
@@ -40,48 +59,89 @@ public class SAXMessageParser extends AbstractSAXParser<Message> {
 		return true;
 	}
 
+	/**
+	 * Modifizierter Parser.
+	 */
+	public ArrayList<Message> parseDocument() throws ConsolewarsAPIException {
+		// HttpClient client = new DefaultHttpClient();
+		// HttpGet request = new HttpGet(getAPIURL().toString());
+		// request.setHeader("Cookie", cookie);
+		//
+		// HttpResponse response = null;
+		// try {
+		// response = client.execute(request);
+		// } catch (ClientProtocolException e2) {
+		// e2.printStackTrace();
+		// } catch (IOException e2) {
+		// e2.printStackTrace();
+		// }
+		//
+		// Header[] headers = response.getAllHeaders();
+		// for (int i = 0; i < headers.length; i++) {
+		// Header h = headers[i];
+		// Log.i("****COOKIE*******", "Header names: " + h.getName());
+		// Log.i("****COOKIE*******", "Header value: " + h.getValue());
+		// }
+		String cookie = "cwbb_userid=" + uid + "; cwbb_password=" + pass;
+		SAXParserFactory spf = SAXParserFactory.newInstance();
+		spf.setValidating(false);
+		try {
+
+			URLConnection localURLConnection = new URL(getAPIURL()).openConnection();
+			localURLConnection.setRequestProperty("Cookie", cookie);
+
+			localURLConnection.connect();
+			SAXParser localSAXParser = spf.newSAXParser();
+			InputStream localInputStream = localURLConnection.getInputStream();
+			localSAXParser.parse(localInputStream, this);
+
+			// SAXParser localSAXParser = spf.newSAXParser();
+			// Reader reader = new InputStreamReader(response.getEntity().getContent(), "UTF-8");
+			// InputSource is = new InputSource(reader);
+			// is.setEncoding("UTF-8");
+			// localSAXParser.parse(is, this);
+		} catch (ParserConfigurationException e) {
+			e.printStackTrace();
+		} catch (SAXException e) {
+			e.printStackTrace();
+		} catch (MalformedURLException e1) {
+			throw new ConsolewarsAPIException("Es sind Verbindungsprobleme aufgetreten", e1);
+		} catch (IOException e) {
+			throw new ConsolewarsAPIException("Ein-/Ausgabefehler", e);
+		}
+		return getItems();
+	}
+
 	@Override
 	protected void parseItem(String uri, String localName, String qName) {
-		if(!qName.equals(localName))
-			qName = localName; 
-		
-		if(qName.equals("title")) {
+		if (!qName.equals(localName))
+			qName = localName;
+
+		if (qName.equals("title")) {
 			getTempItem().setTitle(tempValue);
-		}
-		else if(qName.equals("id")) {
+		} else if (qName.equals("id")) {
 			getTempItem().setId(Integer.parseInt(tempValue));
-		}
-		else if(qName.equals("tid")) {
+		} else if (qName.equals("tid")) {
 			getTempItem().setTid(Integer.parseInt(tempValue));
-		}
-		else if(qName.equals("mode")) {
+		} else if (qName.equals("mode")) {
 			getTempItem().setMode(tempValue);
-		}
-		else if(qName.equals("fromusername")) {
+		} else if (qName.equals("fromusername")) {
 			getTempItem().setFromusername(tempValue);
-		}
-		else if(qName.equals("fromuserid")) {
+		} else if (qName.equals("fromuserid")) {
 			getTempItem().setFromuserid(Integer.parseInt(tempValue));
-		}
-		else if(qName.equals("tousername")) {
+		} else if (qName.equals("tousername")) {
 			getTempItem().setTousername(tempValue);
-		}
-		else if(qName.equals("touserid")) {
+		} else if (qName.equals("touserid")) {
 			getTempItem().setTouserid(Integer.parseInt(tempValue));
-		}
-		else if(qName.equals("message")) {
+		} else if (qName.equals("message")) {
 			getTempItem().setMessage(tempValue);
-		}
-		else if(qName.equals("origmessage")) {
+		} else if (qName.equals("origmessage")) {
 			getTempItem().setOrigmessage(tempValue);
-		}
-		else if(qName.equals("unixtime")) {
+		} else if (qName.equals("unixtime")) {
 			getTempItem().setUnixtime(Integer.parseInt(tempValue));
-		}
-		else if(qName.equals("messageread")) {
+		} else if (qName.equals("messageread")) {
 			boolean messageRead = Integer.parseInt(tempValue) >= 1;
 			getTempItem().setMessageread(messageRead);
 		}
 	}
-	
 }

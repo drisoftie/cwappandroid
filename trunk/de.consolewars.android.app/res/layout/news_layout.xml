@@ -32,7 +32,7 @@
 				android:id="@+id/news_table"
 				android:layout_width="fill_parent"
 				android:layout_height="fill_parent"
-				android:padding="3dip"/>
+				android:layout_margin="3dip"/>
 		</RelativeLayout>
 	</ScrollView>
 </RelativeLayout>

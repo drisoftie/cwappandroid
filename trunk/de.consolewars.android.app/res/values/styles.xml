@@ -7,8 +7,7 @@
 			name="android:textColor">@color/tab_indicator_text</item>
 	</style>
 	<style
-		name="WindowTitleBackground"
-		parent="android:WindowTitleBackground">
+		name="WindowTitleBackground">
 		<item
 			name="android:background">@android:color/transparent</item>
 	</style>
