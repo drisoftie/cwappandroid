@@ -1,13 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:orientation="vertical"
 	android:layout_width="fill_parent"
-	android:layout_height="fill_parent">	
+	android:layout_height="fill_parent">
+	<RelativeLayout
+		android:id="@+id/msg_filter"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content">
+		<Button
+			android:id="@+id/msg_bttn_refresh"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentRight="true"
+			android:background="@drawable/refresh_bump"/>
+		<Spinner
+			android:id="@+id/msg_filter_spinner"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_toLeftOf="@id/msg_bttn_refresh"
+			android:prompt="@string/msg_option"/>
+	</RelativeLayout>
 	<ScrollView
 		android:id="@+id/msgs_scroll_view"
 		android:layout_width="fill_parent"
-		android:layout_height="fill_parent">
+		android:layout_height="fill_parent"
+		android:layout_below="@id/msg_filter">
 		<TableLayout
 			android:id="@+id/msgs_table"
 			xmlns:android="http://schemas.android.com/apk/res/android"
@@ -16,4 +33,4 @@
 			android:padding="3dip">
 		</TableLayout>
 	</ScrollView>
-</LinearLayout>
+</RelativeLayout>

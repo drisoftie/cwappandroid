@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -22,8 +21,8 @@ import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -82,82 +81,8 @@ public class BlogsActivity extends Activity {
 		}
 		blogs_layout = (ViewGroup) LayoutInflater.from(BlogsActivity.this.getParent()).inflate(
 				R.layout.blogs_layout, null);
+		setContentView(blogs_layout);
 		new BuildBlogsAsyncTask().execute();
-	}
-
-	/**
-	 * Create rows displaying single blogs to be displayed in a table.
-	 */
-	private List<View> createBlogRows() {
-		// create table based on current blogs
-		TableLayout blogsTable = (TableLayout) blogs_layout.findViewById(R.id.blogs_table);
-
-		styleStringBuilder = new StyleSpannableStringBuilder();
-
-		List<View> rows = new ArrayList<View>();
-
-		ViewGroup separator = (ViewGroup) LayoutInflater.from(BlogsActivity.this.getParent())
-				.inflate(R.layout.blogs_row_day_separator_layout, null);
-		TextView separatorTxt = (TextView) separator
-				.findViewById(R.id.blogs_row_day_separator_text);
-		separatorTxt
-				.setText(createDate(currentBlogsDate.getTimeInMillis(), "EEEE, dd. MMMMM yyyy"));
-		rows.add(separator);
-
-		Calendar tempCal = Calendar.getInstance(Locale.GERMANY);
-		tempCal.setTimeInMillis(currentBlogsDate.getTimeInMillis() + 1L);
-
-		for (Blog blog : blogs) {
-			if (getDay(tempCal, -1).getTimeInMillis() > blog.getUnixtime() * 1000L) {
-				currentBlogsDate.setTimeInMillis(currentBlogsDate.getTimeInMillis() + 1L);
-				currentBlogsDate
-						.setTimeInMillis(getDay(currentBlogsDate, -1).getTimeInMillis() - 1L);
-				tempCal.setTimeInMillis(currentBlogsDate.getTimeInMillis() + 1L);
-				separator = (ViewGroup) LayoutInflater.from(BlogsActivity.this.getParent())
-						.inflate(R.layout.blogs_row_day_separator_layout, null);
-				separatorTxt = (TextView) separator.findViewById(R.id.blogs_row_day_separator_text);
-				separatorTxt.setText(createDate(currentBlogsDate.getTimeInMillis(),
-						"EEEE, dd. MMMMM yyyy"));
-				rows.add(separator);
-			} else if ((currentBlogsDate.getTimeInMillis() >= blog.getUnixtime() * 1000L)
-					&& (getDay(tempCal, -1).getTimeInMillis() <= blog.getUnixtime() * 1000L)) {
-				// get the table row by an inflater and set the needed information
-				final View tableRow = LayoutInflater.from(BlogsActivity.this).inflate(
-						R.layout.blogs_row_layout, blogsTable, false);
-				tableRow.setId(blog.getId());
-				tableRow.setOnClickListener(new View.OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						// set the correct background when a table row was selected by the user
-						if (selectedRow != null) {
-							selectedRow.setBackgroundDrawable(getResources().getDrawable(
-									R.drawable.table_cell_bg));
-						}
-						tableRow.setBackgroundDrawable(getResources().getDrawable(
-								R.drawable.table_cell_bg_selected));
-						selectedRow = tableRow;
-						getSingleBlog(tableRow.getId());
-					}
-				});
-				// set each table row with the given information from the returned blogs
-				((ImageView) tableRow.findViewById(R.id.blogs_row_user_icon))
-						.setImageBitmap(getUserPic(blog.getUid()));
-				((TextView) tableRow.findViewById(R.id.blogs_row_title)).setText(createTitle(blog
-						.getTitle()));
-				((TextView) tableRow.findViewById(R.id.blogs_row_date)).setText(createDate(
-						blog.getUnixtime() * 1000L, "'um' HH:mm'Uhr'"));
-				TextView amount = (TextView) tableRow.findViewById(R.id.blogs_row_cmmts_amount);
-				amount.setText(createCommentsamount(blog.getComments()));
-
-				TextView author = (TextView) tableRow.findViewById(R.id.blogs_row_author);
-				author.setText(createAuthor(blog.getAuthor()));
-				author.setSelected(true);
-
-				rows.add(tableRow);
-			}
-		}
-		styleStringBuilder = null;
-		return rows;
 	}
 
 	/**
@@ -172,10 +97,9 @@ public class BlogsActivity extends Activity {
 
 		singleBlogIntent.putExtra(BlogsActivity.class.getName(), id);
 
-		View view = ((ActivityGroup) getParent())
-				.getLocalActivityManager()
-				.startActivity(SingleBlogActivity.class.getSimpleName(),
-						singleBlogIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
+		View view = ((ActivityGroup) getParent()).getLocalActivityManager().startActivity(
+				SingleBlogActivity.class.getSimpleName(),
+				singleBlogIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
 		// replace the view
 		((BlogsActivityGroup) getParent()).replaceView(view);
 	}
@@ -236,8 +160,8 @@ public class BlogsActivity extends Activity {
 		// TODO more text formatting
 		// an empty author string means that the blog was not written by a
 		styleStringBuilder.clear();
-		styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF7e6003),
-				String.valueOf(commentAmount));
+		styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF7e6003), String
+				.valueOf(commentAmount));
 
 		return styleStringBuilder;
 	}
@@ -303,51 +227,52 @@ public class BlogsActivity extends Activity {
 	 * 
 	 * @author Alexander Dridiger
 	 */
-	private class BuildBlogsAsyncTask extends AsyncTask<Void, Integer, List<View>> {
+	private class BuildBlogsAsyncTask extends AsyncTask<Void, View, Void> {
 
 		private ProgressBar progressBar;
 
 		@Override
 		protected void onPreExecute() {
-			// first set progressbar view
+			// first set progressbar
 			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(
 					BlogsActivity.this.getParent()).inflate(R.layout.centered_progressbar, null);
-			setContentView(progress_layout);
 
 			TextView text = (TextView) progress_layout.findViewById(R.id.centered_progressbar_text);
 			text.setText(getString(R.string.loading, getString(R.string.tab_blogs_head)));
 
 			progressBar = (ProgressBar) progress_layout.findViewById(R.id.centered_progressbar);
 			progressBar.setProgress(0);
+			TableLayout blogsTable = (TableLayout) blogs_layout.findViewById(R.id.blogs_table);
+			blogsTable.addView(progress_layout);
 		}
 
 		@Override
-		protected List<View> doInBackground(Void... params) {
+		protected Void doInBackground(Void... params) {
 			try {
 				oldestBlogsDate.setTimeInMillis(getDay(oldestBlogsDate, 0).getTimeInMillis());
 				mainTabs.getApiCaller().authenticateOnCW();
-				blogs = mainTabs.getApiCaller().getApi()
-						.getBlogsList(-1, 100, 0, oldestBlogsDate.getTime());
+				blogs = mainTabs.getApiCaller().getApi().getBlogsList(-1, 50, 0,
+						oldestBlogsDate.getTime());
 			} catch (ConsolewarsAPIException e) {
 				e.printStackTrace();
 				Log.e(getString(R.string.exc_auth_tag), e.getMessage(), e);
-				return new ArrayList<View>();
 			}
-			return createBlogRows();
+			createBlogRows();
+			return null;
 		}
 
 		@Override
-		protected void onProgressUpdate(Integer... values) {
-			progressBar.setProgress(values[0]);
+		protected void onProgressUpdate(View... rows) {
+			TableLayout blogsTable = (TableLayout) blogs_layout.findViewById(R.id.blogs_table);
+			blogsTable.addView(rows[0], blogsTable.getChildCount() - 1);
 		}
 
 		@Override
-		protected void onPostExecute(List<View> result) {
+		protected void onPostExecute(Void result) {
 			// sets the blogs view for this Activity
 			TableLayout blogsTable = (TableLayout) blogs_layout.findViewById(R.id.blogs_table);
-			for (View row : result) {
-				blogsTable.addView(row);
-			}
+
+			blogsTable.removeViewAt(blogsTable.getChildCount() - 1);
 			ViewGroup lastrowLayout = (ViewGroup) LayoutInflater.from(
 					BlogsActivity.this.getParent()).inflate(R.layout.day_down_row_layout, null);
 			Button downBttn = (Button) lastrowLayout.findViewById(R.id.day_down_row_bttn);
@@ -363,8 +288,79 @@ public class BlogsActivity extends Activity {
 				}
 			});
 			blogsTable.addView(lastrowLayout);
+		}
 
-			setContentView(blogs_layout);
+		/**
+		 * Create rows displaying single blogs to be displayed in a table.
+		 */
+		private void createBlogRows() {
+			// create table based on current blogs
+			TableLayout blogsTable = (TableLayout) blogs_layout.findViewById(R.id.blogs_table);
+
+			styleStringBuilder = new StyleSpannableStringBuilder();
+
+			ViewGroup separator = (ViewGroup) LayoutInflater.from(BlogsActivity.this.getParent())
+					.inflate(R.layout.blogs_row_day_separator_layout, null);
+			TextView separatorTxt = (TextView) separator
+					.findViewById(R.id.blogs_row_day_separator_text);
+			separatorTxt.setText(createDate(currentBlogsDate.getTimeInMillis(),
+					"EEEE, dd. MMMMM yyyy"));
+			publishProgress(separator);
+
+			Calendar tempCal = Calendar.getInstance(Locale.GERMANY);
+			tempCal.setTimeInMillis(currentBlogsDate.getTimeInMillis() + 1L);
+
+			for (Blog blog : blogs) {
+				if (getDay(tempCal, -1).getTimeInMillis() > blog.getUnixtime() * 1000L) {
+					currentBlogsDate.setTimeInMillis(currentBlogsDate.getTimeInMillis() + 1L);
+					currentBlogsDate
+							.setTimeInMillis(getDay(currentBlogsDate, -1).getTimeInMillis() - 1L);
+					tempCal.setTimeInMillis(currentBlogsDate.getTimeInMillis() + 1L);
+					separator = (ViewGroup) LayoutInflater.from(BlogsActivity.this.getParent())
+							.inflate(R.layout.blogs_row_day_separator_layout, null);
+					separatorTxt = (TextView) separator
+							.findViewById(R.id.blogs_row_day_separator_text);
+					separatorTxt.setText(createDate(currentBlogsDate.getTimeInMillis(),
+							"EEEE, dd. MMMMM yyyy"));
+					publishProgress(separator);
+				} else if ((currentBlogsDate.getTimeInMillis() >= blog.getUnixtime() * 1000L)
+						&& (getDay(tempCal, -1).getTimeInMillis() <= blog.getUnixtime() * 1000L)) {
+					// get the table row by an inflater and set the needed information
+					final View tableRow = LayoutInflater.from(BlogsActivity.this).inflate(
+							R.layout.blogs_row_layout, blogsTable, false);
+					tableRow.setId(blog.getId());
+					tableRow.setOnClickListener(new View.OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							// set the correct background when a table row was selected by the user
+							if (selectedRow != null) {
+								selectedRow.setBackgroundDrawable(getResources().getDrawable(
+										R.drawable.table_cell_bg));
+							}
+							tableRow.setBackgroundDrawable(getResources().getDrawable(
+									R.drawable.table_cell_bg_selected));
+							selectedRow = tableRow;
+							getSingleBlog(tableRow.getId());
+						}
+					});
+					// set each table row with the given information from the returned blogs
+					((ImageView) tableRow.findViewById(R.id.blogs_row_user_icon))
+							.setImageBitmap(getUserPic(blog.getUid()));
+					((TextView) tableRow.findViewById(R.id.blogs_row_title))
+							.setText(createTitle(blog.getTitle()));
+					((TextView) tableRow.findViewById(R.id.blogs_row_date)).setText(createDate(blog
+							.getUnixtime() * 1000L, "'um' HH:mm'Uhr'"));
+					TextView amount = (TextView) tableRow.findViewById(R.id.blogs_row_cmmts_amount);
+					amount.setText(createCommentsamount(blog.getComments()));
+
+					TextView author = (TextView) tableRow.findViewById(R.id.blogs_row_author);
+					author.setText(createAuthor(blog.getAuthor()));
+					author.setSelected(true);
+
+					publishProgress(tableRow);
+				}
+			}
+			styleStringBuilder = null;
 		}
 	}
 }

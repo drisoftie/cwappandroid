@@ -140,8 +140,8 @@ public class MessagesActivity extends Activity {
 			e.printStackTrace();
 		}
 		if (user != null) {
-			msgs = mainTabs.getApiCaller().getApi()
-					.getMessages(user.getUid(), user.getPasswordHash(), 0, 10);
+			msgs = mainTabs.getApiCaller().getApi().getMessages(user.getUid(),
+					user.getPasswordHash(), 0, 10);
 		} else {
 			msgs = new ArrayList<Message>();
 		}
@@ -157,10 +157,9 @@ public class MessagesActivity extends Activity {
 
 		singleNewsIntent.putExtra(MessagesActivity.class.getName(), text);
 
-		View view = ((ActivityGroup) getParent())
-				.getLocalActivityManager()
-				.startActivity(SingleMessageActivity.class.getSimpleName(),
-						singleNewsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
+		View view = ((ActivityGroup) getParent()).getLocalActivityManager().startActivity(
+				SingleMessageActivity.class.getSimpleName(),
+				singleNewsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
 		// replace the view
 		((MessagesActivityGroup) getParent()).replaceView(view);
 	}
@@ -216,10 +215,10 @@ public class MessagesActivity extends Activity {
 			author = getString(R.string.news_author_unknown);
 		}
 		styleStringBuilder.clear();
-		styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF3e3e3e),
+		styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF007711),
 				getString(R.string.news_author_by));
 		styleStringBuilder.append(" ");
-		styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0x3e3e3e), author);
+		styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF009933), author);
 
 		return styleStringBuilder;
 	}

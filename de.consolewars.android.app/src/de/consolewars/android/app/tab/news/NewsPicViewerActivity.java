@@ -63,10 +63,10 @@ public class NewsPicViewerActivity extends Activity {
 
 		public AddImgAdp(Context c) {
 			cont = c;
-			TypedArray typArray = obtainStyledAttributes(R.styleable.GalleryTheme);
-			GalItemBg = typArray.getResourceId(
-					R.styleable.GalleryTheme_android_galleryItemBackground, 0);
-			typArray.recycle();
+//			TypedArray typArray = obtainStyledAttributes(R.styleable.GalleryTheme);
+//			GalItemBg = typArray.getResourceId(
+//					R.styleable.GalleryTheme_android_galleryItemBackground, 0);
+//			typArray.recycle();
 		}
 
 		public int getCount() {
@@ -87,7 +87,7 @@ public class NewsPicViewerActivity extends Activity {
 			imgView.setImageResource(Imgid[position]);
 			imgView.setScaleType(ImageView.ScaleType.FIT_XY);
 			imgView.setLayoutParams(new Gallery.LayoutParams(100, 100));
-			imgView.setBackgroundResource(GalItemBg);
+//			imgView.setBackgroundResource(GalItemBg);
 
 			return imgView;
 		}

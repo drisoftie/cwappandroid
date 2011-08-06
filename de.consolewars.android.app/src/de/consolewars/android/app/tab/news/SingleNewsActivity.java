@@ -95,7 +95,7 @@ public class SingleNewsActivity extends Activity {
 			e.printStackTrace();
 		}
 		TextView text = (TextView) newsView.findViewById(R.id.singlenews_newstext);
-		// up to now only the text of the blog is shown
+
 		if (id == -1) {
 			text.setText(getString(R.string.failure));
 		} else if (news != null) {
