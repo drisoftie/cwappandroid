@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TabHost;
-import android.widget.TextView;
 import de.consolewars.android.app.APICaller;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.db.AppDataHandler;
@@ -19,6 +18,8 @@ import de.consolewars.android.app.tab.msgs.MessagesActivityGroup;
 import de.consolewars.android.app.tab.news.NewsActivityGroup;
 import de.consolewars.android.app.tab.overview.OverviewActivityGroup;
 import de.consolewars.android.app.tab.shout.ShoutboxActivityGroup;
+import de.consolewars.android.app.util.HttpPoster;
+import de.consolewars.api.data.AuthenticatedUser;
 
 /*
  * Copyright [2010] [Alexander Dridiger]
@@ -50,6 +51,8 @@ public class CwNavigationMainTabActivity extends TabActivity {
 
 	private APICaller apiCaller;
 	private AppDataHandler dataHandler;
+	private HttpPoster poster;
+	private AuthenticatedUser user;
 
 	/**
 	 * The {@link TabHost} for this {@link TabActivity}. Before used, check for null since the
@@ -75,6 +78,30 @@ public class CwNavigationMainTabActivity extends TabActivity {
 		return dataHandler;
 	}
 
+	/**
+	 * @return the poster
+	 */
+	public HttpPoster getHttpPoster() {
+		return poster;
+	}
+
+	/**
+	 * @return the poster
+	 */
+	public AuthenticatedUser getAuthenticatedUser() {
+		if (user == null) {
+			user = new AuthenticatedUser();
+		}
+		return user;
+	}
+
+	/**
+	 * @return the poster
+	 */
+	public void setAuthenticatedUser(AuthenticatedUser user) {
+		this.user = user;
+	}
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -94,6 +121,7 @@ public class CwNavigationMainTabActivity extends TabActivity {
 	private void initHelper() {
 		dataHandler = new AppDataHandler(getApplicationContext());
 		apiCaller = new APICaller(getApplicationContext());
+		poster = new HttpPoster(getApplicationContext());
 	}
 
 	/**
@@ -101,16 +129,11 @@ public class CwNavigationMainTabActivity extends TabActivity {
 	 */
 	private void setTabs() {
 		// add the necessary tabs
-		addTab(R.string.tab_overv_head, R.string.tab_overv_tag, R.drawable.def_tab_overview,
-				OverviewActivityGroup.class);
-		addTab(R.string.tab_news_head, R.string.tab_news_tag, R.drawable.def_tab_news,
-				NewsActivityGroup.class);
-		addTab(R.string.tab_blogs_head, R.string.tab_blogs_tag, R.drawable.def_tab_blogs,
-				BlogsActivityGroup.class);
-		addTab(R.string.tab_msgs_head, R.string.tab_msgs_tag, R.drawable.def_tab_msg,
-				MessagesActivityGroup.class);
-		addTab(R.string.tab_shout_head, R.string.tab_shout_tag, R.drawable.def_tab_shout,
-				ShoutboxActivityGroup.class);
+		addTab(R.string.tab_overv_tag, R.drawable.def_tab_overview, OverviewActivityGroup.class);
+		addTab(R.string.tab_news_tag, R.drawable.def_tab_news, NewsActivityGroup.class);
+		addTab(R.string.tab_blogs_tag, R.drawable.def_tab_blogs, BlogsActivityGroup.class);
+		addTab(R.string.tab_msgs_tag, R.drawable.def_tab_msg, MessagesActivityGroup.class);
+		addTab(R.string.tab_shout_tag, R.drawable.def_tab_shout, ShoutboxActivityGroup.class);
 	}
 
 	/**
@@ -125,19 +148,15 @@ public class CwNavigationMainTabActivity extends TabActivity {
 	 * @param activity
 	 *            the activity to be added
 	 */
-	private void addTab(int labelId, int tagId, int drawableId,
-			Class<? extends ICwActivityGroup> activity) {
+	private void addTab(int tagId, int drawableId, Class<? extends ICwActivityGroup> activity) {
 		// create an Intent to launch an Activity for the tab (to be reused)
 		Intent intent = new Intent().setClass(this, activity);
 		// initialize a TabSpec for each tab and add it to the TabHost
 		TabHost.TabSpec spec = usedTabHost.newTabSpec(getString(tagId));
 		// use layout inflater to get a view of the tab to be added
-		View tabIndicator = LayoutInflater.from(this).inflate(R.layout.tab_indicator,
-				getTabWidget(), false);
+		View tabIndicator = LayoutInflater.from(this).inflate(R.layout.tab_indicator, getTabWidget(), false);
 
 		// add given information to view elements of the tab
-		TextView title = (TextView) tabIndicator.findViewById(R.id.title);
-		title.setText(labelId);
 		ImageView icon = (ImageView) tabIndicator.findViewById(R.id.icon);
 		icon.setImageResource(drawableId);
 

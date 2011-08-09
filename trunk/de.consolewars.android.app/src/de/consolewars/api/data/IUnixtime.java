@@ -18,8 +18,9 @@ package de.consolewars.api.data;
  */
 
 public interface IUnixtime {
-	
+
 	public int getUnixtime();
+
 	public void setUnixtime(int unixtime);
 
 }

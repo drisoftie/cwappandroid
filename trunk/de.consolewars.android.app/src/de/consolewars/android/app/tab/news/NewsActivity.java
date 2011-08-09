@@ -209,8 +209,8 @@ public class NewsActivity extends Activity {
 		// TODO more text formatting
 		// an empty author string means that the news was not written by a
 		styleStringBuilder.clear();
-		styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF7e6003), String
-				.valueOf(commentAmount));
+		styleStringBuilder
+				.appendWithStyle(new ForegroundColorSpan(0xFF7e6003), String.valueOf(commentAmount));
 
 		return styleStringBuilder;
 	}
@@ -281,8 +281,8 @@ public class NewsActivity extends Activity {
 		@Override
 		protected void onPreExecute() {
 			// first set progressbar
-			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(
-					NewsActivity.this.getParent()).inflate(R.layout.centered_progressbar, null);
+			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(NewsActivity.this.getParent())
+					.inflate(R.layout.centered_progressbar, null);
 
 			TextView text = (TextView) progress_layout.findViewById(R.id.centered_progressbar_text);
 			text.setText(getString(R.string.loading, getString(R.string.tab_news_head)));
@@ -323,9 +323,8 @@ public class NewsActivity extends Activity {
 			initFilter(news_layout);
 			initRefreshBttn(news_layout);
 
-			ViewGroup lastrowLayout = (ViewGroup) LayoutInflater
-					.from(NewsActivity.this.getParent())
-					.inflate(R.layout.day_down_row_layout, null);
+			ViewGroup lastrowLayout = (ViewGroup) LayoutInflater.from(NewsActivity.this.getParent()).inflate(
+					R.layout.day_down_row_layout, null);
 			Button downBttn = (Button) lastrowLayout.findViewById(R.id.day_down_row_bttn);
 			downBttn.setOnClickListener(new OnClickListener() {
 				@Override
@@ -349,12 +348,10 @@ public class NewsActivity extends Activity {
 
 			styleStringBuilder = new StyleSpannableStringBuilder();
 
-			ViewGroup separator = (ViewGroup) LayoutInflater.from(NewsActivity.this.getParent())
-					.inflate(R.layout.news_row_day_separator_layout, null);
-			TextView separatorTxt = (TextView) separator
-					.findViewById(R.id.news_row_day_separator_text);
-			separatorTxt.setText(createDate(currentNewsDate.getTimeInMillis(),
-					"EEEE, dd. MMMMM yyyy"));
+			ViewGroup separator = (ViewGroup) LayoutInflater.from(NewsActivity.this.getParent()).inflate(
+					R.layout.news_row_day_separator_layout, null);
+			TextView separatorTxt = (TextView) separator.findViewById(R.id.news_row_day_separator_text);
+			separatorTxt.setText(createDate(currentNewsDate.getTimeInMillis(), "EEEE, dd. MMMMM yyyy"));
 			publishProgress(separator);
 
 			Calendar tempCal = Calendar.getInstance(Locale.GERMANY);
@@ -363,15 +360,13 @@ public class NewsActivity extends Activity {
 			for (News newsToAdd : news) {
 				if (getDay(tempCal, -1).getTimeInMillis() > newsToAdd.getUnixtime() * 1000L) {
 					currentNewsDate.setTimeInMillis(currentNewsDate.getTimeInMillis() + 1L);
-					currentNewsDate
-							.setTimeInMillis(getDay(currentNewsDate, -1).getTimeInMillis() - 1L);
+					currentNewsDate.setTimeInMillis(getDay(currentNewsDate, -1).getTimeInMillis() - 1L);
 					tempCal.setTimeInMillis(currentNewsDate.getTimeInMillis() + 1L);
-					separator = (ViewGroup) LayoutInflater.from(NewsActivity.this.getParent())
-							.inflate(R.layout.news_row_day_separator_layout, null);
-					separatorTxt = (TextView) separator
-							.findViewById(R.id.news_row_day_separator_text);
-					separatorTxt.setText(createDate(currentNewsDate.getTimeInMillis(),
-							"EEEE, dd. MMMMM yyyy"));
+					separator = (ViewGroup) LayoutInflater.from(NewsActivity.this.getParent()).inflate(
+							R.layout.news_row_day_separator_layout, null);
+					separatorTxt = (TextView) separator.findViewById(R.id.news_row_day_separator_text);
+					separatorTxt
+							.setText(createDate(currentNewsDate.getTimeInMillis(), "EEEE, dd. MMMMM yyyy"));
 					publishProgress(separator);
 				} else if ((currentNewsDate.getTimeInMillis() >= newsToAdd.getUnixtime() * 1000L)
 						&& (getDay(tempCal, -1).getTimeInMillis() <= newsToAdd.getUnixtime() * 1000L)) {
@@ -395,17 +390,14 @@ public class NewsActivity extends Activity {
 					((ImageView) tableRow.findViewById(R.id.news_row_category_icon))
 							.setImageResource(NewsActivity.this.getResources().getIdentifier(
 									getString(R.string.cat_drawable, newsToAdd.getCategoryshort()),
-									getString(R.string.drawable),
-									getApplicationContext().getPackageName()));
-					((TextView) tableRow.findViewById(R.id.news_row_title))
-							.setText(createTitle(newsToAdd.getTitle()));
-					((TextView) tableRow.findViewById(R.id.news_row_date)).setText(createDate(
-							newsToAdd.getUnixtime() * 1000L, "'um' HH:mm'Uhr'"));
-					TextView cmtAmount = (TextView) tableRow
-							.findViewById(R.id.news_row_cmmts_amount);
+									getString(R.string.drawable), getApplicationContext().getPackageName()));
+					((TextView) tableRow.findViewById(R.id.news_row_title)).setText(createTitle(newsToAdd
+							.getTitle()));
+					((TextView) tableRow.findViewById(R.id.news_row_date)).setText(createDate(newsToAdd
+							.getUnixtime() * 1000L, "'um' HH:mm'Uhr'"));
+					TextView cmtAmount = (TextView) tableRow.findViewById(R.id.news_row_cmmts_amount);
 					cmtAmount.setText(createAamount(newsToAdd.getComments()));
-					TextView picAmount = (TextView) tableRow
-							.findViewById(R.id.news_row_pics_amount);
+					TextView picAmount = (TextView) tableRow.findViewById(R.id.news_row_pics_amount);
 					picAmount.setText(createAamount(newsToAdd.getPiclist().length));
 					TextView author = (TextView) tableRow.findViewById(R.id.news_row_author);
 					author.setText(createAuthor(newsToAdd.getAuthor()));

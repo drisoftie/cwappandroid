@@ -3,7 +3,9 @@ package de.consolewars.android.app.tab.cmts;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -20,14 +22,17 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TableLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import de.consolewars.android.app.R;
+import de.consolewars.android.app.tab.CwBasicActivityGroup;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
-import de.consolewars.android.app.tab.blogs.SingleBlogActivity;
-import de.consolewars.android.app.tab.news.SingleNewsActivity;
 import de.consolewars.android.app.util.TextViewHandler;
 import de.consolewars.api.data.Comment;
 import de.consolewars.api.exception.ConsolewarsAPIException;
@@ -52,11 +57,13 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
  */
 public class CommentsActivity extends Activity {
 
-	private List<Comment> comments;
+	private List<Comment> comments = new ArrayList<Comment>();
 	private CwNavigationMainTabActivity mainTabs;
 	private ViewGroup cmmts_layout;
 	private int area;
 	private int id;
+	private int currpage = 1;
+	private int maxpage = 1;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -68,18 +75,73 @@ public class CommentsActivity extends Activity {
 		if (getParent().getParent() instanceof CwNavigationMainTabActivity) {
 			mainTabs = (CwNavigationMainTabActivity) getParent().getParent();
 		}
+
+		resolveBundle();
 		new BuildCommentsAsyncTask().execute();
 	}
 
-	private void resolveID() {
-		id = -1;
+	private void initButtonsAndCheck() {
+		Button refresh_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_refresh);
+
+		refresh_bttn.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				new BuildCommentsAsyncTask().execute();
+			}
+		});
+
+		Button next_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_next);
+		Button prev_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_prev);
+		next_bttn.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				currpage++;
+				new BuildCommentsAsyncTask().execute();
+			}
+		});
+		prev_bttn.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				currpage--;
+				new BuildCommentsAsyncTask().execute();
+			}
+		});
+
+		Button submit_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_submit);
+		submit_bttn.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				new SubmitCommentAsyncTask().execute();
+			}
+		});
+		checkButtons();
+	}
+
+	private void checkButtons() {
+		Button next_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_next);
+		Button prev_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_prev);
+		if (currpage <= 1) {
+			prev_bttn.setEnabled(false);
+		} else {
+			prev_bttn.setEnabled(true);
+		}
+		if (currpage == maxpage) {
+			next_bttn.setEnabled(false);
+		} else {
+			next_bttn.setEnabled(true);
+		}
+	}
+
+	private void resolveBundle() {
+		Bundle extra = CommentsActivity.this.getIntent().getExtras();
+
+		id = extra.getInt(getString(R.string.id), -1);
+
 		// looking for the correct intent
-		if (getIntent().hasExtra(SingleBlogActivity.class.getName())) {
-			id = getIntent().getIntExtra(SingleBlogActivity.class.getName(), -1);
-			area = Comment.AREA_BLOGS;
-		} else if (getIntent().hasExtra(SingleNewsActivity.class.getName())) {
-			id = getIntent().getIntExtra(SingleNewsActivity.class.getName(), -1);
+		if (extra.getInt(getString(R.string.type)) == R.string.news) {
 			area = Comment.AREA_NEWS;
+		} else if (extra.getInt(getString(R.string.type)) == R.string.blog) {
+			area = Comment.AREA_BLOGS;
 		}
 	}
 
@@ -94,7 +156,7 @@ public class CommentsActivity extends Activity {
 		URL newurl;
 		Bitmap icon = null;
 		try {
-			newurl = new URL(getString(R.string.blogs_userpic_url, uid, 30));
+			newurl = new URL(getString(R.string.blogs_userpic_url, uid, 50));
 			icon = BitmapFactory.decodeStream(newurl.openConnection().getInputStream());
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
@@ -115,8 +177,7 @@ public class CommentsActivity extends Activity {
 		TimeZone zone = TimeZone.getDefault();
 
 		Calendar cal = Calendar.getInstance(zone, Locale.GERMANY);
-		SimpleDateFormat dateformat = new SimpleDateFormat("dd.MM.yyyy, HH:mm 'Uhr'",
-				Locale.GERMANY);
+		SimpleDateFormat dateformat = new SimpleDateFormat("dd.MM.yyyy, HH:mm 'Uhr'", Locale.GERMANY);
 		dateformat.setCalendar(cal);
 		return dateformat.format(date);
 	}
@@ -132,33 +193,29 @@ public class CommentsActivity extends Activity {
 
 		@Override
 		protected void onPreExecute() {
-			cmmts_layout = (ViewGroup) LayoutInflater.from(CommentsActivity.this.getParent())
-					.inflate(R.layout.comments_layout, null);
+			cmmts_layout = (ViewGroup) LayoutInflater.from(CommentsActivity.this.getParent()).inflate(
+					R.layout.comments_layout, null);
 			setContentView(cmmts_layout);
 			// first set progressbar
-			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(
-					CommentsActivity.this.getParent()).inflate(R.layout.centered_progressbar, null);
+			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(CommentsActivity.this.getParent())
+					.inflate(R.layout.centered_progressbar, null);
 			TextView text = (TextView) progress_layout.findViewById(R.id.centered_progressbar_text);
 			text.setText(getString(R.string.loading, getString(R.string.comments)));
 
 			progressBar = (ProgressBar) progress_layout.findViewById(R.id.centered_progressbar);
 			progressBar.setProgress(0);
 			TableLayout comtsTable = (TableLayout) cmmts_layout.findViewById(R.id.comments_table);
+			comtsTable.removeAllViews();
 			comtsTable.addView(progress_layout);
 		}
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			resolveID();
 			try {
-				mainTabs.getApiCaller().authenticateOnCW();
-				Log.i("********ComID*******", id + " " + area);
-				comments = mainTabs.getApiCaller().getApi().getComments(id, area, 10, 1, -1);
-				Log.i("********Comments*******", "Anzahl: " + comments.size());
+				comments = mainTabs.getApiCaller().getApi().getComments(id, area, 10, currpage, -1);
 			} catch (ConsolewarsAPIException e) {
 				e.printStackTrace();
 				Log.e(getString(R.string.exc_auth_tag), e.getMessage(), e);
-				// return new ArrayList<View>();
 			}
 			createCommentsRows();
 			return null;
@@ -172,6 +229,7 @@ public class CommentsActivity extends Activity {
 
 		@Override
 		protected void onPostExecute(Void result) {
+			initButtonsAndCheck();
 			// sets the comments view for this Activity
 			TableLayout cmtsTable = (TableLayout) cmmts_layout.findViewById(R.id.comments_table);
 			cmtsTable.removeViewAt(cmtsTable.getChildCount() - 1);
@@ -185,26 +243,90 @@ public class CommentsActivity extends Activity {
 			TableLayout comtsTable = (TableLayout) cmmts_layout.findViewById(R.id.comments_table);
 
 			for (Comment comment : comments) {
+				maxpage = comment.getPagecount();
 				// get the table row by an inflater and set the needed information
 				final View tableRow = LayoutInflater.from(CommentsActivity.this).inflate(
 						R.layout.comments_row_layout, comtsTable, false);
 
-				((TextView) tableRow.findViewById(R.id.cmts_username)).setText(comment
-						.getUsername());
-				((ImageView) tableRow.findViewById(R.id.cmts_usericon))
-						.setImageBitmap(getUserPic(comment.getUid()));
-				((TextView) tableRow.findViewById(R.id.cmts_date)).setText(createDate(comment
-						.getUnixtime() * 1000L));
+				TextView usernameTxt = (TextView) tableRow.findViewById(R.id.cmts_username);
+				usernameTxt.setText(comment.getUsername());
+				usernameTxt.setSelected(true);
+				((ImageView) tableRow.findViewById(R.id.cmts_usericon)).setImageBitmap(getUserPic(comment
+						.getUid()));
+				((TextView) tableRow.findViewById(R.id.cmts_date))
+						.setText(createDate(comment.getUnixtime() * 1000L));
 				((TextView) tableRow.findViewById(R.id.cmts_date)).setSelected(true);
 				TextView content = (TextView) tableRow.findViewById(R.id.comment_content);
 				content.setText(Html.fromHtml(comment.getStatement(), new TextViewHandler(
 						CommentsActivity.this.getApplicationContext()), null));
-				//
 				// TextView author = (TextView) tableRow.findViewById(R.id.blogs_row_author);
 				// author.setText(createAuthor(blog.getAuthor()));
 				// author.setSelected(true);
 				publishProgress(tableRow);
 			}
+		}
+	}
+
+	/**
+	 * Asynchronous task to submit a comment.
+	 * 
+	 * @author Alexander Dridiger
+	 */
+	private class SubmitCommentAsyncTask extends AsyncTask<Void, Void, Void> {
+
+		boolean dowork = false;
+
+		@Override
+		protected void onPreExecute() {
+			EditText commenttxt = (EditText) cmmts_layout.findViewById(R.id.comments_edttxt_input);
+			if (commenttxt.getText().toString().matches("")) {
+				commenttxt.setError(getString(R.string.no_text_entered));
+			} else if (mainTabs.getAuthenticatedUser().getUsername() == null
+					|| mainTabs.getAuthenticatedUser().getUsername().matches("")) {
+				commenttxt.setError(getString(R.string.not_logged_in));
+			} else {
+				commenttxt.setError(null);
+				Toast.makeText(CommentsActivity.this, getResources().getString(R.string.comment_sending),
+						Toast.LENGTH_SHORT).show();
+				dowork = true;
+			}
+		}
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			if (dowork) {
+				EditText commenttxt = (EditText) cmmts_layout.findViewById(R.id.comments_edttxt_input);
+				if (mainTabs.getAuthenticatedUser() != null) {
+					try {
+						mainTabs.getHttpPoster().sendPost(
+								getString(R.string.cw_posting_url),
+								getString(R.string.cw_cookie_full, mainTabs.getAuthenticatedUser().getUid(),
+										mainTabs.getAuthenticatedUser().getPasswordHash()),
+								getString(R.string.cw_cmmt_data, area, id,
+										getString(R.string.cw_command_newentry), URLEncoder.encode(commenttxt
+												.getText().toString(), getString(R.string.utf8)), 1));
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			if (dowork) {
+				Toast.makeText(CommentsActivity.this, getResources().getString(R.string.comment_sent),
+						Toast.LENGTH_SHORT).show();
+			}
+		}
+	}
+
+	@Override
+	public void onBackPressed() {
+		if (getParent() instanceof CwBasicActivityGroup) {
+			((CwBasicActivityGroup) getParent()).back();
 		}
 	}
 }

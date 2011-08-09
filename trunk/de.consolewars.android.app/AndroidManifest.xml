@@ -7,10 +7,13 @@
 	<application
 		android:debuggable="true"
 		android:persistent="false"
-		android:icon="@drawable/cw_logo" android:theme="@style/CheckTheme" android:label="@string/app_name">
+		android:icon="@drawable/cw_logo"
+		android:theme="@style/CheckTheme"
+		android:label="@string/app_name">
 		<activity
 			android:icon="@drawable/cw_logo"
-			android:name=".SplashScreenActivity" android:theme="@style/CheckTheme">
+			android:name=".SplashScreenActivity"
+			android:theme="@style/CheckTheme">
 			<intent-filter>
 				<action
 					android:name="android.intent.action.MAIN"/>
@@ -21,7 +24,8 @@
 
 		<activity
 			android:name=".tab.CwNavigationMainTabActivity"
-			android:configChanges="keyboardHidden|orientation" android:theme="@style/CheckTheme"></activity>
+			android:configChanges="keyboardHidden|orientation"
+			android:theme="@style/CheckTheme"></activity>
 		<activity
 			android:name=".tab.news.NewsActivityGroup"
 			android:configChanges="keyboardHidden|orientation"></activity>
@@ -48,9 +52,11 @@
 			android:configChanges="keyboardHidden|orientation"></activity>
 		<activity
 			android:name=".tab.msgs.SingleMessageActivity"
+			android:alwaysRetainTaskState="false"
 			android:configChanges="keyboardHidden|orientation"></activity>
 		<activity
 			android:name=".tab.news.SingleNewsActivity"
+			android:alwaysRetainTaskState="false"
 			android:configChanges="orientation"></activity>
 		<activity
 			android:name=".tab.overview.OverviewActivity"
@@ -59,14 +65,20 @@
 			android:name=".tab.shout.ShoutboxActivityGroup"></activity>
 		<activity
 			android:name=".tab.overview.OverviewActivityGroup"
+			android:alwaysRetainTaskState="false"
 			android:configChanges="keyboardHidden|orientation"></activity>
-		<activity android:name=".tab.news.NewsPicViewerActivity"></activity>
-		<activity android:name=".tab.cmts.CommentsActivity"></activity>
+		<activity
+			android:name=".tab.news.NewsPicViewerActivity"></activity>
+		<activity
+			android:name=".tab.cmts.CommentsActivity"
+			android:alwaysRetainTaskState="false"></activity>
 
-		
-		
+
+
 	</application>
 	<uses-permission
 		android:name="android.permission.INTERNET"></uses-permission>
-	<uses-sdk android:minSdkVersion="6" android:targetSdkVersion="8"></uses-sdk>
+	<uses-sdk
+		android:minSdkVersion="6"
+		android:targetSdkVersion="8"></uses-sdk>
 </manifest> 

@@ -122,10 +122,9 @@ public class DatabaseManager {
 	 * @param orderBy
 	 * @return
 	 */
-	public Cursor fireQuery(String table, String[] columns, String selection,
-			String[] selectionArgs, String groupBy, String having, String orderBy) {
-		Cursor cursor = this.db.query(table, columns, selection, selectionArgs, groupBy, having,
-				orderBy);
+	public Cursor fireQuery(String table, String[] columns, String selection, String[] selectionArgs,
+			String groupBy, String having, String orderBy) {
+		Cursor cursor = this.db.query(table, columns, selection, selectionArgs, groupBy, having, orderBy);
 		return cursor;
 	}
 

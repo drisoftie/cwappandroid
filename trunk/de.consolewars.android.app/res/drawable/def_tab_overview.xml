@@ -2,8 +2,8 @@
 <selector
 	xmlns:android="http://schemas.android.com/apk/res/android">
 	<item
-		android:drawable="@drawable/tabicon_overview_bright"
+		android:drawable="@drawable/tab_overview_selected"
 		android:state_selected="true"/>
 	<item
-		android:drawable="@drawable/tabicon_overview_dark"/>
+		android:drawable="@drawable/tab_overview"/>
 </selector>

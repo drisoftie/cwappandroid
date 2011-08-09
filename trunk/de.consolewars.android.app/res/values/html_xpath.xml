@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<string
+		name="cw_domain">http://www.consolewars.de</string>	
+	<string
 		name="cw_url">http://www.consolewars.de%1$s</string>
 	<string
 		name="cw_url_slash">http://www.consolewars.de/</string>
@@ -15,6 +17,8 @@
 	<string
 		name="value">value</string>
 	<string
+		name="utf8">UTF-8</string>	
+	<string
 		name="prefix_userpic">/userpages/?uid=</string>	
 	<string
 		name="youtube_embedding">"&lt;object width=\"%1$d\" height=\"%2$d\"&gt;&lt;param name=\"movie\" value=\"%3$s\"&gt;&lt;/param&gt;&lt;param name=\"allowFullScreen\" value=\"true\"&gt;&lt;/param&gt;&lt;param name=\"allowscriptaccess\" value=\"always\"&gt;&lt;/param&gt;&lt;embed src=\"%3$s\" type=\"application/x-shockwave-flash\" allowscriptaccess=\"always\" allowfullscreen=\"true\" width=\"%1$d\" height=\"%2$d\"&gt;&lt;/embed&gt;"</string>
@@ -25,9 +29,30 @@
 		name="general_picture">http://www.consolewars.de/gen/fetchpics.php?aidx=%1$d&amp;database=attachments&amp;noborder=0&amp;sizex=%2$s
 	</string>
 	<string
+		name="post">POST
+	</string>
+	<string
+		name="cookie">Cookie
+	</string>
+	<string
+		name="cw_cookie_full">cwbb_userid=%1$d; cwbb_password=%2$s
+	</string>
+	<string
+		name="cw_cookie_userid">cwbb_userid
+	</string>
+	<string
+		name="cw_cookie_pw">cwbb_password
+	</string>
+	<string
+		name="cw_posting_url">http://www.consolewars.de/gen/processtalkback.php
+	</string>		
+	<string
 		name="cw_login">http://www.consolewars.de/messageboard/login.php?do=login&amp;cookieuser=1&amp;do=login&amp;s=&amp;vb_login_md5password=%1$s&amp;vb_login_md5password_utf=%1$s&amp;vb_login_password=&amp;vb_login_username=%2$s
 	</string>
 	<string
-		name="cw_cmmt">http://www.consolewars.de/gen/processtalkback.php?reference_area=11&amp;reference_id=32690&amp;talkback_cid=0&amp;talkback_command=newentry&amp;talkback_content=goil&amp;talkback_uid=0&amp;talkback_viewpage=5
-	</string>			
+		name="cw_cmmt_data">reference_area=%1$d&amp;reference_id=%2$d&amp;talkback_command=%3$s&amp;talkback_content=%4$s&amp;talkback_viewpage=%5$d
+	</string>	
+	<string
+		name="cw_command_newentry">newentry
+	</string>		
 </resources>

@@ -23,7 +23,7 @@ import de.consolewars.api.data.AuthStatus;
  * @author cerpin (arrewk@gmail.com)
  */
 public class SAXAuthStatusParser extends AbstractSAXParser<AuthStatus> {
-	
+
 	public SAXAuthStatusParser(String APIURL) {
 		super(APIURL);
 	}

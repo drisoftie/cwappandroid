@@ -23,5 +23,4 @@ public interface BlogUpdateListener {
 
 	public void blogsReceived(ListEventObject<Blog> event);
 
-	
 }

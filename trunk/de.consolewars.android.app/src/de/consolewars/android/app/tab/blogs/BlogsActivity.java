@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -55,7 +56,7 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
  */
 public class BlogsActivity extends Activity {
 
-	private List<Blog> blogs;
+	private List<Blog> blogs = new ArrayList<Blog>();
 	// remember last selected table row to draw the background
 	private View selectedRow;
 	// text styling
@@ -160,8 +161,8 @@ public class BlogsActivity extends Activity {
 		// TODO more text formatting
 		// an empty author string means that the blog was not written by a
 		styleStringBuilder.clear();
-		styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF7e6003), String
-				.valueOf(commentAmount));
+		styleStringBuilder
+				.appendWithStyle(new ForegroundColorSpan(0xFF7e6003), String.valueOf(commentAmount));
 
 		return styleStringBuilder;
 	}
@@ -234,8 +235,8 @@ public class BlogsActivity extends Activity {
 		@Override
 		protected void onPreExecute() {
 			// first set progressbar
-			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(
-					BlogsActivity.this.getParent()).inflate(R.layout.centered_progressbar, null);
+			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(BlogsActivity.this.getParent())
+					.inflate(R.layout.centered_progressbar, null);
 
 			TextView text = (TextView) progress_layout.findViewById(R.id.centered_progressbar_text);
 			text.setText(getString(R.string.loading, getString(R.string.tab_blogs_head)));
@@ -251,8 +252,7 @@ public class BlogsActivity extends Activity {
 			try {
 				oldestBlogsDate.setTimeInMillis(getDay(oldestBlogsDate, 0).getTimeInMillis());
 				mainTabs.getApiCaller().authenticateOnCW();
-				blogs = mainTabs.getApiCaller().getApi().getBlogsList(-1, 50, 0,
-						oldestBlogsDate.getTime());
+				blogs = mainTabs.getApiCaller().getApi().getBlogsList(-1, 50, 0, oldestBlogsDate.getTime());
 			} catch (ConsolewarsAPIException e) {
 				e.printStackTrace();
 				Log.e(getString(R.string.exc_auth_tag), e.getMessage(), e);
@@ -273,16 +273,15 @@ public class BlogsActivity extends Activity {
 			TableLayout blogsTable = (TableLayout) blogs_layout.findViewById(R.id.blogs_table);
 
 			blogsTable.removeViewAt(blogsTable.getChildCount() - 1);
-			ViewGroup lastrowLayout = (ViewGroup) LayoutInflater.from(
-					BlogsActivity.this.getParent()).inflate(R.layout.day_down_row_layout, null);
+			ViewGroup lastrowLayout = (ViewGroup) LayoutInflater.from(BlogsActivity.this.getParent())
+					.inflate(R.layout.day_down_row_layout, null);
 			Button downBttn = (Button) lastrowLayout.findViewById(R.id.day_down_row_bttn);
 			downBttn.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
 					currentBlogsDate.setTimeInMillis(oldestBlogsDate.getTimeInMillis() - 1L);
 					oldestBlogsDate.setTimeInMillis(getDay(oldestBlogsDate, -1).getTimeInMillis());
-					TableLayout blogsTable = (TableLayout) blogs_layout
-							.findViewById(R.id.blogs_table);
+					TableLayout blogsTable = (TableLayout) blogs_layout.findViewById(R.id.blogs_table);
 					blogsTable.removeViewAt(blogsTable.getChildCount() - 1);
 					new BuildBlogsAsyncTask().execute();
 				}
@@ -299,12 +298,10 @@ public class BlogsActivity extends Activity {
 
 			styleStringBuilder = new StyleSpannableStringBuilder();
 
-			ViewGroup separator = (ViewGroup) LayoutInflater.from(BlogsActivity.this.getParent())
-					.inflate(R.layout.blogs_row_day_separator_layout, null);
-			TextView separatorTxt = (TextView) separator
-					.findViewById(R.id.blogs_row_day_separator_text);
-			separatorTxt.setText(createDate(currentBlogsDate.getTimeInMillis(),
-					"EEEE, dd. MMMMM yyyy"));
+			ViewGroup separator = (ViewGroup) LayoutInflater.from(BlogsActivity.this.getParent()).inflate(
+					R.layout.blogs_row_day_separator_layout, null);
+			TextView separatorTxt = (TextView) separator.findViewById(R.id.blogs_row_day_separator_text);
+			separatorTxt.setText(createDate(currentBlogsDate.getTimeInMillis(), "EEEE, dd. MMMMM yyyy"));
 			publishProgress(separator);
 
 			Calendar tempCal = Calendar.getInstance(Locale.GERMANY);
@@ -313,13 +310,11 @@ public class BlogsActivity extends Activity {
 			for (Blog blog : blogs) {
 				if (getDay(tempCal, -1).getTimeInMillis() > blog.getUnixtime() * 1000L) {
 					currentBlogsDate.setTimeInMillis(currentBlogsDate.getTimeInMillis() + 1L);
-					currentBlogsDate
-							.setTimeInMillis(getDay(currentBlogsDate, -1).getTimeInMillis() - 1L);
+					currentBlogsDate.setTimeInMillis(getDay(currentBlogsDate, -1).getTimeInMillis() - 1L);
 					tempCal.setTimeInMillis(currentBlogsDate.getTimeInMillis() + 1L);
-					separator = (ViewGroup) LayoutInflater.from(BlogsActivity.this.getParent())
-							.inflate(R.layout.blogs_row_day_separator_layout, null);
-					separatorTxt = (TextView) separator
-							.findViewById(R.id.blogs_row_day_separator_text);
+					separator = (ViewGroup) LayoutInflater.from(BlogsActivity.this.getParent()).inflate(
+							R.layout.blogs_row_day_separator_layout, null);
+					separatorTxt = (TextView) separator.findViewById(R.id.blogs_row_day_separator_text);
 					separatorTxt.setText(createDate(currentBlogsDate.getTimeInMillis(),
 							"EEEE, dd. MMMMM yyyy"));
 					publishProgress(separator);
@@ -346,8 +341,8 @@ public class BlogsActivity extends Activity {
 					// set each table row with the given information from the returned blogs
 					((ImageView) tableRow.findViewById(R.id.blogs_row_user_icon))
 							.setImageBitmap(getUserPic(blog.getUid()));
-					((TextView) tableRow.findViewById(R.id.blogs_row_title))
-							.setText(createTitle(blog.getTitle()));
+					((TextView) tableRow.findViewById(R.id.blogs_row_title)).setText(createTitle(blog
+							.getTitle()));
 					((TextView) tableRow.findViewById(R.id.blogs_row_date)).setText(createDate(blog
 							.getUnixtime() * 1000L, "'um' HH:mm'Uhr'"));
 					TextView amount = (TextView) tableRow.findViewById(R.id.blogs_row_cmmts_amount);

@@ -23,7 +23,7 @@ import android.view.View;
  * 
  * @author Alexander Dridiger
  */
-public interface ICwActivityGroup {	
+public interface ICwActivityGroup {
 
 	/**
 	 * Replaces the current view of the current activity with another view of another activity.

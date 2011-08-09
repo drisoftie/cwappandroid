@@ -20,8 +20,8 @@ import android.os.Bundle;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -96,32 +96,35 @@ public class SingleBlogActivity extends Activity {
 				// String fString = String.format(blog.getArticle(), "");
 				// CharSequence styledString = Html.fromHtml(fString);
 				// text.setText(styledString);
-				text.setText(Html.fromHtml(blog.getArticle(true), new TextViewHandler(
-						SingleBlogActivity.this.getApplicationContext()), null));
+				text.setText(Html.fromHtml(blog.getArticle(true), new TextViewHandler(SingleBlogActivity.this
+						.getApplicationContext()), null));
 			} catch (IllegalFormatException ife) {
 				// FIXME Wrong format handling
 				text.setText(blog.getArticle());
 			}
-			createCommentBttn(blogView, blog.getId());
+			createCommentBttn(blogView, blog);
 			createHeader(blogView, blog);
 		}
 		return blogView;
 	}
 
-	private void createCommentBttn(View blogView, final int id) {
+	private void createCommentBttn(View blogView, final Blog blog) {
 		Button bttn = (Button) blogView.findViewById(R.id.singleblog_comments_bttn);
 		bttn.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				Intent commentsIntent = new Intent(SingleBlogActivity.this, CommentsActivity.class);
 
-				commentsIntent.putExtra(SingleBlogActivity.class.getName(), id);
+				Bundle extra = new Bundle();
+				extra.putInt(getString(R.string.type), R.string.blog);
+				extra.putInt(getString(R.string.id), blog.getId());
+				extra.putInt(getString(R.string.comments_amount), blog.getComments());
 
-				View view = ((ActivityGroup) getParent())
-						.getLocalActivityManager()
-						.startActivity(CommentsActivity.class.getSimpleName(),
-								commentsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
-						.getDecorView();
+				commentsIntent.putExtras(extra);
+
+				View view = ((ActivityGroup) getParent()).getLocalActivityManager().startActivity(
+						CommentsActivity.class.getSimpleName(),
+						commentsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
 				// replace the view
 				((BlogsActivityGroup) getParent()).replaceView(view);
 			}
@@ -193,9 +196,8 @@ public class SingleBlogActivity extends Activity {
 		@Override
 		protected void onPreExecute() {
 			// first set progressbar view
-			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(
-					SingleBlogActivity.this.getParent()).inflate(R.layout.centered_progressbar,
-					null);
+			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(SingleBlogActivity.this.getParent())
+					.inflate(R.layout.centered_progressbar, null);
 			setContentView(progress_layout);
 
 			TextView text = (TextView) progress_layout.findViewById(R.id.centered_progressbar_text);

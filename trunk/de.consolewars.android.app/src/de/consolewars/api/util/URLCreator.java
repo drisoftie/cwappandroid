@@ -23,73 +23,73 @@ import java.util.ArrayList;
  * this class is for comfortable creating of API-URLs
  * 
  * @author cerpin (arrewk@gmail.com)
- *
+ * 
  */
 public class URLCreator {
-	
+
 	private ArrayList<URLArgument> arguments;
 	private String baseURL;
-	
+
 	public URLCreator(String baseURL) {
 		this.arguments = new ArrayList<URLArgument>();
 		this.baseURL = baseURL;
 	}
-	
+
 	public void addArgument(String name, String value) {
-		arguments.add(new URLArgument(name,value));
+		arguments.add(new URLArgument(name, value));
 	}
-	
+
 	public void addArgument(String name, int value) {
-		this.addArgument(name,value + "");
+		this.addArgument(name, value + "");
 	}
-	
+
 	public void addArgument(String name, int[] values) {
 		String strValues = "";
-		for(int i = 0; i < values.length; i++) {
+		for (int i = 0; i < values.length; i++) {
 			strValues += values[i];
-			if(i != values.length -1) {
+			if (i != values.length - 1) {
 				strValues += ",";
 			}
 		}
-		arguments.add(new URLArgument(name,strValues));
+		arguments.add(new URLArgument(name, strValues));
 	}
-	
+
 	public String toString() {
 		String url = baseURL;
-		if(arguments.size() > 0) {
+		if (arguments.size() > 0) {
 			url += "?";
 		}
-		
-		for(int i = 0; i < arguments.size(); i++) {
+
+		for (int i = 0; i < arguments.size(); i++) {
 			url += arguments.get(i);
-			if(i != arguments.size() - 1) {
+			if (i != arguments.size() - 1) {
 				url += "&";
 			}
 		}
-		
-		return url;		
+
+		return url;
 	}
-	
+
 	private class URLArgument {
-		
+
 		private String name;
 		private String value;
-		
+
 		public URLArgument(String name, String value) {
 			this.name = name;
 			this.value = value;
 		}
-		
+
 		@SuppressWarnings("unused")
 		public String getName() {
 			return name;
 		}
-		
+
 		@SuppressWarnings("unused")
 		public String getValue() {
 			return value;
 		}
-		
+
 		public String toString() {
 			return name + "=" + value;
 		}

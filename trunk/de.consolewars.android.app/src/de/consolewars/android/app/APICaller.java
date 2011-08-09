@@ -68,8 +68,7 @@ public class APICaller {
 	 * @return
 	 * @throws ConsolewarsAPIException
 	 */
-	public AuthenticatedUser getAuthUser(String username, String password)
-			throws ConsolewarsAPIException {
+	public AuthenticatedUser getAuthUser(String username, String password) throws ConsolewarsAPIException {
 		return api.authenticate(username, password);
 	}
 }

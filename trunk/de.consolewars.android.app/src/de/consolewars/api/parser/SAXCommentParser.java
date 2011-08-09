@@ -22,18 +22,21 @@ import de.consolewars.api.data.Comment;
 /**
  * 
  * @author cerpin (arrewk@gmail.com)
- *
+ * 
  */
 public class SAXCommentParser extends AbstractSAXParser<Comment> {
-	
+
 	private boolean isComment = true;
-		
+
+	private int pagecount;
+	private int currpage;
+
 	public SAXCommentParser(String APIURL) {
 		super(APIURL);
 	}
 
 	@Override
-	protected Comment createTempItem() {	
+	protected Comment createTempItem() {
 		return new Comment();
 	}
 
@@ -44,52 +47,41 @@ public class SAXCommentParser extends AbstractSAXParser<Comment> {
 
 	@Override
 	protected void parseItem(String uri, String localName, String qName) {
-		if(!qName.equals(localName))
-			qName = localName; 
-		
-		if(qName.equals("navi")) {
+		if (!qName.equals(localName))
+			qName = localName;
+
+		if (qName.equals("navi")) {
 			// todo
-		}
-		else if(qName.equals("currpage")) {
-			getTempItem().setCurrpage(Integer.parseInt(tempValue));
-		}
-		else if(qName.equals("pagecount")) {
-			getTempItem().setPagecount(Integer.parseInt(tempValue));
-		}
-		else if(qName.equals("mode")) {
-			if(tempValue.equalsIgnoreCase("comment")) {
+		} else if (qName.equals("currpage")) {
+			currpage = Integer.parseInt(tempValue);
+		} else if (qName.equals("pagecount")) {
+			pagecount = Integer.parseInt(tempValue);
+		} else if (qName.equals("mode")) {
+			if (tempValue.equalsIgnoreCase("comment")) {
 				isComment = true;
 				getTempItem().setMode(tempValue);
-			}
-			else { 
+			} else {
 				isComment = false;
 			}
-		}
-		else if(qName.equals("unixtime")) {
+		} else if (qName.equals("unixtime")) {
 			getTempItem().setUnixtime(Integer.parseInt(tempValue));
-		}
-		else if(qName.equals("statement")) {
+		} else if (qName.equals("statement")) {
 			getTempItem().setStatement(tempValue);
-		}
-		else if(qName.equals("quote")) {
+		} else if (qName.equals("quote")) {
 			getTempItem().setQuote(tempValue);
-		}
-		else if(qName.equals("username")) {
+		} else if (qName.equals("username")) {
 			getTempItem().setUsername(tempValue);
-		}
-		else if(qName.equals("uid")) {
+			getTempItem().setPagecount(pagecount);
+			getTempItem().setCurrpage(currpage);
+		} else if (qName.equals("uid")) {
 			getTempItem().setUid(Integer.parseInt(tempValue));
-		}
-		else if(qName.equals("usertitle")) {
+		} else if (qName.equals("usertitle")) {
 			getTempItem().setUsertitle(tempValue);
-		}
-		else if(qName.equals("commentcount")) {
+		} else if (qName.equals("commentcount")) {
 			getTempItem().setCommentcount(Integer.parseInt(tempValue));
-		}
-		else if(qName.equals("postcount")) {
+		} else if (qName.equals("postcount")) {
 			getTempItem().setPostcount(Integer.parseInt(tempValue));
-		}
-		else if(qName.equals("cid")) {
+		} else if (qName.equals("cid")) {
 			getTempItem().setCid(Integer.parseInt(tempValue));
 		}
 	}

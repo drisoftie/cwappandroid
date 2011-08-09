@@ -20,8 +20,7 @@ import de.consolewars.api.data.Message;
  */
 
 public interface MessageUpdateListener {
-	
-	public void messagesReceived(ListEventObject<Message> event);
 
+	public void messagesReceived(ListEventObject<Message> event);
 
 }

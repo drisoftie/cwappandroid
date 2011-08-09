@@ -4,6 +4,25 @@ import android.content.Context;
 import android.database.Cursor;
 import de.consolewars.android.app.R;
 
+/*
+ * Copyright [2010] [Alexander Dridiger]
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
+ * Helper class providing access to app-specific data. Access to the db is also leveraged by it.
+ * 
+ * @author Alexander Dridiger
+ */
 public class AppDataHandler {
 
 	private Context context;
@@ -34,8 +53,8 @@ public class AppDataHandler {
 		String columnPassw = getString(R.string.db_password_attribute);
 		String columnDate = getString(R.string.db_date_attribute);
 
-		Cursor cursor = db.fireQuery(tableName, new String[] { columnId, columnUsername,
-				columnPassw, columnDate }, null, null, null, null, getString(R.string.db_id_desc));
+		Cursor cursor = db.fireQuery(tableName, new String[] { columnId, columnUsername, columnPassw,
+				columnDate }, null, null, null, null, getString(R.string.db_id_desc));
 		if (cursor.getCount() > 0 && cursor.moveToFirst()) {
 			for (String columnName : cursor.getColumnNames()) {
 				if (columnName.matches(columnUsername)) {

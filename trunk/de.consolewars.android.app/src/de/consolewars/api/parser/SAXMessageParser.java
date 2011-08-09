@@ -63,30 +63,10 @@ public class SAXMessageParser extends AbstractSAXParser<Message> {
 	 * Modifizierter Parser.
 	 */
 	public ArrayList<Message> parseDocument() throws ConsolewarsAPIException {
-		// HttpClient client = new DefaultHttpClient();
-		// HttpGet request = new HttpGet(getAPIURL().toString());
-		// request.setHeader("Cookie", cookie);
-		//
-		// HttpResponse response = null;
-		// try {
-		// response = client.execute(request);
-		// } catch (ClientProtocolException e2) {
-		// e2.printStackTrace();
-		// } catch (IOException e2) {
-		// e2.printStackTrace();
-		// }
-		//
-		// Header[] headers = response.getAllHeaders();
-		// for (int i = 0; i < headers.length; i++) {
-		// Header h = headers[i];
-		// Log.i("****COOKIE*******", "Header names: " + h.getName());
-		// Log.i("****COOKIE*******", "Header value: " + h.getValue());
-		// }
 		String cookie = "cwbb_userid=" + uid + "; cwbb_password=" + pass;
 		SAXParserFactory spf = SAXParserFactory.newInstance();
 		spf.setValidating(false);
 		try {
-
 			URLConnection localURLConnection = new URL(getAPIURL()).openConnection();
 			localURLConnection.setRequestProperty("Cookie", cookie);
 
@@ -95,11 +75,6 @@ public class SAXMessageParser extends AbstractSAXParser<Message> {
 			InputStream localInputStream = localURLConnection.getInputStream();
 			localSAXParser.parse(localInputStream, this);
 
-			// SAXParser localSAXParser = spf.newSAXParser();
-			// Reader reader = new InputStreamReader(response.getEntity().getContent(), "UTF-8");
-			// InputSource is = new InputSource(reader);
-			// is.setEncoding("UTF-8");
-			// localSAXParser.parse(is, this);
 		} catch (ParserConfigurationException e) {
 			e.printStackTrace();
 		} catch (SAXException e) {

@@ -6,7 +6,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
 
-import android.util.Log;
 import de.consolewars.api.data.AuthStatus;
 import de.consolewars.api.data.AuthenticatedUser;
 import de.consolewars.api.data.Blog;
@@ -105,8 +104,7 @@ public class API {
 	 *            plain-text password
 	 * @return password hash for further use e.g. getMessages
 	 */
-	public AuthenticatedUser authenticate(String username, String password)
-			throws ConsolewarsAPIException {
+	public AuthenticatedUser authenticate(String username, String password) throws ConsolewarsAPIException {
 
 		String apiname = "authenticate";
 		// creating the api url for authentication
@@ -136,8 +134,7 @@ public class API {
 	 *            what kind of blogs should be returned: 0 normal, 1 newsblogs, 2 other
 	 * @return list of blogs
 	 */
-	public ArrayList<Blog> getBlogsList(int uid, int count, int filter)
-			throws ConsolewarsAPIException {
+	public ArrayList<Blog> getBlogsList(int uid, int count, int filter) throws ConsolewarsAPIException {
 
 		ArrayList<Blog> blogs = new ArrayList<Blog>();
 
@@ -281,8 +278,6 @@ public class API {
 		messageURL.addArgument("folder", folder);
 		messageURL.addArgument("count", count);
 
-		Log.i("********MSGSSURL*******", messageURL.toString());
-
 		SAXMessageParser parser = new SAXMessageParser(messageURL.toString(), uid, pass);
 		msgs = parser.parseDocument();
 
@@ -325,8 +320,7 @@ public class API {
 	}
 
 	@SuppressWarnings("unchecked")
-	public ArrayList<News> getNewsList(int count, int filter, Date since)
-			throws ConsolewarsAPIException {
+	public ArrayList<News> getNewsList(int count, int filter, Date since) throws ConsolewarsAPIException {
 		if (since == null)
 			return getNewsList(count, filter);
 		else {
@@ -410,13 +404,11 @@ public class API {
 
 	public void setCheckBlogUpdatesInterval(int minutes, int seconds) {
 		if (DEBUG)
-			System.out.println("changing interval to " + minutes + " minutes and " + seconds
-					+ " seconds");
+			System.out.println("changing interval to " + minutes + " minutes and " + seconds + " seconds");
 
 		bloglistUpdateThread.interrupt();
 
-		long interval = Math
-				.max(minutes * DateUtil.MINUTE + seconds * DateUtil.SECOND, minInterval);
+		long interval = Math.max(minutes * DateUtil.MINUTE + seconds * DateUtil.SECOND, minInterval);
 
 		bloglistUpdateThread.setInterval(interval);
 		bloglistUpdateThread.notify();
@@ -428,11 +420,9 @@ public class API {
 
 	public void setCheckNewsUpdatesInterval(int minutes, int seconds) {
 		if (DEBUG)
-			System.out.println("changing interval to " + minutes + " minutes and " + seconds
-					+ " seconds");
+			System.out.println("changing interval to " + minutes + " minutes and " + seconds + " seconds");
 
-		long interval = Math
-				.max(minutes * DateUtil.MINUTE + seconds * DateUtil.SECOND, minInterval);
+		long interval = Math.max(minutes * DateUtil.MINUTE + seconds * DateUtil.SECOND, minInterval);
 
 		newslistUpdateThread.setInterval(interval);
 		newslistUpdateThread.interrupt();
@@ -481,9 +471,6 @@ public class API {
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		}
-
-		Log.i("********PW*******", passwordHash);
-
 		return passwordHash;
 	}
 
@@ -496,8 +483,7 @@ public class API {
 	 *            list items should not be older than this time
 	 * @return filtered list by date
 	 */
-	private ArrayList<? extends IUnixtime> filterListByDate(ArrayList<? extends IUnixtime> list,
-			Date since) {
+	private ArrayList<? extends IUnixtime> filterListByDate(ArrayList<? extends IUnixtime> list, Date since) {
 		ArrayList<IUnixtime> filteredList = new ArrayList<IUnixtime>();
 		for (IUnixtime item : list) {
 			long sinceTime = since.getTime() / DateUtil.SECOND;
@@ -595,7 +581,7 @@ public class API {
 					lastUpdate = new Date();
 					sleep(checkInterval);
 				} catch (InterruptedException e) {
-					System.out.println("Wartevorgang vor dem n�chsten Update abgebrochen.");
+					System.out.println("Wartevorgang vor dem nächsten Update abgebrochen.");
 				} catch (ConsolewarsAPIException e) {
 					e.printStackTrace();
 				}

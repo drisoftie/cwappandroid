@@ -23,7 +23,7 @@ import de.consolewars.api.data.AuthenticatedUser;
  * @author cerpin (arrewk@gmail.com)
  */
 public class SAXAuthenticationParser extends AbstractSAXParser<AuthenticatedUser> {
-	
+
 	public SAXAuthenticationParser(String APIURL) {
 		super(APIURL);
 	}
@@ -35,22 +35,19 @@ public class SAXAuthenticationParser extends AbstractSAXParser<AuthenticatedUser
 
 	@Override
 	protected void parseItem(String uri, String localName, String qName) {
-		if(!qName.equals(localName))
-			qName = localName; 
-		
-		if(qName.equals("success")) {
+		if (!qName.equals(localName))
+			qName = localName;
+
+		if (qName.equals("success")) {
 			getTempItem().setSuccess(tempValue);
-		}
-		else if(qName.equals("uid")) {
-			if(!tempValue.equals(""))
+		} else if (qName.equals("uid")) {
+			if (!tempValue.equals(""))
 				getTempItem().setUid(Integer.parseInt(tempValue));
-		}
-		else if(qName.equals("user")) {
-			if(!tempValue.equals(""))
+		} else if (qName.equals("user")) {
+			if (!tempValue.equals(""))
 				getTempItem().setUsername(tempValue);
-		}
-		else if(qName.equals("passwordhash")) {
-			if(!tempValue.equals(""))
+		} else if (qName.equals("passwordhash")) {
+			if (!tempValue.equals(""))
 				getTempItem().setPasswordHash(tempValue);
 		}
 	}

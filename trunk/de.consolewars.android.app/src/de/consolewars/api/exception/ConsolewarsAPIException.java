@@ -1,6 +1,5 @@
 package de.consolewars.api.exception;
 
-
 /*
  * Copyright [2009] Dimitrios Kapanikis
  *
@@ -25,9 +24,9 @@ public class ConsolewarsAPIException extends Exception {
 	public ConsolewarsAPIException(String message) {
 		super(message);
 	}
-	
+
 	public ConsolewarsAPIException(String message, Exception cause) {
-		super(message,cause);
+		super(message, cause);
 	}
 
 }

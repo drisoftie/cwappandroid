@@ -26,7 +26,7 @@ import de.consolewars.api.util.PlainTextCreator;
  * @author cerpin (arrewk@gmail.com)
  */
 public class Blog implements IUnixtime {
-	
+
 	private String title;
 	private int id;
 	private String description;
@@ -39,14 +39,13 @@ public class Blog implements IUnixtime {
 	private int comments;
 	private String url;
 	private String article;
-	
+
 	public static final int FILTER_NORMAL = 0;
 	public static final int FILTER_NEWS = 1;
 	public static final int FILTER_UID = 2;
-	
-	public Blog(String title,int id, String description, String mode, int unixtime,
-				boolean visible, float rating, String author, int uid, int comments,
-				String url, String article) {
+
+	public Blog(String title, int id, String description, String mode, int unixtime, boolean visible,
+			float rating, String author, int uid, int comments, String url, String article) {
 		this.title = title;
 		this.id = id;
 		this.description = description;
@@ -60,14 +59,12 @@ public class Blog implements IUnixtime {
 		this.url = url;
 		this.article = article;
 	}
-	
-	public Blog(String title,int id, String description, String mode, int unixtime,
-			boolean visible, float rating, String author, int uid, int comments,
-			String url) {
-		this(title,id,description,mode,unixtime,visible,
-				rating,author,uid,comments,url,"");
+
+	public Blog(String title, int id, String description, String mode, int unixtime, boolean visible,
+			float rating, String author, int uid, int comments, String url) {
+		this(title, id, description, mode, unixtime, visible, rating, author, uid, comments, url, "");
 	}
-	
+
 	public Blog() {
 		// TODO Auto-generated constructor stub
 	}
@@ -75,42 +72,53 @@ public class Blog implements IUnixtime {
 	public String getTitle() {
 		return title;
 	}
+
 	public int getId() {
 		return id;
 	}
+
 	public String getDescription() {
 		return description;
 	}
+
 	public String getMode() {
 		return mode;
 	}
+
 	public int getUnixtime() {
 		return unixtime;
 	}
+
 	public float getRating() {
 		return rating;
 	}
+
 	public String getAuthor() {
 		return author;
 	}
+
 	public int getUid() {
 		return uid;
 	}
+
 	public int getComments() {
 		return comments;
 	}
+
 	public String getUrl() {
 		return url;
 	}
+
 	public String getArticle() {
 		return getArticle(false);
 	}
-	
+
 	public String getArticle(boolean plaintext) {
-		if(plaintext) return PlainTextCreator.getPlainText(article);
+		if (plaintext)
+			return PlainTextCreator.getPlainText(article);
 		return article;
 	}
-	
+
 	public void setTitle(String title) {
 		this.title = title;
 	}
@@ -162,19 +170,20 @@ public class Blog implements IUnixtime {
 	public String toString() {
 		return author + ": " + title + " - " + getRelativeTime();
 	}
-	
+
 	public boolean isVisible() {
 		return visible;
 	}
-	
+
 	public String getRelativeTime() {
 		return DateUtil.timePassed(unixtime);
 	}
-	
+
 	public boolean equals(Object obj) {
-		if(!(obj instanceof Blog)) return false;
+		if (!(obj instanceof Blog))
+			return false;
 		else {
-			Blog blog = (Blog)obj; 
+			Blog blog = (Blog) obj;
 			return (this.id == blog.id && this.unixtime == blog.unixtime);
 		}
 	}

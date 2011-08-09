@@ -1,25 +1,22 @@
 package de.consolewars.android.app.tab.shout;
 
-import java.security.GeneralSecurityException;
-
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.webkit.WebSettings.PluginState;
+import android.view.View.OnClickListener;
+import android.webkit.CookieManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.webkit.WebSettings.PluginState;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
-import de.consolewars.android.app.util.HashEncrypter;
-import de.consolewars.api.data.AuthenticatedUser;
-import de.consolewars.api.exception.ConsolewarsAPIException;
 
 /*
  * Copyright [2010] [Alexander Dridiger]
@@ -47,8 +44,6 @@ public class ShoutboxActivity extends Activity {
 
 	private ViewGroup shoutbox_layout;
 
-	private AuthenticatedUser user;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -56,8 +51,8 @@ public class ShoutboxActivity extends Activity {
 		if (getParent().getParent() instanceof CwNavigationMainTabActivity) {
 			mainTabs = (CwNavigationMainTabActivity) getParent().getParent();
 		}
-		shoutbox_layout = (ViewGroup) LayoutInflater.from(ShoutboxActivity.this.getParent())
-				.inflate(R.layout.shoutbox_layout, null);
+		shoutbox_layout = (ViewGroup) LayoutInflater.from(ShoutboxActivity.this.getParent()).inflate(
+				R.layout.shoutbox_layout, null);
 
 		new BuildShoutboxAsyncTask().execute();
 	}
@@ -67,16 +62,47 @@ public class ShoutboxActivity extends Activity {
 		refresh.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
+				// Log.i("********AllCookies**********", CookieManager.getInstance().getCookie(
+				// getString(R.string.cw_domain)));
+				// String[] keyValueSets =
+				// CookieManager.getInstance().getCookie(getString(R.string.cw_domain))
+				// .split(";");
+				// for (String cookie : keyValueSets) {
+				// String[] keyValue = cookie.split("=");
+				// String key = keyValue[0];
+				// String value = "";
+				// if (keyValue.length > 1)
+				// value = keyValue[1];
+				// mainTabs.getHttpClient().getCookieStore().addCookie(
+				// new BasicClientCookie(key.trim(), value.trim()));
+				// }
 				new BuildShoutboxAsyncTask().execute();
 			}
 		});
+
 		WebView webView = (WebView) shoutbox_layout.findViewById(R.id.shoutbox);
 
 		webView.getSettings().setUseWideViewPort(false);
 		webView.getSettings().setPluginState(PluginState.ON);
 		webView.getSettings().setPluginsEnabled(true);
 		webView.getSettings().setJavaScriptEnabled(true);
-		webView.getSettings().setBuiltInZoomControls(false);
+		webView.getSettings().setBuiltInZoomControls(true);
+
+		webView.requestFocus(View.FOCUS_DOWN);
+		webView.setOnTouchListener(new View.OnTouchListener() {
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				switch (event.getAction()) {
+				case MotionEvent.ACTION_DOWN:
+				case MotionEvent.ACTION_UP:
+					if (!v.hasFocus()) {
+						v.requestFocus();
+					}
+					break;
+				}
+				return false;
+			}
+		});
 
 		webView.setWebViewClient(new WebViewClient() {
 			@Override
@@ -85,25 +111,23 @@ public class ShoutboxActivity extends Activity {
 				return true;
 			}
 		});
-		if (mainTabs.getDataHandler().loadCurrentUser()
-				&& mainTabs.getDataHandler().getHashPw().matches("")
+		if (!mainTabs.getDataHandler().loadCurrentUser() && mainTabs.getDataHandler().getHashPw().matches("")
 				&& mainTabs.getDataHandler().getUserName().matches("")) {
 			webView.loadUrl(getString(R.string.cw_url_slash));
 		} else {
-			try {
-				user = mainTabs
-						.getApiCaller()
-						.getApi()
-						.authenticate(
-								mainTabs.getDataHandler().getUserName(),
-								HashEncrypter.decrypt(getString(R.string.db_cry), mainTabs
-										.getDataHandler().getHashPw()));
-			} catch (GeneralSecurityException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ConsolewarsAPIException e) {
-				e.printStackTrace();
+			if (mainTabs.getAuthenticatedUser() != null
+					&& mainTabs.getAuthenticatedUser().getSuccess().matches("YES")) {
+				CookieManager cookieManager = CookieManager.getInstance();
+				cookieManager.removeAllCookie();
+				cookieManager.setCookie(getString(R.string.cw_domain), getString(R.string.cw_cookie_userid)
+						+ "=" + mainTabs.getAuthenticatedUser().getUid());
+				cookieManager.setCookie(getString(R.string.cw_domain), getString(R.string.cw_cookie_pw) + "="
+						+ mainTabs.getAuthenticatedUser().getPasswordHash());
+				webView.loadUrl(getString(R.string.cw_shoutbox));
+			} else {
+				webView.loadUrl(getString(R.string.cw_url_slash));
 			}
+
 		}
 		return shoutbox_layout;
 	}
@@ -120,8 +144,8 @@ public class ShoutboxActivity extends Activity {
 		@Override
 		protected void onPreExecute() {
 			// first set progressbar view
-			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(
-					ShoutboxActivity.this.getParent()).inflate(R.layout.centered_progressbar, null);
+			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(ShoutboxActivity.this.getParent())
+					.inflate(R.layout.centered_progressbar, null);
 			setContentView(progress_layout);
 
 			TextView text = (TextView) progress_layout.findViewById(R.id.centered_progressbar_text);
@@ -144,15 +168,13 @@ public class ShoutboxActivity extends Activity {
 		@Override
 		protected void onPostExecute(View result) {
 			setContentView(result);
-			WebView webView = (WebView) ShoutboxActivity.this.findViewById(R.id.shoutbox);
-			if (user.getSuccess().matches("YES")) {
-				webView.postUrl(getString(R.string.cw_url_slash),
-						getString(R.string.cw_login, user.getPasswordHash(), user.getUsername())
-								.getBytes());
-				webView.loadUrl(getString(R.string.cw_shoutbox));
-			} else {
-				webView.loadUrl(getString(R.string.cw_url_slash));
-			}
+		}
+	}
+
+	@Override
+	public void onBackPressed() {
+		if (getParent() instanceof ShoutboxActivityGroup) {
+			((ShoutboxActivityGroup) getParent()).back();
 		}
 	}
 }

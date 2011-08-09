@@ -31,8 +31,7 @@ import org.htmlcleaner.XPatherException;
  */
 public class MediaSnapper {
 
-	public static String snapFromCleanedHTMLWithXPath(String stringURL, String xPath,
-			String attrToStrip) {
+	public static String snapFromCleanedHTMLWithXPath(String stringURL, String xPath, String attrToStrip) {
 		String snap = "";
 
 		// create an instance of HtmlCleaner

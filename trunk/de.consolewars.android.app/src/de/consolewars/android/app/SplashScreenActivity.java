@@ -73,8 +73,8 @@ public class SplashScreenActivity extends Activity {
 						// do nothing
 					} finally {
 						finish();
-						SplashScreenActivity.this.startActivity(new Intent(
-								SplashScreenActivity.this, CwNavigationMainTabActivity.class));
+						SplashScreenActivity.this.startActivity(new Intent(SplashScreenActivity.this,
+								CwNavigationMainTabActivity.class));
 					}
 				}
 			};

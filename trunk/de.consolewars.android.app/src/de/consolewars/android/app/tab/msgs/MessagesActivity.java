@@ -1,6 +1,5 @@
 package de.consolewars.android.app.tab.msgs;
 
-import java.security.GeneralSecurityException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -25,9 +24,7 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
-import de.consolewars.android.app.util.HashEncrypter;
 import de.consolewars.android.app.util.StyleSpannableStringBuilder;
-import de.consolewars.api.data.AuthenticatedUser;
 import de.consolewars.api.data.Message;
 import de.consolewars.api.exception.ConsolewarsAPIException;
 
@@ -52,7 +49,7 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
  */
 public class MessagesActivity extends Activity {
 
-	private List<Message> msgs;
+	private List<Message> msgs = new ArrayList<Message>();;
 
 	// remember last selected table row to draw the background
 	private View selectedRow;
@@ -81,8 +78,8 @@ public class MessagesActivity extends Activity {
 	 */
 	private List<View> createMsgsRows() {
 		// create table based on current messages
-		View msgsView = LayoutInflater.from(MessagesActivity.this.getParent()).inflate(
-				R.layout.msgs_layout, null);
+		View msgsView = LayoutInflater.from(MessagesActivity.this.getParent()).inflate(R.layout.msgs_layout,
+				null);
 		TableLayout msgsTable = (TableLayout) msgsView.findViewById(R.id.msgs_table);
 
 		styleStringBuilder = new StyleSpannableStringBuilder();
@@ -91,16 +88,16 @@ public class MessagesActivity extends Activity {
 
 		for (final Message msg : this.msgs) {
 			// get the table row by an inflater and set the needed information
-			final View tableRow = LayoutInflater.from(this).inflate(R.layout.msgs_row_layout,
-					msgsTable, false);
+			final View tableRow = LayoutInflater.from(this).inflate(R.layout.msgs_row_layout, msgsTable,
+					false);
 
 			tableRow.setId(msg.getId());
 			tableRow.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
 					if (selectedRow != null) {
-						selectedRow.setBackgroundDrawable(getResources().getDrawable(
-								R.drawable.table_cell_bg));
+						selectedRow.setBackgroundDrawable(getResources()
+								.getDrawable(R.drawable.table_cell_bg));
 					}
 					tableRow.setBackgroundDrawable(getResources().getDrawable(
 							R.drawable.table_cell_bg_selected));
@@ -110,10 +107,9 @@ public class MessagesActivity extends Activity {
 			});
 			((ImageView) tableRow.findViewById(R.id.msgs_row_read_icon))
 					.setImageResource(createMessageIcon(msg.isMessageread()));
-			((TextView) tableRow.findViewById(R.id.msgs_row_title)).setText(createTitle(msg
-					.getTitle()));
-			((TextView) tableRow.findViewById(R.id.msgs_row_date)).setText(createDate(msg
-					.getUnixtime() * 1000L));
+			((TextView) tableRow.findViewById(R.id.msgs_row_title)).setText(createTitle(msg.getTitle()));
+			((TextView) tableRow.findViewById(R.id.msgs_row_date))
+					.setText(createDate(msg.getUnixtime() * 1000L));
 			((TextView) tableRow.findViewById(R.id.msgs_row_author)).setText(createFromUser(msg
 					.getFromusername()));
 			rows.add(tableRow);
@@ -128,20 +124,9 @@ public class MessagesActivity extends Activity {
 	 * @throws ConsolewarsAPIException
 	 */
 	private void setCurrentMessages() throws ConsolewarsAPIException {
-		mainTabs.getDataHandler().loadCurrentUser();
-		AuthenticatedUser user = null;
-		try {
-			user = mainTabs.getApiCaller().getAuthUser(
-					mainTabs.getDataHandler().getUserName(),
-					HashEncrypter.decrypt(getString(R.string.db_cry), mainTabs.getDataHandler()
-							.getHashPw()));
-		} catch (GeneralSecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		if (user != null) {
-			msgs = mainTabs.getApiCaller().getApi().getMessages(user.getUid(),
-					user.getPasswordHash(), 0, 10);
+		if (mainTabs.getAuthenticatedUser() != null) {
+			msgs = mainTabs.getApiCaller().getApi().getMessages(mainTabs.getAuthenticatedUser().getUid(),
+					mainTabs.getAuthenticatedUser().getPasswordHash(), 0, 10);
 		} else {
 			msgs = new ArrayList<Message>();
 		}
@@ -235,8 +220,8 @@ public class MessagesActivity extends Activity {
 		@Override
 		protected void onPreExecute() {
 			// first set progressbar view
-			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(
-					MessagesActivity.this.getParent()).inflate(R.layout.centered_progressbar, null);
+			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(MessagesActivity.this.getParent())
+					.inflate(R.layout.centered_progressbar, null);
 			setContentView(progress_layout);
 
 			TextView text = (TextView) progress_layout.findViewById(R.id.centered_progressbar_text);
@@ -267,8 +252,8 @@ public class MessagesActivity extends Activity {
 		@Override
 		protected void onPostExecute(List<View> result) {
 			// sets the messages view for this Activity
-			ViewGroup msgs_layout = (ViewGroup) LayoutInflater.from(
-					MessagesActivity.this.getParent()).inflate(R.layout.msgs_layout, null);
+			ViewGroup msgs_layout = (ViewGroup) LayoutInflater.from(MessagesActivity.this.getParent())
+					.inflate(R.layout.msgs_layout, null);
 			TableLayout msgsTable = (TableLayout) msgs_layout.findViewById(R.id.msgs_table);
 			for (View row : result) {
 				msgsTable.addView(row);
