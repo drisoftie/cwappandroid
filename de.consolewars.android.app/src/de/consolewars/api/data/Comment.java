@@ -20,13 +20,13 @@ import de.consolewars.api.util.DateUtil;
  */
 
 /**
- * @author cerpin (arrewk@gmail.com) 
+ * @author cerpin (arrewk@gmail.com)
  */
 public class Comment implements IUnixtime {
-	
-	private int currpage; 	
+
+	private int currpage;
 	private int pagecount;
-	private String mode; 	
+	private String mode;
 	private int unixtime;
 	private String statement;
 	private String quote;
@@ -36,14 +36,13 @@ public class Comment implements IUnixtime {
 	private int commentcount;
 	private int postcount;
 	private int cid;
-	
+
 	public final static int AREA_NEWS = 11;
 	public final static int AREA_BLOGS = 101;
-	
-	public Comment(int currpage, int pagecount, String mode, int unixtime,
-			String statement, String quote, String username, int uid,
-			String usertitle, int commentcount, int postcount, int cid) {
-		
+
+	public Comment(int currpage, int pagecount, String mode, int unixtime, String statement, String quote,
+			String username, int uid, String usertitle, int commentcount, int postcount, int cid) {
+
 		this.currpage = currpage;
 		this.pagecount = pagecount;
 		this.mode = mode;
@@ -65,40 +64,51 @@ public class Comment implements IUnixtime {
 	public int getCurrpage() {
 		return currpage;
 	}
+
 	public int getPagecount() {
 		return pagecount;
 	}
+
 	public String getMode() {
 		return mode;
 	}
+
 	public int getUnixtime() {
 		return unixtime;
 	}
+
 	public String getStatement() {
 		return statement;
 	}
+
 	public String getQuote() {
 		return quote;
 	}
+
 	public String getUsername() {
 		return username;
 	}
+
 	public int getUid() {
 		return uid;
 	}
+
 	public String getUsertitle() {
 		return usertitle;
 	}
+
 	public int getCommentcount() {
 		return commentcount;
 	}
+
 	public int getPostcount() {
 		return postcount;
 	}
+
 	public int getCid() {
 		return cid;
 	}
-	
+
 	public void setCurrpage(int currpage) {
 		this.currpage = currpage;
 	}
@@ -150,7 +160,7 @@ public class Comment implements IUnixtime {
 	public String toString() {
 		return username + ": " + statement;
 	}
-	
+
 	public String getRelativeTime() {
 		return DateUtil.timePassed(unixtime);
 	}

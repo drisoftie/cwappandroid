@@ -21,10 +21,10 @@ import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.webkit.WebSettings.PluginState;
+import android.view.View.OnClickListener;
 import android.webkit.WebView;
+import android.webkit.WebSettings.PluginState;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -100,17 +100,16 @@ public class SingleNewsActivity extends Activity {
 			text.setText(getString(R.string.failure));
 		} else if (news != null) {
 			try {
-				text.setText(Html.fromHtml(news.getArticle(), new TextViewHandler(
-						SingleNewsActivity.this.getApplicationContext()), null));
+				text.setText(Html.fromHtml(news.getArticle(), new TextViewHandler(SingleNewsActivity.this
+						.getApplicationContext()), null));
 			} catch (IllegalFormatException ife) {
 				// FIXME Wrong format handling
 				text.setText(news.getArticle());
 			}
 			createHeader(newsView, news);
 			createCommentBttn();
-			vidURL = MediaSnapper.snapFromCleanedHTMLWithXPath(
-					getString(R.string.cw_url, news.getUrl()), getString(R.string.xpath_get_video),
-					getString(R.string.value));
+			vidURL = MediaSnapper.snapFromCleanedHTMLWithXPath(getString(R.string.cw_url, news.getUrl()),
+					getString(R.string.xpath_get_video), getString(R.string.value));
 			initVideos(news.getUrl());
 		}
 		return newsView;
@@ -123,13 +122,18 @@ public class SingleNewsActivity extends Activity {
 			public void onClick(View v) {
 				Intent commentsIntent = new Intent(SingleNewsActivity.this, CommentsActivity.class);
 
-				commentsIntent.putExtra(SingleNewsActivity.class.getName(), news.getId());
+				Bundle extra = new Bundle();
+				extra.putInt(getString(R.string.type), R.string.news);
+				extra.putInt(getString(R.string.id), news.getId());
+				extra.putInt(getString(R.string.comments_amount), news.getComments());
 
-				View view = ((ActivityGroup) getParent())
-						.getLocalActivityManager()
-						.startActivity(CommentsActivity.class.getSimpleName(),
-								commentsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
-						.getDecorView();
+				Log.i("*****NEWSCMMTSCOUNT*****", "" + news.getComments());
+
+				commentsIntent.putExtras(extra);
+
+				View view = ((ActivityGroup) getParent()).getLocalActivityManager().startActivity(
+						CommentsActivity.class.getSimpleName(),
+						commentsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
 				// replace the view
 				((NewsActivityGroup) getParent()).replaceView(view);
 			}
@@ -154,17 +158,16 @@ public class SingleNewsActivity extends Activity {
 
 			Log.i("******YOUTUBE*******", getString(R.string.youtube_embedding, 300, 200, vidURL));
 
-			localWebView.loadDataWithBaseURL(getString(R.string.cw_url_slash),
-					getString(R.string.youtube_embedding, 300, 200, vidURL), "text/html", "utf-8",
-					null);
+			localWebView.loadDataWithBaseURL(getString(R.string.cw_url_slash), getString(
+					R.string.youtube_embedding, 300, 200, vidURL), "text/html", "utf-8", null);
 		}
 	}
 
 	private void createHeader(View parent, News news) {
 		ImageView icon = (ImageView) parent.findViewById(R.id.header_icon);
 		icon.setImageResource(this.getResources().getIdentifier(
-				getString(R.string.cat_drawable, news.getCategoryshort()),
-				getString(R.string.drawable), getApplicationContext().getPackageName()));
+				getString(R.string.cat_drawable, news.getCategoryshort()), getString(R.string.drawable),
+				getApplicationContext().getPackageName()));
 
 		ImageView usericon = (ImageView) parent.findViewById(R.id.header_descr_usericon);
 		loadPicture(usericon, news);
@@ -174,8 +177,8 @@ public class SingleNewsActivity extends Activity {
 		TextView title = (TextView) parent.findViewById(R.id.header_descr_title);
 		title.setText(news.getTitle());
 		TextView info = (TextView) parent.findViewById(R.id.header_descr_info);
-		info.setText(getString(R.string.singlenews_info, createDate(news.getUnixtime() * 1000L),
-				news.getAuthor()));
+		info.setText(getString(R.string.singlenews_info, createDate(news.getUnixtime() * 1000L), news
+				.getAuthor()));
 		TextView descr = (TextView) parent.findViewById(R.id.header_descr);
 		descr.setText(news.getDescription());
 	}
@@ -191,9 +194,8 @@ public class SingleNewsActivity extends Activity {
 	private void loadPicture(ImageView view, News news) {
 		int userID = -1;
 
-		String picURL = MediaSnapper.snapFromCleanedHTMLWithXPath(
-				getString(R.string.cw_url, news.getUrl()), getString(R.string.xpath_get_author),
-				getString(R.string.href));
+		String picURL = MediaSnapper.snapFromCleanedHTMLWithXPath(getString(R.string.cw_url, news.getUrl()),
+				getString(R.string.xpath_get_author), getString(R.string.href));
 		userID = Integer.valueOf(picURL.subSequence(getString(R.string.prefix_userpic).length(),
 				picURL.length()).toString());
 		try {
@@ -237,9 +239,8 @@ public class SingleNewsActivity extends Activity {
 		@Override
 		protected void onPreExecute() {
 			// first set progressbar view
-			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(
-					SingleNewsActivity.this.getParent()).inflate(R.layout.centered_progressbar,
-					null);
+			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(SingleNewsActivity.this.getParent())
+					.inflate(R.layout.centered_progressbar, null);
 			setContentView(progress_layout);
 
 			TextView text = (TextView) progress_layout.findViewById(R.id.centered_progressbar_text);
@@ -262,6 +263,13 @@ public class SingleNewsActivity extends Activity {
 		@Override
 		protected void onPostExecute(View result) {
 			setContentView(result);
+		}
+	}
+
+	@Override
+	public void onBackPressed() {
+		if (getParent() instanceof NewsActivityGroup) {
+			((NewsActivityGroup) getParent()).back();
 		}
 	}
 }

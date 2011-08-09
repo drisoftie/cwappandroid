@@ -20,8 +20,7 @@ import de.consolewars.api.data.Comment;
  */
 
 public interface CommentUpdateListener {
-	
-	public void commentsReceived(ListEventObject<Comment> event);
 
+	public void commentsReceived(ListEventObject<Comment> event);
 
 }

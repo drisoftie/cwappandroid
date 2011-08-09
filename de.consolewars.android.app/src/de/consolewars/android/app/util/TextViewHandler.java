@@ -23,7 +23,6 @@ import android.graphics.drawable.Drawable;
 import android.text.Editable;
 import android.text.Html.ImageGetter;
 import android.text.Html.TagHandler;
-import android.util.Log;
 
 /*
  * Copyright [2010] [Alexander Dridiger]
@@ -57,11 +56,11 @@ public class TextViewHandler implements ImageGetter, TagHandler {
 			if (source.startsWith("/")) {
 				source = "http://www.consolewars.de" + source;
 			}
-			Log.i("****PIC******", source);
+			// Log.i("****PIC******", source);
 			URL newurl = new URL(source);
 			URLConnection con = newurl.openConnection();
 
-			Log.i("****PICSIZE******", String.valueOf(con.getContentLength()));
+			// Log.i("****PICSIZE******", String.valueOf(con.getContentLength()));
 			/*
 			 * 1st approach // Drawable pic = Drawable.createFromStream(newurl.openStream(), "src");
 			 * Bitmap bm = BitmapFactory.decodeFile(myJpgPath, options);
@@ -109,7 +108,7 @@ public class TextViewHandler implements ImageGetter, TagHandler {
 					// scaling based on 2^scale quotient; if size is two and a half times bigger ->
 					// scaling is 2; 25 times bigger -> scaling is 32; etc...
 					scale = Math.pow(2, Math.round(quot));
-					Log.i("****RESIZE******", String.valueOf(scale));
+					// Log.i("****RESIZE******", String.valueOf(scale));
 				}
 			}
 

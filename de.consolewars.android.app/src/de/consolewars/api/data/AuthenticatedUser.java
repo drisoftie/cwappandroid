@@ -20,40 +20,45 @@ package de.consolewars.api.data;
 /**
  * 
  * @author cerpin (arrewk@gmail.com)
- *
+ * 
  */
 public class AuthenticatedUser extends User {
-	
+
 	private String success = "";
 	private String passwordHash = "";
 	private String reason = "";
-	
+
 	public String getSuccess() {
 		return success;
 	}
+
 	public void setSuccess(String success) {
 		this.success = success;
 	}
+
 	public String getPasswordHash() {
 		return passwordHash;
 	}
+
 	public void setPasswordHash(String passwordHash) {
 		this.passwordHash = passwordHash;
 	}
+
 	public String getReason() {
 		return reason;
 	}
+
 	public void setReason(String reason) {
 		this.reason = reason;
 	}
-	
+
 	public String toString() {
 		String sUser = "";
 		sUser += "\nsuccess: " + success;
-		if(reason.length() > 0) {
+		if (reason.length() > 0) {
 			sUser += "\nreason: " + reason;
 		}
-		if(passwordHash.length() > 0) {
+		if (passwordHash.length() > 0) {
 			sUser += "\npassword hash: " + passwordHash;
 		}
 		return super.toString() + sUser;

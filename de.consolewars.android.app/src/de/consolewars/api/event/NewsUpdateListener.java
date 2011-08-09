@@ -20,7 +20,7 @@ import de.consolewars.api.data.News;
  */
 
 public interface NewsUpdateListener {
-	
+
 	public void newsReceived(ListEventObject<News> event);
 
 }

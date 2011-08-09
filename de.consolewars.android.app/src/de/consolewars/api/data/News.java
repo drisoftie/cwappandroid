@@ -24,10 +24,10 @@ import de.consolewars.api.util.PlainTextCreator;
  * News class representation
  * 
  * @author cerpin (arrewk@gmail.com)
- *
+ * 
  */
 public class News implements IUnixtime {
-	
+
 	private String title;
 	private int id;
 	private String description;
@@ -41,11 +41,11 @@ public class News implements IUnixtime {
 	private String url;
 	private int picid;
 	private String article;
-	
+
 	public final static int FILTER_MICROSOFT_ONLY = 1;
 	public final static int FILTER_NINTENDO_ONLY = 2;
 	public final static int FILTER_SONY_ONLY = 3;
-	
+
 	public News() {
 		this.title = "";
 		this.id = 0;
@@ -61,10 +61,10 @@ public class News implements IUnixtime {
 		this.picid = 0;
 		this.article = "";
 	}
-	
-	public News(String title, int id, String description, String mode,
-			int unixtime, String category, String categoryshort, String author,
-			Picture[] piclist, int comments, String url, int picid,String article) {
+
+	public News(String title, int id, String description, String mode, int unixtime, String category,
+			String categoryshort, String author, Picture[] piclist, int comments, String url, int picid,
+			String article) {
 		super();
 		this.title = title;
 		this.id = id;
@@ -176,32 +176,34 @@ public class News implements IUnixtime {
 	public void setPicid(int picid) {
 		this.picid = picid;
 	}
-	
+
 	public String getArticle() {
 		return getArticle(false);
 	}
-	
+
 	public String getArticle(boolean plaintext) {
-		if(plaintext) return PlainTextCreator.getPlainText(article);
+		if (plaintext)
+			return PlainTextCreator.getPlainText(article);
 		return article;
 	}
-	
+
 	public void setArticle(String article) {
 		this.article = article;
 	}
-	
+
 	public String getRelativeTime() {
 		return DateUtil.timePassed(unixtime);
 	}
-	
+
 	public String toString() {
-		return "[" + category + "] " + title + ", Autor: " + author + " - " + getRelativeTime(); 
+		return "[" + category + "] " + title + ", Autor: " + author + " - " + getRelativeTime();
 	}
-	
+
 	public boolean equals(Object obj) {
-		if(!(obj instanceof News)) return false;
+		if (!(obj instanceof News))
+			return false;
 		else {
-			News news = (News)obj; 
+			News news = (News) obj;
 			return (this.id == news.id && this.unixtime == news.unixtime);
 		}
 	}

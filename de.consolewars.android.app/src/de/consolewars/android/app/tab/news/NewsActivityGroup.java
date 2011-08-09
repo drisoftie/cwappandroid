@@ -1,10 +1,12 @@
 package de.consolewars.android.app.tab.news;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.View;
 import de.consolewars.android.app.tab.CwBasicActivityGroup;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
+import de.consolewars.android.app.tab.blogs.BlogsActivity;
 
 /*
  * Copyright [2010] [Alexander Dridiger]
@@ -36,23 +38,22 @@ public class NewsActivityGroup extends CwBasicActivityGroup {
 
 		// Start the root activity withing the group and get its view
 		View view = getLocalActivityManager().startActivity(NewsActivity.class.getSimpleName(),
-				new Intent(this, NewsActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
-				.getDecorView();
+				new Intent(this, NewsActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
 		// Replace the view of this ActivityGroup
 		replaceView(view);
 	}
 
-	// @Override
-	// public void onConfigurationChanged(Configuration newConfig) {
-	// super.onConfigurationChanged(newConfig);
-	//
-	// // handling rotation
-	// resetCache();
-	//
-	// // reset the ui
-	// View view = getLocalActivityManager().startActivity(NewsActivity.class.getSimpleName(),
-	// new Intent(this, NewsActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
-	// .getDecorView();
-	// replaceView(view);
-	// }
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+
+		// handling rotation
+		resetCache();
+
+		// reset the ui
+		View view = getLocalActivityManager().startActivity(BlogsActivity.class.getSimpleName(),
+				new Intent(this, BlogsActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
+				.getDecorView();
+		replaceView(view);
+	}
 }

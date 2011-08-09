@@ -2,15 +2,14 @@ package de.consolewars.android.app.tab.news;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Gallery;
 import android.widget.ImageView;
+import android.widget.AdapterView.OnItemClickListener;
 import de.consolewars.android.app.R;
 
 /*
@@ -35,9 +34,8 @@ public class NewsPicViewerActivity extends Activity {
 	private Gallery gallery;
 	private ImageView imgView;
 
-	private Integer[] Imgid = { R.drawable.splash_bg, R.drawable.cw_logo_skeletal,
-			R.drawable.cw_logo, R.drawable.cw_logo_splash, R.drawable.cw_white_logo,
-			R.drawable.icon, R.drawable.titlebar_bg };
+	private Integer[] Imgid = { R.drawable.splash_bg, R.drawable.cw_logo_skeletal, R.drawable.cw_logo,
+			R.drawable.cw_logo_splash, R.drawable.cw_white_logo, R.drawable.icon, R.drawable.titlebar_bg };
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -63,10 +61,10 @@ public class NewsPicViewerActivity extends Activity {
 
 		public AddImgAdp(Context c) {
 			cont = c;
-//			TypedArray typArray = obtainStyledAttributes(R.styleable.GalleryTheme);
-//			GalItemBg = typArray.getResourceId(
-//					R.styleable.GalleryTheme_android_galleryItemBackground, 0);
-//			typArray.recycle();
+			// TypedArray typArray = obtainStyledAttributes(R.styleable.GalleryTheme);
+			// GalItemBg = typArray.getResourceId(
+			// R.styleable.GalleryTheme_android_galleryItemBackground, 0);
+			// typArray.recycle();
 		}
 
 		public int getCount() {
@@ -87,7 +85,7 @@ public class NewsPicViewerActivity extends Activity {
 			imgView.setImageResource(Imgid[position]);
 			imgView.setScaleType(ImageView.ScaleType.FIT_XY);
 			imgView.setLayoutParams(new Gallery.LayoutParams(100, 100));
-//			imgView.setBackgroundResource(GalItemBg);
+			// imgView.setBackgroundResource(GalItemBg);
 
 			return imgView;
 		}

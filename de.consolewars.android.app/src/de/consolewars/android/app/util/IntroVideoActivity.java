@@ -60,12 +60,12 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
-import android.widget.LinearLayout.LayoutParams;
 import android.widget.MediaController;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.VideoView;
+import android.widget.LinearLayout.LayoutParams;
 import de.consolewars.android.app.R;
 
 /**
@@ -399,7 +399,7 @@ public class IntroVideoActivity extends Activity {
 		protected Uri doInBackground(YouTubeId... pParams) {
 			String lUriStr = null;
 			String lYouTubeFmtQuality = "17"; // 3gpp medium quality, which should be fast enough to
-												// view over EDGE connection
+			// view over EDGE connection
 			String lYouTubeVideoId = null;
 
 			if (isCancelled())
@@ -554,8 +554,7 @@ public class IntroVideoActivity extends Activity {
 				lYouTubeResponse = new JSONObject(lInfoStr);
 
 				JSONArray lEntryArr = lYouTubeResponse.getJSONObject("feed").getJSONArray("entry");
-				JSONArray lLinkArr = lEntryArr.getJSONObject(lEntryArr.length() - 1).getJSONArray(
-						"link");
+				JSONArray lLinkArr = lEntryArr.getJSONObject(lEntryArr.length() - 1).getJSONArray("link");
 				for (int i = 0; i < lLinkArr.length(); i++) {
 					JSONObject lLinkObj = lLinkArr.getJSONObject(i);
 					;
@@ -611,8 +610,7 @@ public class IntroVideoActivity extends Activity {
 				if (isCancelled())
 					return;
 
-				final MediaController lMediaController = new MediaController(
-						IntroVideoActivity.this);
+				final MediaController lMediaController = new MediaController(IntroVideoActivity.this);
 				mVideoView.setMediaController(lMediaController);
 				lMediaController.show(0);
 				mVideoView.setKeepScreenOn(true);

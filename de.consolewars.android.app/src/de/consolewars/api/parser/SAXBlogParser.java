@@ -40,9 +40,9 @@ public class SAXBlogParser extends AbstractSAXParser<Blog> {
 
 	@Override
 	protected void parseItem(String uri, String localName, String qName) {
-		if(!qName.equals(localName))
-			qName = localName; 
-		
+		if (!qName.equals(localName))
+			qName = localName;
+
 		if (qName.equals("title")) {
 			getTempItem().setTitle(tempValue);
 		} else if (qName.equals("id")) {

@@ -69,8 +69,18 @@ public class OverviewActivity extends Activity {
 		if (getParent().getParent() instanceof CwNavigationMainTabActivity) {
 			mainTabs = (CwNavigationMainTabActivity) getParent().getParent();
 		}
-		overview = (ViewGroup) LayoutInflater.from(getParent()).inflate(R.layout.overview_layout,
-				null);
+		mainTabs.getDataHandler().loadCurrentUser();
+		AuthenticatedUser user = null;
+		try {
+			user = mainTabs.getApiCaller().getAuthUser(mainTabs.getDataHandler().getUserName(),
+					HashEncrypter.decrypt(getString(R.string.db_cry), mainTabs.getDataHandler().getHashPw()));
+		} catch (ConsolewarsAPIException e) {
+			e.printStackTrace();
+		} catch (GeneralSecurityException e) {
+			e.printStackTrace();
+		}
+		mainTabs.setAuthenticatedUser(user);
+		overview = (ViewGroup) LayoutInflater.from(getParent()).inflate(R.layout.overview_layout, null);
 		new BuildOverviewAsyncTask().execute();
 	}
 
@@ -89,11 +99,7 @@ public class OverviewActivity extends Activity {
 						new Date(mainTabs.getDataHandler().getDate())).size();
 				blogsAmount += mainTabs.getApiCaller().getApi().getBlogsList(-1, 5, 2,
 						new Date(mainTabs.getDataHandler().getDate())).size();
-				AuthenticatedUser user = null;
-				user = mainTabs.getApiCaller().getAuthUser(
-						mainTabs.getDataHandler().getUserName(),
-						HashEncrypter.decrypt(getString(R.string.db_cry), mainTabs.getDataHandler()
-								.getHashPw()));
+				AuthenticatedUser user = mainTabs.getAuthenticatedUser();
 				for (Message msg : mainTabs.getApiCaller().getApi().getMessages(user.getUid(),
 						user.getPasswordHash(), 0, 5)) {
 					if (msg.getUnixtime() > mainTabs.getDataHandler().getDate()) {
@@ -109,20 +115,17 @@ public class OverviewActivity extends Activity {
 			} catch (ConsolewarsAPIException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} catch (GeneralSecurityException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 		}
 		flipper.addView(createBannerCell(getString(R.string.tab_news_tag), R.drawable.banner_news,
-				getString(R.string.overview_banner_news_title), getString(
-						R.string.overview_banner_details, newsAmount, "News")));
-		flipper.addView(createBannerCell(getString(R.string.tab_blogs_tag),
-				R.drawable.banner_blogs, getString(R.string.overview_banner_blogs_title),
-				getString(R.string.overview_banner_details, blogsAmount, "Blogs")));
+				getString(R.string.overview_banner_news_title), getString(R.string.overview_banner_details,
+						newsAmount, "News")));
+		flipper.addView(createBannerCell(getString(R.string.tab_blogs_tag), R.drawable.banner_blogs,
+				getString(R.string.overview_banner_blogs_title), getString(R.string.overview_banner_details,
+						blogsAmount, "Blogs")));
 		flipper.addView(createBannerCell(getString(R.string.tab_msgs_tag), R.drawable.banner_msgs,
-				getString(R.string.overview_banner_msgs_title), getString(
-						R.string.overview_banner_details, msgsAmount, "Nachrichten")));
+				getString(R.string.overview_banner_msgs_title), getString(R.string.overview_banner_details,
+						msgsAmount, "Nachrichten")));
 		flipper.setInAnimation(AnimationUtils.loadAnimation(this, R.anim.overview_marquee_in));
 		flipper.setOutAnimation(AnimationUtils.loadAnimation(this, R.anim.overview_marquee_out));
 		flipper.setFlipInterval(3000);
@@ -158,18 +161,7 @@ public class OverviewActivity extends Activity {
 		final EditText passwEdttxt = (EditText) parent.findViewById(R.id.overview_edttxt_passw);
 		final ImageView icon = (ImageView) parent.findViewById(R.id.overview_usericon);
 		if (mainTabs.getDataHandler().getHashPw() != null) {
-			try {
-				AuthenticatedUser authUser = mainTabs.getApiCaller().getApi().authenticate(
-						mainTabs.getDataHandler().getUserName(),
-						HashEncrypter.decrypt(getString(R.string.db_cry), mainTabs.getDataHandler()
-								.getHashPw()));
-				loadPicture(icon, authUser.getUid());
-			} catch (GeneralSecurityException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ConsolewarsAPIException e) {
-				e.printStackTrace();
-			}
+			loadPicture(icon, mainTabs.getAuthenticatedUser().getUid());
 		}
 		if (mainTabs.getDataHandler().getUserName() != null) {
 			usrnmEdttxt.setText(mainTabs.getDataHandler().getUserName());
@@ -185,9 +177,9 @@ public class OverviewActivity extends Activity {
 				AuthenticatedUser authUser = null;
 				try {
 					authUser = mainTabs.getApiCaller().getApi().authenticate(
-							mainTabs.getDataHandler().getUserName(),
-							passwEdttxt.getText().toString());
+							mainTabs.getDataHandler().getUserName(), passwEdttxt.getText().toString());
 					loadPicture(icon, authUser.getUid());
+					mainTabs.setAuthenticatedUser(authUser);
 				} catch (ConsolewarsAPIException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -202,8 +194,7 @@ public class OverviewActivity extends Activity {
 			try {
 				mainTabs.getDataHandler().getDatabaseManager().updateUserData(
 						mainTabs.getDataHandler().getUserDBId(), userName,
-						HashEncrypter.encrypt(getString(R.string.db_cry), pw),
-						calendar.getTimeInMillis());
+						HashEncrypter.encrypt(getString(R.string.db_cry), pw), calendar.getTimeInMillis());
 				mainTabs.getDataHandler().loadCurrentUser();
 			} catch (GeneralSecurityException e) {
 				// TODO Auto-generated catch block
@@ -212,8 +203,7 @@ public class OverviewActivity extends Activity {
 		} else {
 			try {
 				mainTabs.getDataHandler().getDatabaseManager().insertUserData(userName,
-						HashEncrypter.encrypt(getString(R.string.db_cry), pw),
-						calendar.getTimeInMillis());
+						HashEncrypter.encrypt(getString(R.string.db_cry), pw), calendar.getTimeInMillis());
 				mainTabs.getDataHandler().loadCurrentUser();
 			} catch (GeneralSecurityException e) {
 				// TODO Auto-generated catch block
@@ -258,8 +248,8 @@ public class OverviewActivity extends Activity {
 		@Override
 		protected void onPreExecute() {
 			// first set progressbar view
-			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(
-					OverviewActivity.this.getParent()).inflate(R.layout.centered_progressbar, null);
+			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(OverviewActivity.this.getParent())
+					.inflate(R.layout.centered_progressbar, null);
 			setContentView(progress_layout);
 
 			TextView text = (TextView) progress_layout.findViewById(R.id.centered_progressbar_text);

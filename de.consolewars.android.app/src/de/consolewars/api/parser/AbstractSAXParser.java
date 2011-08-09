@@ -1,12 +1,7 @@
 package de.consolewars.api.parser;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -21,7 +16,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import android.util.Log;
 import de.consolewars.api.data.AuthStatus;
 import de.consolewars.api.exception.ConsolewarsAPIException;
 
@@ -137,22 +131,22 @@ public abstract class AbstractSAXParser<T> extends DefaultHandler {
 	public ArrayList<T> parseDocument() throws ConsolewarsAPIException {
 		SAXParserFactory spf = SAXParserFactory.newInstance();
 		spf.setValidating(false);
-		URL url;
+		// URL url;
 		try {
-			url = new URL(APIURL);
-
-			InputStream is = url.openConnection().getInputStream();
-			Writer writer = new StringWriter();
-			char[] buffer = new char[1024];
-			try {
-				Reader reader = new BufferedReader(new InputStreamReader(is));
-				int n;
-				while ((n = reader.read(buffer)) != -1) {
-					writer.write(buffer, 0, n);
-				}
-			} finally {
-				is.close();
-			}
+			// url = new URL(APIURL);
+			//
+			// InputStream is = url.openConnection().getInputStream();
+			// Writer writer = new StringWriter();
+			// char[] buffer = new char[1024];
+			// try {
+			// Reader reader = new BufferedReader(new InputStreamReader(is));
+			// int n;
+			// while ((n = reader.read(buffer)) != -1) {
+			// writer.write(buffer, 0, n);
+			// }
+			// } finally {
+			// is.close();
+			// }
 
 			// 2nd attemp
 			// HttpGet httpRequest = null;
@@ -195,9 +189,9 @@ public abstract class AbstractSAXParser<T> extends DefaultHandler {
 			// }
 			// instream.close();
 
-			Log.i("********XMLANFANG*******", APIURL);
-			Log.i("********XML*******", writer.toString());
-			Log.i("********XMLENDE*******", "STIER");
+			// Log.i("********XMLANFANG*******", APIURL);
+			// System.out.println(writer.toString());
+			// Log.i("********XMLENDE*******", "STIER");
 
 			// URLConnection connection = url.openConnection();
 			// connection.connect();

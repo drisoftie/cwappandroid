@@ -18,10 +18,10 @@ package de.consolewars.api.util;
  */
 
 public class PlainTextCreator {
-	
+
 	private final static String ahrefRegex = "<a href=\"([^\"]*)\" [^>]*>";
 	private final static String imgRegex = "<img .?src=\"([^\"]*)\"[^>]*>";
-	
+
 	public static String getPlainText(String richtext) {
 		richtext = richtext.replaceAll("<(p|b|u|strong)( class=\"[^\"]*\")?>", "");
 		richtext = richtext.replaceAll("</(a|b|u|strong)>", "");
@@ -34,7 +34,7 @@ public class PlainTextCreator {
 		richtext = richtext.replaceAll("<!--.*-->", "");
 		return richtext;
 	}
-	
+
 	private static String replaceSpecialChars(String text) {
 		text = text.replaceAll("&uuml;", "ü");
 		text = text.replaceAll("&ouml;", "ö");
@@ -42,7 +42,7 @@ public class PlainTextCreator {
 		text = text.replaceAll("&szlig;", "ß");
 		return text;
 	}
-	
+
 	private static String replaceEmbedYouTubeLink(String text) {
 		text = text.replaceAll("http://de.<object [^>]*>", "");
 		text = text.replaceAll("<param [^>]*>", "");

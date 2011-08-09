@@ -50,20 +50,16 @@ public abstract class CwBasicActivityGroup extends ActivityGroup implements ICwA
 			viewCache.remove(viewCache.size() - 1);
 			setContentView(viewCache.get(viewCache.size() - 1));
 		} else {
-			AlertDialog.Builder dialog = new AlertDialog.Builder(this)
-					.setMessage("CW-App beenden?").setCancelable(false)
-					.setPositiveButton("Ja", new OnClickListener() {
+			AlertDialog.Builder dialog = new AlertDialog.Builder(this).setMessage("CW-App beenden?")
+					.setCancelable(false).setPositiveButton("Ja", new OnClickListener() {
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
 							if (getParent() instanceof CwNavigationMainTabActivity) {
 								CwNavigationMainTabActivity parent = (CwNavigationMainTabActivity) getParent();
 								if (parent.getDataHandler().loadCurrentUser()) {
-									parent.getDataHandler()
-											.getDatabaseManager()
-											.updateDate(
-													parent.getDataHandler().getUserDBId(),
-													GregorianCalendar.getInstance()
-															.getTimeInMillis());
+									parent.getDataHandler().getDatabaseManager().updateDate(
+											parent.getDataHandler().getUserDBId(),
+											GregorianCalendar.getInstance().getTimeInMillis());
 								}
 								parent.getDataHandler().getDatabaseManager().closeDB();
 							}
