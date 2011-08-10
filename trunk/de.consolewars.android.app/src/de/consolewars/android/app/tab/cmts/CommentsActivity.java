@@ -84,7 +84,7 @@ public class CommentsActivity extends Activity {
 		Button refresh_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_refresh);
 
 		refresh_bttn.setOnClickListener(new OnClickListener() {
-			@Override
+
 			public void onClick(View v) {
 				new BuildCommentsAsyncTask().execute();
 			}
@@ -93,14 +93,14 @@ public class CommentsActivity extends Activity {
 		Button next_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_next);
 		Button prev_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_prev);
 		next_bttn.setOnClickListener(new OnClickListener() {
-			@Override
+
 			public void onClick(View v) {
 				currpage++;
 				new BuildCommentsAsyncTask().execute();
 			}
 		});
 		prev_bttn.setOnClickListener(new OnClickListener() {
-			@Override
+
 			public void onClick(View v) {
 				currpage--;
 				new BuildCommentsAsyncTask().execute();
@@ -109,7 +109,7 @@ public class CommentsActivity extends Activity {
 
 		Button submit_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_submit);
 		submit_bttn.setOnClickListener(new OnClickListener() {
-			@Override
+
 			public void onClick(View v) {
 				new SubmitCommentAsyncTask().execute();
 			}

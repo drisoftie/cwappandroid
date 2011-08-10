@@ -598,7 +598,6 @@ public class IntroVideoActivity extends Activity {
 				// TODO: add listeners for finish of video
 				mVideoView.setOnCompletionListener(new OnCompletionListener() {
 
-					@Override
 					public void onCompletion(MediaPlayer pMp) {
 						if (isCancelled())
 							return;
@@ -616,7 +615,6 @@ public class IntroVideoActivity extends Activity {
 				mVideoView.setKeepScreenOn(true);
 				mVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
 
-					@Override
 					public void onPrepared(MediaPlayer pMp) {
 						if (isCancelled())
 							return;
@@ -649,7 +647,7 @@ public class IntroVideoActivity extends Activity {
 			lBuilder.setPositiveButton(getResources().getString(R.string.ok),
 					new DialogInterface.OnClickListener() {
 
-						@Override
+
 						public void onClick(DialogInterface pDialog, int pWhich) {
 							IntroVideoActivity.this.finish();
 						}

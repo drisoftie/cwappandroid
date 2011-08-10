@@ -86,7 +86,7 @@ public class NewsActivity extends Activity {
 		if (getParent().getParent() instanceof CwNavigationMainTabActivity) {
 			mainTabs = (CwNavigationMainTabActivity) getParent().getParent();
 			mainTabs.getUsedTabHost().setOnTabChangedListener(new OnTabChangeListener() {
-				@Override
+				
 				public void onTabChanged(String tabId) {
 				}
 			});
@@ -100,7 +100,7 @@ public class NewsActivity extends Activity {
 	private void initRefreshBttn(ViewGroup parent) {
 		Button refresh = (Button) parent.findViewById(R.id.news_bttn_refresh);
 		refresh.setOnClickListener(new OnClickListener() {
-			@Override
+			
 			public void onClick(View arg0) {
 				TableLayout newsTable = (TableLayout) news_layout.findViewById(R.id.news_table);
 				newsTable.removeAllViews();
@@ -123,7 +123,7 @@ public class NewsActivity extends Activity {
 		spinner.setAdapter(adapter);
 		spinner.setSelection(currentFilter);
 		spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
-			@Override
+			
 			public void onItemSelected(AdapterView<?> aView, View view, int position, long id) {
 				int selected;
 				switch (position) {
@@ -152,7 +152,6 @@ public class NewsActivity extends Activity {
 				}
 			}
 
-			@Override
 			public void onNothingSelected(AdapterView<?> arg0) {
 				// not needed
 			}
@@ -327,7 +326,7 @@ public class NewsActivity extends Activity {
 					R.layout.day_down_row_layout, null);
 			Button downBttn = (Button) lastrowLayout.findViewById(R.id.day_down_row_bttn);
 			downBttn.setOnClickListener(new OnClickListener() {
-				@Override
+
 				public void onClick(View v) {
 					currentNewsDate.setTimeInMillis(oldestNewsDate.getTimeInMillis() - 1L);
 					oldestNewsDate.setTimeInMillis(getDay(oldestNewsDate, -1).getTimeInMillis());
@@ -375,7 +374,7 @@ public class NewsActivity extends Activity {
 							R.layout.news_row_layout, newsTable, false);
 					tableRow.setId(newsToAdd.getId());
 					tableRow.setOnClickListener(new View.OnClickListener() {
-						@Override
+
 						public void onClick(View v) {
 							if (selectedRow != null) {
 								selectedRow.setBackgroundDrawable(getResources().getDrawable(

@@ -35,7 +35,6 @@ public abstract class CwBasicActivityGroup extends ActivityGroup implements ICwA
 
 	private List<View> viewCache;
 
-	@Override
 	public void replaceView(View view) {
 		if (viewCache == null) {
 			viewCache = new ArrayList<View>();
@@ -44,7 +43,6 @@ public abstract class CwBasicActivityGroup extends ActivityGroup implements ICwA
 		setContentView(view);
 	}
 
-	@Override
 	public void back() {
 		if (viewCache.size() > 1) {
 			viewCache.remove(viewCache.size() - 1);
@@ -52,7 +50,7 @@ public abstract class CwBasicActivityGroup extends ActivityGroup implements ICwA
 		} else {
 			AlertDialog.Builder dialog = new AlertDialog.Builder(this).setMessage("CW-App beenden?")
 					.setCancelable(false).setPositiveButton("Ja", new OnClickListener() {
-						@Override
+						
 						public void onClick(DialogInterface dialog, int which) {
 							if (getParent() instanceof CwNavigationMainTabActivity) {
 								CwNavigationMainTabActivity parent = (CwNavigationMainTabActivity) getParent();
@@ -66,7 +64,7 @@ public abstract class CwBasicActivityGroup extends ActivityGroup implements ICwA
 							finish();
 						}
 					}).setNegativeButton("Nein", new OnClickListener() {
-						@Override
+						
 						public void onClick(DialogInterface dialog, int which) {
 							dialog.cancel();
 						}

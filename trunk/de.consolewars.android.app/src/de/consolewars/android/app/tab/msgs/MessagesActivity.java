@@ -93,7 +93,7 @@ public class MessagesActivity extends Activity {
 
 			tableRow.setId(msg.getId());
 			tableRow.setOnClickListener(new View.OnClickListener() {
-				@Override
+				
 				public void onClick(View v) {
 					if (selectedRow != null) {
 						selectedRow.setBackgroundDrawable(getResources()

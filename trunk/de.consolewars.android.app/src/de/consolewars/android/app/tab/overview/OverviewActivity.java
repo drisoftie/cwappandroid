@@ -141,7 +141,7 @@ public class OverviewActivity extends Activity {
 
 		cell.setTag(tag);
 		cell.setOnClickListener(new OnClickListener() {
-			@Override
+			
 			public void onClick(View v) {
 				if (v.getTag() instanceof String && ((String) v.getTag()).matches(tag)) {
 					mainTabs.getUsedTabHost().setCurrentTabByTag(tag);
@@ -171,7 +171,7 @@ public class OverviewActivity extends Activity {
 
 		Button confirmBttn = (Button) parent.findViewById(R.id.overview_set_user_bttn);
 		confirmBttn.setOnClickListener(new OnClickListener() {
-			@Override
+			
 			public void onClick(View v) {
 				persistUser(usrnmEdttxt.getText().toString(), passwEdttxt.getText().toString());
 				AuthenticatedUser authUser = null;

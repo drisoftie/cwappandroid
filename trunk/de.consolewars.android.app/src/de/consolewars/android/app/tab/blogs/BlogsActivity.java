@@ -277,7 +277,7 @@ public class BlogsActivity extends Activity {
 					.inflate(R.layout.day_down_row_layout, null);
 			Button downBttn = (Button) lastrowLayout.findViewById(R.id.day_down_row_bttn);
 			downBttn.setOnClickListener(new OnClickListener() {
-				@Override
+
 				public void onClick(View v) {
 					currentBlogsDate.setTimeInMillis(oldestBlogsDate.getTimeInMillis() - 1L);
 					oldestBlogsDate.setTimeInMillis(getDay(oldestBlogsDate, -1).getTimeInMillis());
@@ -325,7 +325,7 @@ public class BlogsActivity extends Activity {
 							R.layout.blogs_row_layout, blogsTable, false);
 					tableRow.setId(blog.getId());
 					tableRow.setOnClickListener(new View.OnClickListener() {
-						@Override
+
 						public void onClick(View v) {
 							// set the correct background when a table row was selected by the user
 							if (selectedRow != null) {
