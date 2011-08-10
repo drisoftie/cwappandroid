@@ -30,9 +30,9 @@ import android.widget.ProgressBar;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import de.consolewars.android.app.CWApplication;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwBasicActivityGroup;
-import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
 import de.consolewars.android.app.util.TextViewHandler;
 import de.consolewars.api.data.Comment;
 import de.consolewars.api.exception.ConsolewarsAPIException;
@@ -58,7 +58,6 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
 public class CommentsActivity extends Activity {
 
 	private List<Comment> comments = new ArrayList<Comment>();
-	private CwNavigationMainTabActivity mainTabs;
 	private ViewGroup cmmts_layout;
 	private int area;
 	private int id;
@@ -68,13 +67,6 @@ public class CommentsActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		/*
-		 * TODO: Might become a source of error someday, if activity design changes. Would be better
-		 * to handle it with intents.
-		 */
-		if (getParent().getParent() instanceof CwNavigationMainTabActivity) {
-			mainTabs = (CwNavigationMainTabActivity) getParent().getParent();
-		}
 
 		resolveBundle();
 		new BuildCommentsAsyncTask().execute();
@@ -212,7 +204,8 @@ public class CommentsActivity extends Activity {
 		@Override
 		protected Void doInBackground(Void... params) {
 			try {
-				comments = mainTabs.getApiCaller().getApi().getComments(id, area, 10, currpage, -1);
+				comments = CWApplication.getInstance().getApiCaller().getApi().getComments(id, area, 10,
+						currpage, -1);
 			} catch (ConsolewarsAPIException e) {
 				e.printStackTrace();
 				Log.e(getString(R.string.exc_auth_tag), e.getMessage(), e);
@@ -280,9 +273,11 @@ public class CommentsActivity extends Activity {
 		protected void onPreExecute() {
 			EditText commenttxt = (EditText) cmmts_layout.findViewById(R.id.comments_edttxt_input);
 			if (commenttxt.getText().toString().matches("")) {
+				commenttxt.requestFocus();
 				commenttxt.setError(getString(R.string.no_text_entered));
-			} else if (mainTabs.getAuthenticatedUser().getUsername() == null
-					|| mainTabs.getAuthenticatedUser().getUsername().matches("")) {
+			} else if (CWApplication.getInstance().getAuthenticatedUser().getUsername() == null
+					|| CWApplication.getInstance().getAuthenticatedUser().getUsername().matches("")) {
+				commenttxt.requestFocus();
 				commenttxt.setError(getString(R.string.not_logged_in));
 			} else {
 				commenttxt.setError(null);
@@ -296,12 +291,13 @@ public class CommentsActivity extends Activity {
 		protected Void doInBackground(Void... params) {
 			if (dowork) {
 				EditText commenttxt = (EditText) cmmts_layout.findViewById(R.id.comments_edttxt_input);
-				if (mainTabs.getAuthenticatedUser() != null) {
+				if (CWApplication.getInstance().getAuthenticatedUser() != null) {
 					try {
-						mainTabs.getHttpPoster().sendPost(
+						CWApplication.getInstance().getHttpPoster().sendPost(
 								getString(R.string.cw_posting_url),
-								getString(R.string.cw_cookie_full, mainTabs.getAuthenticatedUser().getUid(),
-										mainTabs.getAuthenticatedUser().getPasswordHash()),
+								getString(R.string.cw_cookie_full, CWApplication.getInstance()
+										.getAuthenticatedUser().getUid(), CWApplication.getInstance()
+										.getAuthenticatedUser().getPasswordHash()),
 								getString(R.string.cw_cmmt_data, area, id,
 										getString(R.string.cw_command_newentry), URLEncoder.encode(commenttxt
 												.getText().toString(), getString(R.string.utf8)), 1));

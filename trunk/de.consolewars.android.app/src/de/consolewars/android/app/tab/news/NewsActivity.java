@@ -28,9 +28,8 @@ import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.TabHost.OnTabChangeListener;
+import de.consolewars.android.app.CWApplication;
 import de.consolewars.android.app.R;
-import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
 import de.consolewars.android.app.util.StyleSpannableStringBuilder;
 import de.consolewars.api.data.News;
 import de.consolewars.api.exception.ConsolewarsAPIException;
@@ -73,24 +72,10 @@ public class NewsActivity extends Activity {
 
 	private StyleSpannableStringBuilder styleStringBuilder;
 
-	private CwNavigationMainTabActivity mainTabs;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		resetDates();
-		/*
-		 * TODO: Might become a source of error someday, if activity design changes. Would be better
-		 * to handle it with intents.
-		 */
-		if (getParent().getParent() instanceof CwNavigationMainTabActivity) {
-			mainTabs = (CwNavigationMainTabActivity) getParent().getParent();
-			mainTabs.getUsedTabHost().setOnTabChangedListener(new OnTabChangeListener() {
-				
-				public void onTabChanged(String tabId) {
-				}
-			});
-		}
 		news_layout = (ViewGroup) LayoutInflater.from(NewsActivity.this.getParent()).inflate(
 				R.layout.news_layout, null);
 		setContentView(news_layout);
@@ -100,7 +85,7 @@ public class NewsActivity extends Activity {
 	private void initRefreshBttn(ViewGroup parent) {
 		Button refresh = (Button) parent.findViewById(R.id.news_bttn_refresh);
 		refresh.setOnClickListener(new OnClickListener() {
-			
+
 			public void onClick(View arg0) {
 				TableLayout newsTable = (TableLayout) news_layout.findViewById(R.id.news_table);
 				newsTable.removeAllViews();
@@ -123,7 +108,7 @@ public class NewsActivity extends Activity {
 		spinner.setAdapter(adapter);
 		spinner.setSelection(currentFilter);
 		spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
-			
+
 			public void onItemSelected(AdapterView<?> aView, View view, int position, long id) {
 				int selected;
 				switch (position) {
@@ -296,8 +281,8 @@ public class NewsActivity extends Activity {
 		protected Void doInBackground(Void... params) {
 			try {
 				oldestNewsDate.setTimeInMillis(getDay(oldestNewsDate, 0).getTimeInMillis());
-				mainTabs.getApiCaller().authenticateOnCW();
-				news = mainTabs.getApiCaller().getApi().getNewsList(50, currentFilter,
+				CWApplication.getInstance().getApiCaller().authenticateOnCW();
+				news = CWApplication.getInstance().getApiCaller().getApi().getNewsList(50, currentFilter,
 						oldestNewsDate.getTime());
 			} catch (ConsolewarsAPIException e) {
 				e.printStackTrace();
@@ -411,5 +396,12 @@ public class NewsActivity extends Activity {
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
+	}
+
+	@Override
+	public void onBackPressed() {
+		if (getParent() instanceof NewsActivityGroup) {
+			((NewsActivityGroup) getParent()).back();
+		}
 	}
 }

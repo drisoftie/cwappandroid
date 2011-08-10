@@ -22,8 +22,8 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TableLayout;
 import android.widget.TextView;
+import de.consolewars.android.app.CWApplication;
 import de.consolewars.android.app.R;
-import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
 import de.consolewars.android.app.util.StyleSpannableStringBuilder;
 import de.consolewars.api.data.Message;
 import de.consolewars.api.exception.ConsolewarsAPIException;
@@ -56,20 +56,10 @@ public class MessagesActivity extends Activity {
 
 	private StyleSpannableStringBuilder styleStringBuilder;
 
-	private CwNavigationMainTabActivity mainTabs;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		/*
-		 * TODO: Might become a source of error someday, if activity design changes. Would be better
-		 * to handle it with intents.
-		 */
-		if (getParent().getParent() instanceof CwNavigationMainTabActivity) {
-			mainTabs = (CwNavigationMainTabActivity) getParent().getParent();
-		} else if (getParent().getParent().getParent() instanceof CwNavigationMainTabActivity) {
-			mainTabs = (CwNavigationMainTabActivity) getParent().getParent().getParent();
-		}
+
 		new BuildMessagesAsyncTask().execute();
 	}
 
@@ -93,7 +83,7 @@ public class MessagesActivity extends Activity {
 
 			tableRow.setId(msg.getId());
 			tableRow.setOnClickListener(new View.OnClickListener() {
-				
+
 				public void onClick(View v) {
 					if (selectedRow != null) {
 						selectedRow.setBackgroundDrawable(getResources()
@@ -124,9 +114,10 @@ public class MessagesActivity extends Activity {
 	 * @throws ConsolewarsAPIException
 	 */
 	private void setCurrentMessages() throws ConsolewarsAPIException {
-		if (mainTabs.getAuthenticatedUser() != null) {
-			msgs = mainTabs.getApiCaller().getApi().getMessages(mainTabs.getAuthenticatedUser().getUid(),
-					mainTabs.getAuthenticatedUser().getPasswordHash(), 0, 10);
+		if (CWApplication.getInstance().getAuthenticatedUser() != null) {
+			msgs = CWApplication.getInstance().getApiCaller().getApi().getMessages(
+					CWApplication.getInstance().getAuthenticatedUser().getUid(),
+					CWApplication.getInstance().getAuthenticatedUser().getPasswordHash(), 0, 10);
 		} else {
 			msgs = new ArrayList<Message>();
 		}
@@ -234,7 +225,7 @@ public class MessagesActivity extends Activity {
 		@Override
 		protected List<View> doInBackground(Void... params) {
 			try {
-				mainTabs.getApiCaller().authenticateOnCW();
+				CWApplication.getInstance().getApiCaller().authenticateOnCW();
 				setCurrentMessages();
 			} catch (ConsolewarsAPIException e) {
 				e.printStackTrace();

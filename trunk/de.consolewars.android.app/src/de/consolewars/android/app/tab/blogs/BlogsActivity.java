@@ -29,8 +29,8 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TableLayout;
 import android.widget.TextView;
+import de.consolewars.android.app.CWApplication;
 import de.consolewars.android.app.R;
-import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
 import de.consolewars.android.app.util.StyleSpannableStringBuilder;
 import de.consolewars.api.data.Blog;
 import de.consolewars.api.exception.ConsolewarsAPIException;
@@ -66,20 +66,11 @@ public class BlogsActivity extends Activity {
 	private Calendar oldestBlogsDate;
 	private Calendar currentBlogsDate;
 
-	private CwNavigationMainTabActivity mainTabs;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		resetDates();
 
-		/*
-		 * TODO: Might become a source of error someday, if activity design changes. Would be better
-		 * to handle it with intents.
-		 */
-		if (getParent().getParent() instanceof CwNavigationMainTabActivity) {
-			mainTabs = (CwNavigationMainTabActivity) getParent().getParent();
-		}
 		blogs_layout = (ViewGroup) LayoutInflater.from(BlogsActivity.this.getParent()).inflate(
 				R.layout.blogs_layout, null);
 		setContentView(blogs_layout);
@@ -251,8 +242,9 @@ public class BlogsActivity extends Activity {
 		protected Void doInBackground(Void... params) {
 			try {
 				oldestBlogsDate.setTimeInMillis(getDay(oldestBlogsDate, 0).getTimeInMillis());
-				mainTabs.getApiCaller().authenticateOnCW();
-				blogs = mainTabs.getApiCaller().getApi().getBlogsList(-1, 50, 0, oldestBlogsDate.getTime());
+				CWApplication.getInstance().getApiCaller().authenticateOnCW();
+				blogs = CWApplication.getInstance().getApiCaller().getApi().getBlogsList(-1, 50, 0,
+						oldestBlogsDate.getTime());
 			} catch (ConsolewarsAPIException e) {
 				e.printStackTrace();
 				Log.e(getString(R.string.exc_auth_tag), e.getMessage(), e);

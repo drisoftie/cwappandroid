@@ -12,14 +12,11 @@ import android.widget.TabHost;
 import de.consolewars.android.app.APICaller;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.db.AppDataHandler;
-import de.consolewars.android.app.db.DatabaseManager;
 import de.consolewars.android.app.tab.blogs.BlogsActivityGroup;
 import de.consolewars.android.app.tab.msgs.MessagesActivityGroup;
 import de.consolewars.android.app.tab.news.NewsActivityGroup;
 import de.consolewars.android.app.tab.overview.OverviewActivityGroup;
 import de.consolewars.android.app.tab.shout.ShoutboxActivityGroup;
-import de.consolewars.android.app.util.HttpPoster;
-import de.consolewars.api.data.AuthenticatedUser;
 
 /*
  * Copyright [2010] [Alexander Dridiger]
@@ -49,11 +46,6 @@ public class CwNavigationMainTabActivity extends TabActivity {
 	// unique tabhost of this activity
 	private TabHost usedTabHost;
 
-	private APICaller apiCaller;
-	private AppDataHandler dataHandler;
-	private HttpPoster poster;
-	private AuthenticatedUser user;
-
 	/**
 	 * The {@link TabHost} for this {@link TabActivity}. Before used, check for null since the
 	 * activity might not have been created.
@@ -64,44 +56,6 @@ public class CwNavigationMainTabActivity extends TabActivity {
 		return usedTabHost;
 	}
 
-	/**
-	 * @return the api wrapper
-	 */
-	public APICaller getApiCaller() {
-		return apiCaller;
-	}
-
-	/**
-	 * @return data handler
-	 */
-	public AppDataHandler getDataHandler() {
-		return dataHandler;
-	}
-
-	/**
-	 * @return the poster
-	 */
-	public HttpPoster getHttpPoster() {
-		return poster;
-	}
-
-	/**
-	 * @return the poster
-	 */
-	public AuthenticatedUser getAuthenticatedUser() {
-		if (user == null) {
-			user = new AuthenticatedUser();
-		}
-		return user;
-	}
-
-	/**
-	 * @return the poster
-	 */
-	public void setAuthenticatedUser(AuthenticatedUser user) {
-		this.user = user;
-	}
-
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -109,19 +63,8 @@ public class CwNavigationMainTabActivity extends TabActivity {
 		setContentView(R.layout.main_tab_layout);
 		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.titlebar_layout);
 
-		initHelper();
-
 		usedTabHost = getTabHost();
 		setTabs();
-	}
-
-	/**
-	 * Initialize helper classes like the {@link DatabaseManager}.
-	 */
-	private void initHelper() {
-		dataHandler = new AppDataHandler(getApplicationContext());
-		apiCaller = new APICaller(getApplicationContext());
-		poster = new HttpPoster(getApplicationContext());
 	}
 
 	/**

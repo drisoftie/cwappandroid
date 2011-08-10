@@ -23,7 +23,9 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ViewFlipper;
+import de.consolewars.android.app.CWApplication;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
 import de.consolewars.android.app.util.HashEncrypter;
@@ -54,10 +56,7 @@ public class OverviewActivity extends Activity {
 
 	private CwNavigationMainTabActivity mainTabs;
 
-	ViewGroup overview;
-
-	// private String userName;
-	// private String pw;
+	ViewGroup overview_layout;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -69,18 +68,8 @@ public class OverviewActivity extends Activity {
 		if (getParent().getParent() instanceof CwNavigationMainTabActivity) {
 			mainTabs = (CwNavigationMainTabActivity) getParent().getParent();
 		}
-		mainTabs.getDataHandler().loadCurrentUser();
-		AuthenticatedUser user = null;
-		try {
-			user = mainTabs.getApiCaller().getAuthUser(mainTabs.getDataHandler().getUserName(),
-					HashEncrypter.decrypt(getString(R.string.db_cry), mainTabs.getDataHandler().getHashPw()));
-		} catch (ConsolewarsAPIException e) {
-			e.printStackTrace();
-		} catch (GeneralSecurityException e) {
-			e.printStackTrace();
-		}
-		mainTabs.setAuthenticatedUser(user);
-		overview = (ViewGroup) LayoutInflater.from(getParent()).inflate(R.layout.overview_layout, null);
+		overview_layout = (ViewGroup) LayoutInflater.from(getParent())
+				.inflate(R.layout.overview_layout, null);
 		new BuildOverviewAsyncTask().execute();
 	}
 
@@ -89,26 +78,26 @@ public class OverviewActivity extends Activity {
 		int newsAmount = 0;
 		int blogsAmount = 0;
 		int msgsAmount = 0;
-		if (mainTabs.getDataHandler().getDate() != -1) {
+		if (CWApplication.getInstance().getDataHandler().getDate() != -1) {
 			try {
-				newsAmount = mainTabs.getApiCaller().getApi().getNewsList(5, 0,
-						new Date(mainTabs.getDataHandler().getDate())).size();
-				blogsAmount = mainTabs.getApiCaller().getApi().getBlogsList(-1, 5, 0,
-						new Date(mainTabs.getDataHandler().getDate())).size();
-				blogsAmount += mainTabs.getApiCaller().getApi().getBlogsList(-1, 5, 1,
-						new Date(mainTabs.getDataHandler().getDate())).size();
-				blogsAmount += mainTabs.getApiCaller().getApi().getBlogsList(-1, 5, 2,
-						new Date(mainTabs.getDataHandler().getDate())).size();
-				AuthenticatedUser user = mainTabs.getAuthenticatedUser();
-				for (Message msg : mainTabs.getApiCaller().getApi().getMessages(user.getUid(),
-						user.getPasswordHash(), 0, 5)) {
-					if (msg.getUnixtime() > mainTabs.getDataHandler().getDate()) {
+				newsAmount = CWApplication.getInstance().getApiCaller().getApi().getNewsList(5, 0,
+						new Date(CWApplication.getInstance().getDataHandler().getDate())).size();
+				blogsAmount = CWApplication.getInstance().getApiCaller().getApi().getBlogsList(-1, 5, 0,
+						new Date(CWApplication.getInstance().getDataHandler().getDate())).size();
+				blogsAmount += CWApplication.getInstance().getApiCaller().getApi().getBlogsList(-1, 5, 1,
+						new Date(CWApplication.getInstance().getDataHandler().getDate())).size();
+				blogsAmount += CWApplication.getInstance().getApiCaller().getApi().getBlogsList(-1, 5, 2,
+						new Date(CWApplication.getInstance().getDataHandler().getDate())).size();
+				AuthenticatedUser user = CWApplication.getInstance().getAuthenticatedUser();
+				for (Message msg : CWApplication.getInstance().getApiCaller().getApi().getMessages(
+						user.getUid(), user.getPasswordHash(), 0, 5)) {
+					if (msg.getUnixtime() > CWApplication.getInstance().getDataHandler().getDate()) {
 						msgsAmount++;
 					}
 				}
-				for (Message msg : mainTabs.getApiCaller().getApi().getMessages(user.getUid(),
-						user.getPasswordHash(), -1, 5)) {
-					if (msg.getUnixtime() > mainTabs.getDataHandler().getDate()) {
+				for (Message msg : CWApplication.getInstance().getApiCaller().getApi().getMessages(
+						user.getUid(), user.getPasswordHash(), -1, 5)) {
+					if (msg.getUnixtime() > CWApplication.getInstance().getDataHandler().getDate()) {
 						msgsAmount++;
 					}
 				}
@@ -141,7 +130,7 @@ public class OverviewActivity extends Activity {
 
 		cell.setTag(tag);
 		cell.setOnClickListener(new OnClickListener() {
-			
+
 			public void onClick(View v) {
 				if (v.getTag() instanceof String && ((String) v.getTag()).matches(tag)) {
 					mainTabs.getUsedTabHost().setCurrentTabByTag(tag);
@@ -158,53 +147,41 @@ public class OverviewActivity extends Activity {
 	 */
 	private void buildUserView(final View parent) {
 		final EditText usrnmEdttxt = (EditText) parent.findViewById(R.id.overview_edttxt_username);
-		final EditText passwEdttxt = (EditText) parent.findViewById(R.id.overview_edttxt_passw);
 		final ImageView icon = (ImageView) parent.findViewById(R.id.overview_usericon);
-		if (mainTabs.getDataHandler().getHashPw() != null) {
-			loadPicture(icon, mainTabs.getAuthenticatedUser().getUid());
+		if (CWApplication.getInstance().getDataHandler().getHashPw() != null) {
+			loadPicture(icon, CWApplication.getInstance().getAuthenticatedUser().getUid());
 		}
-		if (mainTabs.getDataHandler().getUserName() != null) {
-			usrnmEdttxt.setText(mainTabs.getDataHandler().getUserName());
+		if (CWApplication.getInstance().getDataHandler().getUserName() != null) {
+			usrnmEdttxt.setText(CWApplication.getInstance().getDataHandler().getUserName());
 		} else {
 			usrnmEdttxt.setText("Kein User gespeichert");
 		}
 
 		Button confirmBttn = (Button) parent.findViewById(R.id.overview_set_user_bttn);
 		confirmBttn.setOnClickListener(new OnClickListener() {
-			
 			public void onClick(View v) {
-				persistUser(usrnmEdttxt.getText().toString(), passwEdttxt.getText().toString());
-				AuthenticatedUser authUser = null;
-				try {
-					authUser = mainTabs.getApiCaller().getApi().authenticate(
-							mainTabs.getDataHandler().getUserName(), passwEdttxt.getText().toString());
-					loadPicture(icon, authUser.getUid());
-					mainTabs.setAuthenticatedUser(authUser);
-				} catch (ConsolewarsAPIException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				new LoginUserAsyncTask().execute();
 			}
 		});
 	}
 
 	private void persistUser(String userName, String pw) {
 		Calendar calendar = GregorianCalendar.getInstance();
-		if (mainTabs.getDataHandler().getUserDBId() != -1) {
+		if (CWApplication.getInstance().getDataHandler().getUserDBId() != -1) {
 			try {
-				mainTabs.getDataHandler().getDatabaseManager().updateUserData(
-						mainTabs.getDataHandler().getUserDBId(), userName,
+				CWApplication.getInstance().getDataHandler().getDatabaseManager().updateUserData(
+						CWApplication.getInstance().getDataHandler().getUserDBId(), userName,
 						HashEncrypter.encrypt(getString(R.string.db_cry), pw), calendar.getTimeInMillis());
-				mainTabs.getDataHandler().loadCurrentUser();
+				CWApplication.getInstance().getDataHandler().loadCurrentUser();
 			} catch (GeneralSecurityException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		} else {
 			try {
-				mainTabs.getDataHandler().getDatabaseManager().insertUserData(userName,
+				CWApplication.getInstance().getDataHandler().getDatabaseManager().insertUserData(userName,
 						HashEncrypter.encrypt(getString(R.string.db_cry), pw), calendar.getTimeInMillis());
-				mainTabs.getDataHandler().loadCurrentUser();
+				CWApplication.getInstance().getDataHandler().loadCurrentUser();
 			} catch (GeneralSecurityException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -261,9 +238,9 @@ public class OverviewActivity extends Activity {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			mainTabs.getDataHandler().loadCurrentUser();
-			buildUserView(overview);
-			createBanner(overview);
+			CWApplication.getInstance().getDataHandler().loadCurrentUser();
+			buildUserView(overview_layout);
+			createBanner(overview_layout);
 			return null;
 		}
 
@@ -274,7 +251,72 @@ public class OverviewActivity extends Activity {
 
 		@Override
 		protected void onPostExecute(Void params) {
-			setContentView(overview);
+			setContentView(overview_layout);
+		}
+	}
+
+	/**
+	 * Asynchronous task to login a user.
+	 * 
+	 * @author Alexander Dridiger
+	 */
+	private class LoginUserAsyncTask extends AsyncTask<Void, Void, Void> {
+
+		boolean dowork = false;
+
+		@Override
+		protected void onPreExecute() {
+			EditText usrnmEdttxt = (EditText) overview_layout.findViewById(R.id.overview_edttxt_username);
+			EditText passwEdttxt = (EditText) overview_layout.findViewById(R.id.overview_edttxt_passw);
+			if (usrnmEdttxt.getText().toString().matches("")) {
+				usrnmEdttxt.requestFocus();
+				usrnmEdttxt.setError(getString(R.string.no_username_entered));
+			} else if (passwEdttxt.getText().toString().matches("")) {
+				passwEdttxt.requestFocus();
+				passwEdttxt.setError(getString(R.string.no_password_entered));
+			} else {
+				usrnmEdttxt.setError(null);
+				passwEdttxt.setError(null);
+				Toast.makeText(OverviewActivity.this, getResources().getString(R.string.try_login),
+						Toast.LENGTH_SHORT).show();
+				dowork = true;
+			}
+		}
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			if (dowork) {
+				EditText usrnmEdttxt = (EditText) overview_layout.findViewById(R.id.overview_edttxt_username);
+				EditText passwEdttxt = (EditText) overview_layout.findViewById(R.id.overview_edttxt_passw);
+				persistUser(usrnmEdttxt.getText().toString(), passwEdttxt.getText().toString());
+				AuthenticatedUser authUser = null;
+				try {
+					authUser = CWApplication.getInstance().getApiCaller().getApi().authenticate(
+							CWApplication.getInstance().getDataHandler().getUserName(),
+							passwEdttxt.getText().toString());
+					CWApplication.getInstance().setAuthenticatedUser(authUser);
+				} catch (ConsolewarsAPIException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			if (dowork
+					&& CWApplication.getInstance().getAuthenticatedUser().getSuccess().matches(
+							getString(R.string.success_yes))) {
+				ImageView icon = (ImageView) overview_layout.findViewById(R.id.overview_usericon);
+				loadPicture(icon, CWApplication.getInstance().getAuthenticatedUser().getUid());
+				Toast.makeText(OverviewActivity.this, getResources().getString(R.string.logged_in),
+						Toast.LENGTH_SHORT).show();
+			} else if (dowork) {
+				Toast.makeText(OverviewActivity.this, getResources().getString(R.string.login_failed),
+						Toast.LENGTH_SHORT).show();
+			}
 		}
 	}
 }

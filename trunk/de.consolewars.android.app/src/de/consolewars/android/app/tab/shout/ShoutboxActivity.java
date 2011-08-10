@@ -15,8 +15,8 @@ import android.webkit.WebSettings.PluginState;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import de.consolewars.android.app.CWApplication;
 import de.consolewars.android.app.R;
-import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
 
 /*
  * Copyright [2010] [Alexander Dridiger]
@@ -40,17 +40,12 @@ import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
  */
 public class ShoutboxActivity extends Activity {
 
-	private CwNavigationMainTabActivity mainTabs;
-
 	private ViewGroup shoutbox_layout;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		if (getParent().getParent() instanceof CwNavigationMainTabActivity) {
-			mainTabs = (CwNavigationMainTabActivity) getParent().getParent();
-		}
 		shoutbox_layout = (ViewGroup) LayoutInflater.from(ShoutboxActivity.this.getParent()).inflate(
 				R.layout.shoutbox_layout, null);
 
@@ -90,7 +85,7 @@ public class ShoutboxActivity extends Activity {
 
 		webView.requestFocus(View.FOCUS_DOWN);
 		webView.setOnTouchListener(new View.OnTouchListener() {
-			
+
 			public boolean onTouch(View v, MotionEvent event) {
 				switch (event.getAction()) {
 				case MotionEvent.ACTION_DOWN:
@@ -111,18 +106,20 @@ public class ShoutboxActivity extends Activity {
 				return true;
 			}
 		});
-		if (!mainTabs.getDataHandler().loadCurrentUser() && mainTabs.getDataHandler().getHashPw().matches("")
-				&& mainTabs.getDataHandler().getUserName().matches("")) {
+		if (!CWApplication.getInstance().getDataHandler().loadCurrentUser()
+				&& CWApplication.getInstance().getDataHandler().getHashPw().matches("")
+				&& CWApplication.getInstance().getDataHandler().getUserName().matches("")) {
 			webView.loadUrl(getString(R.string.cw_url_slash));
 		} else {
-			if (mainTabs.getAuthenticatedUser() != null
-					&& mainTabs.getAuthenticatedUser().getSuccess().matches("YES")) {
+			if (CWApplication.getInstance().getAuthenticatedUser() != null
+					&& CWApplication.getInstance().getAuthenticatedUser().getSuccess().matches(
+							getString(R.string.success_yes))) {
 				CookieManager cookieManager = CookieManager.getInstance();
 				cookieManager.removeAllCookie();
 				cookieManager.setCookie(getString(R.string.cw_domain), getString(R.string.cw_cookie_userid)
-						+ "=" + mainTabs.getAuthenticatedUser().getUid());
+						+ "=" + CWApplication.getInstance().getAuthenticatedUser().getUid());
 				cookieManager.setCookie(getString(R.string.cw_domain), getString(R.string.cw_cookie_pw) + "="
-						+ mainTabs.getAuthenticatedUser().getPasswordHash());
+						+ CWApplication.getInstance().getAuthenticatedUser().getPasswordHash());
 				webView.loadUrl(getString(R.string.cw_shoutbox));
 			} else {
 				webView.loadUrl(getString(R.string.cw_url_slash));
