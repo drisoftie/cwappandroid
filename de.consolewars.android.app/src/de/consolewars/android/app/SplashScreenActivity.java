@@ -1,5 +1,7 @@
 package de.consolewars.android.app;
 
+import java.security.GeneralSecurityException;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -7,6 +9,9 @@ import android.os.Bundle;
 import android.view.Window;
 import android.widget.ProgressBar;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
+import de.consolewars.android.app.util.HashEncrypter;
+import de.consolewars.api.data.AuthenticatedUser;
+import de.consolewars.api.exception.ConsolewarsAPIException;
 
 /**
  * Activity handling the splash screen.
@@ -44,6 +49,19 @@ public class SplashScreenActivity extends Activity {
 
 		@Override
 		protected Void doInBackground(Void... params) {
+			CWApplication.getInstance().getDataHandler().loadCurrentUser();
+			AuthenticatedUser user = null;
+			try {
+				user = CWApplication.getInstance().getApiCaller().getAuthUser(
+						CWApplication.getInstance().getDataHandler().getUserName(),
+						HashEncrypter.decrypt(getString(R.string.db_cry), CWApplication.getInstance()
+								.getDataHandler().getHashPw()));
+			} catch (ConsolewarsAPIException e) {
+				e.printStackTrace();
+			} catch (GeneralSecurityException e) {
+				e.printStackTrace();
+			}
+			CWApplication.getInstance().setAuthenticatedUser(user);
 			return null;
 		}
 

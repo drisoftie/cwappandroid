@@ -29,8 +29,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import de.consolewars.android.app.CWApplication;
 import de.consolewars.android.app.R;
-import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
 import de.consolewars.android.app.tab.cmts.CommentsActivity;
 import de.consolewars.android.app.util.MediaSnapper;
 import de.consolewars.android.app.util.TextViewHandler;
@@ -58,8 +58,6 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
  */
 public class SingleNewsActivity extends Activity {
 
-	private CwNavigationMainTabActivity mainTabs;
-
 	private ViewGroup newsView;
 
 	private News news;
@@ -69,13 +67,6 @@ public class SingleNewsActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		/*
-		 * TODO: Might become a source of error someday, if activity design changes. Would be better
-		 * to handle it with intents.
-		 */
-		if (getParent().getParent() instanceof CwNavigationMainTabActivity) {
-			mainTabs = (CwNavigationMainTabActivity) getParent().getParent();
-		}
 		newsView = (ViewGroup) LayoutInflater.from(SingleNewsActivity.this.getParent()).inflate(
 				R.layout.singlenews_layout, null);
 		new BuildSingleNewsAsyncTask().execute();
@@ -90,7 +81,7 @@ public class SingleNewsActivity extends Activity {
 		}
 		news = null;
 		try {
-			news = mainTabs.getApiCaller().getApi().getNews(id);
+			news = CWApplication.getInstance().getApiCaller().getApi().getNews(id);
 		} catch (ConsolewarsAPIException e) {
 			e.printStackTrace();
 		}

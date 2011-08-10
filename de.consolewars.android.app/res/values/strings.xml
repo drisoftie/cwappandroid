@@ -71,7 +71,19 @@
 	<string
 		name="comments_amount">amount</string>
 	<string
+		name="success_yes">YES</string>		
+	<string
+		name="no_username_entered">Es wurde kein Username eingegeben, einloggen nicht möglich.</string>	
+	<string
+		name="no_password_entered">Es wurde kein Passwort eingegeben, einloggen nicht möglich.</string>		
+	<string
 		name="no_text_entered">Es wurde kein Text eingegeben, senden nicht möglich.</string>
+	<string
+		name="try_login">Einlogversuch gestartet...</string>	
+	<string
+		name="logged_in">Sie wurden erfolgreich eingeloggt.</string>
+	<string
+		name="login_failed">Einlogversuch gescheitert.</string>					
 	<string
 		name="comment_sending">Kommentar wird gesendet...</string>
 	<string

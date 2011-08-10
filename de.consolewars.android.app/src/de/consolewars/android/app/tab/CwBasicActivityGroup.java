@@ -10,6 +10,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.view.View;
+import de.consolewars.android.app.CWApplication;
 
 /*
  * Copyright [2010] [Alexander Dridiger]
@@ -50,21 +51,22 @@ public abstract class CwBasicActivityGroup extends ActivityGroup implements ICwA
 		} else {
 			AlertDialog.Builder dialog = new AlertDialog.Builder(this).setMessage("CW-App beenden?")
 					.setCancelable(false).setPositiveButton("Ja", new OnClickListener() {
-						
+
 						public void onClick(DialogInterface dialog, int which) {
 							if (getParent() instanceof CwNavigationMainTabActivity) {
-								CwNavigationMainTabActivity parent = (CwNavigationMainTabActivity) getParent();
-								if (parent.getDataHandler().loadCurrentUser()) {
-									parent.getDataHandler().getDatabaseManager().updateDate(
-											parent.getDataHandler().getUserDBId(),
-											GregorianCalendar.getInstance().getTimeInMillis());
+								if (CWApplication.getInstance().getDataHandler().loadCurrentUser()) {
+									CWApplication.getInstance().getDataHandler().getDatabaseManager()
+											.updateDate(
+													CWApplication.getInstance().getDataHandler()
+															.getUserDBId(),
+													GregorianCalendar.getInstance().getTimeInMillis());
 								}
-								parent.getDataHandler().getDatabaseManager().closeDB();
+								CWApplication.getInstance().getDataHandler().getDatabaseManager().closeDB();
 							}
 							finish();
 						}
 					}).setNegativeButton("Nein", new OnClickListener() {
-						
+
 						public void onClick(DialogInterface dialog, int which) {
 							dialog.cancel();
 						}

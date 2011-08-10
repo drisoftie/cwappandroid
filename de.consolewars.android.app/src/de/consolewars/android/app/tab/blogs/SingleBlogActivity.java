@@ -26,8 +26,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import de.consolewars.android.app.CWApplication;
 import de.consolewars.android.app.R;
-import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
 import de.consolewars.android.app.tab.cmts.CommentsActivity;
 import de.consolewars.android.app.util.TextViewHandler;
 import de.consolewars.api.data.Blog;
@@ -54,18 +54,9 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
  */
 public class SingleBlogActivity extends Activity {
 
-	private CwNavigationMainTabActivity mainTabs;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		/*
-		 * TODO: Might become a source of error someday, if activity design changes. Would be better
-		 * to handle it with intents.
-		 */
-		if (getParent().getParent() instanceof CwNavigationMainTabActivity) {
-			mainTabs = (CwNavigationMainTabActivity) getParent().getParent();
-		}
 		new BuildSingleNewsAsyncTask().execute();
 	}
 
@@ -83,7 +74,7 @@ public class SingleBlogActivity extends Activity {
 		Blog blog = null;
 
 		try {
-			blog = mainTabs.getApiCaller().getApi().getBlog(id);
+			blog = CWApplication.getInstance().getApiCaller().getApi().getBlog(id);
 		} catch (ConsolewarsAPIException e) {
 			e.printStackTrace();
 		}

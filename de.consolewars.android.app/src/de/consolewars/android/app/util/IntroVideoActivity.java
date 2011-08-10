@@ -647,7 +647,6 @@ public class IntroVideoActivity extends Activity {
 			lBuilder.setPositiveButton(getResources().getString(R.string.ok),
 					new DialogInterface.OnClickListener() {
 
-
 						public void onClick(DialogInterface pDialog, int pWhich) {
 							IntroVideoActivity.this.finish();
 						}
