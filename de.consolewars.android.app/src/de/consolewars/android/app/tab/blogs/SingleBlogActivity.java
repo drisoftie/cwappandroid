@@ -111,7 +111,7 @@ public class SingleBlogActivity extends Activity {
 	private void createCommentBttn(View blogView, final Blog blog) {
 		Button bttn = (Button) blogView.findViewById(R.id.singleblog_comments_bttn);
 		bttn.setOnClickListener(new OnClickListener() {
-			@Override
+
 			public void onClick(View v) {
 				Intent commentsIntent = new Intent(SingleBlogActivity.this, CommentsActivity.class);
 

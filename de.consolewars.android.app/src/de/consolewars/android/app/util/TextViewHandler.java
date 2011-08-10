@@ -50,7 +50,7 @@ public class TextViewHandler implements ImageGetter, TagHandler {
 		this.context = context;
 	}
 
-	@Override
+
 	public Drawable getDrawable(String source) {
 		try {
 			if (source.startsWith("/")) {

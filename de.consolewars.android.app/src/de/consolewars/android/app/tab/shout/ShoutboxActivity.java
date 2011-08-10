@@ -60,7 +60,7 @@ public class ShoutboxActivity extends Activity {
 	private View loginAndOpenShoutbox() {
 		Button refresh = (Button) shoutbox_layout.findViewById(R.id.shoutbox_refresh);
 		refresh.setOnClickListener(new OnClickListener() {
-			@Override
+
 			public void onClick(View arg0) {
 				// Log.i("********AllCookies**********", CookieManager.getInstance().getCookie(
 				// getString(R.string.cw_domain)));
@@ -90,7 +90,7 @@ public class ShoutboxActivity extends Activity {
 
 		webView.requestFocus(View.FOCUS_DOWN);
 		webView.setOnTouchListener(new View.OnTouchListener() {
-			@Override
+			
 			public boolean onTouch(View v, MotionEvent event) {
 				switch (event.getAction()) {
 				case MotionEvent.ACTION_DOWN:

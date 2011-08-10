@@ -118,7 +118,7 @@ public class SingleNewsActivity extends Activity {
 	private void createCommentBttn() {
 		Button bttn = (Button) newsView.findViewById(R.id.singlenews_comments_bttn);
 		bttn.setOnClickListener(new OnClickListener() {
-			@Override
+
 			public void onClick(View v) {
 				Intent commentsIntent = new Intent(SingleNewsActivity.this, CommentsActivity.class);
 
