@@ -1,6 +1,7 @@
 package de.consolewars.android.app;
 
 import android.app.Application;
+import android.content.res.Configuration;
 import de.consolewars.android.app.db.AppDataHandler;
 import de.consolewars.android.app.db.DatabaseManager;
 import de.consolewars.android.app.util.HttpPoster;
@@ -50,6 +51,12 @@ public class CWApplication extends Application {
 		singleton = this;
 
 		initHelper();
+	}
+
+	@Override
+	public final void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		dataHandler.getDatabaseManager().openDatabase();
 	}
 
 	/**

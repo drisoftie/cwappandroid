@@ -49,6 +49,7 @@ public class SplashScreenActivity extends Activity {
 
 		@Override
 		protected Void doInBackground(Void... params) {
+			CWApplication.getInstance().getDataHandler().getDatabaseManager().openDatabase();
 			CWApplication.getInstance().getDataHandler().loadCurrentUser();
 			AuthenticatedUser user = null;
 			try {
