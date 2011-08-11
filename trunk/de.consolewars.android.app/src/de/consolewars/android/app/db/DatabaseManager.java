@@ -53,6 +53,15 @@ public class DatabaseManager {
 		this.db = openHelper.getWritableDatabase();
 	}
 
+	public boolean openDatabase() {
+		if ((db == null || !db.isOpen()) && context != null) {
+			CwSQLiteOpenHelper openHelper = new CwSQLiteOpenHelper(context);
+			this.db = openHelper.getWritableDatabase();
+			return true;
+		}
+		return false;
+	}
+
 	/**
 	 * Convenient method to insert some user data. Every attribute is mandatory.
 	 * 
