@@ -2,6 +2,10 @@ package de.consolewars.android.app.db;
 
 import android.content.Context;
 import android.database.Cursor;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import de.consolewars.android.app.R;
 
 /*
@@ -19,30 +23,25 @@ import de.consolewars.android.app.R;
  * limitations under the License.
  */
 /**
- * Helper class providing access to app-specific data. Access to the db is also leveraged by it.
+ * Helper class providing access to app-specific data. Access to the db is also
+ * leveraged by it.
  * 
  * @author Alexander Dridiger
  */
+@Singleton
 public class AppDataHandler {
 
+	@Inject
 	private Context context;
-	private DatabaseManager db;
+	@Inject
+	private DatabaseManager databaseManager;
 
 	private String userName = "";
 	private String hashPw = "";
-	private int cwUserID = -1;
-	private int id = -1;
+	private int cwUserId = -1;
+	private int userDbId = -1;
 	private long date = -1;
 	private String stringDate = "";
-
-	public AppDataHandler(Context applicationContext) {
-		context = applicationContext;
-		db = new DatabaseManager(applicationContext);
-	}
-
-	public DatabaseManager getDatabaseManager() {
-		return db;
-	}
 
 	public boolean loadCurrentUser() {
 		boolean existingUser = false;
@@ -53,7 +52,7 @@ public class AppDataHandler {
 		String columnPassw = getString(R.string.db_password_attribute);
 		String columnDate = getString(R.string.db_date_attribute);
 
-		Cursor cursor = db.fireQuery(tableName, new String[] { columnId, columnUsername, columnPassw,
+		Cursor cursor = databaseManager.fireQuery(tableName, new String[] { columnId, columnUsername, columnPassw,
 				columnDate }, null, null, null, null, getString(R.string.db_id_desc));
 		if (cursor.getCount() > 0 && cursor.moveToFirst()) {
 			for (String columnName : cursor.getColumnNames()) {
@@ -62,7 +61,7 @@ public class AppDataHandler {
 				} else if (columnName.matches(columnPassw)) {
 					hashPw = cursor.getString(cursor.getColumnIndex(columnName));
 				} else if (columnName.matches(columnId)) {
-					id = cursor.getInt(cursor.getColumnIndex(columnName));
+					userDbId = cursor.getInt(cursor.getColumnIndex(columnName));
 				} else if (columnName.matches(columnDate)) {
 					date = cursor.getLong(cursor.getColumnIndex(columnName));
 					stringDate = cursor.getString(cursor.getColumnIndex(columnName));
@@ -96,21 +95,21 @@ public class AppDataHandler {
 	 * @return the cwUserID
 	 */
 	public int getCwUserID() {
-		return cwUserID;
+		return cwUserId;
 	}
 
 	/**
 	 * @param cwUserID
 	 */
 	public void setCwUserID(int cwUserID) {
-		this.cwUserID = cwUserID;
+		this.cwUserId = cwUserID;
 	}
 
 	/**
 	 * @return the id
 	 */
-	public int getUserDBId() {
-		return id;
+	public int getUserDbId() {
+		return userDbId;
 	}
 
 	/**

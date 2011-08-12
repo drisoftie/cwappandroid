@@ -1,6 +1,6 @@
 package de.consolewars.android.app.tab.shout;
 
-import android.app.Activity;
+import roboguice.activity.RoboActivity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -16,8 +16,12 @@ import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import com.google.inject.Inject;
+
 import de.consolewars.android.app.CWApplication;
 import de.consolewars.android.app.R;
+import de.consolewars.android.app.db.AppDataHandler;
 
 /*
  * Copyright [2010] [Alexander Dridiger]
@@ -39,7 +43,12 @@ import de.consolewars.android.app.R;
  * 
  * @author Alexander Dridiger
  */
-public class ShoutboxActivity extends Activity {
+public class ShoutboxActivity extends RoboActivity {
+
+	@Inject
+	private CWApplication cwApplication;
+	@Inject
+	private AppDataHandler appDataHandler;
 
 	private ViewGroup shoutbox_layout;
 
@@ -58,7 +67,8 @@ public class ShoutboxActivity extends Activity {
 		refresh.setOnClickListener(new OnClickListener() {
 
 			public void onClick(View arg0) {
-				// Log.i("********AllCookies**********", CookieManager.getInstance().getCookie(
+				// Log.i("********AllCookies**********",
+				// CookieManager.getInstance().getCookie(
 				// getString(R.string.cw_domain)));
 				// String[] keyValueSets =
 				// CookieManager.getInstance().getCookie(getString(R.string.cw_domain))
@@ -107,21 +117,19 @@ public class ShoutboxActivity extends Activity {
 				return true;
 			}
 		});
-		if (!CWApplication.getInstance().getDataHandler().loadCurrentUser()
-				&& CWApplication.getInstance().getDataHandler().getHashPw().matches("")
-				&& CWApplication.getInstance().getDataHandler().getUserName().matches("")) {
+		if (!appDataHandler.loadCurrentUser() && appDataHandler.getHashPw().matches("")
+				&& appDataHandler.getUserName().matches("")) {
 			webView.loadUrl(getString(R.string.cw_url_slash));
 		} else {
-			if (CWApplication.getInstance().getAuthenticatedUser() != null
-					&& CWApplication.getInstance().getAuthenticatedUser().getSuccess()
-							.matches(getString(R.string.success_yes))) {
+			if (cwApplication.getAuthenticatedUser() != null
+					&& cwApplication.getAuthenticatedUser().getSuccess().matches(getString(R.string.success_yes))) {
 				CookieSyncManager.createInstance(ShoutboxActivity.this);
 				CookieManager cookieManager = CookieManager.getInstance();
 //				cookieManager.removeAllCookie();
-				cookieManager.setCookie(getString(R.string.cw_domain), getString(R.string.cw_cookie_userid)
-						+ "=" + CWApplication.getInstance().getAuthenticatedUser().getUid());
+				cookieManager.setCookie(getString(R.string.cw_domain), getString(R.string.cw_cookie_userid) + "="
+						+ cwApplication.getAuthenticatedUser().getUid());
 				cookieManager.setCookie(getString(R.string.cw_domain), getString(R.string.cw_cookie_pw) + "="
-						+ CWApplication.getInstance().getAuthenticatedUser().getPasswordHash());
+						+ cwApplication.getAuthenticatedUser().getPasswordHash());
 				CookieSyncManager.getInstance().sync();
 				webView.loadUrl(getString(R.string.cw_shoutbox));
 			} else {
@@ -144,8 +152,8 @@ public class ShoutboxActivity extends Activity {
 		@Override
 		protected void onPreExecute() {
 			// first set progressbar view
-			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(ShoutboxActivity.this.getParent())
-					.inflate(R.layout.centered_progressbar, null);
+			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(ShoutboxActivity.this.getParent()).inflate(
+					R.layout.centered_progressbar, null);
 			setContentView(progress_layout);
 
 			TextView text = (TextView) progress_layout.findViewById(R.id.centered_progressbar_text);

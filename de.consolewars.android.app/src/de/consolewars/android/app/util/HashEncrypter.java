@@ -33,8 +33,11 @@ import javax.crypto.spec.SecretKeySpec;
  * 
  * @author ferenc.hechler
  */
-public class HashEncrypter {
+public final class HashEncrypter {
 
+	private HashEncrypter() {
+	}
+	
 	public static String encrypt(String seed, String cleartext) throws GeneralSecurityException {
 		byte[] rawKey = getRawKey(seed.getBytes());
 		byte[] result = encrypt(rawKey, cleartext.getBytes());

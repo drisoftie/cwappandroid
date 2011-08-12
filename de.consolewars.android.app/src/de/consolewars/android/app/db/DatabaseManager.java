@@ -5,6 +5,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import de.consolewars.android.app.R;
 
 /*
@@ -26,6 +30,7 @@ import de.consolewars.android.app.R;
  * 
  * @author Alexander Dridiger
  */
+@Singleton
 public class DatabaseManager {
 
 	private String userdata_table;
@@ -37,11 +42,13 @@ public class DatabaseManager {
 	private Context context;
 
 	/**
-	 * Constructor to get an Android {@link Context} and initializing the database.
+	 * Constructor to get an Android {@link Context} and initializing the
+	 * database.
 	 * 
 	 * @param context
 	 *            needed for {@link SQLiteOpenHelper}
 	 */
+	@Inject
 	public DatabaseManager(Context context) {
 		this.context = context;
 		userdata_table = context.getString(R.string.db_table_userdata_name);
@@ -49,8 +56,7 @@ public class DatabaseManager {
 		blogdata_table = context.getString(R.string.db_table_blogdata_name);
 		picdata_table = context.getString(R.string.db_table_picdata_name);
 		viddata_table = context.getString(R.string.db_table_viddata_name);
-		CwSQLiteOpenHelper openHelper = new CwSQLiteOpenHelper(context);
-		this.db = openHelper.getWritableDatabase();
+		openDatabase();
 	}
 
 	public boolean openDatabase() {
@@ -120,7 +126,8 @@ public class DatabaseManager {
 	}
 
 	/**
-	 * Wrapping the query method of the actual database {@link SQLiteDatabase.query()}.
+	 * Wrapping the query method of the actual database {@link
+	 * SQLiteDatabase.query()}.
 	 * 
 	 * @param table
 	 * @param columns
@@ -131,8 +138,8 @@ public class DatabaseManager {
 	 * @param orderBy
 	 * @return
 	 */
-	public Cursor fireQuery(String table, String[] columns, String selection, String[] selectionArgs,
-			String groupBy, String having, String orderBy) {
+	public Cursor fireQuery(String table, String[] columns, String selection, String[] selectionArgs, String groupBy,
+			String having, String orderBy) {
 		Cursor cursor = this.db.query(table, columns, selection, selectionArgs, groupBy, having, orderBy);
 		return cursor;
 	}
@@ -157,8 +164,8 @@ public class DatabaseManager {
 		 *            the Android {@link Context} to set
 		 */
 		public CwSQLiteOpenHelper(Context context) {
-			super(context, DatabaseManager.this.context.getString(R.string.db_name), null, Integer
-					.valueOf(DatabaseManager.this.context.getString(R.string.db_version)));
+			super(context, context.getString(R.string.db_name), null, Integer.valueOf(context
+					.getString(R.string.db_version)));
 		}
 
 		@Override

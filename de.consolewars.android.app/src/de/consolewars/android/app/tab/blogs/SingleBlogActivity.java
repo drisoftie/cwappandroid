@@ -10,7 +10,7 @@ import java.util.IllegalFormatException;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import android.app.Activity;
+import roboguice.activity.RoboActivity;
 import android.app.ActivityGroup;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -20,16 +20,18 @@ import android.os.Bundle;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import de.consolewars.android.app.CWApplication;
+
+import com.google.inject.Inject;
+
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.cmts.CommentsActivity;
 import de.consolewars.android.app.util.TextViewHandler;
+import de.consolewars.api.API;
 import de.consolewars.api.data.Blog;
 import de.consolewars.api.exception.ConsolewarsAPIException;
 
@@ -52,17 +54,19 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
  * 
  * @author Alexander Dridiger
  */
-public class SingleBlogActivity extends Activity {
+public class SingleBlogActivity extends RoboActivity {
+
+	@Inject
+	private API api;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		new BuildSingleNewsAsyncTask().execute();
+		new BuildSingleBlogAsyncTask().execute();
 	}
 
 	private View createBlogView() {
-		View blogView = LayoutInflater.from(SingleBlogActivity.this.getParent()).inflate(
-				R.layout.singleblog_layout, null);
+		View blogView = LayoutInflater.from(getParent()).inflate(R.layout.singleblog_layout, null);
 
 		int id = -1;
 
@@ -74,7 +78,7 @@ public class SingleBlogActivity extends Activity {
 		Blog blog = null;
 
 		try {
-			blog = CWApplication.getInstance().getApiCaller().getApi().getBlog(id);
+			blog = api.getBlog(id);
 		} catch (ConsolewarsAPIException e) {
 			e.printStackTrace();
 		}
@@ -87,8 +91,8 @@ public class SingleBlogActivity extends Activity {
 				// String fString = String.format(blog.getArticle(), "");
 				// CharSequence styledString = Html.fromHtml(fString);
 				// text.setText(styledString);
-				text.setText(Html.fromHtml(blog.getArticle(true), new TextViewHandler(SingleBlogActivity.this
-						.getApplicationContext()), null));
+				text.setText(Html.fromHtml(blog.getArticle(true),
+						new TextViewHandler(SingleBlogActivity.this.getApplicationContext()), null));
 			} catch (IllegalFormatException ife) {
 				// FIXME Wrong format handling
 				text.setText(blog.getArticle());
@@ -113,9 +117,10 @@ public class SingleBlogActivity extends Activity {
 
 				commentsIntent.putExtras(extra);
 
-				View view = ((ActivityGroup) getParent()).getLocalActivityManager().startActivity(
-						CommentsActivity.class.getSimpleName(),
-						commentsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
+				View view = ((ActivityGroup) getParent())
+						.getLocalActivityManager()
+						.startActivity(CommentsActivity.class.getSimpleName(),
+								commentsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
 				// replace the view
 				((BlogsActivityGroup) getParent()).replaceView(view);
 			}
@@ -136,7 +141,8 @@ public class SingleBlogActivity extends Activity {
 	}
 
 	/**
-	 * Downloads the user picture and decodes it into a {@link Bitmap} to be set into an ImageView.
+	 * Downloads the user picture and decodes it into a {@link Bitmap} to be set
+	 * into an ImageView.
 	 * 
 	 * @param view
 	 *            the ImageView
@@ -169,32 +175,30 @@ public class SingleBlogActivity extends Activity {
 
 		Calendar cal = Calendar.getInstance(zone, Locale.GERMANY);
 		// formatting day of week in EEEE format like Sunday, Monday etc.
-		SimpleDateFormat dateformat = new SimpleDateFormat("EEEE, dd. MMMMM yyyy 'um' HH:mm 'Uhr'",
-				Locale.GERMANY);
+		SimpleDateFormat dateformat = new SimpleDateFormat("EEEE, dd. MMMMM yyyy 'um' HH:mm 'Uhr'", Locale.GERMANY);
 		dateformat.setCalendar(cal);
 		return dateformat.format(date);
 	}
 
 	/**
-	 * Asynchronous task to receive a single news from the API and build up the ui.
+	 * Asynchronous task to receive a single news from the API and build up the
+	 * ui.
 	 * 
 	 * @author Alexander Dridiger
 	 */
-	private class BuildSingleNewsAsyncTask extends AsyncTask<Void, Integer, View> {
+	private class BuildSingleBlogAsyncTask extends AsyncTask<Void, Integer, View> {
 
 		private ProgressBar progressBar;
 
 		@Override
 		protected void onPreExecute() {
 			// first set progressbar view
-			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(SingleBlogActivity.this.getParent())
-					.inflate(R.layout.centered_progressbar, null);
-			setContentView(progress_layout);
+			setContentView(R.layout.centered_progressbar);
 
-			TextView text = (TextView) progress_layout.findViewById(R.id.centered_progressbar_text);
+			TextView text = (TextView) findViewById(R.id.centered_progressbar_text);
 			text.setText(getString(R.string.loading, "Einzelblog"));
 
-			progressBar = (ProgressBar) progress_layout.findViewById(R.id.centered_progressbar);
+			progressBar = (ProgressBar) findViewById(R.id.centered_progressbar);
 			progressBar.setProgress(0);
 		}
 

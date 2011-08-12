@@ -1,10 +1,15 @@
 package de.consolewars.android.app;
 
-import android.app.Application;
+import java.util.List;
+
+import roboguice.application.RoboApplication;
 import android.content.res.Configuration;
-import de.consolewars.android.app.db.AppDataHandler;
+
+import com.google.inject.Inject;
+import com.google.inject.Module;
+import com.google.inject.Singleton;
+
 import de.consolewars.android.app.db.DatabaseManager;
-import de.consolewars.android.app.util.HttpPoster;
 import de.consolewars.api.data.AuthenticatedUser;
 
 /*
@@ -22,71 +27,27 @@ import de.consolewars.api.data.AuthenticatedUser;
  * limitations under the License.
  */
 /**
- * Application stands as a singleton for the whole app and provides access to underlying
- * functionalities.
+ * Application stands as a singleton for the whole app and provides access to
+ * underlying functionalities.
  * 
  * @author Alexander Dridiger
  */
-public class CWApplication extends Application {
+@Singleton
+public class CWApplication extends RoboApplication {
 
-	private static CWApplication singleton;
-
-	private APICaller apiCaller;
-	private AppDataHandler dataHandler;
-	private HttpPoster poster;
+	@Inject
+	private DatabaseManager databaseManager;
 	private AuthenticatedUser user;
 
-	/**
-	 * Singleton method.
-	 * 
-	 * @return CWApplication singleton
-	 */
-	public static CWApplication getInstance() {
-		return singleton;
-	}
-
 	@Override
-	public final void onCreate() {
-		super.onCreate();
-		singleton = this;
-
-		initHelper();
+	protected void addApplicationModules(List<Module> modules) {
+		modules.add(new CWAndroidModule());
 	}
 
 	@Override
 	public final void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
-		dataHandler.getDatabaseManager().openDatabase();
-	}
-
-	/**
-	 * Initialize helper classes like the {@link DatabaseManager}.
-	 */
-	private void initHelper() {
-		dataHandler = new AppDataHandler(getApplicationContext());
-		apiCaller = new APICaller(getApplicationContext());
-		poster = new HttpPoster(getApplicationContext());
-	}
-
-	/**
-	 * @return the api wrapper
-	 */
-	public APICaller getApiCaller() {
-		return apiCaller;
-	}
-
-	/**
-	 * @return data handler
-	 */
-	public AppDataHandler getDataHandler() {
-		return dataHandler;
-	}
-
-	/**
-	 * @return the poster
-	 */
-	public HttpPoster getHttpPoster() {
-		return poster;
+		databaseManager.openDatabase();
 	}
 
 	/**

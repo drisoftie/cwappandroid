@@ -9,6 +9,10 @@ import java.net.URL;
 
 import android.content.Context;
 import android.util.Log;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import de.consolewars.android.app.R;
 
 /*
@@ -29,13 +33,11 @@ import de.consolewars.android.app.R;
  * @author Alexander Dridiger
  * 
  */
+@Singleton
 public class HttpPoster {
 
+	@Inject
 	private Context context;
-
-	public HttpPoster(Context context) {
-		this.context = context;
-	}
 
 	public void sendPost(String urlString, String cookies, String data) throws IOException {
 		URL url = new URL(urlString);
