@@ -99,40 +99,18 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.android</groupId>
-			<artifactId>spring-android-rest-template</artifactId>
-			<version>${spring-android-version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.android</groupId>
-			<artifactId>spring-android-auth</artifactId>
-			<version>${spring-android-version}</version>
-		</dependency>
-		<dependency>
 			<groupId>net.sourceforge.htmlcleaner</groupId>
 			<artifactId>htmlcleaner</artifactId>
 			<version>${htmlcleaner-version}</version>
-		</dependency>
-		<dependency>
-			<!-- Using Simple for XML marshaling -->
-			<groupId>org.simpleframework</groupId>
-			<artifactId>simple-xml</artifactId>
-			<version>${simple-version}</version>
 			<exclusions>
-				<!-- StAX is not available on Android -->
-				<exclusion>
-					<artifactId>stax</artifactId>
-					<groupId>stax</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>stax-api</artifactId>
-					<groupId>stax</groupId>
-				</exclusion>
-				<!-- Provided by Android -->
-				<exclusion>
-					<artifactId>xpp3</artifactId>
-					<groupId>xpp3</groupId>
-				</exclusion>
+			    <exclusion>
+			        <groupId>org.apache.ant</groupId>
+                    <artifactId>ant</artifactId>
+			    </exclusion>
+			    <exclusion>
+                    <groupId>org.jdom</groupId>
+                    <artifactId>jdom</artifactId>
+                </exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -145,6 +123,35 @@
 			<artifactId>commons-lang</artifactId>
 			<version>${commons-lang-version}</version>
 		</dependency>
+		<!-- dependency>
+            <groupId>org.springframework.android</groupId>
+            <artifactId>spring-android-rest-template</artifactId>
+            <version>${spring-android-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.android</groupId>
+            <artifactId>spring-android-auth</artifactId>
+            <version>${spring-android-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.simpleframework</groupId>
+            <artifactId>simple-xml</artifactId>
+            <version>${simple-version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>stax</artifactId>
+                    <groupId>stax</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>stax-api</artifactId>
+                    <groupId>stax</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>xpp3</artifactId>
+                    <groupId>xpp3</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency-->
 	</dependencies>
 
 	<repositories>
