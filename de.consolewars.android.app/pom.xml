@@ -68,6 +68,10 @@
 					</emulator>
 					<deleteConflictingFiles>true</deleteConflictingFiles>
 					<undeployBeforeDeploy>true</undeployBeforeDeploy>
+				    <jvmArguments>
+                        <argument>-Xms256m</argument>
+                        <argument>-Xmx512m</argument>
+                    </jvmArguments>
 				</configuration>
 				<extensions>true</extensions>
 			</plugin>
