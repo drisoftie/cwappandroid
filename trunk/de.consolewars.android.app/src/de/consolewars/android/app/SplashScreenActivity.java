@@ -2,12 +2,17 @@ package de.consolewars.android.app;
 
 import java.security.GeneralSecurityException;
 
-import android.app.Activity;
+import roboguice.activity.RoboActivity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Window;
 import android.widget.ProgressBar;
+
+import com.google.inject.Inject;
+
+import de.consolewars.android.app.db.AppDataHandler;
+import de.consolewars.android.app.db.DatabaseManager;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
 import de.consolewars.android.app.util.HashEncrypter;
 import de.consolewars.api.data.AuthenticatedUser;
@@ -18,11 +23,23 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
  * 
  * @author Alexander Dridiger
  */
-public class SplashScreenActivity extends Activity {
+public class SplashScreenActivity extends RoboActivity {
+
+	@Inject
+	private CWApplication cwApplication;
+	@Inject
+	private DatabaseManager databaseManager;
+	@Inject
+	private APICaller apiCaller;
+	@Inject
+	private AppDataHandler appDataHandler;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+		setContentView(R.layout.splash_layout);
+		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.titlebar_layout);
 
 		new SplashAsyncTask().execute();
 	}
@@ -38,10 +55,6 @@ public class SplashScreenActivity extends Activity {
 
 		@Override
 		protected void onPreExecute() {
-			requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
-			setContentView(R.layout.splash_layout);
-			getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.titlebar_layout);
-
 			progressBar = (ProgressBar) findViewById(R.id.splash_progressbar);
 			// first set progressbar view
 			progressBar.setProgress(0);
@@ -49,20 +62,18 @@ public class SplashScreenActivity extends Activity {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			CWApplication.getInstance().getDataHandler().getDatabaseManager().openDatabase();
-			CWApplication.getInstance().getDataHandler().loadCurrentUser();
+			databaseManager.openDatabase();
+			appDataHandler.loadCurrentUser();
 			AuthenticatedUser user = null;
 			try {
-				user = CWApplication.getInstance().getApiCaller().getAuthUser(
-						CWApplication.getInstance().getDataHandler().getUserName(),
-						HashEncrypter.decrypt(getString(R.string.db_cry), CWApplication.getInstance()
-								.getDataHandler().getHashPw()));
+				user = apiCaller.getAuthUser(appDataHandler.getUserName(),
+						HashEncrypter.decrypt(getString(R.string.db_cry), appDataHandler.getHashPw()));
 			} catch (ConsolewarsAPIException e) {
 				e.printStackTrace();
 			} catch (GeneralSecurityException e) {
 				e.printStackTrace();
 			}
-			CWApplication.getInstance().setAuthenticatedUser(user);
+			cwApplication.setAuthenticatedUser(user);
 			return null;
 		}
 

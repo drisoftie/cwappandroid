@@ -2,7 +2,7 @@ package de.consolewars.android.app.tab.msgs;
 
 import java.util.IllegalFormatException;
 
-import android.app.Activity;
+import roboguice.activity.RoboActivity;
 import android.os.Bundle;
 import android.text.Html;
 import android.widget.TextView;
@@ -28,7 +28,7 @@ import de.consolewars.android.app.util.TextViewHandler;
  * 
  * @author Alexander Dridiger
  */
-public class SingleMessageActivity extends Activity {
+public class SingleMessageActivity extends RoboActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

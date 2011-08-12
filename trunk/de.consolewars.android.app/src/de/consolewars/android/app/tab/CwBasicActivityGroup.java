@@ -4,13 +4,18 @@ import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+import roboguice.activity.RoboActivityGroup;
 import android.app.Activity;
 import android.app.ActivityGroup;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.view.View;
-import de.consolewars.android.app.CWApplication;
+
+import com.google.inject.Inject;
+
+import de.consolewars.android.app.db.AppDataHandler;
+import de.consolewars.android.app.db.DatabaseManager;
 
 /*
  * Copyright [2010] [Alexander Dridiger]
@@ -27,12 +32,17 @@ import de.consolewars.android.app.CWApplication;
  * limitations under the License.
  */
 /**
- * Basic implementation of an {@link ActivityGroup} supporting {@link Activity} switching and
- * {@link View} caching.
+ * Basic implementation of an {@link ActivityGroup} supporting {@link Activity}
+ * switching and {@link View} caching.
  * 
  * @author Alexander Dridiger
  */
-public abstract class CwBasicActivityGroup extends ActivityGroup implements ICwActivityGroup {
+public abstract class CwBasicActivityGroup extends RoboActivityGroup implements ICwActivityGroup {
+
+	@Inject
+	private AppDataHandler appDataHandler;
+	@Inject
+	private DatabaseManager databaseManager;
 
 	private List<View> viewCache;
 
@@ -54,14 +64,11 @@ public abstract class CwBasicActivityGroup extends ActivityGroup implements ICwA
 
 						public void onClick(DialogInterface dialog, int which) {
 							if (getParent() instanceof CwNavigationMainTabActivity) {
-								if (CWApplication.getInstance().getDataHandler().loadCurrentUser()) {
-									CWApplication.getInstance().getDataHandler().getDatabaseManager()
-											.updateDate(
-													CWApplication.getInstance().getDataHandler()
-															.getUserDBId(),
-													GregorianCalendar.getInstance().getTimeInMillis());
+								if (appDataHandler.loadCurrentUser()) {
+									databaseManager.updateDate(appDataHandler.getUserDbId(), GregorianCalendar
+											.getInstance().getTimeInMillis());
 								}
-								CWApplication.getInstance().getDataHandler().getDatabaseManager().closeDB();
+								databaseManager.closeDB();
 							}
 							finish();
 						}

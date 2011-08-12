@@ -2,6 +2,10 @@ package de.consolewars.android.app;
 
 import android.content.Context;
 import android.util.Log;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import de.consolewars.api.API;
 import de.consolewars.api.data.AuthStatus;
 import de.consolewars.api.data.AuthenticatedUser;
@@ -26,29 +30,13 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
  * 
  * @author Alexander Dridiger
  */
+@Singleton
 public class APICaller {
 
+	@Inject
 	private Context context;
+	@Inject
 	private API api;
-
-	/**
-	 * Constructor to get an Android {@link Context}.
-	 * 
-	 * @param context
-	 */
-	public APICaller(Context context) {
-		this.context = context;
-		api = new API(context.getString(R.string.api_key));
-	}
-
-	/**
-	 * Returns the actual CW API,´.
-	 * 
-	 * @return
-	 */
-	public API getApi() {
-		return api;
-	}
 
 	/**
 	 * Passes on the CW API Key to check receive authentication.
@@ -61,7 +49,8 @@ public class APICaller {
 	}
 
 	/**
-	 * Method wrapper for {@link API.authenticate(String username, String password)}.
+	 * Method wrapper for {@link API.authenticate(String username, String
+	 * password)}.
 	 * 
 	 * @param username
 	 * @param password

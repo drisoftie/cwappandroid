@@ -6,6 +6,11 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
 
+import com.google.inject.Singleton;
+
+import roboguice.inject.InjectResource;
+
+import de.consolewars.android.app.R;
 import de.consolewars.api.data.AuthStatus;
 import de.consolewars.api.data.AuthenticatedUser;
 import de.consolewars.api.data.Blog;
@@ -48,11 +53,13 @@ import de.consolewars.api.util.URLCreator;
  * 
  * @author cerpin (arrewk@gmail.com)
  */
+@Singleton
 public class API {
 
 	private final String BASEURL = "http://www.consolewars.de/api/";
 	public static final int BLANK_ARGUMENT = -1;
 
+	@InjectResource(R.string.api_key)
 	private String APIKey;
 
 	private CheckBlogThread bloglistUpdateThread;
@@ -65,10 +72,6 @@ public class API {
 	private ArrayList<Object> listeners = new ArrayList<Object>();
 
 	public final boolean DEBUG = false;
-
-	public API(String APIKey) {
-		this.APIKey = APIKey;
-	}
 
 	/**
 	 * checking if apikey is valid or not OK - when apikey is valid FAILED - when apikey is invalid

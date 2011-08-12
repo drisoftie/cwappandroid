@@ -1,10 +1,10 @@
 package de.consolewars.android.app.tab;
 
+import roboguice.activity.RoboTabActivity;
 import android.app.ActivityGroup;
 import android.app.TabActivity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.widget.ImageView;
@@ -41,7 +41,7 @@ import de.consolewars.android.app.tab.shout.ShoutboxActivityGroup;
  * 
  * @author Alexander Dridiger
  */
-public class CwNavigationMainTabActivity extends TabActivity {
+public class CwNavigationMainTabActivity extends RoboTabActivity {
 
 	// unique tabhost of this activity
 	private TabHost usedTabHost;
@@ -97,7 +97,7 @@ public class CwNavigationMainTabActivity extends TabActivity {
 		// initialize a TabSpec for each tab and add it to the TabHost
 		TabHost.TabSpec spec = usedTabHost.newTabSpec(getString(tagId));
 		// use layout inflater to get a view of the tab to be added
-		View tabIndicator = LayoutInflater.from(this).inflate(R.layout.tab_indicator, getTabWidget(), false);
+		View tabIndicator = getLayoutInflater().inflate(R.layout.tab_indicator, getTabWidget(), false);
 
 		// add given information to view elements of the tab
 		ImageView icon = (ImageView) tabIndicator.findViewById(R.id.icon);

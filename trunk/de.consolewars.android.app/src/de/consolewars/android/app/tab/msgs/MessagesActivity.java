@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import android.app.Activity;
+import roboguice.activity.RoboActivity;
 import android.app.ActivityGroup;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -22,9 +22,14 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TableLayout;
 import android.widget.TextView;
+
+import com.google.inject.Inject;
+
+import de.consolewars.android.app.APICaller;
 import de.consolewars.android.app.CWApplication;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.util.StyleSpannableStringBuilder;
+import de.consolewars.api.API;
 import de.consolewars.api.data.Message;
 import de.consolewars.api.exception.ConsolewarsAPIException;
 
@@ -47,9 +52,16 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
  * 
  * @author Alexander Dridiger
  */
-public class MessagesActivity extends Activity {
+public class MessagesActivity extends RoboActivity {
 
-	private List<Message> msgs = new ArrayList<Message>();;
+	@Inject
+	private CWApplication cwApplication;
+	@Inject
+	private APICaller apiCaller;
+	@Inject
+	private API api;
+
+	private List<Message> msgs = new ArrayList<Message>();
 
 	// remember last selected table row to draw the background
 	private View selectedRow;
@@ -68,8 +80,7 @@ public class MessagesActivity extends Activity {
 	 */
 	private List<View> createMsgsRows() {
 		// create table based on current messages
-		View msgsView = LayoutInflater.from(MessagesActivity.this.getParent()).inflate(R.layout.msgs_layout,
-				null);
+		View msgsView = LayoutInflater.from(MessagesActivity.this.getParent()).inflate(R.layout.msgs_layout, null);
 		TableLayout msgsTable = (TableLayout) msgsView.findViewById(R.id.msgs_table);
 
 		styleStringBuilder = new StyleSpannableStringBuilder();
@@ -78,30 +89,25 @@ public class MessagesActivity extends Activity {
 
 		for (final Message msg : this.msgs) {
 			// get the table row by an inflater and set the needed information
-			final View tableRow = LayoutInflater.from(this).inflate(R.layout.msgs_row_layout, msgsTable,
-					false);
+			final View tableRow = LayoutInflater.from(this).inflate(R.layout.msgs_row_layout, msgsTable, false);
 
 			tableRow.setId(msg.getId());
 			tableRow.setOnClickListener(new View.OnClickListener() {
 
 				public void onClick(View v) {
 					if (selectedRow != null) {
-						selectedRow.setBackgroundDrawable(getResources()
-								.getDrawable(R.drawable.table_cell_bg));
+						selectedRow.setBackgroundDrawable(getResources().getDrawable(R.drawable.table_cell_bg));
 					}
-					tableRow.setBackgroundDrawable(getResources().getDrawable(
-							R.drawable.table_cell_bg_selected));
+					tableRow.setBackgroundDrawable(getResources().getDrawable(R.drawable.table_cell_bg_selected));
 					selectedRow = tableRow;
 					getSingleMessage(msg.getMessage());
 				}
 			});
-			((ImageView) tableRow.findViewById(R.id.msgs_row_read_icon))
-					.setImageResource(createMessageIcon(msg.isMessageread()));
+			((ImageView) tableRow.findViewById(R.id.msgs_row_read_icon)).setImageResource(createMessageIcon(msg
+					.isMessageread()));
 			((TextView) tableRow.findViewById(R.id.msgs_row_title)).setText(createTitle(msg.getTitle()));
-			((TextView) tableRow.findViewById(R.id.msgs_row_date))
-					.setText(createDate(msg.getUnixtime() * 1000L));
-			((TextView) tableRow.findViewById(R.id.msgs_row_author)).setText(createFromUser(msg
-					.getFromusername()));
+			((TextView) tableRow.findViewById(R.id.msgs_row_date)).setText(createDate(msg.getUnixtime() * 1000L));
+			((TextView) tableRow.findViewById(R.id.msgs_row_author)).setText(createFromUser(msg.getFromusername()));
 			rows.add(tableRow);
 		}
 		styleStringBuilder = null;
@@ -114,17 +120,17 @@ public class MessagesActivity extends Activity {
 	 * @throws ConsolewarsAPIException
 	 */
 	private void setCurrentMessages() throws ConsolewarsAPIException {
-		if (CWApplication.getInstance().getAuthenticatedUser() != null) {
-			msgs = CWApplication.getInstance().getApiCaller().getApi().getMessages(
-					CWApplication.getInstance().getAuthenticatedUser().getUid(),
-					CWApplication.getInstance().getAuthenticatedUser().getPasswordHash(), 0, 10);
+		if (cwApplication.getAuthenticatedUser() != null) {
+			msgs = api.getMessages(cwApplication.getAuthenticatedUser().getUid(), cwApplication.getAuthenticatedUser()
+					.getPasswordHash(), 0, 10);
 		} else {
 			msgs = new ArrayList<Message>();
 		}
 	}
 
 	/**
-	 * Changes the current activity to a {@link SingleMessageActivity} with the selected news.
+	 * Changes the current activity to a {@link SingleMessageActivity} with the
+	 * selected news.
 	 * 
 	 * @param text
 	 */
@@ -133,9 +139,10 @@ public class MessagesActivity extends Activity {
 
 		singleNewsIntent.putExtra(MessagesActivity.class.getName(), text);
 
-		View view = ((ActivityGroup) getParent()).getLocalActivityManager().startActivity(
-				SingleMessageActivity.class.getSimpleName(),
-				singleNewsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
+		View view = ((ActivityGroup) getParent())
+				.getLocalActivityManager()
+				.startActivity(SingleMessageActivity.class.getSimpleName(),
+						singleNewsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
 		// replace the view
 		((MessagesActivityGroup) getParent()).replaceView(view);
 	}
@@ -191,8 +198,7 @@ public class MessagesActivity extends Activity {
 			author = getString(R.string.news_author_unknown);
 		}
 		styleStringBuilder.clear();
-		styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF007711),
-				getString(R.string.news_author_by));
+		styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF007711), getString(R.string.news_author_by));
 		styleStringBuilder.append(" ");
 		styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF009933), author);
 
@@ -211,8 +217,8 @@ public class MessagesActivity extends Activity {
 		@Override
 		protected void onPreExecute() {
 			// first set progressbar view
-			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(MessagesActivity.this.getParent())
-					.inflate(R.layout.centered_progressbar, null);
+			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(MessagesActivity.this.getParent()).inflate(
+					R.layout.centered_progressbar, null);
 			setContentView(progress_layout);
 
 			TextView text = (TextView) progress_layout.findViewById(R.id.centered_progressbar_text);
@@ -225,7 +231,7 @@ public class MessagesActivity extends Activity {
 		@Override
 		protected List<View> doInBackground(Void... params) {
 			try {
-				CWApplication.getInstance().getApiCaller().authenticateOnCW();
+				apiCaller.authenticateOnCW();
 				setCurrentMessages();
 			} catch (ConsolewarsAPIException e) {
 				e.printStackTrace();
@@ -243,8 +249,8 @@ public class MessagesActivity extends Activity {
 		@Override
 		protected void onPostExecute(List<View> result) {
 			// sets the messages view for this Activity
-			ViewGroup msgs_layout = (ViewGroup) LayoutInflater.from(MessagesActivity.this.getParent())
-					.inflate(R.layout.msgs_layout, null);
+			ViewGroup msgs_layout = (ViewGroup) LayoutInflater.from(MessagesActivity.this.getParent()).inflate(
+					R.layout.msgs_layout, null);
 			TableLayout msgsTable = (TableLayout) msgs_layout.findViewById(R.id.msgs_table);
 			for (View row : result) {
 				msgsTable.addView(row);

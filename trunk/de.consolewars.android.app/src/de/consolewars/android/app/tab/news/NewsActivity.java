@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import android.app.Activity;
+import roboguice.activity.RoboActivity;
 import android.app.ActivityGroup;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -17,9 +17,10 @@ import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -27,10 +28,13 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TextView;
-import android.widget.AdapterView.OnItemSelectedListener;
-import de.consolewars.android.app.CWApplication;
+
+import com.google.inject.Inject;
+
+import de.consolewars.android.app.APICaller;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.util.StyleSpannableStringBuilder;
+import de.consolewars.api.API;
 import de.consolewars.api.data.News;
 import de.consolewars.api.exception.ConsolewarsAPIException;
 
@@ -53,8 +57,13 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
  * 
  * @author Alexander Dridiger
  */
-public class NewsActivity extends Activity {
+public class NewsActivity extends RoboActivity {
 
+	@Inject
+	private APICaller apiCaller;
+	@Inject
+	private API api;
+	
 	private List<News> news;
 
 	private ViewGroup news_layout;
@@ -76,8 +85,8 @@ public class NewsActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		resetDates();
-		news_layout = (ViewGroup) LayoutInflater.from(NewsActivity.this.getParent()).inflate(
-				R.layout.news_layout, null);
+		news_layout = (ViewGroup) LayoutInflater.from(NewsActivity.this.getParent())
+				.inflate(R.layout.news_layout, null);
 		setContentView(news_layout);
 		new BuildNewsAsyncTask().execute();
 	}
@@ -103,8 +112,8 @@ public class NewsActivity extends Activity {
 	 */
 	private void initFilter(final View parentView) {
 		Spinner spinner = (Spinner) parentView.findViewById(R.id.news_filter_spinner);
-		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getParent(),
-				R.array.news_filter_options, android.R.layout.simple_spinner_item);
+		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getParent(), R.array.news_filter_options,
+				android.R.layout.simple_spinner_item);
 		spinner.setAdapter(adapter);
 		spinner.setSelection(currentFilter);
 		spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
@@ -144,7 +153,8 @@ public class NewsActivity extends Activity {
 	}
 
 	/**
-	 * Changes the current activity to a {@link SingleNewsActivity} with the selected news.
+	 * Changes the current activity to a {@link SingleNewsActivity} with the
+	 * selected news.
 	 * 
 	 * @param id
 	 */
@@ -153,15 +163,17 @@ public class NewsActivity extends Activity {
 
 		singleNewsIntent.putExtra(NewsActivity.class.getName(), id);
 
-		View view = ((ActivityGroup) getParent()).getLocalActivityManager().startActivity(
-				SingleNewsActivity.class.getSimpleName(),
-				singleNewsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
+		View view = ((ActivityGroup) getParent())
+				.getLocalActivityManager()
+				.startActivity(SingleNewsActivity.class.getSimpleName(),
+						singleNewsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
 		// replace the view
 		((NewsActivityGroup) getParent()).replaceView(view);
 	}
 
 	/**
-	 * Creates the string for the ui cell showing the author of a news and the amount of comments.
+	 * Creates the string for the ui cell showing the author of a news and the
+	 * amount of comments.
 	 * 
 	 * @param commentAmount
 	 * @param author
@@ -174,8 +186,7 @@ public class NewsActivity extends Activity {
 			author = getString(R.string.news_author_unknown);
 		}
 		styleStringBuilder.clear();
-		styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF007711),
-				getString(R.string.news_author_by));
+		styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF007711), getString(R.string.news_author_by));
 		styleStringBuilder.append(" ");
 		styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF009933), author);
 
@@ -183,7 +194,8 @@ public class NewsActivity extends Activity {
 	}
 
 	/**
-	 * Creates the string for the ui cell showing the author of a news and the amount of comments.
+	 * Creates the string for the ui cell showing the author of a news and the
+	 * amount of comments.
 	 * 
 	 * @param commentAmount
 	 * @param author
@@ -193,8 +205,7 @@ public class NewsActivity extends Activity {
 		// TODO more text formatting
 		// an empty author string means that the news was not written by a
 		styleStringBuilder.clear();
-		styleStringBuilder
-				.appendWithStyle(new ForegroundColorSpan(0xFF7e6003), String.valueOf(commentAmount));
+		styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF7e6003), String.valueOf(commentAmount));
 
 		return styleStringBuilder;
 	}
@@ -265,8 +276,8 @@ public class NewsActivity extends Activity {
 		@Override
 		protected void onPreExecute() {
 			// first set progressbar
-			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(NewsActivity.this.getParent())
-					.inflate(R.layout.centered_progressbar, null);
+			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(NewsActivity.this.getParent()).inflate(
+					R.layout.centered_progressbar, null);
 
 			TextView text = (TextView) progress_layout.findViewById(R.id.centered_progressbar_text);
 			text.setText(getString(R.string.loading, getString(R.string.tab_news_head)));
@@ -281,9 +292,8 @@ public class NewsActivity extends Activity {
 		protected Void doInBackground(Void... params) {
 			try {
 				oldestNewsDate.setTimeInMillis(getDay(oldestNewsDate, 0).getTimeInMillis());
-				CWApplication.getInstance().getApiCaller().authenticateOnCW();
-				news = CWApplication.getInstance().getApiCaller().getApi().getNewsList(50, currentFilter,
-						oldestNewsDate.getTime());
+				apiCaller.authenticateOnCW();
+				news = api.getNewsList(50, currentFilter, oldestNewsDate.getTime());
 			} catch (ConsolewarsAPIException e) {
 				e.printStackTrace();
 				Log.e(getString(R.string.exc_auth_tag), e.getMessage(), e);
@@ -349,36 +359,34 @@ public class NewsActivity extends Activity {
 					separator = (ViewGroup) LayoutInflater.from(NewsActivity.this.getParent()).inflate(
 							R.layout.news_row_day_separator_layout, null);
 					separatorTxt = (TextView) separator.findViewById(R.id.news_row_day_separator_text);
-					separatorTxt
-							.setText(createDate(currentNewsDate.getTimeInMillis(), "EEEE, dd. MMMMM yyyy"));
+					separatorTxt.setText(createDate(currentNewsDate.getTimeInMillis(), "EEEE, dd. MMMMM yyyy"));
 					publishProgress(separator);
 				} else if ((currentNewsDate.getTimeInMillis() >= newsToAdd.getUnixtime() * 1000L)
 						&& (getDay(tempCal, -1).getTimeInMillis() <= newsToAdd.getUnixtime() * 1000L)) {
-					// get the table row by an inflater and set the needed information
-					final View tableRow = LayoutInflater.from(NewsActivity.this).inflate(
-							R.layout.news_row_layout, newsTable, false);
+					// get the table row by an inflater and set the needed
+					// information
+					final View tableRow = LayoutInflater.from(NewsActivity.this).inflate(R.layout.news_row_layout,
+							newsTable, false);
 					tableRow.setId(newsToAdd.getId());
 					tableRow.setOnClickListener(new View.OnClickListener() {
 
 						public void onClick(View v) {
 							if (selectedRow != null) {
-								selectedRow.setBackgroundDrawable(getResources().getDrawable(
-										R.drawable.table_cell_bg));
+								selectedRow.setBackgroundDrawable(getResources().getDrawable(R.drawable.table_cell_bg));
 							}
-							tableRow.setBackgroundDrawable(getResources().getDrawable(
-									R.drawable.table_cell_bg_selected));
+							tableRow.setBackgroundDrawable(getResources()
+									.getDrawable(R.drawable.table_cell_bg_selected));
 							selectedRow = tableRow;
 							getSingleNews(tableRow.getId());
 						}
 					});
-					((ImageView) tableRow.findViewById(R.id.news_row_category_icon))
-							.setImageResource(NewsActivity.this.getResources().getIdentifier(
+					((ImageView) tableRow.findViewById(R.id.news_row_category_icon)).setImageResource(NewsActivity.this
+							.getResources().getIdentifier(
 									getString(R.string.cat_drawable, newsToAdd.getCategoryshort()),
 									getString(R.string.drawable), getApplicationContext().getPackageName()));
-					((TextView) tableRow.findViewById(R.id.news_row_title)).setText(createTitle(newsToAdd
-							.getTitle()));
-					((TextView) tableRow.findViewById(R.id.news_row_date)).setText(createDate(newsToAdd
-							.getUnixtime() * 1000L, "'um' HH:mm'Uhr'"));
+					((TextView) tableRow.findViewById(R.id.news_row_title)).setText(createTitle(newsToAdd.getTitle()));
+					((TextView) tableRow.findViewById(R.id.news_row_date)).setText(createDate(
+							newsToAdd.getUnixtime() * 1000L, "'um' HH:mm'Uhr'"));
 					TextView cmtAmount = (TextView) tableRow.findViewById(R.id.news_row_cmmts_amount);
 					cmtAmount.setText(createAamount(newsToAdd.getComments()));
 					TextView picAmount = (TextView) tableRow.findViewById(R.id.news_row_pics_amount);

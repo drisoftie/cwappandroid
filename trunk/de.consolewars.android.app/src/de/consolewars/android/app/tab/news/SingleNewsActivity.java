@@ -10,7 +10,7 @@ import java.util.IllegalFormatException;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import android.app.Activity;
+import roboguice.activity.RoboActivity;
 import android.app.ActivityGroup;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -21,19 +21,22 @@ import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
-import android.webkit.WebView;
+import android.view.ViewGroup;
 import android.webkit.WebSettings.PluginState;
+import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import de.consolewars.android.app.CWApplication;
+
+import com.google.inject.Inject;
+
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.cmts.CommentsActivity;
 import de.consolewars.android.app.util.MediaSnapper;
 import de.consolewars.android.app.util.TextViewHandler;
+import de.consolewars.api.API;
 import de.consolewars.api.data.News;
 import de.consolewars.api.exception.ConsolewarsAPIException;
 
@@ -56,7 +59,10 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
  * 
  * @author Alexander Dridiger
  */
-public class SingleNewsActivity extends Activity {
+public class SingleNewsActivity extends RoboActivity {
+
+	@Inject
+	private API api;
 
 	private ViewGroup newsView;
 
@@ -81,7 +87,7 @@ public class SingleNewsActivity extends Activity {
 		}
 		news = null;
 		try {
-			news = CWApplication.getInstance().getApiCaller().getApi().getNews(id);
+			news = api.getNews(id);
 		} catch (ConsolewarsAPIException e) {
 			e.printStackTrace();
 		}
@@ -91,8 +97,8 @@ public class SingleNewsActivity extends Activity {
 			text.setText(getString(R.string.failure));
 		} else if (news != null) {
 			try {
-				text.setText(Html.fromHtml(news.getArticle(), new TextViewHandler(SingleNewsActivity.this
-						.getApplicationContext()), null));
+				text.setText(Html.fromHtml(news.getArticle(),
+						new TextViewHandler(SingleNewsActivity.this.getApplicationContext()), null));
 			} catch (IllegalFormatException ife) {
 				// FIXME Wrong format handling
 				text.setText(news.getArticle());
@@ -122,9 +128,10 @@ public class SingleNewsActivity extends Activity {
 
 				commentsIntent.putExtras(extra);
 
-				View view = ((ActivityGroup) getParent()).getLocalActivityManager().startActivity(
-						CommentsActivity.class.getSimpleName(),
-						commentsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
+				View view = ((ActivityGroup) getParent())
+						.getLocalActivityManager()
+						.startActivity(CommentsActivity.class.getSimpleName(),
+								commentsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
 				// replace the view
 				((NewsActivityGroup) getParent()).replaceView(view);
 			}
@@ -132,8 +139,8 @@ public class SingleNewsActivity extends Activity {
 	}
 
 	/**
-	 * Sets a video, if one exists in a news. Can't be invoked without calling Looper.prepare().
-	 * Don't use this within an AsyncTask!
+	 * Sets a video, if one exists in a news. Can't be invoked without calling
+	 * Looper.prepare(). Don't use this within an AsyncTask!
 	 * 
 	 * @param url
 	 */
@@ -149,8 +156,8 @@ public class SingleNewsActivity extends Activity {
 
 			Log.i("******YOUTUBE*******", getString(R.string.youtube_embedding, 300, 200, vidURL));
 
-			localWebView.loadDataWithBaseURL(getString(R.string.cw_url_slash), getString(
-					R.string.youtube_embedding, 300, 200, vidURL), "text/html", "utf-8", null);
+			localWebView.loadDataWithBaseURL(getString(R.string.cw_url_slash),
+					getString(R.string.youtube_embedding, 300, 200, vidURL), "text/html", "utf-8", null);
 		}
 	}
 
@@ -168,14 +175,14 @@ public class SingleNewsActivity extends Activity {
 		TextView title = (TextView) parent.findViewById(R.id.header_descr_title);
 		title.setText(news.getTitle());
 		TextView info = (TextView) parent.findViewById(R.id.header_descr_info);
-		info.setText(getString(R.string.singlenews_info, createDate(news.getUnixtime() * 1000L), news
-				.getAuthor()));
+		info.setText(getString(R.string.singlenews_info, createDate(news.getUnixtime() * 1000L), news.getAuthor()));
 		TextView descr = (TextView) parent.findViewById(R.id.header_descr);
 		descr.setText(news.getDescription());
 	}
 
 	/**
-	 * Downloads the user picture and decodes it into a {@link Bitmap} to be set into an ImageView.
+	 * Downloads the user picture and decodes it into a {@link Bitmap} to be set
+	 * into an ImageView.
 	 * 
 	 * @param view
 	 *            the ImageView
@@ -187,8 +194,8 @@ public class SingleNewsActivity extends Activity {
 
 		String picURL = MediaSnapper.snapFromCleanedHTMLWithXPath(getString(R.string.cw_url, news.getUrl()),
 				getString(R.string.xpath_get_author), getString(R.string.href));
-		userID = Integer.valueOf(picURL.subSequence(getString(R.string.prefix_userpic).length(),
-				picURL.length()).toString());
+		userID = Integer.valueOf(picURL.subSequence(getString(R.string.prefix_userpic).length(), picURL.length())
+				.toString());
 		try {
 			URL newurl = new URL(getString(R.string.blogs_userpic_url, userID, 50));
 			Bitmap mIcon_val = BitmapFactory.decodeStream(newurl.openConnection().getInputStream());
@@ -212,14 +219,14 @@ public class SingleNewsActivity extends Activity {
 
 		Calendar cal = Calendar.getInstance(zone, Locale.GERMANY);
 		// formatting day of week in EEEE format like Sunday, Monday etc.
-		SimpleDateFormat dateformat = new SimpleDateFormat(getString(R.string.dateformat_detailed),
-				Locale.GERMANY);
+		SimpleDateFormat dateformat = new SimpleDateFormat(getString(R.string.dateformat_detailed), Locale.GERMANY);
 		dateformat.setCalendar(cal);
 		return dateformat.format(date);
 	}
 
 	/**
-	 * Asynchronous task to receive a single news from the API and build up the ui.
+	 * Asynchronous task to receive a single news from the API and build up the
+	 * ui.
 	 * 
 	 * @author Alexander Dridiger
 	 */
@@ -230,8 +237,8 @@ public class SingleNewsActivity extends Activity {
 		@Override
 		protected void onPreExecute() {
 			// first set progressbar view
-			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(SingleNewsActivity.this.getParent())
-					.inflate(R.layout.centered_progressbar, null);
+			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(SingleNewsActivity.this.getParent()).inflate(
+					R.layout.centered_progressbar, null);
 			setContentView(progress_layout);
 
 			TextView text = (TextView) progress_layout.findViewById(R.id.centered_progressbar_text);

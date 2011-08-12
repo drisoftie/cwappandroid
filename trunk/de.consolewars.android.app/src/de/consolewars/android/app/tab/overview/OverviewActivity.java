@@ -8,15 +8,15 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-import android.app.Activity;
+import roboguice.activity.RoboActivity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
@@ -25,10 +25,16 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
+
+import com.google.inject.Inject;
+
 import de.consolewars.android.app.CWApplication;
 import de.consolewars.android.app.R;
+import de.consolewars.android.app.db.AppDataHandler;
+import de.consolewars.android.app.db.DatabaseManager;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
 import de.consolewars.android.app.util.HashEncrypter;
+import de.consolewars.api.API;
 import de.consolewars.api.data.AuthenticatedUser;
 import de.consolewars.api.data.Message;
 import de.consolewars.api.exception.ConsolewarsAPIException;
@@ -52,7 +58,16 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
  * 
  * @author Alexander Dridiger
  */
-public class OverviewActivity extends Activity {
+public class OverviewActivity extends RoboActivity {
+
+	@Inject
+	private CWApplication cwApplication;
+	@Inject
+	private AppDataHandler appDataHandler;
+	@Inject
+	private DatabaseManager databaseManager;
+	@Inject
+	private API api;
 
 	private CwNavigationMainTabActivity mainTabs;
 
@@ -62,14 +77,13 @@ public class OverviewActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		/*
-		 * TODO: Might become a source of error someday, if activity design changes. Would be better
-		 * to handle it with intents.
+		 * TODO: Might become a source of error someday, if activity design
+		 * changes. Would be better to handle it with intents.
 		 */
 		if (getParent().getParent() instanceof CwNavigationMainTabActivity) {
 			mainTabs = (CwNavigationMainTabActivity) getParent().getParent();
 		}
-		overview_layout = (ViewGroup) LayoutInflater.from(getParent())
-				.inflate(R.layout.overview_layout, null);
+		overview_layout = (ViewGroup) LayoutInflater.from(getParent()).inflate(R.layout.overview_layout, null);
 		new BuildOverviewAsyncTask().execute();
 	}
 
@@ -78,26 +92,21 @@ public class OverviewActivity extends Activity {
 		int newsAmount = 0;
 		int blogsAmount = 0;
 		int msgsAmount = 0;
-		if (CWApplication.getInstance().getDataHandler().getDate() != -1) {
+		if (appDataHandler.getDate() != -1) {
 			try {
-				newsAmount = CWApplication.getInstance().getApiCaller().getApi().getNewsList(5, 0,
-						new Date(CWApplication.getInstance().getDataHandler().getDate())).size();
-				blogsAmount = CWApplication.getInstance().getApiCaller().getApi().getBlogsList(-1, 5, 0,
-						new Date(CWApplication.getInstance().getDataHandler().getDate())).size();
-				blogsAmount += CWApplication.getInstance().getApiCaller().getApi().getBlogsList(-1, 5, 1,
-						new Date(CWApplication.getInstance().getDataHandler().getDate())).size();
-				blogsAmount += CWApplication.getInstance().getApiCaller().getApi().getBlogsList(-1, 5, 2,
-						new Date(CWApplication.getInstance().getDataHandler().getDate())).size();
-				AuthenticatedUser user = CWApplication.getInstance().getAuthenticatedUser();
-				for (Message msg : CWApplication.getInstance().getApiCaller().getApi().getMessages(
-						user.getUid(), user.getPasswordHash(), 0, 5)) {
-					if (msg.getUnixtime() > CWApplication.getInstance().getDataHandler().getDate()) {
+				Date date = new Date(appDataHandler.getDate());
+				newsAmount = api.getNewsList(5, 0, date).size();
+				blogsAmount = api.getBlogsList(-1, 5, 0, date).size();
+				blogsAmount += api.getBlogsList(-1, 5, 1, date).size();
+				blogsAmount += api.getBlogsList(-1, 5, 2, date).size();
+				AuthenticatedUser user = cwApplication.getAuthenticatedUser();
+				for (Message msg : api.getMessages(user.getUid(), user.getPasswordHash(), 0, 5)) {
+					if (msg.getUnixtime() > appDataHandler.getDate()) {
 						msgsAmount++;
 					}
 				}
-				for (Message msg : CWApplication.getInstance().getApiCaller().getApi().getMessages(
-						user.getUid(), user.getPasswordHash(), -1, 5)) {
-					if (msg.getUnixtime() > CWApplication.getInstance().getDataHandler().getDate()) {
+				for (Message msg : api.getMessages(user.getUid(), user.getPasswordHash(), -1, 5)) {
+					if (msg.getUnixtime() > appDataHandler.getDate()) {
 						msgsAmount++;
 					}
 				}
@@ -107,14 +116,14 @@ public class OverviewActivity extends Activity {
 			}
 		}
 		flipper.addView(createBannerCell(getString(R.string.tab_news_tag), R.drawable.banner_news,
-				getString(R.string.overview_banner_news_title), getString(R.string.overview_banner_details,
-						newsAmount, "News")));
+				getString(R.string.overview_banner_news_title),
+				getString(R.string.overview_banner_details, newsAmount, "News")));
 		flipper.addView(createBannerCell(getString(R.string.tab_blogs_tag), R.drawable.banner_blogs,
-				getString(R.string.overview_banner_blogs_title), getString(R.string.overview_banner_details,
-						blogsAmount, "Blogs")));
+				getString(R.string.overview_banner_blogs_title),
+				getString(R.string.overview_banner_details, blogsAmount, "Blogs")));
 		flipper.addView(createBannerCell(getString(R.string.tab_msgs_tag), R.drawable.banner_msgs,
-				getString(R.string.overview_banner_msgs_title), getString(R.string.overview_banner_details,
-						msgsAmount, "Nachrichten")));
+				getString(R.string.overview_banner_msgs_title),
+				getString(R.string.overview_banner_details, msgsAmount, "Nachrichten")));
 		flipper.setInAnimation(AnimationUtils.loadAnimation(this, R.anim.overview_marquee_in));
 		flipper.setOutAnimation(AnimationUtils.loadAnimation(this, R.anim.overview_marquee_out));
 		flipper.setFlipInterval(3000);
@@ -122,8 +131,8 @@ public class OverviewActivity extends Activity {
 	}
 
 	private ViewGroup createBannerCell(final String tag, int icon, String title, String details) {
-		ViewGroup cell = (ViewGroup) LayoutInflater.from(getParent()).inflate(
-				R.layout.overview_banner_cell_layout, null);
+		ViewGroup cell = (ViewGroup) LayoutInflater.from(getParent()).inflate(R.layout.overview_banner_cell_layout,
+				null);
 		((ImageView) cell.findViewById(R.id.overview_banner_icon)).setImageResource(icon);
 		((TextView) cell.findViewById(R.id.overview_banner_title)).setText(title);
 		((TextView) cell.findViewById(R.id.overview_banner_details)).setText(details);
@@ -148,11 +157,11 @@ public class OverviewActivity extends Activity {
 	private void buildUserView(final View parent) {
 		final EditText usrnmEdttxt = (EditText) parent.findViewById(R.id.overview_edttxt_username);
 		final ImageView icon = (ImageView) parent.findViewById(R.id.overview_usericon);
-		if (CWApplication.getInstance().getDataHandler().getHashPw() != null) {
-			loadPicture(icon, CWApplication.getInstance().getAuthenticatedUser().getUid());
+		if (appDataHandler.getHashPw() != null) {
+			loadPicture(icon, cwApplication.getAuthenticatedUser().getUid());
 		}
-		if (CWApplication.getInstance().getDataHandler().getUserName() != null) {
-			usrnmEdttxt.setText(CWApplication.getInstance().getDataHandler().getUserName());
+		if (appDataHandler.getUserName() != null) {
+			usrnmEdttxt.setText(appDataHandler.getUserName());
 		} else {
 			usrnmEdttxt.setText("Kein User gespeichert");
 		}
@@ -167,21 +176,20 @@ public class OverviewActivity extends Activity {
 
 	private void persistUser(String userName, String pw) {
 		Calendar calendar = GregorianCalendar.getInstance();
-		if (CWApplication.getInstance().getDataHandler().getUserDBId() != -1) {
+		if (appDataHandler.getUserDbId() != -1) {
 			try {
-				CWApplication.getInstance().getDataHandler().getDatabaseManager().updateUserData(
-						CWApplication.getInstance().getDataHandler().getUserDBId(), userName,
+				databaseManager.updateUserData(appDataHandler.getUserDbId(), userName,
 						HashEncrypter.encrypt(getString(R.string.db_cry), pw), calendar.getTimeInMillis());
-				CWApplication.getInstance().getDataHandler().loadCurrentUser();
+				appDataHandler.loadCurrentUser();
 			} catch (GeneralSecurityException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		} else {
 			try {
-				CWApplication.getInstance().getDataHandler().getDatabaseManager().insertUserData(userName,
-						HashEncrypter.encrypt(getString(R.string.db_cry), pw), calendar.getTimeInMillis());
-				CWApplication.getInstance().getDataHandler().loadCurrentUser();
+				databaseManager.insertUserData(userName, HashEncrypter.encrypt(getString(R.string.db_cry), pw),
+						calendar.getTimeInMillis());
+				appDataHandler.loadCurrentUser();
 			} catch (GeneralSecurityException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -190,7 +198,8 @@ public class OverviewActivity extends Activity {
 	}
 
 	/**
-	 * Downloads the user picture and decodes it into a {@link Bitmap} to be set into an ImageView.
+	 * Downloads the user picture and decodes it into a {@link Bitmap} to be set
+	 * into an ImageView.
 	 * 
 	 * @param view
 	 *            the ImageView
@@ -225,8 +234,8 @@ public class OverviewActivity extends Activity {
 		@Override
 		protected void onPreExecute() {
 			// first set progressbar view
-			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(OverviewActivity.this.getParent())
-					.inflate(R.layout.centered_progressbar, null);
+			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(OverviewActivity.this.getParent()).inflate(
+					R.layout.centered_progressbar, null);
 			setContentView(progress_layout);
 
 			TextView text = (TextView) progress_layout.findViewById(R.id.centered_progressbar_text);
@@ -238,7 +247,7 @@ public class OverviewActivity extends Activity {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			CWApplication.getInstance().getDataHandler().loadCurrentUser();
+			appDataHandler.loadCurrentUser();
 			buildUserView(overview_layout);
 			createBanner(overview_layout);
 			return null;
@@ -277,8 +286,8 @@ public class OverviewActivity extends Activity {
 			} else {
 				usrnmEdttxt.setError(null);
 				passwEdttxt.setError(null);
-				Toast.makeText(OverviewActivity.this, getResources().getString(R.string.try_login),
-						Toast.LENGTH_SHORT).show();
+				Toast.makeText(OverviewActivity.this, getResources().getString(R.string.try_login), Toast.LENGTH_SHORT)
+						.show();
 				dowork = true;
 			}
 		}
@@ -291,10 +300,8 @@ public class OverviewActivity extends Activity {
 				persistUser(usrnmEdttxt.getText().toString(), passwEdttxt.getText().toString());
 				AuthenticatedUser authUser = null;
 				try {
-					authUser = CWApplication.getInstance().getApiCaller().getApi().authenticate(
-							CWApplication.getInstance().getDataHandler().getUserName(),
-							passwEdttxt.getText().toString());
-					CWApplication.getInstance().setAuthenticatedUser(authUser);
+					authUser = api.authenticate(appDataHandler.getUserName(), passwEdttxt.getText().toString());
+					cwApplication.setAuthenticatedUser(authUser);
 				} catch (ConsolewarsAPIException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -306,13 +313,11 @@ public class OverviewActivity extends Activity {
 
 		@Override
 		protected void onPostExecute(Void result) {
-			if (dowork
-					&& CWApplication.getInstance().getAuthenticatedUser().getSuccess().matches(
-							getString(R.string.success_yes))) {
+			if (dowork && cwApplication.getAuthenticatedUser().getSuccess().matches(getString(R.string.success_yes))) {
 				ImageView icon = (ImageView) overview_layout.findViewById(R.id.overview_usericon);
-				loadPicture(icon, CWApplication.getInstance().getAuthenticatedUser().getUid());
-				Toast.makeText(OverviewActivity.this, getResources().getString(R.string.logged_in),
-						Toast.LENGTH_SHORT).show();
+				loadPicture(icon, cwApplication.getAuthenticatedUser().getUid());
+				Toast.makeText(OverviewActivity.this, getResources().getString(R.string.logged_in), Toast.LENGTH_SHORT)
+						.show();
 			} else if (dowork) {
 				Toast.makeText(OverviewActivity.this, getResources().getString(R.string.login_failed),
 						Toast.LENGTH_SHORT).show();
