@@ -25,6 +25,7 @@
 		<htmlcleaner-version>2.2</htmlcleaner-version>
 		<roboguice-version>1.1.2</roboguice-version>
 		<commons-lang-version>2.6</commons-lang-version>
+		<maven-jarsigner-plugin-version>1.2</maven-jarsigner-plugin-version>
 	</properties>
 
 	<build>
@@ -131,7 +132,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-jarsigner-plugin</artifactId>
-						<version>1.2</version>
+						<version>${maven-jarsigner-plugin-version}</version>
 						<executions>
 							<execution>
 								<id>signing</id>
