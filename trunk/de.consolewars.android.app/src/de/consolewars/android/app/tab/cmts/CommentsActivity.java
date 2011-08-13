@@ -305,6 +305,8 @@ public class CommentsActivity extends RoboActivity {
 						public void onClick(View v) {
 							View edit_layout = LayoutInflater.from(CommentsActivity.this).inflate(R.layout.edit_layout,
 									tableRow, false);
+							EditText textToEdit = (EditText) edit_layout.findViewById(R.id.cmts_edtxt_edit);
+							textToEdit.setText(comment.getStatement());
 							ViewGroup parent_layout = (ViewGroup) tableRow.findViewById(R.id.comment_content_layout);
 							parent_layout.addView(edit_layout);
 							createEditSubmitBttn(edit_layout, tableRow, comment.getCid());
