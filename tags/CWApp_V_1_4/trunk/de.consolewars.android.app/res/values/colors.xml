@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<!-- general colours -->
+
+	<color
+		name="app_background">#ff1c171c</color>
+	<color
+		name="light_red">#ba0305</color>
+	<color
+		name="splash_bg_up">#306f90</color>
+	<color
+		name="splash_bg_down">#4db0e7</color>
+	<color
+		name="text_tab_selected">#eff3f7</color>
+	<color
+		name="text_tab_unselected">#a8b8c2</color>
+	<color
+		name="table_cell_unselected_up">#e1e1e1</color>
+	<color
+		name="table_cell_unselected_down">#efefef</color>
+	<color
+		name="progressbar_text">#FFeeeeee</color>
+	<color
+		name="table_cell_selected_up">#ffffffff</color>
+	<color
+		name="table_cell_selected_center">#ff68b5da</color>
+	<color
+		name="table_cell_selected_down">#efefef</color>
+	<color
+		name="table_row_separator_up">#bbbbbb</color>
+	<color
+		name="table_row_separator_down">#d3d3d3</color>	
+
+	<!-- view specific colours -->
+
+	<color
+		name="overview_bg_up">#b8d9ea</color>
+	<color
+		name="overview_bg_down">#a4a4a4</color>
+	<color
+		name="overview_banner_bg_down">#077fb8</color>
+	<color
+		name="overview_banner_bg_up">#00baff</color>
+	<color
+		name="overview_text">#514a4a</color>
+	<color
+		name="news_table_text_title">#514a4a</color>
+	<color
+		name="news_table_text_date">#8b8b8b</color>
+	<color
+		name="news_table_text_author">#009933</color>
+	<color
+		name="blogs_table_text_title">#514a4a</color>
+	<color
+		name="blogs_table_text_date">#8b8b8b</color>
+	<color
+		name="blogs_table_text_author">#009933</color>
+	<color
+		name="news_article_bg">#f9f7f7</color>
+	<color
+		name="blog_article_bg">#cce4f7</color>
+	<color
+		name="msg_content_bg">#cce4f7</color>
+	<color
+		name="msg_text_fromUser">#3e3e3e</color>
+	<color
+		name="header_up">#9bd1fa</color>
+	<color
+		name="header_down">#60b7f5</color>
+	<color
+		name="header_descr_up">#cccccc</color>	
+	<color
+		name="header_descr_down">#e4e4e4</color>	
+	<color
+		name="header_descr_title">#198dde</color>		
+	<color
+		name="header_descr_info">#9e9999</color>
+	<color
+		name="header_descr">#666666</color>
+	<color
+		name="comments_cell_bg">#eff3ef</color>				
+	<color
+		name="comments_bg_up">#bed4e6</color>	
+	<color
+		name="comments_bg_down">#def4f6</color>				
+	<color
+		name="comments_author_bg_up">#cee4f6</color>	
+	<color
+		name="comments_author_bg_down">#def4f6</color>	
+</resources>

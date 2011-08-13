@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:background="@drawable/splash_bg">
+	<ImageView
+		android:id="@+id/splash_icon"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_centerInParent="true"
+		android:src="@drawable/cw_logo_skeletal"></ImageView>
+	<ProgressBar
+		android:id="@+id/splash_progressbar"
+		style="?android:attr/progressBarStyleLarge"
+		android:max="100"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_centerInParent="true">
+	</ProgressBar>
+	<TextView
+		android:id="@+id/text_splashscreen"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_centerHorizontal="true"
+		android:layout_alignParentBottom="true"
+		android:padding="12dip"
+		android:text="@string/general_splashtext"
+		android:textColor="@android:color/white"></TextView>
+</RelativeLayout>

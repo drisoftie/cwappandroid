@@ -1,0 +1,218 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>CWApp</groupId>
+	<artifactId>CWApp</artifactId>
+	<version>1.4</version>
+	<packaging>apk</packaging>
+	<name>CWApp</name>
+
+	<scm>
+		<developerConnection>scm:svn:https://cwappandroid.googlecode.com/svn/tags/CWApp_V_1_4</developerConnection>
+	</scm>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<android-platform>10</android-platform>
+		<android-emulator>CW</android-emulator>
+		<maven-android-plugin-version>3.0.0-alpha-2</maven-android-plugin-version>
+		<maven-compiler-plugin-version>2.3.2</maven-compiler-plugin-version>
+		<maven-eclipse-plugin-version>2.8</maven-eclipse-plugin-version>
+		<build-helper-maven-plugin-version>1.7</build-helper-maven-plugin-version>
+		<android-version>2.3.3</android-version>
+		<java-version>1.6</java-version>
+		<spring-android-version>1.0.0.M4</spring-android-version>
+		<spring-social-version>1.0.0.RC2</spring-social-version>
+		<jackson-version>1.8.3</jackson-version>
+		<gson-version>1.7.1</gson-version>
+		<simple-version>2.6</simple-version>
+		<htmlcleaner-version>2.2</htmlcleaner-version>
+		<roboguice-version>1.1.2</roboguice-version>
+		<commons-lang-version>2.6</commons-lang-version>
+		<maven-jarsigner-plugin-version>1.2</maven-jarsigner-plugin-version>
+	</properties>
+
+	<build>
+		<finalName>${project.artifactId}-${project.version}</finalName>
+		<sourceDirectory>src</sourceDirectory>
+		<resources>
+			<resource>
+				<directory>res</directory>
+			</resource>
+		</resources>
+		<plugins>
+			<!-- plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>build-helper-maven-plugin</artifactId> 
+				<version>${build-helper-maven-plugin-version}</version> <executions> <execution> 
+				<id>add-source</id> <phase>generate-sources</phase> <goals> <goal>add-source</goal> 
+				</goals> <configuration> <sources> <source>gen</source> </sources> </configuration> 
+				</execution> </executions> </plugin -->
+			<plugin>
+				<groupId>com.jayway.maven.plugins.android.generation2</groupId>
+				<artifactId>maven-android-plugin</artifactId>
+				<version>${maven-android-plugin-version}</version>
+				<executions>
+					<execution>
+						<id>update-version</id>
+						<goals>
+							<goal>version-update</goal>
+						</goals>
+						<configuration>
+							<versionNameUpdate>true</versionNameUpdate>
+							<versionCodeAutoIncrement>true</versionCodeAutoIncrement>
+						</configuration>
+					</execution>
+				</executions>
+				<configuration>
+					<sdk>
+						<platform>${android-platform}</platform>
+					</sdk>
+					<emulator>
+						<avd>${android-emulator}</avd>
+					</emulator>
+					<deleteConflictingFiles>true</deleteConflictingFiles>
+					<undeployBeforeDeploy>true</undeployBeforeDeploy>
+					<jvmArguments>
+						<argument>-Xms256m</argument>
+						<argument>-Xmx512m</argument>
+					</jvmArguments>
+				</configuration>
+				<extensions>true</extensions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${maven-compiler-plugin-version}</version>
+				<configuration>
+					<source>${java-version}</source>
+					<target>${java-version}</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-release-plugin</artifactId>
+				<inherited>true</inherited>
+				<configuration>
+					<checkModificationExcludes>
+						<checkModificationExclude>R.java</checkModificationExclude>
+					</checkModificationExcludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<version>${maven-eclipse-plugin-version}</version>
+				<configuration>
+					<downloadSources>true</downloadSources>
+					<downloadJavadocs>true</downloadJavadocs>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.google.android</groupId>
+			<artifactId>android</artifactId>
+			<version>${android-version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.sourceforge.htmlcleaner</groupId>
+			<artifactId>htmlcleaner</artifactId>
+			<version>${htmlcleaner-version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.ant</groupId>
+					<artifactId>ant</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.jdom</groupId>
+					<artifactId>jdom</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.roboguice</groupId>
+			<artifactId>roboguice</artifactId>
+			<version>${roboguice-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>${commons-lang-version}</version>
+		</dependency>
+		<!-- dependency> <groupId>org.springframework.android</groupId> <artifactId>spring-android-rest-template</artifactId> 
+			<version>${spring-android-version}</version> </dependency> <dependency> <groupId>org.springframework.android</groupId> 
+			<artifactId>spring-android-auth</artifactId> <version>${spring-android-version}</version> 
+			</dependency> <dependency> <groupId>org.simpleframework</groupId> <artifactId>simple-xml</artifactId> 
+			<version>${simple-version}</version> <exclusions> <exclusion> <artifactId>stax</artifactId> 
+			<groupId>stax</groupId> </exclusion> <exclusion> <artifactId>stax-api</artifactId> 
+			<groupId>stax</groupId> </exclusion> <exclusion> <artifactId>xpp3</artifactId> 
+			<groupId>xpp3</groupId> </exclusion> </exclusions> </dependency -->
+	</dependencies>
+
+	<profiles>
+		<profile>
+			<id>sign</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-jarsigner-plugin</artifactId>
+						<version>${maven-jarsigner-plugin-version}</version>
+						<executions>
+							<execution>
+								<id>signing</id>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+								<phase>package</phase>
+								<inherited>true</inherited>
+								<configuration>
+									<archiveDirectory />
+									<includes>
+										<include>target/*.apk</include>
+									</includes>
+									<!-- Change this to the appropriate path on your filesystem. -->
+									<keystore>file:/D:/Eclipse/CWApp.key</keystore>
+									<storepass>consolewars</storepass>
+									<keypass>consolewars</keypass>
+									<alias>cw</alias>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>com.jayway.maven.plugins.android.generation2</groupId>
+						<artifactId>maven-android-plugin</artifactId>
+						<inherited>true</inherited>
+						<configuration>
+							<sign>
+								<debug>false</debug>
+							</sign>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+	<repositories>
+		<repository>
+			<id>org.springframework.maven.snapshot</id>
+			<name>Spring Maven Snapshot Repository</name>
+			<url>http://maven.springframework.org/snapshot</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>org.springframework.maven.milestone</id>
+			<name>Spring Maven Milestone Repository</name>
+			<url>http://maven.springframework.org/milestone</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+</project>
