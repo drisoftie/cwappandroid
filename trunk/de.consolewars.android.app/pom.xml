@@ -91,7 +91,7 @@
 				<inherited>true</inherited>
 				<configuration>
 					<checkModificationExcludes>
-						<checkModificationExclude>R.java</checkModificationExclude>
+						<checkModificationExclude>gen/de/consolewars/android/app/R.java</checkModificationExclude>
 					</checkModificationExcludes>
 				</configuration>
 			</plugin>
