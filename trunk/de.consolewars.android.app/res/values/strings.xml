@@ -69,9 +69,15 @@
 	<string
 		name="id">id</string>
 	<string
+		name="yes">Ja</string>
+	<string
+		name="no">Nein</string>			
+	<string
+		name="close_app">CW-App beenden?</string>	
+	<string
 		name="comments_amount">amount</string>
 	<string
-		name="success_yes">YES</string>		
+		name="success_yes">YES</string>			
 	<string
 		name="no_username_entered">Es wurde kein Username eingegeben, einloggen nicht möglich.</string>	
 	<string
@@ -88,6 +94,12 @@
 		name="comment_sending">Kommentar wird gesendet...</string>
 	<string
 		name="comment_sent">Kommentar wurde erfolgreich gepostet.</string>		
+	<string
+		name="delete_cmt_question">Wollen Sie wirklich diesen Kommentar löschen?</string>
+	<string
+		name="delete_comment">Ihr Kommentar wird gelöscht...</string>
+	<string
+		name="comment_deleted">Der Kommentar wurde erfolgreich gelöscht.</string>							
 	<string
 		name="not_logged_in">Sie sind nicht eingeloggt.</string>									
 	<string

@@ -51,7 +51,7 @@ public class CWApplication extends RoboApplication {
 	}
 
 	/**
-	 * @return the poster
+	 * @return the user
 	 */
 	public AuthenticatedUser getAuthenticatedUser() {
 		if (user == null) {
@@ -61,7 +61,7 @@ public class CWApplication extends RoboApplication {
 	}
 
 	/**
-	 * @return the poster
+	 * @param user
 	 */
 	public void setAuthenticatedUser(AuthenticatedUser user) {
 		this.user = user;
