@@ -95,11 +95,15 @@
 	<string
 		name="comment_sent">Kommentar wurde erfolgreich gepostet.</string>		
 	<string
-		name="delete_cmt_question">Wollen Sie wirklich diesen Kommentar löschen?</string>
+		name="comment_delete_question">Wollen Sie wirklich diesen Kommentar löschen?</string>
 	<string
-		name="delete_comment">Ihr Kommentar wird gelöscht...</string>
+		name="comment_deleting">Ihr Kommentar wird gelöscht...</string>
 	<string
-		name="comment_deleted">Der Kommentar wurde erfolgreich gelöscht.</string>							
+		name="comment_deleted">Der Kommentar wurde erfolgreich gelöscht.</string>	
+	<string
+		name="comment_editing">Ihr Kommentar wird editiert...</string>		
+	<string
+		name="comment_edited">Der Kommentar wurde erfolgreich editiert.</string>							
 	<string
 		name="not_logged_in">Sie sind nicht eingeloggt.</string>									
 	<string

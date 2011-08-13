@@ -56,9 +56,15 @@
 		name="cw_cmmt_delete_data">reference_area=%1$d&amp;reference_id=%2$d&amp;talkback_cid=%3$d&amp;talkback_command=%4$s&amp;talkback_content=&amp;talkback_viewpage=%5$d
 	</string>	
 	<string
+		name="cw_cmmt_edit_data">reference_area=%1$d&amp;reference_id=%2$d&amp;talkback_cid=%3$d&amp;talkback_command=%4$s&amp;talkback_content=%5$s&amp;talkback_viewpage=%6$d
+	</string>	
+	<string
 		name="cw_command_newentry">newentry
 	</string>
 	<string
 		name="cw_command_remove">remove
+	</string>		
+	<string
+		name="cw_command_update">update
 	</string>					
 </resources>
