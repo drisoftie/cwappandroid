@@ -3,9 +3,13 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>CWApp</groupId>
 	<artifactId>CWApp</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.4-SNAPSHOT</version>
 	<packaging>apk</packaging>
 	<name>CWApp</name>
+	
+	<scm>
+        <url>https://cwappandroid.googlecode.com/svn/trunk</url>
+    </scm>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -46,6 +50,18 @@
 				<groupId>com.jayway.maven.plugins.android.generation2</groupId>
 				<artifactId>maven-android-plugin</artifactId>
 				<version>${maven-android-plugin-version}</version>
+				<executions>
+					<execution>
+						<id>update-version</id>
+						<goals>
+							<goal>version-update</goal>
+						</goals>
+						<configuration>
+							<versionNameUpdate>true</versionNameUpdate>
+							<versionCodeAutoIncrement>true</versionCodeAutoIncrement>
+						</configuration>
+					</execution>
+				</executions>
 				<configuration>
 					<sdk>
 						<platform>${android-platform}</platform>
@@ -55,10 +71,10 @@
 					</emulator>
 					<deleteConflictingFiles>true</deleteConflictingFiles>
 					<undeployBeforeDeploy>true</undeployBeforeDeploy>
-				    <jvmArguments>
-                        <argument>-Xms256m</argument>
-                        <argument>-Xmx512m</argument>
-                    </jvmArguments>
+					<jvmArguments>
+						<argument>-Xms256m</argument>
+						<argument>-Xmx512m</argument>
+					</jvmArguments>
 				</configuration>
 				<extensions>true</extensions>
 			</plugin>
