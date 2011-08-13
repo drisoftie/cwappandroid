@@ -453,7 +453,6 @@ public class CommentsActivity extends RoboActivity {
 									getString(R.string.cw_command_update),
 									URLEncoder.encode(textToEdit.getText().toString(), getString(R.string.utf8)), 1));
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -463,6 +462,11 @@ public class CommentsActivity extends RoboActivity {
 		@Override
 		protected void onPostExecute(View row) {
 			ViewGroup parent_layout = (ViewGroup) row.findViewById(R.id.comment_content_layout);
+			EditText textToEdit = (EditText) row.findViewById(R.id.cmts_edtxt_edit);
+			TextView content = (TextView) row.findViewById(R.id.comment_content);
+			content.setText(Html.fromHtml(textToEdit.getText().toString(),
+					new TextViewHandler(CommentsActivity.this.getApplicationContext()), null));
+			parent_layout.removeViewAt(1);
 			Toast.makeText(CommentsActivity.this, getResources().getString(R.string.comment_edited), Toast.LENGTH_SHORT)
 					.show();
 		}
