@@ -87,15 +87,6 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<artifactId>maven-release-plugin</artifactId>
-				<inherited>true</inherited>
-				<configuration>
-					<checkModificationExcludes>
-						<checkModificationExclude>gen/*</checkModificationExclude>
-					</checkModificationExcludes>
-				</configuration>
-			</plugin>
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-eclipse-plugin</artifactId>
 				<version>${maven-eclipse-plugin-version}</version>
