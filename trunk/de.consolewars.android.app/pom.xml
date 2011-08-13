@@ -2,12 +2,12 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>CWApp</groupId>
 	<artifactId>CWApp</artifactId>
-	<version>1.4</version>
+	<version>1.5-SNAPSHOT</version>
 	<packaging>apk</packaging>
 	<name>CWApp</name>
 
 	<scm>
-		<developerConnection>scm:svn:https://cwappandroid.googlecode.com/svn/tags/CWApp_V_1_4</developerConnection>
+		<developerConnection>scm:svn:https://cwappandroid.googlecode.com/svn</developerConnection>
 	</scm>
 
 	<properties>
