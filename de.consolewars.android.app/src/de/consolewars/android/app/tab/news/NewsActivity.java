@@ -63,7 +63,7 @@ public class NewsActivity extends RoboActivity {
 	private APICaller apiCaller;
 	@Inject
 	private API api;
-	
+
 	private List<News> news;
 
 	private ViewGroup news_layout;
@@ -153,8 +153,7 @@ public class NewsActivity extends RoboActivity {
 	}
 
 	/**
-	 * Changes the current activity to a {@link SingleNewsActivity} with the
-	 * selected news.
+	 * Changes the current activity to a {@link SingleNewsActivity} with the selected news.
 	 * 
 	 * @param id
 	 */
@@ -172,8 +171,7 @@ public class NewsActivity extends RoboActivity {
 	}
 
 	/**
-	 * Creates the string for the ui cell showing the author of a news and the
-	 * amount of comments.
+	 * Creates the string for the ui cell showing the author of a news and the amount of comments.
 	 * 
 	 * @param commentAmount
 	 * @param author
@@ -194,8 +192,7 @@ public class NewsActivity extends RoboActivity {
 	}
 
 	/**
-	 * Creates the string for the ui cell showing the author of a news and the
-	 * amount of comments.
+	 * Creates the string for the ui cell showing the author of a news and the amount of comments.
 	 * 
 	 * @param commentAmount
 	 * @param author
