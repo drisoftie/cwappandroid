@@ -50,9 +50,15 @@
 		name="cw_login">http://www.consolewars.de/messageboard/login.php?do=login&amp;cookieuser=1&amp;do=login&amp;s=&amp;vb_login_md5password=%1$s&amp;vb_login_md5password_utf=%1$s&amp;vb_login_password=&amp;vb_login_username=%2$s
 	</string>
 	<string
-		name="cw_cmmt_data">reference_area=%1$d&amp;reference_id=%2$d&amp;talkback_command=%3$s&amp;talkback_content=%4$s&amp;talkback_viewpage=%5$d
+		name="cw_cmmt_submit_data">reference_area=%1$d&amp;reference_id=%2$d&amp;talkback_command=%3$s&amp;talkback_content=%4$s&amp;talkback_viewpage=%5$d
+	</string>
+	<string
+		name="cw_cmmt_delete_data">reference_area=%1$d&amp;reference_id=%2$d&amp;talkback_cid=%3$d&amp;talkback_command=%4$s&amp;talkback_content=&amp;talkback_viewpage=%5$d
 	</string>	
 	<string
 		name="cw_command_newentry">newentry
-	</string>		
+	</string>
+	<string
+		name="cw_command_remove">remove
+	</string>					
 </resources>

@@ -15,6 +15,8 @@ import java.util.TimeZone;
 import org.apache.commons.lang.StringUtils;
 
 import roboguice.activity.RoboActivity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -72,6 +74,7 @@ public class CommentsActivity extends RoboActivity {
 	private API api;
 	private List<Comment> comments = new ArrayList<Comment>();
 	private ViewGroup cmmts_layout;
+	private View rowToDelete;
 	private int area;
 	private int id;
 	private int currpage = 1;
@@ -151,8 +154,7 @@ public class CommentsActivity extends RoboActivity {
 	}
 
 	/**
-	 * Downloads the user picture and decodes it into a {@link Bitmap} to be set
-	 * into an ImageView.
+	 * Downloads the user picture and decodes it into a {@link Bitmap} to be set into an ImageView.
 	 * 
 	 * @param uid
 	 *            the user id
@@ -203,8 +205,8 @@ public class CommentsActivity extends RoboActivity {
 					R.layout.comments_layout, null);
 			setContentView(cmmts_layout);
 			// first set progressbar
-			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(CommentsActivity.this.getParent()).inflate(
-					R.layout.centered_progressbar, null);
+			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(CommentsActivity.this.getParent())
+					.inflate(R.layout.centered_progressbar, null);
 			TextView text = (TextView) progress_layout.findViewById(R.id.centered_progressbar_text);
 			text.setText(getString(R.string.loading, getString(R.string.comments)));
 
@@ -229,6 +231,10 @@ public class CommentsActivity extends RoboActivity {
 
 		@Override
 		protected void onProgressUpdate(View... rows) {
+			if (rowToDelete != null) {
+				Button delete_bttn = (Button) rowToDelete.findViewById(R.id.cmts_bttn_delete);
+				delete_bttn.setVisibility(View.VISIBLE);
+			}
 			TableLayout cmtsTable = (TableLayout) cmmts_layout.findViewById(R.id.comments_table);
 			cmtsTable.addView(rows[0], cmtsTable.getChildCount() - 1);
 		}
@@ -248,26 +254,59 @@ public class CommentsActivity extends RoboActivity {
 			// create table based on current comment
 			TableLayout comtsTable = (TableLayout) cmmts_layout.findViewById(R.id.comments_table);
 
-			for (Comment comment : comments) {
+			for (final Comment comment : comments) {
 				maxpage = comment.getPagecount();
 				// get the table row by an inflater and set the needed
 				// information
-				final View tableRow = LayoutInflater.from(CommentsActivity.this).inflate(R.layout.comments_row_layout,
-						comtsTable, false);
+				final View tableRow = LayoutInflater.from(CommentsActivity.this).inflate(
+						R.layout.comments_row_layout, comtsTable, false);
 
 				TextView usernameTxt = (TextView) tableRow.findViewById(R.id.cmts_username);
 				usernameTxt.setText(comment.getUsername());
 				usernameTxt.setSelected(true);
-				((ImageView) tableRow.findViewById(R.id.cmts_usericon)).setImageBitmap(getUserPic(comment.getUid()));
-				((TextView) tableRow.findViewById(R.id.cmts_date)).setText(createDate(comment.getUnixtime() * 1000L));
+				((ImageView) tableRow.findViewById(R.id.cmts_usericon)).setImageBitmap(getUserPic(comment
+						.getUid()));
+				((TextView) tableRow.findViewById(R.id.cmts_date))
+						.setText(createDate(comment.getUnixtime() * 1000L));
 				((TextView) tableRow.findViewById(R.id.cmts_date)).setSelected(true);
 				TextView content = (TextView) tableRow.findViewById(R.id.comment_content);
-				content.setText(Html.fromHtml(comment.getStatement(),
-						new TextViewHandler(CommentsActivity.this.getApplicationContext()), null));
-				// TextView author = (TextView)
-				// tableRow.findViewById(R.id.blogs_row_author);
-				// author.setText(createAuthor(blog.getAuthor()));
-				// author.setSelected(true);
+				content.setText(Html.fromHtml(comment.getStatement(), new TextViewHandler(
+						CommentsActivity.this.getApplicationContext()), null));
+
+				if (cwApplication.getAuthenticatedUser().getUid() == comment.getUid()) {
+					View delete_edit_bttn_layout = LayoutInflater.from(CommentsActivity.this).inflate(
+							R.layout.delete_edit_bttn_layout, comtsTable, false);
+					ViewGroup parent_layout = (ViewGroup) tableRow
+							.findViewById(R.id.cmts_bttn_delete_edit_layout);
+					parent_layout.addView(delete_edit_bttn_layout);
+
+					Button delete_bttn = (Button) delete_edit_bttn_layout.findViewById(R.id.cmts_bttn_delete);
+
+					// first ask the user, if he wants to delete a comment
+					delete_bttn.setOnClickListener(new OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							AlertDialog.Builder dialog = new AlertDialog.Builder(CommentsActivity.this
+									.getParent())
+									.setMessage(getString(R.string.delete_cmt_question))
+									.setCancelable(false)
+									.setPositiveButton(getString(R.string.yes),
+											new DialogInterface.OnClickListener() {
+												public void onClick(DialogInterface dialog, int which) {
+													rowToDelete = tableRow;
+													new DeleteCommentAsyncTask().execute(comment.getCid());
+												}
+											})
+									.setNegativeButton(getString(R.string.no),
+											new DialogInterface.OnClickListener() {
+												public void onClick(DialogInterface dialog, int which) {
+													dialog.cancel();
+												}
+											});
+							dialog.create().show();
+						}
+					});
+				}
 				publishProgress(tableRow);
 			}
 		}
@@ -305,14 +344,13 @@ public class CommentsActivity extends RoboActivity {
 				EditText commenttxt = (EditText) cmmts_layout.findViewById(R.id.comments_edttxt_input);
 				if (cwApplication.getAuthenticatedUser() != null) {
 					try {
-						httpPoster
-								.sendPost(
-										getString(R.string.cw_posting_url),
-										getString(R.string.cw_cookie_full, cwApplication.getAuthenticatedUser()
-												.getUid(), cwApplication.getAuthenticatedUser().getPasswordHash()),
-										getString(R.string.cw_cmmt_data, area, id,
-												getString(R.string.cw_command_newentry), URLEncoder.encode(commenttxt
-														.getText().toString(), getString(R.string.utf8)), 1));
+						httpPoster.sendPost(
+								getString(R.string.cw_posting_url),
+								getString(R.string.cw_cookie_full, cwApplication.getAuthenticatedUser()
+										.getUid(), cwApplication.getAuthenticatedUser().getPasswordHash()),
+								getString(R.string.cw_cmmt_submit_data, area, id,
+										getString(R.string.cw_command_newentry), URLEncoder.encode(commenttxt
+												.getText().toString(), getString(R.string.utf8)), 1));
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -328,6 +366,48 @@ public class CommentsActivity extends RoboActivity {
 				Toast.makeText(CommentsActivity.this, getResources().getString(R.string.comment_sent),
 						Toast.LENGTH_SHORT).show();
 			}
+		}
+	}
+
+	/**
+	 * Asynchronous task to delete a comment.
+	 * 
+	 * @author Alexander Dridiger
+	 */
+	private class DeleteCommentAsyncTask extends AsyncTask<Integer, Void, Void> {
+
+		@Override
+		protected void onPreExecute() {
+			Toast.makeText(CommentsActivity.this, getResources().getString(R.string.comment_deleted),
+					Toast.LENGTH_SHORT).show();
+		}
+
+		@Override
+		protected Void doInBackground(Integer... ids) {
+			if (cwApplication.getAuthenticatedUser() != null) {
+				try {
+					httpPoster.sendPost(
+							getString(R.string.cw_posting_url),
+							getString(R.string.cw_cookie_full, cwApplication.getAuthenticatedUser().getUid(),
+									cwApplication.getAuthenticatedUser().getPasswordHash()),
+							getString(R.string.cw_cmmt_delete_data, area, id, ids[0],
+									getString(R.string.cw_command_remove), 1));
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			if (rowToDelete.getParent() instanceof TableLayout) {
+				TableLayout comtsTable = (TableLayout) rowToDelete.getParent();
+				comtsTable.removeView(rowToDelete);
+			}
+			Toast.makeText(CommentsActivity.this, getResources().getString(R.string.comment_sent),
+					Toast.LENGTH_SHORT).show();
 		}
 	}
 

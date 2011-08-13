@@ -14,6 +14,7 @@ import android.view.View;
 
 import com.google.inject.Inject;
 
+import de.consolewars.android.app.R;
 import de.consolewars.android.app.db.AppDataHandler;
 import de.consolewars.android.app.db.DatabaseManager;
 
@@ -32,8 +33,8 @@ import de.consolewars.android.app.db.DatabaseManager;
  * limitations under the License.
  */
 /**
- * Basic implementation of an {@link ActivityGroup} supporting {@link Activity}
- * switching and {@link View} caching.
+ * Basic implementation of an {@link ActivityGroup} supporting {@link Activity} switching and
+ * {@link View} caching.
  * 
  * @author Alexander Dridiger
  */
@@ -59,20 +60,21 @@ public abstract class CwBasicActivityGroup extends RoboActivityGroup implements 
 			viewCache.remove(viewCache.size() - 1);
 			setContentView(viewCache.get(viewCache.size() - 1));
 		} else {
-			AlertDialog.Builder dialog = new AlertDialog.Builder(this).setMessage("CW-App beenden?")
-					.setCancelable(false).setPositiveButton("Ja", new OnClickListener() {
+			AlertDialog.Builder dialog = new AlertDialog.Builder(this)
+					.setMessage(getString(R.string.close_app)).setCancelable(false)
+					.setPositiveButton(getString(R.string.yes), new OnClickListener() {
 
 						public void onClick(DialogInterface dialog, int which) {
 							if (getParent() instanceof CwNavigationMainTabActivity) {
 								if (appDataHandler.loadCurrentUser()) {
-									databaseManager.updateDate(appDataHandler.getUserDbId(), GregorianCalendar
-											.getInstance().getTimeInMillis());
+									databaseManager.updateDate(appDataHandler.getUserDbId(),
+											GregorianCalendar.getInstance().getTimeInMillis());
 								}
 								databaseManager.closeDB();
 							}
 							finish();
 						}
-					}).setNegativeButton("Nein", new OnClickListener() {
+					}).setNegativeButton(getString(R.string.no), new OnClickListener() {
 
 						public void onClick(DialogInterface dialog, int which) {
 							dialog.cancel();
