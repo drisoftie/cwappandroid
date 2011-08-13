@@ -17,9 +17,15 @@ import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TextView;
 
@@ -66,7 +72,29 @@ public class MessagesActivity extends RoboActivity {
 	// remember last selected table row to draw the background
 	private View selectedRow;
 
+	private MsgFilter currentFilter = MsgFilter.INBOX;
+
 	private StyleSpannableStringBuilder styleStringBuilder;
+
+	private enum MsgFilter {
+		INBOX(0, 0), OUTBOX(1, -1);
+
+		private int position;
+		private int filter;
+
+		private MsgFilter(int position, int filter) {
+			this.position = position;
+			this.filter = filter;
+		}
+
+		public int getPosition() {
+			return position;
+		}
+
+		public int getFilter() {
+			return filter;
+		}
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -122,7 +150,7 @@ public class MessagesActivity extends RoboActivity {
 	private void setCurrentMessages() throws ConsolewarsAPIException {
 		if (cwApplication.getAuthenticatedUser() != null) {
 			msgs = api.getMessages(cwApplication.getAuthenticatedUser().getUid(), cwApplication.getAuthenticatedUser()
-					.getPasswordHash(), 0, 10);
+					.getPasswordHash(), currentFilter.getFilter(), 10);
 		} else {
 			msgs = new ArrayList<Message>();
 		}
@@ -206,6 +234,57 @@ public class MessagesActivity extends RoboActivity {
 	}
 
 	/**
+	 * Filter ui and logic for filtering news.
+	 * 
+	 * @param parentView
+	 *            to find the inflated view elements.
+	 */
+	private void initFilter(final View parentView) {
+
+		Spinner spinner = (Spinner) parentView.findViewById(R.id.msg_filter_spinner);
+		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(MessagesActivity.this,
+				R.array.msgs_filter_options, android.R.layout.simple_spinner_item);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		spinner.setAdapter(adapter);
+		spinner.setSelection(currentFilter.getPosition());
+		spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+			public void onItemSelected(AdapterView<?> aView, View view, int position, long id) {
+				MsgFilter selected;
+				if (position == MsgFilter.OUTBOX.getPosition()) {
+					selected = MsgFilter.OUTBOX;
+				} else {
+					selected = MsgFilter.INBOX;
+				}
+				if (!currentFilter.equals(selected)) {
+					currentFilter = selected;
+					removeAllMessages(parentView);
+					new BuildMessagesAsyncTask().execute();
+				}
+			}
+
+			public void onNothingSelected(AdapterView<?> arg0) {
+			}
+		});
+	}
+
+	private void initRefreshBttn(final View parentView) {
+		Button refresh = (Button) parentView.findViewById(R.id.msg_bttn_refresh);
+		refresh.setOnClickListener(new OnClickListener() {
+
+			public void onClick(View arg0) {
+				removeAllMessages(parentView);
+				new BuildMessagesAsyncTask().execute();
+			}
+		});
+	}
+
+	private void removeAllMessages(View parentView) {
+		TableLayout msgsTable = (TableLayout) parentView.findViewById(R.id.msgs_table);
+		msgsTable.removeAllViews();
+	}
+
+	/**
 	 * Asynchronous task to receive messages from the API and build up the ui.
 	 * 
 	 * @author Alexander Dridiger
@@ -251,6 +330,8 @@ public class MessagesActivity extends RoboActivity {
 			// sets the messages view for this Activity
 			ViewGroup msgs_layout = (ViewGroup) LayoutInflater.from(MessagesActivity.this.getParent()).inflate(
 					R.layout.msgs_layout, null);
+			initFilter(msgs_layout);
+			initRefreshBttn(msgs_layout);
 			TableLayout msgsTable = (TableLayout) msgs_layout.findViewById(R.id.msgs_table);
 			for (View row : result) {
 				msgsTable.addView(row);
