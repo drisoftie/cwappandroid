@@ -8,7 +8,7 @@
 	<name>CWApp</name>
 	
 	<scm>
-        <developerConnection>scm:svn:https://cwappandroid.googlecode.com/svn/trunk</developerConnection>
+        <developerConnection>scm:svn:https://cwappandroid.googlecode.com/svn</developerConnection>
     </scm>
 
 	<properties>
