@@ -75,9 +75,6 @@ public class NewsActivity extends RoboActivity {
 
 	private int currentFilter = 0;
 	private final int NOFILTER = 0;
-	private final int MSFILTER = 1;
-	private final int NINFILTER = 2;
-	private final int SONYFILTER = 3;
 
 	private StyleSpannableStringBuilder styleStringBuilder;
 
@@ -91,6 +88,9 @@ public class NewsActivity extends RoboActivity {
 		new BuildNewsAsyncTask().execute();
 	}
 
+	/**
+	 * @param parent
+	 */
 	private void initRefreshBttn(ViewGroup parent) {
 		Button refresh = (Button) parent.findViewById(R.id.news_bttn_refresh);
 		refresh.setOnClickListener(new OnClickListener() {
@@ -114,6 +114,7 @@ public class NewsActivity extends RoboActivity {
 		Spinner spinner = (Spinner) parentView.findViewById(R.id.news_filter_spinner);
 		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getParent(), R.array.news_filter_options,
 				android.R.layout.simple_spinner_item);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spinner.setAdapter(adapter);
 		spinner.setSelection(currentFilter);
 		spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
@@ -124,14 +125,14 @@ public class NewsActivity extends RoboActivity {
 				case NOFILTER:
 					selected = NOFILTER;
 					break;
-				case MSFILTER:
-					selected = MSFILTER;
+				case News.FILTER_MICROSOFT_ONLY:
+					selected = News.FILTER_MICROSOFT_ONLY;
 					break;
-				case NINFILTER:
-					selected = NINFILTER;
+				case News.FILTER_NINTENDO_ONLY:
+					selected = News.FILTER_NINTENDO_ONLY;
 					break;
-				case SONYFILTER:
-					selected = SONYFILTER;
+				case News.FILTER_SONY_ONLY:
+					selected = News.FILTER_SONY_ONLY;
 					break;
 				default:
 					selected = NOFILTER;

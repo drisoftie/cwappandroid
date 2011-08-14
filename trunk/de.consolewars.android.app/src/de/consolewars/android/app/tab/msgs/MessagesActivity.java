@@ -157,20 +157,19 @@ public class MessagesActivity extends RoboActivity {
 	}
 
 	/**
-	 * Changes the current activity to a {@link SingleMessageActivity} with the
-	 * selected news.
+	 * Changes the current activity to a {@link SingleMessageActivity} with the selected news.
 	 * 
 	 * @param text
 	 */
 	private void getSingleMessage(String text) {
-		Intent singleNewsIntent = new Intent(MessagesActivity.this, SingleMessageActivity.class);
+		Intent singleMessageIntent = new Intent(MessagesActivity.this, SingleMessageActivity.class);
 
-		singleNewsIntent.putExtra(MessagesActivity.class.getName(), text);
+		singleMessageIntent.putExtra(MessagesActivity.class.getName(), text);
 
 		View view = ((ActivityGroup) getParent())
 				.getLocalActivityManager()
 				.startActivity(SingleMessageActivity.class.getSimpleName(),
-						singleNewsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
+						singleMessageIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
 		// replace the view
 		((MessagesActivityGroup) getParent()).replaceView(view);
 	}
@@ -279,6 +278,23 @@ public class MessagesActivity extends RoboActivity {
 		});
 	}
 
+	private void initSendMsgBttn(final View parentView) {
+		Button new_bttn = (Button) parentView.findViewById(R.id.msg_bttn_new_mssg);
+		new_bttn.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				Intent newMsgIntent = new Intent(MessagesActivity.this, MessageWriterActivity.class);
+
+				View view = ((ActivityGroup) getParent())
+						.getLocalActivityManager()
+						.startActivity(MessageWriterActivity.class.getSimpleName(),
+								newMsgIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
+				// replace the view
+				((MessagesActivityGroup) getParent()).replaceView(view);
+			}
+		});
+	}
+
 	private void removeAllMessages(View parentView) {
 		TableLayout msgsTable = (TableLayout) parentView.findViewById(R.id.msgs_table);
 		msgsTable.removeAllViews();
@@ -332,6 +348,7 @@ public class MessagesActivity extends RoboActivity {
 					R.layout.msgs_layout, null);
 			initFilter(msgs_layout);
 			initRefreshBttn(msgs_layout);
+			initSendMsgBttn(msgs_layout);
 			TableLayout msgsTable = (TableLayout) msgs_layout.findViewById(R.id.msgs_table);
 			for (View row : result) {
 				msgsTable.addView(row);

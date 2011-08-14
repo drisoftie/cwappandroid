@@ -24,15 +24,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TextView;
 
 import com.google.inject.Inject;
 
 import de.consolewars.android.app.APICaller;
+import de.consolewars.android.app.CWApplication;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.util.StyleSpannableStringBuilder;
 import de.consolewars.api.API;
@@ -59,7 +64,9 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
  * @author Alexander Dridiger
  */
 public class BlogsActivity extends RoboActivity {
-	
+
+	@Inject
+	private CWApplication cwApplication;
 	@Inject
 	private APICaller apiCaller;
 	@Inject
@@ -68,9 +75,13 @@ public class BlogsActivity extends RoboActivity {
 	private List<Blog> blogs = new ArrayList<Blog>();
 	// remember last selected table row to draw the background
 	private View selectedRow;
+
+	private int currentFilter = 0;
+
 	// text styling
 	private StyleSpannableStringBuilder styleStringBuilder;
 
+	private ViewGroup blogs_layout;
 	private Calendar oldestBlogsDate;
 	private Calendar currentBlogsDate;
 
@@ -79,13 +90,77 @@ public class BlogsActivity extends RoboActivity {
 		super.onCreate(savedInstanceState);
 		resetDates();
 
-		setContentView(R.layout.blogs_layout);
+		blogs_layout = (ViewGroup) LayoutInflater.from(BlogsActivity.this.getParent()).inflate(R.layout.blogs_layout,
+				null);
+		setContentView(blogs_layout);
 		new BuildBlogsAsyncTask().execute();
 	}
 
 	/**
-	 * Changes the current activity to a {@link SingleBlogActivity} with the
-	 * selected blog.
+	 * @param parent
+	 */
+	private void initRefreshBttn(ViewGroup parent) {
+		Button refresh = (Button) parent.findViewById(R.id.blogs_bttn_refresh);
+		refresh.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				TableLayout newsTable = (TableLayout) blogs_layout.findViewById(R.id.blogs_table);
+				newsTable.removeAllViews();
+				resetDates();
+				new BuildBlogsAsyncTask().execute();
+			}
+		});
+	}
+
+	/**
+	 * Filter ui and logic for filtering news.
+	 * 
+	 * @param parentView
+	 *            to find the inflated view elements.
+	 */
+	private void initFilter(final View parentView) {
+		Spinner spinner = (Spinner) parentView.findViewById(R.id.blogs_filter_spinner);
+		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getParent(), R.array.blogs_filter_options,
+				android.R.layout.simple_spinner_item);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		spinner.setAdapter(adapter);
+		spinner.setSelection(currentFilter);
+		spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+			@Override
+			public void onItemSelected(AdapterView<?> aView, View view, int position, long id) {
+				int selected;
+				switch (position) {
+				case Blog.FILTER_NORMAL:
+					selected = Blog.FILTER_NORMAL;
+					break;
+				case Blog.FILTER_NEWS:
+					selected = Blog.FILTER_NEWS;
+					break;
+				case Blog.FILTER_UID:
+					selected = Blog.FILTER_UID;
+					break;
+				default:
+					selected = Blog.FILTER_NORMAL;
+					break;
+				}
+				if (currentFilter != selected) {
+					currentFilter = selected;
+					TableLayout newsTable = (TableLayout) parentView.findViewById(R.id.blogs_table);
+					newsTable.removeAllViews();
+					resetDates();
+					new BuildBlogsAsyncTask().execute();
+				}
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> arg0) {
+				// not needed
+			}
+		});
+	}
+
+	/**
+	 * Changes the current activity to a {@link SingleBlogActivity} with the selected blog.
 	 * 
 	 * @param id
 	 *            the blog id to find the selected blog
@@ -105,8 +180,7 @@ public class BlogsActivity extends RoboActivity {
 	}
 
 	/**
-	 * Downloads the user picture and decodes it into a {@link Bitmap} to be set
-	 * into an ImageView.
+	 * Downloads the user picture and decodes it into a {@link Bitmap} to be set into an ImageView.
 	 * 
 	 * @param uid
 	 *            the user id
@@ -119,18 +193,15 @@ public class BlogsActivity extends RoboActivity {
 			newurl = new URL(getString(R.string.blogs_userpic_url, uid, 30));
 			icon = BitmapFactory.decodeStream(newurl.openConnection().getInputStream());
 		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return icon;
 	}
 
 	/**
-	 * Creates the string for the ui cell showing the author of a blog and the
-	 * amount of comments.
+	 * Creates the string for the ui cell showing the author of a blog and the amount of comments.
 	 * 
 	 * @param commentAmount
 	 * @param author
@@ -151,8 +222,7 @@ public class BlogsActivity extends RoboActivity {
 	}
 
 	/**
-	 * Creates the string for the ui cell showing the author of a blog and the
-	 * amount of comments.
+	 * Creates the string for the ui cell showing the author of a blog and the amount of comments.
 	 * 
 	 * @param commentAmount
 	 * @param author
@@ -206,11 +276,26 @@ public class BlogsActivity extends RoboActivity {
 		TimeZone zone = TimeZone.getDefault();
 
 		oldestBlogsDate = Calendar.getInstance(zone, Locale.GERMANY);
-		oldestBlogsDate.setTimeInMillis(getDay(oldestBlogsDate, 0).getTimeInMillis());
 		currentBlogsDate = Calendar.getInstance(zone, Locale.GERMANY);
-		currentBlogsDate.setTimeInMillis(getDay(currentBlogsDate, 1).getTimeInMillis() - 1L);
+
+		if (currentFilter == Blog.FILTER_UID) {
+			oldestBlogsDate.setTimeInMillis(getDay(oldestBlogsDate, -30).getTimeInMillis());
+			currentBlogsDate.setTimeInMillis(getDay(currentBlogsDate, 1).getTimeInMillis() - 1L);
+		} else {
+			oldestBlogsDate.setTimeInMillis(getDay(oldestBlogsDate, 0).getTimeInMillis());
+			currentBlogsDate.setTimeInMillis(getDay(currentBlogsDate, 1).getTimeInMillis() - 1L);
+		}
 	}
 
+	/**
+	 * Gets a day at 00:00:00:00 o'clock based on a specified date and the shift.
+	 * 
+	 * @param date
+	 *            the specified date from which it's going to be calculated
+	 * @param days
+	 *            to be shifted
+	 * @return date at exactly 00:00:00:00 o'clock
+	 */
 	private Calendar getDay(Calendar date, int days) {
 		Calendar cal = Calendar.getInstance(Locale.GERMANY);
 		cal.setTimeInMillis(date.getTimeInMillis());
@@ -243,7 +328,7 @@ public class BlogsActivity extends RoboActivity {
 
 			progressBar = (ProgressBar) progress_layout.findViewById(R.id.centered_progressbar);
 			progressBar.setProgress(0);
-			TableLayout blogsTable = (TableLayout) findViewById(R.id.blogs_table);
+			TableLayout blogsTable = (TableLayout) blogs_layout.findViewById(R.id.blogs_table);
 			blogsTable.addView(progress_layout);
 		}
 
@@ -252,36 +337,57 @@ public class BlogsActivity extends RoboActivity {
 			try {
 				oldestBlogsDate.setTimeInMillis(getDay(oldestBlogsDate, 0).getTimeInMillis());
 				apiCaller.authenticateOnCW();
-				blogs = api.getBlogsList(-1, 50, 0, oldestBlogsDate.getTime());
+				if (currentFilter == Blog.FILTER_UID) {
+					blogs = api.getBlogsList(cwApplication.getAuthenticatedUser().getUid(), 50, currentFilter,
+							oldestBlogsDate.getTime());
+					int count = 0;
+					while (blogs.isEmpty() && count < 6) {
+						currentBlogsDate.setTimeInMillis(oldestBlogsDate.getTimeInMillis() - 1L);
+						oldestBlogsDate.setTimeInMillis(getDay(oldestBlogsDate, -30).getTimeInMillis());
+						count++;
+						blogs = api.getBlogsList(cwApplication.getAuthenticatedUser().getUid(), 50, currentFilter);
+					}
+					createUserBlogRows();
+				} else {
+					blogs = api.getBlogsList(-1, 50, currentFilter, oldestBlogsDate.getTime());
+					createBlogRows();
+				}
 			} catch (ConsolewarsAPIException e) {
 				e.printStackTrace();
 				Log.e(getString(R.string.exc_auth_tag), e.getMessage(), e);
 			}
-			createBlogRows();
 			return null;
 		}
 
 		@Override
 		protected void onProgressUpdate(View... rows) {
-			TableLayout blogsTable = (TableLayout) findViewById(R.id.blogs_table);
+			TableLayout blogsTable = (TableLayout) blogs_layout.findViewById(R.id.blogs_table);
 			blogsTable.addView(rows[0], blogsTable.getChildCount() - 1);
 		}
 
 		@Override
 		protected void onPostExecute(Void result) {
 			// sets the blogs view for this Activity
-			TableLayout blogsTable = (TableLayout) findViewById(R.id.blogs_table);
+			TableLayout blogsTable = (TableLayout) blogs_layout.findViewById(R.id.blogs_table);
 
 			blogsTable.removeViewAt(blogsTable.getChildCount() - 1);
+			initFilter(blogs_layout);
+			initRefreshBttn(blogs_layout);
+
 			ViewGroup lastrowLayout = (ViewGroup) LayoutInflater.from(BlogsActivity.this.getParent()).inflate(
 					R.layout.day_down_row_layout, null);
 			Button downBttn = (Button) lastrowLayout.findViewById(R.id.day_down_row_bttn);
 			downBttn.setOnClickListener(new OnClickListener() {
-
+				@Override
 				public void onClick(View v) {
-					currentBlogsDate.setTimeInMillis(oldestBlogsDate.getTimeInMillis() - 1L);
-					oldestBlogsDate.setTimeInMillis(getDay(oldestBlogsDate, -1).getTimeInMillis());
-					TableLayout blogsTable = (TableLayout) findViewById(R.id.blogs_table);
+					if (currentFilter == Blog.FILTER_UID) {
+						currentBlogsDate.setTimeInMillis(oldestBlogsDate.getTimeInMillis() - 1L);
+						oldestBlogsDate.setTimeInMillis(getDay(oldestBlogsDate, -30).getTimeInMillis());
+					} else {
+						currentBlogsDate.setTimeInMillis(oldestBlogsDate.getTimeInMillis() - 1L);
+						oldestBlogsDate.setTimeInMillis(getDay(oldestBlogsDate, -1).getTimeInMillis());
+					}
+					TableLayout blogsTable = (TableLayout) blogs_layout.findViewById(R.id.blogs_table);
 					blogsTable.removeViewAt(blogsTable.getChildCount() - 1);
 					new BuildBlogsAsyncTask().execute();
 				}
@@ -290,11 +396,67 @@ public class BlogsActivity extends RoboActivity {
 		}
 
 		/**
+		 * Create rows displaying single user blogs to be displayed in a table.
+		 */
+		private void createUserBlogRows() {
+			// create table based on current blogs
+			TableLayout blogsTable = (TableLayout) blogs_layout.findViewById(R.id.blogs_table);
+
+			styleStringBuilder = new StyleSpannableStringBuilder();
+			Calendar tempCal = Calendar.getInstance(Locale.GERMANY);
+			tempCal.setTimeInMillis(currentBlogsDate.getTimeInMillis() + 1L);
+
+			for (Blog blog : blogs) {
+				if (getDay(tempCal, -30).getTimeInMillis() > blog.getUnixtime() * 1000L) {
+					currentBlogsDate.setTimeInMillis(currentBlogsDate.getTimeInMillis() + 1L);
+					currentBlogsDate.setTimeInMillis(getDay(currentBlogsDate, -30).getTimeInMillis() - 1L);
+					tempCal.setTimeInMillis(currentBlogsDate.getTimeInMillis() + 1L);
+				} else if ((currentBlogsDate.getTimeInMillis() >= blog.getUnixtime() * 1000L)
+						&& (getDay(tempCal, -30).getTimeInMillis() <= blog.getUnixtime() * 1000L)) {
+					// get the table row by an inflater and set the needed
+					// information
+					final View tableRow = LayoutInflater.from(BlogsActivity.this).inflate(R.layout.blogs_row_layout,
+							blogsTable, false);
+					tableRow.setId(blog.getId());
+					tableRow.setOnClickListener(new View.OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							// set the correct background when a table row was selected by the user
+							if (selectedRow != null) {
+								selectedRow.setBackgroundDrawable(getResources().getDrawable(R.drawable.table_cell_bg));
+							}
+							tableRow.setBackgroundDrawable(getResources()
+									.getDrawable(R.drawable.table_cell_bg_selected));
+							selectedRow = tableRow;
+							getSingleBlog(tableRow.getId());
+						}
+					});
+					// set each table row with the given information from the
+					// returned blogs
+					((ImageView) tableRow.findViewById(R.id.blogs_row_user_icon)).setImageBitmap(getUserPic(blog
+							.getUid()));
+					((TextView) tableRow.findViewById(R.id.blogs_row_title)).setText(createTitle(blog.getTitle()));
+					((TextView) tableRow.findViewById(R.id.blogs_row_date)).setText(createDate(
+							blog.getUnixtime() * 1000L, "'um' HH:mm'Uhr'"));
+					TextView amount = (TextView) tableRow.findViewById(R.id.blogs_row_cmmts_amount);
+					amount.setText(createCommentsamount(blog.getComments()));
+
+					TextView author = (TextView) tableRow.findViewById(R.id.blogs_row_author);
+					author.setText(createAuthor(blog.getAuthor()));
+					author.setSelected(true);
+
+					publishProgress(tableRow);
+				}
+			}
+			styleStringBuilder = null;
+		}
+
+		/**
 		 * Create rows displaying single blogs to be displayed in a table.
 		 */
 		private void createBlogRows() {
 			// create table based on current blogs
-			TableLayout blogsTable = (TableLayout) findViewById(R.id.blogs_table);
+			TableLayout blogsTable = (TableLayout) blogs_layout.findViewById(R.id.blogs_table);
 
 			styleStringBuilder = new StyleSpannableStringBuilder();
 
@@ -325,7 +487,7 @@ public class BlogsActivity extends RoboActivity {
 							blogsTable, false);
 					tableRow.setId(blog.getId());
 					tableRow.setOnClickListener(new View.OnClickListener() {
-
+						@Override
 						public void onClick(View v) {
 							// set the correct background when a table row was
 							// selected by the user

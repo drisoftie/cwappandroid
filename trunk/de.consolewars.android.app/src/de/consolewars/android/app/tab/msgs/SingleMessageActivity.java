@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.text.Html;
 import android.widget.TextView;
 import de.consolewars.android.app.R;
+import de.consolewars.android.app.tab.CwBasicActivityGroup;
 import de.consolewars.android.app.util.TextViewHandler;
 
 /*
@@ -48,6 +49,13 @@ public class SingleMessageActivity extends RoboActivity {
 					.getApplicationContext()), null));
 		} catch (IllegalFormatException ife) {
 			msg_view.setText(text);
+		}
+	}
+	
+	@Override
+	public void onBackPressed() {
+		if (getParent() instanceof CwBasicActivityGroup) {
+			((CwBasicActivityGroup) getParent()).back();
 		}
 	}
 }

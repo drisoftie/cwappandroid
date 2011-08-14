@@ -60,6 +60,7 @@
 		<activity android:alwaysRetainTaskState="false"
 			android:configChanges="keyboardHidden|orientation" android:name=".tab.cmts.CommentsActivity"
 			android:screenOrientation="portrait" />
+		<activity android:name=".tab.msgs.MessageWriterActivity" android:screenOrientation="portrait" android:configChanges="keyboardHidden|orientation"></activity>
 
 
 

@@ -124,8 +124,6 @@ public class SingleNewsActivity extends RoboActivity {
 				extra.putInt(getString(R.string.id), news.getId());
 				extra.putInt(getString(R.string.comments_amount), news.getComments());
 
-				Log.i("*****NEWSCMMTSCOUNT*****", "" + news.getComments());
-
 				commentsIntent.putExtras(extra);
 
 				View view = ((ActivityGroup) getParent())

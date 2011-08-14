@@ -60,8 +60,9 @@ public class SAXMessageParser extends AbstractSAXParser<Message> {
 	}
 
 	/**
-	 * Modifizierter Parser.
+	 * Modified parser.
 	 */
+	@Override
 	public ArrayList<Message> parseDocument() throws ConsolewarsAPIException {
 		String cookie = "cwbb_userid=" + uid + "; cwbb_password=" + pass;
 		SAXParserFactory spf = SAXParserFactory.newInstance();

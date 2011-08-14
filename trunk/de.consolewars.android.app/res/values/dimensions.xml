@@ -1,69 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<dimen
-		name="corner_radius">4dp</dimen>
-	<dimen
-		name="tab_space_top">4dp</dimen>
-	<dimen
-		name="tab_space">2dp</dimen>
-	<dimen
-		name="tab_space_plus1">3dp</dimen>
-	<dimen
-		name="header_margin">5dp</dimen>
-	<dimen
-		name="header_icon_margin">5dp</dimen>
-	<dimen
-		name="header_title_margin">5dp</dimen>
-	<dimen
-		name="header_title_size">15dp</dimen>
-	<dimen
-		name="header_descr_title_size">17dp</dimen>
-	<dimen
-		name="header_descr_margin">7dp</dimen>
-	<dimen
-		name="header_descr_usericon_margin">5dp</dimen>
-	<dimen
-		name="header_descr_info_size">12dp</dimen>
-	<dimen
-		name="header_descr_size">15dp</dimen>
-	<dimen
-		name="overview_edittxt_usrname_padding_top">4dp</dimen>
-	<dimen
-		name="overview_banner_title_margin">2dp</dimen>
-	<dimen
-		name="overview_banner_icon_margin">2dp</dimen>
-	<dimen
-		name="overview_banner_descr_margin">2dp</dimen>
-	<dimen
-		name="news_row_day_separator_margin">4dp</dimen>
-	<dimen
-		name="news_row_title_padding">2dp</dimen>
-	<dimen
-		name="news_row_icon_padding_top">2dp</dimen>
-	<dimen
-		name="news_row_icon_padding_left">1dp</dimen>
-	<dimen
-		name="news_row_date_padding_left">2dp</dimen>
-	<dimen
-		name="news_row_cmmts_icon_margin">2dp</dimen>
-	<dimen
-		name="news_row_author_margin">2dp</dimen>
-	<dimen
-		name="blogs_row_title_padding">2dp</dimen>
-	<dimen
-		name="blogs_row_icon_padding_top">2dp</dimen>
-	<dimen
-		name="blogs_row_icon_padding_left">1dp</dimen>
-	<dimen
-		name="blogs_row_date_padding_left">2dp</dimen>
-	<dimen
-		name="blogs_row_cmmts_icon_margin">2dp</dimen>
-	<dimen
-		name="blogs_row_author_margin">2dp</dimen>
-	<dimen
-		name="overview_logged_as_padding">2dp</dimen>
-	<dimen
-		name="overview_usericon_margin_left">25dp</dimen>
-	<dimen
-		name="comments_cell_margin">5dp</dimen>	
+
+	<!-- general dimensions -->
+
+	<!-- view specific dimensions -->
+
+	<dimen name="corner_radius">4dp</dimen>
+	<dimen name="tab_space_top">4dp</dimen>
+	<dimen name="tab_space">2dp</dimen>
+	<dimen name="tab_space_plus1">3dp</dimen>
+	<dimen name="header_margin">5dp</dimen>
+	<dimen name="header_icon_margin">5dp</dimen>
+	<dimen name="header_title_margin">5dp</dimen>
+	<dimen name="header_title_size">15dp</dimen>
+	<dimen name="header_descr_title_size">17dp</dimen>
+	<dimen name="header_descr_margin">7dp</dimen>
+	<dimen name="header_descr_usericon_margin">5dp</dimen>
+	<dimen name="header_descr_info_size">12dp</dimen>
+	<dimen name="header_descr_size">15dp</dimen>
+	<dimen name="overview_edittxt_usrname_padding_top">4dp</dimen>
+	<dimen name="overview_banner_title_margin">2dp</dimen>
+	<dimen name="overview_banner_icon_margin">2dp</dimen>
+	<dimen name="overview_banner_descr_margin">2dp</dimen>
+	<dimen name="news_row_day_separator_margin">4dp</dimen>
+	<dimen name="news_row_title_padding">2dp</dimen>
+	<dimen name="news_row_icon_padding_top">2dp</dimen>
+	<dimen name="news_row_icon_padding_left">1dp</dimen>
+	<dimen name="news_row_date_padding_left">2dp</dimen>
+	<dimen name="news_row_cmmts_icon_margin">2dp</dimen>
+	<dimen name="news_row_author_margin">2dp</dimen>
+	<dimen name="blogs_row_title_padding">2dp</dimen>
+	<dimen name="blogs_row_icon_padding_top">2dp</dimen>
+	<dimen name="blogs_row_icon_padding_left">1dp</dimen>
+	<dimen name="blogs_row_date_padding_left">2dp</dimen>
+	<dimen name="blogs_row_cmmts_icon_margin">2dp</dimen>
+	<dimen name="blogs_row_author_margin">2dp</dimen>
+	<dimen name="overview_logged_as_padding">2dp</dimen>
+	<dimen name="overview_usericon_margin_left">25dp</dimen>
+	<dimen name="messagewriter_text_margin">2dp</dimen>
+	<dimen name="comments_cell_margin">5dp</dimen>
 </resources>
