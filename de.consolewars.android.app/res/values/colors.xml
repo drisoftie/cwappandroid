@@ -65,6 +65,8 @@
 	<color
 		name="msg_text_fromUser">#3e3e3e</color>
 	<color
+		name="messagewriter_text">#514a4a</color>	
+	<color
 		name="header_up">#9bd1fa</color>
 	<color
 		name="header_down">#60b7f5</color>

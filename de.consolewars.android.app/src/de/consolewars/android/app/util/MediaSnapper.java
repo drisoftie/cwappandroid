@@ -2,6 +2,7 @@ package de.consolewars.android.app.util;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -10,6 +11,9 @@ import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.TagNode;
 import org.htmlcleaner.XPatherException;
+
+import android.content.Context;
+import de.consolewars.android.app.R;
 
 /*
  * Copyright [2010] [Alexander Dridiger]
@@ -74,6 +78,44 @@ public class MediaSnapper {
 		cleaner = null;
 		props = null;
 		url = null;
+		return snap;
+	}
+
+	public static String snapWithCookies(Context context, String xPath, String attrToStrip, String urlString,
+			String cookies) throws IOException, XPatherException {
+		String snap = "";
+
+		// create an instance of HtmlCleaner
+		HtmlCleaner cleaner = new HtmlCleaner();
+
+		// take default cleaner properties
+		CleanerProperties props = cleaner.getProperties();
+
+		props.setAllowHtmlInsideAttributes(true);
+		props.setAllowMultiWordAttributes(true);
+		props.setRecognizeUnicodeChars(true);
+		props.setOmitComments(true);
+
+		URL url = new URL(urlString);
+
+		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+		connection.setDoOutput(true);
+
+		connection.setRequestProperty(context.getString(R.string.cookie), cookies);
+		connection.connect();
+
+		// use the cleaner to "clean" the HTML and return it as a TagNode object
+		TagNode root = cleaner.clean(new InputStreamReader(connection.getInputStream()));
+
+		Object[] foundNodes = root.evaluateXPath(xPath);
+
+		if (foundNodes.length > 0) {
+			TagNode foundNode = (TagNode) foundNodes[0];
+			snap = foundNode.getAttributeByName(attrToStrip);
+		}
+
+		// Log.i("**********RESPONSEURLCONN!!!!!!!!********", getData);
+
 		return snap;
 	}
 }

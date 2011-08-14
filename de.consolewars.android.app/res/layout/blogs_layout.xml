@@ -4,6 +4,23 @@
 	android:orientation="vertical"
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent">
+	<RelativeLayout
+		android:id="@+id/blogs_header"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content">
+		<Button
+			android:id="@+id/blogs_bttn_refresh"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentRight="true"
+			android:background="@drawable/refresh_bump"/>
+		<Spinner
+			android:id="@+id/blogs_filter_spinner"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_toLeftOf="@id/blogs_bttn_refresh"
+			android:prompt="@string/blogs_filter"/>
+	</RelativeLayout>
 	<ScrollView
 		android:id="@+id/blogs_scroll_view"
 		android:layout_width="fill_parent"
