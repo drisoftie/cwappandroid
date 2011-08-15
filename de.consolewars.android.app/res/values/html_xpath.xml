@@ -70,7 +70,7 @@
 		name="cw_cmmt_edit_data">reference_area=%1$d&amp;reference_id=%2$d&amp;talkback_cid=%3$d&amp;talkback_command=%4$s&amp;talkback_content=%5$s&amp;talkback_viewpage=%6$d
 	</string>	
 	<string
-		name="cw_mssg_submit_data">do=insertpm&amp;message=%1$s&amp;recipients=%2$s&amp;savecopy=%3$d&amp;sbutton=Abschicken&amp;title=%4$s&amp;parseurl=%5$d&amp;securitytoken=%6$s&amp;signature=%7$d&amp;disablesmilies=%8$d
+		name="cw_mssg_submit_data">do=insertpm&amp;message=%1$s&amp;recipients=%2$s&amp;savecopy=%3$d&amp;sbutton=Abschicken&amp;title=%4$s&amp;parseurl=%5$d&amp;securitytoken=%6$s&amp;signature=%7$d&amp;disablesmilies=%8$d&amp;receipt=%9$d
 	</string>
 	<string
 		name="cw_command_newentry">newentry
