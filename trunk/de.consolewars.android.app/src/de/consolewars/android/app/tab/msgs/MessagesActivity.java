@@ -25,8 +25,8 @@ import android.widget.TextView;
 
 import com.google.inject.Inject;
 
-import de.consolewars.android.app.APICaller;
 import de.consolewars.android.app.CWApplication;
+import de.consolewars.android.app.CWManager;
 import de.consolewars.android.app.Filter;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.util.DateUtility;
@@ -59,7 +59,7 @@ public class MessagesActivity extends RoboActivity {
 	@Inject
 	private CWApplication cwApplication;
 	@Inject
-	private APICaller apiCaller;
+	private CWManager cwManager;
 	@Inject
 	private ViewUtility viewUtility;
 
@@ -127,11 +127,7 @@ public class MessagesActivity extends RoboActivity {
 		 * @throws ConsolewarsAPIException
 		 */
 		private void setCurrentMessages() throws ConsolewarsAPIException {
-			if (cwApplication.getAuthenticatedUser() != null) {
-				msgs = apiCaller.getMessages(cwApplication.getAuthenticatedUser(), currentFilter, 10);
-			} else {
-				msgs = new ArrayList<Message>();
-			}
+			msgs = cwManager.getMessages(currentFilter, 10);
 		}
 
 		/**

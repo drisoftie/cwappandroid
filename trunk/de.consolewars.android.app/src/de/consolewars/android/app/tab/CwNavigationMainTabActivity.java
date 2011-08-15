@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TabHost;
-import de.consolewars.android.app.APICaller;
+import de.consolewars.android.app.CWManager;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.db.AppDataHandler;
 import de.consolewars.android.app.tab.blogs.BlogsActivityGroup;
@@ -37,7 +37,7 @@ import de.consolewars.android.app.tab.shout.ShoutboxActivityGroup;
  * Activity to manage the main navigation of the app, i.e. its tabs. Initializes the tabs and their
  * corresponding {@link ActivityGroup}s and exposes the {@link TabHost} for tab management. The
  * {@link TabHost} is managed by the Android activity lifecycle. It also grants access to the
- * {@link APICaller} and {@link AppDataHandler} to facilitate Consolewars-API calls and database
+ * {@link CWManager} and {@link AppDataHandler} to facilitate Consolewars-API calls and database
  * handling. No switching or further application logic is provided here.
  * 
  * @author Alexander Dridiger

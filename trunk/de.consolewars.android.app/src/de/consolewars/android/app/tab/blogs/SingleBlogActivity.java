@@ -18,8 +18,8 @@ import android.widget.TextView;
 
 import com.google.inject.Inject;
 
-import de.consolewars.android.app.APICaller;
-import de.consolewars.android.app.APICaller.CommentArea;
+import de.consolewars.android.app.CWManager;
+import de.consolewars.android.app.CWManager.CommentArea;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.cmts.CommentsActivity;
 import de.consolewars.android.app.util.DateUtility;
@@ -50,7 +50,7 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
 public class SingleBlogActivity extends RoboActivity {
 
 	@Inject
-	private APICaller apiCaller;
+	private CWManager cwManager;
 	@Inject
 	private ViewUtility viewUtility;
 
@@ -111,7 +111,7 @@ public class SingleBlogActivity extends RoboActivity {
 
 			if (id != -1) {
 				try {
-					blog = apiCaller.getBlogById(id);
+					blog = cwManager.getBlogById(id);
 				} catch (ConsolewarsAPIException e) {
 					e.printStackTrace();
 				}
