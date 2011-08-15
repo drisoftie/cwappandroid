@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.view.View;
 import de.consolewars.android.app.tab.CwBasicActivityGroup;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
-import de.consolewars.android.app.tab.blogs.BlogsActivity;
 
 /*
  * Copyright [2010] [Alexander Dridiger]
@@ -23,8 +22,8 @@ import de.consolewars.android.app.tab.blogs.BlogsActivity;
  * limitations under the License.
  */
 /**
- * Manages activities belonging to news. It is used for facilitating the exchange of activities
- * within tabs. Switch news activities with this group.
+ * Manages activities belonging to news. It is used for facilitating the
+ * exchange of activities within tabs. Switch news activities with this group.
  * 
  * @author Alexander Dridiger
  * @see CwNavigationMainTabActivity
@@ -36,11 +35,8 @@ public class NewsActivityGroup extends CwBasicActivityGroup {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		// Start the root activity withing the group and get its view
-		View view = getLocalActivityManager().startActivity(NewsActivity.class.getSimpleName(),
-				new Intent(this, NewsActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
-		// Replace the view of this ActivityGroup
-		replaceView(view);
+		// reset the ui
+		replaceView(startNewsActivity());
 	}
 
 	@Override
@@ -51,9 +47,12 @@ public class NewsActivityGroup extends CwBasicActivityGroup {
 		resetCache();
 
 		// reset the ui
-		View view = getLocalActivityManager().startActivity(BlogsActivity.class.getSimpleName(),
-				new Intent(this, BlogsActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
-				.getDecorView();
-		replaceView(view);
+		replaceView(startNewsActivity());
+	}
+
+	private View startNewsActivity() {
+		// Start the root activity within the group and get its view
+		return getLocalActivityManager().startActivity(NewsActivity.class.getSimpleName(),
+				new Intent(this, NewsActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
 	}
 }

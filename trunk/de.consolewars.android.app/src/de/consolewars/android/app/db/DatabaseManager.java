@@ -144,7 +144,7 @@ public class DatabaseManager {
 		return cursor;
 	}
 
-	public void closeDB() {
+	public void closeDatabase() {
 		if (db.isOpen()) {
 			db.close();
 		}

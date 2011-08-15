@@ -52,6 +52,7 @@ public class AppDataHandler {
 		String columnPassw = getString(R.string.db_password_attribute);
 		String columnDate = getString(R.string.db_date_attribute);
 
+		databaseManager.openDatabase();
 		Cursor cursor = databaseManager.fireQuery(tableName, new String[] { columnId, columnUsername, columnPassw,
 				columnDate }, null, null, null, null, getString(R.string.db_id_desc));
 		if (cursor.getCount() > 0 && cursor.moveToFirst()) {

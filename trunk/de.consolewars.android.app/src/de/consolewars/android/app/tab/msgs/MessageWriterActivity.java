@@ -53,10 +53,10 @@ public class MessageWriterActivity extends RoboActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.messagewriter_layout);
-		initSentBttn();
+		initSendBttn();
 	}
 
-	private void initSentBttn() {
+	private void initSendBttn() {
 		Button submit = (Button) findViewById(R.id.messagewriter_bttn_submit);
 		submit.setOnClickListener(new OnClickListener() {
 			@Override
