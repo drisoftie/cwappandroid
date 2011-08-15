@@ -1,4 +1,4 @@
-package de.consolewars.android.app.tab.shout;
+package de.consolewars.android.app.tab.board;
 
 import roboguice.activity.RoboActivity;
 import android.os.AsyncTask;
@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 import android.webkit.WebSettings.PluginState;
+import android.webkit.WebSettings.ZoomDensity;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
@@ -37,11 +38,11 @@ import de.consolewars.android.app.util.ViewUtility;
  * limitations under the License.
  */
 /**
- * Central Activity to handle the ui for the shoutbox. <br>
+ * Central Activity to handle the ui for the messageboard. <br>
  * 
  * @author Alexander Dridiger
  */
-public class ShoutboxActivity extends RoboActivity {
+public class BoardActivity extends RoboActivity {
 
 	@Inject
 	private CWApplication cwApplication;
@@ -50,76 +51,47 @@ public class ShoutboxActivity extends RoboActivity {
 	@Inject
 	private ViewUtility viewUtility;
 
-	private ViewGroup shoutbox_layout;
+	private WebView webView;
+
+	private ViewGroup board_layout;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		shoutbox_layout = (ViewGroup) LayoutInflater.from(ShoutboxActivity.this.getParent()).inflate(
-				R.layout.shoutbox_layout, null);
+		board_layout = (ViewGroup) LayoutInflater.from(BoardActivity.this.getParent()).inflate(R.layout.board_layout,
+				null);
 
-		new BuildShoutboxAsyncTask().execute();
+		new OpenBoardAsyncTask().execute();
 	}
 
 	/**
-	 * Asynchronous task to login into consolewars.de and open the shoutbox.
+	 * Asynchronous task to login into consolewars.de and open the messageboard.
 	 * 
 	 * @author Alexander Dridiger
 	 */
-	private class BuildShoutboxAsyncTask extends AsyncTask<Void, Integer, View> {
+	private class OpenBoardAsyncTask extends AsyncTask<Void, Integer, View> {
 
 		@Override
 		protected void onPreExecute() {
 			// first set progressbar view
 			ViewGroup progress_layout = viewUtility.getCenteredProgressBarLayout(
-					LayoutInflater.from(ShoutboxActivity.this.getParent()), R.string.shoutbox);
+					LayoutInflater.from(BoardActivity.this.getParent()), R.string.board);
 			setContentView(progress_layout);
 		}
 
 		@Override
 		protected View doInBackground(Void... params) {
-			return loginAndOpenShoutbox();
+			return loginAndOpenBoard();
 		}
 
 		@Override
 		protected void onPostExecute(View result) {
 			setContentView(result);
-			// WebView webView = (WebView) findViewById(R.id.shoutbox);
-			// if
-			// (!CWApplication.getInstance().getDataHandler().loadCurrentUser()
-			// &&
-			// CWApplication.getInstance().getDataHandler().getHashPw().matches("")
-			// &&
-			// CWApplication.getInstance().getDataHandler().getUserName().matches(""))
-			// {
-			// webView.loadUrl(getString(R.string.cw_url_slash));
-			// } else {
-			// if (CWApplication.getInstance().getAuthenticatedUser() != null
-			// &&
-			// CWApplication.getInstance().getAuthenticatedUser().getSuccess()
-			// .matches(getString(R.string.success_yes))) {
-			// CookieSyncManager.createInstance(ShoutboxActivity.this);
-			// CookieManager cookieManager = CookieManager.getInstance();
-			// cookieManager.removeAllCookie();
-			// cookieManager.setCookie(getString(R.string.cw_domain),
-			// getString(R.string.cw_cookie_userid) + "="
-			// + CWApplication.getInstance().getAuthenticatedUser().getUid());
-			// cookieManager.setCookie(getString(R.string.cw_domain),
-			// getString(R.string.cw_cookie_pw)
-			// + "=" +
-			// CWApplication.getInstance().getAuthenticatedUser().getPasswordHash());
-			// CookieSyncManager.getInstance().sync();
-			// webView.loadUrl(getString(R.string.cw_shoutbox));
-			// } else {
-			// webView.loadUrl(getString(R.string.cw_url_slash));
-			// }
-			//
-			// }
 		}
 
-		private View loginAndOpenShoutbox() {
-			Button refresh = (Button) shoutbox_layout.findViewById(R.id.shoutbox_refresh);
+		private View loginAndOpenBoard() {
+			Button refresh = (Button) board_layout.findViewById(R.id.board_refresh);
 			refresh.setOnClickListener(new OnClickListener() {
 
 				public void onClick(View arg0) {
@@ -138,12 +110,13 @@ public class ShoutboxActivity extends RoboActivity {
 					// mainTabs.getHttpClient().getCookieStore().addCookie(
 					// new BasicClientCookie(key.trim(), value.trim()));
 					// }
-					new BuildShoutboxAsyncTask().execute();
+					new OpenBoardAsyncTask().execute();
 				}
 			});
 
-			WebView webView = (WebView) shoutbox_layout.findViewById(R.id.shoutbox);
+			webView = (WebView) board_layout.findViewById(R.id.board);
 
+			webView.getSettings().setDefaultZoom(ZoomDensity.FAR);
 			webView.getSettings().setUseWideViewPort(false);
 			webView.getSettings().setPluginState(PluginState.ON);
 			webView.getSettings().setPluginsEnabled(true);
@@ -179,7 +152,7 @@ public class ShoutboxActivity extends RoboActivity {
 			} else {
 				if (cwApplication.getAuthenticatedUser() != null
 						&& cwApplication.getAuthenticatedUser().getSuccess().matches(getString(R.string.success_yes))) {
-					CookieSyncManager.createInstance(ShoutboxActivity.this);
+					CookieSyncManager.createInstance(BoardActivity.this);
 					CookieManager cookieManager = CookieManager.getInstance();
 					// cookieManager.removeAllCookie();
 					cookieManager.setCookie(getString(R.string.cw_domain), getString(R.string.cw_cookie_userid) + "="
@@ -187,20 +160,24 @@ public class ShoutboxActivity extends RoboActivity {
 					cookieManager.setCookie(getString(R.string.cw_domain), getString(R.string.cw_cookie_pw) + "="
 							+ cwApplication.getAuthenticatedUser().getPasswordHash());
 					CookieSyncManager.getInstance().sync();
-					webView.loadUrl(getString(R.string.cw_shoutbox));
+					webView.loadUrl(getString(R.string.cw_messageboard_mobile_url));
 				} else {
 					webView.loadUrl(getString(R.string.cw_url_slash));
 				}
 
 			}
-			return shoutbox_layout;
+			return board_layout;
 		}
 	}
 
 	@Override
 	public void onBackPressed() {
-		if (getParent() instanceof ShoutboxActivityGroup) {
-			((ShoutboxActivityGroup) getParent()).back();
+		if (webView.canGoBack()) {
+			webView.goBack();
+		} else {
+			if (getParent() instanceof BoardActivityGroup) {
+				((BoardActivityGroup) getParent()).back();
+			}
 		}
 	}
 }

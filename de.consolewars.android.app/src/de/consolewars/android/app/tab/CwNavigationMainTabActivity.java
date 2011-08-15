@@ -13,6 +13,7 @@ import de.consolewars.android.app.APICaller;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.db.AppDataHandler;
 import de.consolewars.android.app.tab.blogs.BlogsActivityGroup;
+import de.consolewars.android.app.tab.board.BoardActivityGroup;
 import de.consolewars.android.app.tab.msgs.MessagesActivityGroup;
 import de.consolewars.android.app.tab.news.NewsActivityGroup;
 import de.consolewars.android.app.tab.overview.OverviewActivityGroup;
@@ -76,6 +77,7 @@ public class CwNavigationMainTabActivity extends RoboTabActivity {
 		addTab(R.string.tab_news_tag, R.drawable.def_tab_news, NewsActivityGroup.class);
 		addTab(R.string.tab_blogs_tag, R.drawable.def_tab_blogs, BlogsActivityGroup.class);
 		addTab(R.string.tab_msgs_tag, R.drawable.def_tab_msg, MessagesActivityGroup.class);
+		addTab(R.string.tab_board_tag, R.drawable.def_tab_board, BoardActivityGroup.class);
 		addTab(R.string.tab_shout_tag, R.drawable.def_tab_shout, ShoutboxActivityGroup.class);
 	}
 
