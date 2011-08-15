@@ -46,6 +46,9 @@
 		name="cw_cookie_pw">cwbb_password
 	</string>
 	<string
+		name="cw_messageboard_mobile_url">http://www.consolewars.de/messageboard/?styleid=14
+	</string>
+	<string
 		name="cw_posting_url">http://www.consolewars.de/gen/processtalkback.php
 	</string>
 	<string
