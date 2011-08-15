@@ -27,7 +27,7 @@ import android.widget.TextView;
 
 import com.google.inject.Inject;
 
-import de.consolewars.android.app.APICaller;
+import de.consolewars.android.app.CWManager;
 import de.consolewars.android.app.Filter;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.util.DateUtility;
@@ -58,7 +58,7 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
 public class NewsActivity extends RoboActivity {
 
 	@Inject
-	private APICaller apiCaller;
+	private CWManager cwManager;
 	@Inject
 	private ViewUtility viewUtility;
 
@@ -114,7 +114,7 @@ public class NewsActivity extends RoboActivity {
 		protected Void doInBackground(Void... params) {
 			try {
 				oldestNewsDate.setTimeInMillis(DateUtility.getDay(oldestNewsDate, 0).getTimeInMillis());
-				news = apiCaller.getNews(50, currentFilter, oldestNewsDate.getTime());
+				news = cwManager.getNews(50, currentFilter, oldestNewsDate.getTime());
 			} catch (ConsolewarsAPIException e) {
 				e.printStackTrace();
 				Log.e(getString(R.string.exc_auth_tag), e.getMessage(), e);

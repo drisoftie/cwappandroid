@@ -28,7 +28,7 @@ import android.widget.TextView;
 
 import com.google.inject.Inject;
 
-import de.consolewars.android.app.APICaller;
+import de.consolewars.android.app.CWManager;
 import de.consolewars.android.app.CWApplication;
 import de.consolewars.android.app.Filter;
 import de.consolewars.android.app.R;
@@ -62,7 +62,7 @@ public class BlogsActivity extends RoboActivity {
 	@Inject
 	private CWApplication cwApplication;
 	@Inject
-	private APICaller apiCaller;
+	private CWManager cwManager;
 	@Inject
 	private ViewUtility viewUtility;
 
@@ -184,19 +184,19 @@ public class BlogsActivity extends RoboActivity {
 
 			try {
 				if (Filter.BLOGS_USER.equals(currentFilter)) {
-					blogs = apiCaller.getUserBlogs(cwApplication.getAuthenticatedUser().getUid(), 50,
+					blogs = cwManager.getUserBlogs(cwApplication.getAuthenticatedUser().getUid(), 50,
 							oldestBlogsDate.getTime());
 					int count = 0;
 					while (blogs.isEmpty() && count < 6) {
 						currentBlogsDate.setTimeInMillis(oldestBlogsDate.getTimeInMillis() - 1L);
 						oldestBlogsDate.setTimeInMillis(DateUtility.getDay(oldestBlogsDate, -30).getTimeInMillis());
 						count++;
-						blogs = apiCaller.getUserBlogs(cwApplication.getAuthenticatedUser().getUid(), 50,
+						blogs = cwManager.getUserBlogs(cwApplication.getAuthenticatedUser().getUid(), 50,
 								oldestBlogsDate.getTime());
 					}
 					createUserBlogRows();
 				} else {
-					blogs = apiCaller.getBlogs(50, currentFilter, oldestBlogsDate.getTime());
+					blogs = cwManager.getBlogs(50, currentFilter, oldestBlogsDate.getTime());
 					createBlogRows();
 				}
 			} catch (ConsolewarsAPIException e) {

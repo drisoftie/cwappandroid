@@ -1,7 +1,5 @@
 package de.consolewars.android.app.tab.cmts;
 
-import java.io.IOException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,12 +25,11 @@ import android.widget.Toast;
 
 import com.google.inject.Inject;
 
-import de.consolewars.android.app.APICaller;
 import de.consolewars.android.app.CWApplication;
+import de.consolewars.android.app.CWManager;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwBasicActivityGroup;
 import de.consolewars.android.app.util.DateUtility;
-import de.consolewars.android.app.util.HttpPoster;
 import de.consolewars.android.app.util.TextViewHandler;
 import de.consolewars.android.app.util.ViewUtility;
 import de.consolewars.api.data.Comment;
@@ -61,9 +58,7 @@ public class CommentsActivity extends RoboActivity {
 	@Inject
 	private CWApplication cwApplication;
 	@Inject
-	private HttpPoster httpPoster;
-	@Inject
-	private APICaller apiCaller;
+	private CWManager cwManager;
 	@Inject
 	private ViewUtility viewUtility;
 	private List<Comment> comments = new ArrayList<Comment>();
@@ -120,7 +115,7 @@ public class CommentsActivity extends RoboActivity {
 		@Override
 		protected Void doInBackground(Void... params) {
 			try {
-				comments = apiCaller.getComments(objectId, area, 10, currpage);
+				comments = cwManager.getComments(objectId, area, 10, currpage);
 			} catch (ConsolewarsAPIException e) {
 				e.printStackTrace();
 				Log.e(getString(R.string.exc_auth_tag), e.getMessage(), e);
@@ -309,21 +304,7 @@ public class CommentsActivity extends RoboActivity {
 		protected Void doInBackground(Void... params) {
 			if (doWork) {
 				EditText commenttxt = (EditText) cmmts_layout.findViewById(R.id.comments_edttxt_input);
-				if (cwApplication.getAuthenticatedUser() != null) {
-					try {
-						httpPoster
-								.sendPost(
-										getString(R.string.cw_posting_url),
-										getString(R.string.cw_cookie_full, cwApplication.getAuthenticatedUser()
-												.getUid(), cwApplication.getAuthenticatedUser().getPasswordHash()),
-										getString(R.string.cw_cmmt_submit_data, area, objectId,
-												getString(R.string.cw_command_newentry), URLEncoder.encode(commenttxt
-														.getText().toString(), getString(R.string.utf8)), 1));
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
+				cwManager.sendComment(commenttxt.getText().toString(), objectId, area);
 			}
 			return null;
 		}
@@ -352,19 +333,7 @@ public class CommentsActivity extends RoboActivity {
 
 		@Override
 		protected Void doInBackground(Integer... ids) {
-			if (cwApplication.getAuthenticatedUser() != null) {
-				try {
-					httpPoster.sendPost(
-							getString(R.string.cw_posting_url),
-							getString(R.string.cw_cookie_full, cwApplication.getAuthenticatedUser().getUid(),
-									cwApplication.getAuthenticatedUser().getPasswordHash()),
-							getString(R.string.cw_cmmt_delete_data, area, objectId, ids[0],
-									getString(R.string.cw_command_remove), 1));
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
+			cwManager.deleteComment(ids[0], objectId, area);
 			return null;
 		}
 
@@ -395,20 +364,8 @@ public class CommentsActivity extends RoboActivity {
 		@Override
 		protected View doInBackground(Object... params) {
 			View row = (View) params[1];
-			if (cwApplication.getAuthenticatedUser() != null) {
-				try {
-					EditText textToEdit = (EditText) row.findViewById(R.id.cmts_edtxt_edit);
-					httpPoster.sendPost(
-							getString(R.string.cw_posting_url),
-							getString(R.string.cw_cookie_full, cwApplication.getAuthenticatedUser().getUid(),
-									cwApplication.getAuthenticatedUser().getPasswordHash()),
-							getString(R.string.cw_cmmt_edit_data, area, objectId, (Integer) params[0],
-									getString(R.string.cw_command_update),
-									URLEncoder.encode(textToEdit.getText().toString(), getString(R.string.utf8)), 1));
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
+			EditText textToEdit = (EditText) row.findViewById(R.id.cmts_edtxt_edit);
+			cwManager.updateComment(textToEdit.getText().toString(), (Integer) params[0], objectId, area);
 			return row;
 		}
 

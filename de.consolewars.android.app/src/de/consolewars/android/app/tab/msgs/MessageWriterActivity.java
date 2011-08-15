@@ -1,10 +1,5 @@
 package de.consolewars.android.app.tab.msgs;
 
-import java.io.IOException;
-import java.net.URLEncoder;
-
-import org.htmlcleaner.XPatherException;
-
 import roboguice.activity.RoboActivity;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -17,11 +12,9 @@ import android.widget.Toast;
 
 import com.google.inject.Inject;
 
-import de.consolewars.android.app.CWApplication;
+import de.consolewars.android.app.CWManager;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwBasicActivityGroup;
-import de.consolewars.android.app.util.HttpPoster;
-import de.consolewars.android.app.util.MediaSnapper;
 
 /*
  * Copyright [2010] [Alexander Dridiger]
@@ -46,9 +39,7 @@ import de.consolewars.android.app.util.MediaSnapper;
 public class MessageWriterActivity extends RoboActivity {
 
 	@Inject
-	private CWApplication cwApplication;
-	@Inject
-	private HttpPoster httpPoster;
+	private CWManager cwManager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -91,36 +82,9 @@ public class MessageWriterActivity extends RoboActivity {
 			CheckBox parseurl = (CheckBox) findViewById(R.id.messagewriter_check_parseurl);
 			CheckBox disablesmilies = (CheckBox) findViewById(R.id.messagewriter_check_disablesmilies);
 
-			String securityToken = "";
-			try {
-				securityToken = MediaSnapper.snapWithCookies(
-						MessageWriterActivity.this,
-						getString(R.string.xpath_get_securitytoken),
-						getString(R.string.value),
-						getString(R.string.cw_getsecuritytoken_url),
-						getString(R.string.cw_cookie_full, cwApplication.getAuthenticatedUser().getUid(), cwApplication
-								.getAuthenticatedUser().getPasswordHash()));
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			} catch (XPatherException e1) {
-				e1.printStackTrace();
-			}
-
-			try {
-				httpPoster.sendPost(
-						getString(R.string.cw_message_url),
-						getString(R.string.cw_cookie_full, cwApplication.getAuthenticatedUser().getUid(), cwApplication
-								.getAuthenticatedUser().getPasswordHash()),
-						getString(R.string.cw_mssg_submit_data,
-								URLEncoder.encode(message.getText().toString(), getString(R.string.utf8)),
-								URLEncoder.encode(recipient.getText().toString(), getString(R.string.utf8)),
-								(copy.isChecked()) ? (1) : (0),
-								URLEncoder.encode(title.getText().toString(), getString(R.string.utf8)),
-								(parseurl.isChecked()) ? (1) : (0), securityToken, (signature.isChecked()) ? (1) : (0),
-								(disablesmilies.isChecked()) ? (1) : (0), (receipt.isChecked()) ? (1) : (0)));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			cwManager.sendMessage(message.getText().toString(), recipient.getText().toString(), title.getText()
+					.toString(), copy.isChecked(), parseurl.isChecked(), signature.isChecked(), disablesmilies
+					.isChecked(), receipt.isChecked());
 			return null;
 		}
 

@@ -27,7 +27,7 @@ public class SplashScreenActivity extends RoboActivity {
 	@Inject
 	private CWApplication cwApplication;
 	@Inject
-	private APICaller apiCaller;
+	private CWManager cwManager;
 	@Inject
 	private AppDataHandler appDataHandler;
 
@@ -62,7 +62,7 @@ public class SplashScreenActivity extends RoboActivity {
 			appDataHandler.loadCurrentUser();
 			AuthenticatedUser user = null;
 			try {
-				user = apiCaller.getAuthUser(appDataHandler.getUserName(),
+				user = cwManager.getAuthUser(appDataHandler.getUserName(),
 						HashEncrypter.decrypt(getString(R.string.db_cry), appDataHandler.getHashPw()));
 			} catch (ConsolewarsAPIException e) {
 				e.printStackTrace();

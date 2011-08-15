@@ -76,6 +76,12 @@
 		name="cw_mssg_submit_data">do=insertpm&amp;message=%1$s&amp;recipients=%2$s&amp;savecopy=%3$d&amp;sbutton=Abschicken&amp;title=%4$s&amp;parseurl=%5$d&amp;securitytoken=%6$s&amp;signature=%7$d&amp;disablesmilies=%8$d&amp;receipt=%9$d
 	</string>
 	<string
+	    name="cw_mssg_delete_data">do=managepm&amp;folderid=0&amp;%1$s&amp;securitytoken=%2$s&amp;dowhat=delete
+	</string>
+	<string
+	    name="cw_mssg_delete_param">pm[%1$d]
+	</string>
+	<string
 		name="cw_command_newentry">newentry
 	</string>
 	<string

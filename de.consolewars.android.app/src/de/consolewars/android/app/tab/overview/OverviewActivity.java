@@ -26,8 +26,8 @@ import android.widget.ViewFlipper;
 
 import com.google.inject.Inject;
 
-import de.consolewars.android.app.APICaller;
 import de.consolewars.android.app.CWApplication;
+import de.consolewars.android.app.CWManager;
 import de.consolewars.android.app.Filter;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.db.AppDataHandler;
@@ -67,7 +67,7 @@ public class OverviewActivity extends RoboActivity {
 	@Inject
 	private DatabaseManager databaseManager;
 	@Inject
-	private APICaller apiCaller;
+	private CWManager cwManager;
 	@Inject
 	private ViewUtility viewUtility;
 
@@ -163,14 +163,13 @@ public class OverviewActivity extends RoboActivity {
 			if (appDataHandler.getDate() != -1) {
 				try {
 					Date date = new Date(appDataHandler.getDate());
-					newsAmount = apiCaller.getNews(5, Filter.NEWS_ALL, date).size();
-					blogsAmount = apiCaller.getBlogs(5, Filter.BLOGS_NORMAL, date).size();
-					blogsAmount += apiCaller.getBlogs(5, Filter.BLOGS_NEWS, date).size();
-					blogsAmount += apiCaller.getBlogs(5, Filter.BLOGS_USER, date).size();
-					AuthenticatedUser user = cwApplication.getAuthenticatedUser();
+					newsAmount = cwManager.getNews(5, Filter.NEWS_ALL, date).size();
+					blogsAmount = cwManager.getBlogs(5, Filter.BLOGS_NORMAL, date).size();
+					blogsAmount += cwManager.getBlogs(5, Filter.BLOGS_NEWS, date).size();
+					blogsAmount += cwManager.getBlogs(5, Filter.BLOGS_USER, date).size();
 
-					List<Message> msgs = apiCaller.getMessages(user, Filter.MSGS_INBOX, 5);
-					msgs.addAll(apiCaller.getMessages(user, Filter.MSGS_OUTBOX, 5));
+					List<Message> msgs = cwManager.getMessages(Filter.MSGS_INBOX, 5);
+					msgs.addAll(cwManager.getMessages(Filter.MSGS_OUTBOX, 5));
 					for (Message msg : msgs) {
 						if (msg.getUnixtime() > appDataHandler.getDate()) {
 							msgsAmount++;
@@ -251,7 +250,7 @@ public class OverviewActivity extends RoboActivity {
 				persistUser(usrnmEdttxt.getText().toString(), passwEdttxt.getText().toString());
 				AuthenticatedUser authUser = null;
 				try {
-					authUser = apiCaller.getAuthUser(appDataHandler.getUserName(), passwEdttxt.getText().toString());
+					authUser = cwManager.getAuthUser(appDataHandler.getUserName(), passwEdttxt.getText().toString());
 					cwApplication.setAuthenticatedUser(authUser);
 				} catch (ConsolewarsAPIException e) {
 					// TODO Auto-generated catch block
