@@ -93,7 +93,7 @@ public class BoardActivity extends RoboActivity {
 		private View loginAndOpenBoard() {
 			Button refresh = (Button) board_layout.findViewById(R.id.board_refresh);
 			refresh.setOnClickListener(new OnClickListener() {
-
+				@Override
 				public void onClick(View arg0) {
 					// Log.i("********AllCookies**********",
 					// CookieManager.getInstance().getCookie(
@@ -125,7 +125,7 @@ public class BoardActivity extends RoboActivity {
 
 			webView.requestFocus(View.FOCUS_DOWN);
 			webView.setOnTouchListener(new View.OnTouchListener() {
-
+				@Override
 				public boolean onTouch(View v, MotionEvent event) {
 					switch (event.getAction()) {
 					case MotionEvent.ACTION_DOWN:

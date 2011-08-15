@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -81,9 +82,14 @@ public class MessageWriterActivity extends RoboActivity {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			EditText receipt = (EditText) findViewById(R.id.messagewriter_edttxt_recipients);
+			EditText recipient = (EditText) findViewById(R.id.messagewriter_edttxt_recipients);
 			EditText title = (EditText) findViewById(R.id.messagewriter_edttxt_title);
 			EditText message = (EditText) findViewById(R.id.messagewriter_edttxt_message);
+			CheckBox receipt = (CheckBox) findViewById(R.id.messagewriter_check_receipt);
+			CheckBox copy = (CheckBox) findViewById(R.id.messagewriter_check_copy);
+			CheckBox signature = (CheckBox) findViewById(R.id.messagewriter_check_signature);
+			CheckBox parseurl = (CheckBox) findViewById(R.id.messagewriter_check_parseurl);
+			CheckBox disablesmilies = (CheckBox) findViewById(R.id.messagewriter_check_disablesmilies);
 
 			String securityToken = "";
 			try {
@@ -107,9 +113,11 @@ public class MessageWriterActivity extends RoboActivity {
 								.getAuthenticatedUser().getPasswordHash()),
 						getString(R.string.cw_mssg_submit_data,
 								URLEncoder.encode(message.getText().toString(), getString(R.string.utf8)),
-								URLEncoder.encode(receipt.getText().toString(), getString(R.string.utf8)), 1,
-								URLEncoder.encode(title.getText().toString(), getString(R.string.utf8)), 1,
-								securityToken, 1, 1));
+								URLEncoder.encode(recipient.getText().toString(), getString(R.string.utf8)),
+								(copy.isChecked()) ? (1) : (0),
+								URLEncoder.encode(title.getText().toString(), getString(R.string.utf8)),
+								(parseurl.isChecked()) ? (1) : (0), securityToken, (signature.isChecked()) ? (1) : (0),
+								(disablesmilies.isChecked()) ? (1) : (0), (receipt.isChecked()) ? (1) : (0)));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
