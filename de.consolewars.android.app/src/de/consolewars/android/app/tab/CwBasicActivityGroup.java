@@ -70,7 +70,7 @@ public abstract class CwBasicActivityGroup extends RoboActivityGroup implements 
 									databaseManager.updateDate(appDataHandler.getUserDbId(),
 											GregorianCalendar.getInstance().getTimeInMillis());
 								}
-								databaseManager.closeDB();
+								databaseManager.closeDatabase();
 							}
 							finish();
 						}

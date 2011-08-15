@@ -1,8 +1,6 @@
 package de.consolewars.android.app.tab.news;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -10,7 +8,6 @@ import java.util.TimeZone;
 import roboguice.activity.RoboActivity;
 import android.app.ActivityGroup;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.style.ForegroundColorSpan;
@@ -24,7 +21,6 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TextView;
@@ -32,9 +28,11 @@ import android.widget.TextView;
 import com.google.inject.Inject;
 
 import de.consolewars.android.app.APICaller;
+import de.consolewars.android.app.Filter;
 import de.consolewars.android.app.R;
+import de.consolewars.android.app.util.DateUtility;
 import de.consolewars.android.app.util.StyleSpannableStringBuilder;
-import de.consolewars.api.API;
+import de.consolewars.android.app.util.ViewUtility;
 import de.consolewars.api.data.News;
 import de.consolewars.api.exception.ConsolewarsAPIException;
 
@@ -62,7 +60,7 @@ public class NewsActivity extends RoboActivity {
 	@Inject
 	private APICaller apiCaller;
 	@Inject
-	private API api;
+	private ViewUtility viewUtility;
 
 	private List<News> news;
 
@@ -73,8 +71,7 @@ public class NewsActivity extends RoboActivity {
 	// remember last selected table row to draw the background for that row
 	private View selectedRow;
 
-	private int currentFilter = 0;
-	private final int NOFILTER = 0;
+	private Filter currentFilter = Filter.NEWS_ALL;
 
 	private StyleSpannableStringBuilder styleStringBuilder;
 
@@ -82,162 +79,9 @@ public class NewsActivity extends RoboActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		resetDates();
-		news_layout = (ViewGroup) LayoutInflater.from(NewsActivity.this.getParent())
-				.inflate(R.layout.news_layout, null);
+		news_layout = (ViewGroup) LayoutInflater.from(getParent()).inflate(R.layout.news_layout, null);
 		setContentView(news_layout);
 		new BuildNewsAsyncTask().execute();
-	}
-
-	/**
-	 * @param parent
-	 */
-	private void initRefreshBttn(ViewGroup parent) {
-		Button refresh = (Button) parent.findViewById(R.id.news_bttn_refresh);
-		refresh.setOnClickListener(new OnClickListener() {
-
-			public void onClick(View arg0) {
-				TableLayout newsTable = (TableLayout) news_layout.findViewById(R.id.news_table);
-				newsTable.removeAllViews();
-				resetDates();
-				new BuildNewsAsyncTask().execute();
-			}
-		});
-	}
-
-	/**
-	 * Filter ui and logic for filtering news.
-	 * 
-	 * @param parentView
-	 *            to find the inflated view elements.
-	 */
-	private void initFilter(final View parentView) {
-		Spinner spinner = (Spinner) parentView.findViewById(R.id.news_filter_spinner);
-		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getParent(), R.array.news_filter_options,
-				android.R.layout.simple_spinner_item);
-		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		spinner.setAdapter(adapter);
-		spinner.setSelection(currentFilter);
-		spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
-
-			public void onItemSelected(AdapterView<?> aView, View view, int position, long id) {
-				int selected;
-				switch (position) {
-				case NOFILTER:
-					selected = NOFILTER;
-					break;
-				case News.FILTER_MICROSOFT_ONLY:
-					selected = News.FILTER_MICROSOFT_ONLY;
-					break;
-				case News.FILTER_NINTENDO_ONLY:
-					selected = News.FILTER_NINTENDO_ONLY;
-					break;
-				case News.FILTER_SONY_ONLY:
-					selected = News.FILTER_SONY_ONLY;
-					break;
-				default:
-					selected = NOFILTER;
-					break;
-				}
-				if (currentFilter != selected) {
-					currentFilter = selected;
-					TableLayout newsTable = (TableLayout) parentView.findViewById(R.id.news_table);
-					newsTable.removeAllViews();
-					resetDates();
-					new BuildNewsAsyncTask().execute();
-				}
-			}
-
-			public void onNothingSelected(AdapterView<?> arg0) {
-				// not needed
-			}
-		});
-	}
-
-	/**
-	 * Changes the current activity to a {@link SingleNewsActivity} with the selected news.
-	 * 
-	 * @param id
-	 */
-	private void getSingleNews(int id) {
-		Intent singleNewsIntent = new Intent(NewsActivity.this, SingleNewsActivity.class);
-
-		singleNewsIntent.putExtra(NewsActivity.class.getName(), id);
-
-		View view = ((ActivityGroup) getParent())
-				.getLocalActivityManager()
-				.startActivity(SingleNewsActivity.class.getSimpleName(),
-						singleNewsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
-		// replace the view
-		((NewsActivityGroup) getParent()).replaceView(view);
-	}
-
-	/**
-	 * Creates the string for the ui cell showing the author of a news and the amount of comments.
-	 * 
-	 * @param commentAmount
-	 * @param author
-	 * @return a formatted {@link CharSequence}
-	 */
-	private CharSequence createAuthor(String author) {
-		// TODO more text formatting
-		// an empty author string means that the news was not written by a
-		if (author.matches("")) {
-			author = getString(R.string.news_author_unknown);
-		}
-		styleStringBuilder.clear();
-		styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF007711), getString(R.string.news_author_by));
-		styleStringBuilder.append(" ");
-		styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF009933), author);
-
-		return styleStringBuilder;
-	}
-
-	/**
-	 * Creates the string for the ui cell showing the author of a news and the amount of comments.
-	 * 
-	 * @param commentAmount
-	 * @param author
-	 * @return a formatted {@link CharSequence}
-	 */
-	private CharSequence createAamount(int commentAmount) {
-		// TODO more text formatting
-		// an empty author string means that the news was not written by a
-		styleStringBuilder.clear();
-		styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF7e6003), String.valueOf(commentAmount));
-
-		return styleStringBuilder;
-	}
-
-	private Calendar createCalendarFromUnixtime(long unixtime) {
-		Date date = new Date(unixtime);
-		TimeZone zone = TimeZone.getDefault();
-
-		Calendar cal = Calendar.getInstance(zone, Locale.GERMANY);
-		// Log.i("****TIMEZONE*****", zone.getDisplayName());
-		cal.setTimeInMillis(date.getTime());
-
-		return cal;
-	}
-
-	/**
-	 * @param unixtime
-	 * @return
-	 */
-	private CharSequence createDate(long unixtime, String format) {
-		SimpleDateFormat dateformat = new SimpleDateFormat(format, Locale.GERMANY);
-		Calendar cal = createCalendarFromUnixtime(unixtime);
-		dateformat.setTimeZone(cal.getTimeZone());
-		dateformat.setCalendar(cal);
-		return dateformat.format(cal.getTime());
-	}
-
-	/**
-	 * @param title
-	 * @return
-	 */
-	private CharSequence createTitle(String title) {
-		// TODO text formatting
-		return title;
 	}
 
 	private void resetDates() {
@@ -245,21 +89,9 @@ public class NewsActivity extends RoboActivity {
 		TimeZone zone = TimeZone.getDefault();
 
 		oldestNewsDate = Calendar.getInstance(zone, Locale.GERMANY);
-		oldestNewsDate.setTimeInMillis(getDay(oldestNewsDate, 0).getTimeInMillis());
+		oldestNewsDate.setTimeInMillis(DateUtility.getDay(oldestNewsDate, 0).getTimeInMillis());
 		currentNewsDate = Calendar.getInstance(zone, Locale.GERMANY);
-		currentNewsDate.setTimeInMillis(getDay(currentNewsDate, 1).getTimeInMillis() - 1L);
-	}
-
-	private Calendar getDay(Calendar date, int days) {
-		Calendar cal = Calendar.getInstance(Locale.GERMANY);
-		cal.setTimeInMillis(date.getTimeInMillis());
-		cal.add(Calendar.DATE, days);
-		cal.set(Calendar.HOUR_OF_DAY, 0);
-		cal.set(Calendar.MINUTE, 0);
-		cal.set(Calendar.SECOND, 0);
-		cal.set(Calendar.MILLISECOND, 0);
-
-		return cal;
+		currentNewsDate.setTimeInMillis(DateUtility.getDay(currentNewsDate, 1).getTimeInMillis() - 1L);
 	}
 
 	/**
@@ -269,19 +101,11 @@ public class NewsActivity extends RoboActivity {
 	 */
 	private class BuildNewsAsyncTask extends AsyncTask<Void, View, Void> {
 
-		private ProgressBar progressBar;
-
 		@Override
 		protected void onPreExecute() {
 			// first set progressbar
-			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(NewsActivity.this.getParent()).inflate(
-					R.layout.centered_progressbar, null);
-
-			TextView text = (TextView) progress_layout.findViewById(R.id.centered_progressbar_text);
-			text.setText(getString(R.string.loading, getString(R.string.tab_news_head)));
-
-			progressBar = (ProgressBar) progress_layout.findViewById(R.id.centered_progressbar);
-			progressBar.setProgress(0);
+			ViewGroup progress_layout = viewUtility.getCenteredProgressBarLayout(
+					LayoutInflater.from(NewsActivity.this.getParent()), R.string.tab_news_head);
 			TableLayout newsTable = (TableLayout) news_layout.findViewById(R.id.news_table);
 			newsTable.addView(progress_layout);
 		}
@@ -289,9 +113,8 @@ public class NewsActivity extends RoboActivity {
 		@Override
 		protected Void doInBackground(Void... params) {
 			try {
-				oldestNewsDate.setTimeInMillis(getDay(oldestNewsDate, 0).getTimeInMillis());
-				apiCaller.authenticateOnCW();
-				news = api.getNewsList(50, currentFilter, oldestNewsDate.getTime());
+				oldestNewsDate.setTimeInMillis(DateUtility.getDay(oldestNewsDate, 0).getTimeInMillis());
+				news = apiCaller.getNews(50, currentFilter, oldestNewsDate.getTime());
 			} catch (ConsolewarsAPIException e) {
 				e.printStackTrace();
 				Log.e(getString(R.string.exc_auth_tag), e.getMessage(), e);
@@ -322,7 +145,7 @@ public class NewsActivity extends RoboActivity {
 
 				public void onClick(View v) {
 					currentNewsDate.setTimeInMillis(oldestNewsDate.getTimeInMillis() - 1L);
-					oldestNewsDate.setTimeInMillis(getDay(oldestNewsDate, -1).getTimeInMillis());
+					oldestNewsDate.setTimeInMillis(DateUtility.getDay(oldestNewsDate, -1).getTimeInMillis());
 					TableLayout newsTable = (TableLayout) news_layout.findViewById(R.id.news_table);
 					newsTable.removeViewAt(newsTable.getChildCount() - 1);
 					new BuildNewsAsyncTask().execute();
@@ -350,9 +173,9 @@ public class NewsActivity extends RoboActivity {
 			tempCal.setTimeInMillis(currentNewsDate.getTimeInMillis() + 1L);
 
 			for (News newsToAdd : news) {
-				if (getDay(tempCal, -1).getTimeInMillis() > newsToAdd.getUnixtime() * 1000L) {
+				if (DateUtility.getDay(tempCal, -1).getTimeInMillis() > newsToAdd.getUnixtime() * 1000L) {
 					currentNewsDate.setTimeInMillis(currentNewsDate.getTimeInMillis() + 1L);
-					currentNewsDate.setTimeInMillis(getDay(currentNewsDate, -1).getTimeInMillis() - 1L);
+					currentNewsDate.setTimeInMillis(DateUtility.getDay(currentNewsDate, -1).getTimeInMillis() - 1L);
 					tempCal.setTimeInMillis(currentNewsDate.getTimeInMillis() + 1L);
 					separator = (ViewGroup) LayoutInflater.from(NewsActivity.this.getParent()).inflate(
 							R.layout.news_row_day_separator_layout, null);
@@ -360,7 +183,7 @@ public class NewsActivity extends RoboActivity {
 					separatorTxt.setText(createDate(currentNewsDate.getTimeInMillis(), "EEEE, dd. MMMMM yyyy"));
 					publishProgress(separator);
 				} else if ((currentNewsDate.getTimeInMillis() >= newsToAdd.getUnixtime() * 1000L)
-						&& (getDay(tempCal, -1).getTimeInMillis() <= newsToAdd.getUnixtime() * 1000L)) {
+						&& (DateUtility.getDay(tempCal, -1).getTimeInMillis() <= newsToAdd.getUnixtime() * 1000L)) {
 					// get the table row by an inflater and set the needed
 					// information
 					final View tableRow = LayoutInflater.from(NewsActivity.this).inflate(R.layout.news_row_layout,
@@ -386,9 +209,9 @@ public class NewsActivity extends RoboActivity {
 					((TextView) tableRow.findViewById(R.id.news_row_date)).setText(createDate(
 							newsToAdd.getUnixtime() * 1000L, "'um' HH:mm'Uhr'"));
 					TextView cmtAmount = (TextView) tableRow.findViewById(R.id.news_row_cmmts_amount);
-					cmtAmount.setText(createAamount(newsToAdd.getComments()));
+					cmtAmount.setText(createAmount(newsToAdd.getComments()));
 					TextView picAmount = (TextView) tableRow.findViewById(R.id.news_row_pics_amount);
-					picAmount.setText(createAamount(newsToAdd.getPiclist().length));
+					picAmount.setText(createAmount(newsToAdd.getPiclist().length));
 					TextView author = (TextView) tableRow.findViewById(R.id.news_row_author);
 					author.setText(createAuthor(newsToAdd.getAuthor()));
 					author.setSelected(true);
@@ -397,11 +220,139 @@ public class NewsActivity extends RoboActivity {
 				}
 			}
 		}
-	}
 
-	@Override
-	public void onConfigurationChanged(Configuration newConfig) {
-		super.onConfigurationChanged(newConfig);
+		/**
+		 * @param parent
+		 */
+		private void initRefreshBttn(ViewGroup parent) {
+			Button refresh = (Button) parent.findViewById(R.id.news_bttn_refresh);
+			refresh.setOnClickListener(new OnClickListener() {
+
+				public void onClick(View arg0) {
+					TableLayout newsTable = (TableLayout) news_layout.findViewById(R.id.news_table);
+					newsTable.removeAllViews();
+					resetDates();
+					new BuildNewsAsyncTask().execute();
+				}
+			});
+		}
+
+		/**
+		 * Filter ui and logic for filtering news.
+		 * 
+		 * @param parentView
+		 *            to find the inflated view elements.
+		 */
+		private void initFilter(final View parentView) {
+			Spinner spinner = (Spinner) parentView.findViewById(R.id.news_filter_spinner);
+			ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getParent(),
+					R.array.news_filter_options, android.R.layout.simple_spinner_item);
+			adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+			spinner.setAdapter(adapter);
+			spinner.setSelection(currentFilter.getPosition());
+			spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+				public void onItemSelected(AdapterView<?> aView, View view, int position, long id) {
+					Filter selected;
+					if (Filter.NEWS_MS.getPosition() == position) {
+						selected = Filter.NEWS_MS;
+					} else if (Filter.NEWS_NIN.getPosition() == position) {
+						selected = Filter.NEWS_NIN;
+					} else if (Filter.NEWS_SONY.getPosition() == position) {
+						selected = Filter.NEWS_SONY;
+					} else {
+						selected = Filter.NEWS_ALL;
+					}
+
+					if (!currentFilter.equals(selected)) {
+						currentFilter = selected;
+						TableLayout newsTable = (TableLayout) parentView.findViewById(R.id.news_table);
+						newsTable.removeAllViews();
+						resetDates();
+						new BuildNewsAsyncTask().execute();
+					}
+				}
+
+				public void onNothingSelected(AdapterView<?> arg0) {
+					// not needed
+				}
+			});
+		}
+
+		/**
+		 * Changes the current activity to a {@link SingleNewsActivity} with the
+		 * selected news.
+		 * 
+		 * @param id
+		 */
+		private void getSingleNews(int id) {
+			Intent singleNewsIntent = new Intent(NewsActivity.this, SingleNewsActivity.class);
+
+			singleNewsIntent.putExtra(NewsActivity.class.getName(), id);
+
+			View view = ((ActivityGroup) getParent())
+					.getLocalActivityManager()
+					.startActivity(SingleNewsActivity.class.getSimpleName(),
+							singleNewsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
+			// replace the view
+			((NewsActivityGroup) getParent()).replaceView(view);
+		}
+
+		/**
+		 * Creates the string for the ui cell showing the author of a news and
+		 * the amount of comments.
+		 * 
+		 * @param commentAmount
+		 * @param author
+		 * @return a formatted {@link CharSequence}
+		 */
+		private CharSequence createAuthor(String author) {
+			// TODO more text formatting
+			// an empty author string means that the news was not written by a
+			if (author.matches("")) {
+				author = getString(R.string.news_author_unknown);
+			}
+			styleStringBuilder.clear();
+			styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF007711), getString(R.string.news_author_by));
+			styleStringBuilder.append(" ");
+			styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF009933), author);
+
+			return styleStringBuilder;
+		}
+
+		/**
+		 * Creates the string for the ui cell showing the author of a news and
+		 * the amount of comments.
+		 * 
+		 * @param commentAmount
+		 * @param author
+		 * @return a formatted {@link CharSequence}
+		 */
+		private CharSequence createAmount(int commentAmount) {
+			// TODO more text formatting
+			// an empty author string means that the news was not written by a
+			styleStringBuilder.clear();
+			styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF7e6003), String.valueOf(commentAmount));
+
+			return styleStringBuilder;
+		}
+
+		/**
+		 * @param unixtime
+		 * @return
+		 */
+		private CharSequence createDate(long unixtime, String format) {
+			return DateUtility.createDate(unixtime, format);
+		}
+
+		/**
+		 * @param title
+		 * @return
+		 */
+		private CharSequence createTitle(String title) {
+			// TODO text formatting
+			return title;
+		}
 	}
 
 	@Override

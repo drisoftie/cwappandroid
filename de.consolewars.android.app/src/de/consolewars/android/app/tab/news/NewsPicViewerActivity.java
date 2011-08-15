@@ -34,7 +34,7 @@ public class NewsPicViewerActivity extends RoboActivity {
 	private Gallery gallery;
 	private ImageView imgView;
 
-	private Integer[] Imgid = { R.drawable.splash_bg, R.drawable.cw_logo_skeletal, R.drawable.cw_logo,
+	private Integer[] imgIds = { R.drawable.splash_bg, R.drawable.cw_logo_skeletal, R.drawable.cw_logo,
 			R.drawable.cw_logo_splash, R.drawable.cw_white_logo, R.drawable.icon, R.drawable.titlebar_bg };
 
 	@Override
@@ -43,32 +43,33 @@ public class NewsPicViewerActivity extends RoboActivity {
 		setContentView(R.layout.news_pic_viewer);
 
 		imgView = (ImageView) findViewById(R.id.ImageView01);
-		imgView.setImageResource(Imgid[0]);
+		imgView.setImageResource(imgIds[0]);
 
 		gallery = (Gallery) findViewById(R.id.examplegallery);
-		gallery.setAdapter(new AddImgAdp(this));
+		gallery.setAdapter(new AddImageAdapter(this));
 
 		gallery.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-				imgView.setImageResource(Imgid[position]);
+				imgView.setImageResource(imgIds[position]);
 			}
 		});
 	}
 
-	public class AddImgAdp extends BaseAdapter {
-		int GalItemBg;
-		private Context cont;
+	public class AddImageAdapter extends BaseAdapter {
+		// private int GalItemBg;
+		private Context context;
 
-		public AddImgAdp(Context c) {
-			cont = c;
-			// TypedArray typArray = obtainStyledAttributes(R.styleable.GalleryTheme);
+		public AddImageAdapter(Context c) {
+			context = c;
+			// TypedArray typArray =
+			// obtainStyledAttributes(R.styleable.GalleryTheme);
 			// GalItemBg = typArray.getResourceId(
 			// R.styleable.GalleryTheme_android_galleryItemBackground, 0);
 			// typArray.recycle();
 		}
 
 		public int getCount() {
-			return Imgid.length;
+			return imgIds.length;
 		}
 
 		public Object getItem(int position) {
@@ -80,9 +81,9 @@ public class NewsPicViewerActivity extends RoboActivity {
 		}
 
 		public View getView(int position, View convertView, ViewGroup parent) {
-			ImageView imgView = new ImageView(cont);
+			ImageView imgView = new ImageView(context);
 
-			imgView.setImageResource(Imgid[position]);
+			imgView.setImageResource(imgIds[position]);
 			imgView.setScaleType(ImageView.ScaleType.FIT_XY);
 			imgView.setLayoutParams(new Gallery.LayoutParams(100, 100));
 			// imgView.setBackgroundResource(GalItemBg);

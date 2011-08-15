@@ -22,8 +22,8 @@ import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
  * limitations under the License.
  */
 /**
- * Manages activities belonging to blogs. It is used for facilitating the exchange of activities
- * within tabs. Switch blogs activities with this group.
+ * Manages activities belonging to blogs. It is used for facilitating the
+ * exchange of activities within tabs. Switch blogs activities with this group.
  * 
  * @author Alexander Dridiger
  * @see CwNavigationMainTabActivity
@@ -35,12 +35,8 @@ public class BlogsActivityGroup extends CwBasicActivityGroup {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		// Start the root activity withing the group and get its view
-		View view = getLocalActivityManager().startActivity(BlogsActivity.class.getSimpleName(),
-				new Intent(this, BlogsActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
-				.getDecorView();
 		// Replace the view of this ActivityGroup
-		replaceView(view);
+		replaceView(startBlogActivity());
 	}
 
 	@Override
@@ -51,9 +47,12 @@ public class BlogsActivityGroup extends CwBasicActivityGroup {
 		resetCache();
 
 		// reset the ui
-		View view = getLocalActivityManager().startActivity(BlogsActivity.class.getSimpleName(),
-				new Intent(this, BlogsActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
-				.getDecorView();
-		replaceView(view);
+		replaceView(startBlogActivity());
+	}
+
+	private View startBlogActivity() {
+		// Start the root activity withing the group and get its view
+		return getLocalActivityManager().startActivity(BlogsActivity.class.getSimpleName(),
+				new Intent(this, BlogsActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
 	}
 }

@@ -1,20 +1,10 @@
 package de.consolewars.android.app.tab.blogs;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.IllegalFormatException;
-import java.util.Locale;
-import java.util.TimeZone;
 
 import roboguice.activity.RoboActivity;
 import android.app.ActivityGroup;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
@@ -28,10 +18,13 @@ import android.widget.TextView;
 
 import com.google.inject.Inject;
 
+import de.consolewars.android.app.APICaller;
+import de.consolewars.android.app.APICaller.CommentArea;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.cmts.CommentsActivity;
+import de.consolewars.android.app.util.DateUtility;
 import de.consolewars.android.app.util.TextViewHandler;
-import de.consolewars.api.API;
+import de.consolewars.android.app.util.ViewUtility;
 import de.consolewars.api.data.Blog;
 import de.consolewars.api.exception.ConsolewarsAPIException;
 
@@ -57,127 +50,14 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
 public class SingleBlogActivity extends RoboActivity {
 
 	@Inject
-	private API api;
+	private APICaller apiCaller;
+	@Inject
+	private ViewUtility viewUtility;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		new BuildSingleBlogAsyncTask().execute();
-	}
-
-	private View createBlogView() {
-		View blogView = LayoutInflater.from(getParent()).inflate(R.layout.singleblog_layout, null);
-
-		int id = -1;
-
-		// looking for the correct intent
-		if (getIntent().hasExtra(BlogsActivity.class.getName())) {
-			id = getIntent().getIntExtra(BlogsActivity.class.getName(), -1);
-		}
-
-		Blog blog = null;
-
-		try {
-			blog = api.getBlog(id);
-		} catch (ConsolewarsAPIException e) {
-			e.printStackTrace();
-		}
-
-		TextView text = (TextView) blogView.findViewById(R.id.singleblog_text_content);
-		if (id == -1) {
-			text.setText("Fehler");
-		} else if (blog != null) {
-			try {
-				// String fString = String.format(blog.getArticle(), "");
-				// CharSequence styledString = Html.fromHtml(fString);
-				// text.setText(styledString);
-				text.setText(Html.fromHtml(blog.getArticle(true),
-						new TextViewHandler(SingleBlogActivity.this.getApplicationContext()), null));
-			} catch (IllegalFormatException ife) {
-				// FIXME Wrong format handling
-				text.setText(blog.getArticle());
-			}
-			createCommentBttn(blogView, blog);
-			createHeader(blogView, blog);
-		}
-		return blogView;
-	}
-
-	private void createCommentBttn(View blogView, final Blog blog) {
-		Button bttn = (Button) blogView.findViewById(R.id.singleblog_comments_bttn);
-		bttn.setOnClickListener(new OnClickListener() {
-
-			public void onClick(View v) {
-				Intent commentsIntent = new Intent(SingleBlogActivity.this, CommentsActivity.class);
-
-				Bundle extra = new Bundle();
-				extra.putInt(getString(R.string.type), R.string.blog);
-				extra.putInt(getString(R.string.id), blog.getId());
-				extra.putInt(getString(R.string.comments_amount), blog.getComments());
-
-				commentsIntent.putExtras(extra);
-
-				View view = ((ActivityGroup) getParent())
-						.getLocalActivityManager()
-						.startActivity(CommentsActivity.class.getSimpleName(),
-								commentsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
-				// replace the view
-				((BlogsActivityGroup) getParent()).replaceView(view);
-			}
-		});
-	}
-
-	private void createHeader(View parent, Blog blog) {
-		ImageView icon = (ImageView) parent.findViewById(R.id.singleblog_header_usericon);
-		loadPicture(icon, blog.getUid());
-
-		TextView text = (TextView) parent.findViewById(R.id.singleblog_header_title);
-		text.setText(getString(R.string.singleblogs_author, blog.getAuthor().toUpperCase()));
-
-		TextView title = (TextView) parent.findViewById(R.id.header_descr_title);
-		title.setText(blog.getTitle());
-		TextView info = (TextView) parent.findViewById(R.id.header_descr_info);
-		info.setText(createDate(blog.getUnixtime() * 1000L));
-	}
-
-	/**
-	 * Downloads the user picture and decodes it into a {@link Bitmap} to be set
-	 * into an ImageView.
-	 * 
-	 * @param view
-	 *            the ImageView
-	 * @param uid
-	 *            user id is needed to get the appropriate picture
-	 */
-	private void loadPicture(ImageView view, int uid) {
-		URL newurl;
-		Bitmap mIcon_val = null;
-		try {
-			newurl = new URL(getString(R.string.blogs_userpic_url, uid, 60));
-			mIcon_val = BitmapFactory.decodeStream(newurl.openConnection().getInputStream());
-			view.setImageBitmap(mIcon_val);
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * @param unixtime
-	 * @return
-	 */
-	private CharSequence createDate(long unixtime) {
-		Date date = new Date(unixtime);
-		TimeZone zone = TimeZone.getDefault();
-
-		Calendar cal = Calendar.getInstance(zone, Locale.GERMANY);
-		// formatting day of week in EEEE format like Sunday, Monday etc.
-		SimpleDateFormat dateformat = new SimpleDateFormat("EEEE, dd. MMMMM yyyy 'um' HH:mm 'Uhr'", Locale.GERMANY);
-		dateformat.setCalendar(cal);
-		return dateformat.format(date);
 	}
 
 	/**
@@ -215,6 +95,91 @@ public class SingleBlogActivity extends RoboActivity {
 		@Override
 		protected void onPostExecute(View result) {
 			setContentView(result);
+		}
+
+		private View createBlogView() {
+			View blogView = LayoutInflater.from(getParent()).inflate(R.layout.singleblog_layout, null);
+
+			int id = -1;
+
+			// looking for the correct intent
+			if (getIntent().hasExtra(getString(R.string.id))) {
+				id = getIntent().getIntExtra(getString(R.string.id), -1);
+			}
+
+			Blog blog = null;
+
+			if (id != -1) {
+				try {
+					blog = apiCaller.getBlogById(id);
+				} catch (ConsolewarsAPIException e) {
+					e.printStackTrace();
+				}
+			}
+
+			TextView text = (TextView) blogView.findViewById(R.id.singleblog_text_content);
+			if (id == -1 || blog == null) {
+				text.setText("Fehler");
+			} else {
+				try {
+					// String fString = String.format(blog.getArticle(), "");
+					// CharSequence styledString = Html.fromHtml(fString);
+					// text.setText(styledString);
+					text.setText(Html.fromHtml(blog.getArticle(true),
+							new TextViewHandler(SingleBlogActivity.this.getApplicationContext()), null));
+				} catch (IllegalFormatException ife) {
+					// FIXME Wrong format handling
+					text.setText(blog.getArticle());
+				}
+				createCommentBttn(blogView, blog);
+				createHeader(blogView, blog);
+			}
+			return blogView;
+		}
+
+		private void createCommentBttn(View blogView, final Blog blog) {
+			Button bttn = (Button) blogView.findViewById(R.id.singleblog_comments_bttn);
+			bttn.setOnClickListener(new OnClickListener() {
+
+				public void onClick(View v) {
+					Intent commentsIntent = new Intent(SingleBlogActivity.this, CommentsActivity.class);
+
+					Bundle extra = new Bundle();
+					extra.putInt(getString(R.string.type), CommentArea.BLOGS.getValue());
+					extra.putInt(getString(R.string.id), blog.getId());
+					extra.putInt(getString(R.string.comments_amount), blog.getComments());
+
+					commentsIntent.putExtras(extra);
+
+					View view = ((ActivityGroup) getParent())
+							.getLocalActivityManager()
+							.startActivity(CommentsActivity.class.getSimpleName(),
+									commentsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
+					// replace the view
+					((BlogsActivityGroup) getParent()).replaceView(view);
+				}
+			});
+		}
+
+		private void createHeader(View parent, Blog blog) {
+			ImageView icon = (ImageView) parent.findViewById(R.id.singleblog_header_usericon);
+			viewUtility.setUserIcon(icon, getString(R.string.blogs_userpic_url, blog.getUid(), 60));
+
+			TextView text = (TextView) parent.findViewById(R.id.singleblog_header_title);
+			text.setText(getString(R.string.singleblogs_author, blog.getAuthor().toUpperCase()));
+
+			TextView title = (TextView) parent.findViewById(R.id.header_descr_title);
+			title.setText(blog.getTitle());
+			TextView info = (TextView) parent.findViewById(R.id.header_descr_info);
+			info.setText(createDate(blog.getUnixtime() * 1000L));
+		}
+
+		/**
+		 * @param unixtime
+		 * @return
+		 */
+		private CharSequence createDate(long unixtime) {
+			return DateUtility.createDate(unixtime, getString(R.string.dateformat_detailed));
 		}
 	}
 }

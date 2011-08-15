@@ -12,7 +12,6 @@ import android.widget.ProgressBar;
 import com.google.inject.Inject;
 
 import de.consolewars.android.app.db.AppDataHandler;
-import de.consolewars.android.app.db.DatabaseManager;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
 import de.consolewars.android.app.util.HashEncrypter;
 import de.consolewars.api.data.AuthenticatedUser;
@@ -27,8 +26,6 @@ public class SplashScreenActivity extends RoboActivity {
 
 	@Inject
 	private CWApplication cwApplication;
-	@Inject
-	private DatabaseManager databaseManager;
 	@Inject
 	private APICaller apiCaller;
 	@Inject
@@ -62,7 +59,6 @@ public class SplashScreenActivity extends RoboActivity {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			databaseManager.openDatabase();
 			appDataHandler.loadCurrentUser();
 			AuthenticatedUser user = null;
 			try {

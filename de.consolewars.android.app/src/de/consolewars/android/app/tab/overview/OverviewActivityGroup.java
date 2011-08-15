@@ -21,8 +21,9 @@ import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
  * limitations under the License.
  */
 /**
- * Manages activities belonging to the overview. It is used for facilitating the exchange of
- * activities within tabs. Switch overview activities with this group.
+ * Manages activities belonging to the overview. It is used for facilitating the
+ * exchange of activities within tabs. Switch overview activities with this
+ * group.
  * 
  * @author Alexander Dridiger
  * @see CwNavigationMainTabActivity
@@ -35,9 +36,8 @@ public class OverviewActivityGroup extends CwBasicActivityGroup {
 		super.onCreate(savedInstanceState);
 
 		// Start the root activity withing the group and get its view
-		View view = getLocalActivityManager().startActivity(this.getClass().getName(),
-				new Intent(this, OverviewActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
-				.getDecorView();
+		View view = getLocalActivityManager().startActivity(OverviewActivity.class.getSimpleName(),
+				new Intent(this, OverviewActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
 		// Replace the view of this ActivityGroup
 		replaceView(view);
 	}

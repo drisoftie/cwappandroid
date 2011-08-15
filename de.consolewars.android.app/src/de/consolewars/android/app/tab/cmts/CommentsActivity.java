@@ -1,24 +1,15 @@
 package de.consolewars.android.app.tab.cmts;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
 
 import org.apache.commons.lang.StringUtils;
 
 import roboguice.activity.RoboActivity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
@@ -30,19 +21,20 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.inject.Inject;
 
+import de.consolewars.android.app.APICaller;
 import de.consolewars.android.app.CWApplication;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwBasicActivityGroup;
+import de.consolewars.android.app.util.DateUtility;
 import de.consolewars.android.app.util.HttpPoster;
 import de.consolewars.android.app.util.TextViewHandler;
-import de.consolewars.api.API;
+import de.consolewars.android.app.util.ViewUtility;
 import de.consolewars.api.data.Comment;
 import de.consolewars.api.exception.ConsolewarsAPIException;
 
@@ -71,12 +63,14 @@ public class CommentsActivity extends RoboActivity {
 	@Inject
 	private HttpPoster httpPoster;
 	@Inject
-	private API api;
+	private APICaller apiCaller;
+	@Inject
+	private ViewUtility viewUtility;
 	private List<Comment> comments = new ArrayList<Comment>();
 	private ViewGroup cmmts_layout;
 	private View rowToDelete;
 	private int area;
-	private int id;
+	private int objectId;
 	private int currpage = 1;
 	private int maxpage = 1;
 
@@ -88,92 +82,11 @@ public class CommentsActivity extends RoboActivity {
 		new BuildCommentsAsyncTask().execute();
 	}
 
-	private void initButtonsAndCheck() {
-		Button refresh_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_refresh);
-
-		refresh_bttn.setOnClickListener(new OnClickListener() {
-
-			public void onClick(View v) {
-				new BuildCommentsAsyncTask().execute();
-			}
-		});
-
-		Button next_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_next);
-		Button prev_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_prev);
-		next_bttn.setOnClickListener(new OnClickListener() {
-
-			public void onClick(View v) {
-				currpage++;
-				new BuildCommentsAsyncTask().execute();
-			}
-		});
-		prev_bttn.setOnClickListener(new OnClickListener() {
-
-			public void onClick(View v) {
-				currpage--;
-				new BuildCommentsAsyncTask().execute();
-			}
-		});
-
-		Button submit_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_submit);
-		submit_bttn.setOnClickListener(new OnClickListener() {
-
-			public void onClick(View v) {
-				new SubmitCommentAsyncTask().execute();
-			}
-		});
-		checkButtons();
-	}
-
-	private void checkButtons() {
-		Button next_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_next);
-		Button prev_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_prev);
-		if (currpage <= 1) {
-			prev_bttn.setEnabled(false);
-		} else {
-			prev_bttn.setEnabled(true);
-		}
-		if (currpage == maxpage) {
-			next_bttn.setEnabled(false);
-		} else {
-			next_bttn.setEnabled(true);
-		}
-	}
-
 	private void resolveBundle() {
 		Bundle extra = CommentsActivity.this.getIntent().getExtras();
 
-		id = extra.getInt(getString(R.string.id), -1);
-
-		// looking for the correct intent
-		if (extra.getInt(getString(R.string.type)) == R.string.news) {
-			area = Comment.AREA_NEWS;
-		} else if (extra.getInt(getString(R.string.type)) == R.string.blog) {
-			area = Comment.AREA_BLOGS;
-		}
-	}
-
-	/**
-	 * Downloads the user picture and decodes it into a {@link Bitmap} to be set into an ImageView.
-	 * 
-	 * @param uid
-	 *            the user id
-	 * @return the picture
-	 */
-	private Bitmap getUserPic(int uid) {
-		URL newurl;
-		Bitmap icon = null;
-		try {
-			newurl = new URL(getString(R.string.blogs_userpic_url, uid, 50));
-			icon = BitmapFactory.decodeStream(newurl.openConnection().getInputStream());
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return icon;
+		objectId = extra.getInt(getString(R.string.id), -1);
+		area = extra.getInt(getString(R.string.type));
 	}
 
 	/**
@@ -181,13 +94,7 @@ public class CommentsActivity extends RoboActivity {
 	 * @return
 	 */
 	private CharSequence createDate(long unixtime) {
-		Date date = new Date(unixtime);
-		TimeZone zone = TimeZone.getDefault();
-
-		Calendar cal = Calendar.getInstance(zone, Locale.GERMANY);
-		SimpleDateFormat dateformat = new SimpleDateFormat("dd.MM.yyyy, HH:mm 'Uhr'", Locale.GERMANY);
-		dateformat.setCalendar(cal);
-		return dateformat.format(date);
+		return DateUtility.createDate(unixtime, "dd.MM.yyyy, HH:mm 'Uhr'");
 	}
 
 	/**
@@ -197,21 +104,14 @@ public class CommentsActivity extends RoboActivity {
 	 */
 	private class BuildCommentsAsyncTask extends AsyncTask<Void, View, Void> {
 
-		private ProgressBar progressBar;
-
 		@Override
 		protected void onPreExecute() {
 			cmmts_layout = (ViewGroup) LayoutInflater.from(CommentsActivity.this.getParent()).inflate(
 					R.layout.comments_layout, null);
 			setContentView(cmmts_layout);
 			// first set progressbar
-			ViewGroup progress_layout = (ViewGroup) LayoutInflater.from(CommentsActivity.this.getParent()).inflate(
-					R.layout.centered_progressbar, null);
-			TextView text = (TextView) progress_layout.findViewById(R.id.centered_progressbar_text);
-			text.setText(getString(R.string.loading, getString(R.string.comments)));
-
-			progressBar = (ProgressBar) progress_layout.findViewById(R.id.centered_progressbar);
-			progressBar.setProgress(0);
+			ViewGroup progress_layout = viewUtility.getCenteredProgressBarLayout(
+					LayoutInflater.from(CommentsActivity.this.getParent()), R.string.comments);
 			TableLayout comtsTable = (TableLayout) cmmts_layout.findViewById(R.id.comments_table);
 			comtsTable.removeAllViews();
 			comtsTable.addView(progress_layout);
@@ -220,7 +120,7 @@ public class CommentsActivity extends RoboActivity {
 		@Override
 		protected Void doInBackground(Void... params) {
 			try {
-				comments = api.getComments(id, area, 10, currpage, -1);
+				comments = apiCaller.getComments(objectId, area, 10, currpage);
 			} catch (ConsolewarsAPIException e) {
 				e.printStackTrace();
 				Log.e(getString(R.string.exc_auth_tag), e.getMessage(), e);
@@ -258,13 +158,14 @@ public class CommentsActivity extends RoboActivity {
 				maxpage = comment.getPagecount();
 				// get the table row by an inflater and set the needed
 				// information
-				final ViewGroup tableRow = (ViewGroup) LayoutInflater.from(CommentsActivity.this).inflate(
-						R.layout.comments_row_layout, comtsTable, false);
+				final ViewGroup tableRow = (ViewGroup) getLayoutInflater().inflate(R.layout.comments_row_layout,
+						comtsTable, false);
 
 				TextView usernameTxt = (TextView) tableRow.findViewById(R.id.cmts_username);
 				usernameTxt.setText(comment.getUsername());
 				usernameTxt.setSelected(true);
-				((ImageView) tableRow.findViewById(R.id.cmts_usericon)).setImageBitmap(getUserPic(comment.getUid()));
+				viewUtility.setUserIcon(((ImageView) tableRow.findViewById(R.id.cmts_usericon)),
+						getString(R.string.blogs_userpic_url, comment.getUid(), 50));
 				((TextView) tableRow.findViewById(R.id.cmts_date)).setText(createDate(comment.getUnixtime() * 1000L));
 				((TextView) tableRow.findViewById(R.id.cmts_date)).setSelected(true);
 				TextView content = (TextView) tableRow.findViewById(R.id.comment_content);
@@ -272,8 +173,8 @@ public class CommentsActivity extends RoboActivity {
 						new TextViewHandler(CommentsActivity.this.getApplicationContext()), null));
 
 				if (cwApplication.getAuthenticatedUser().getUid() == comment.getUid()) {
-					View delete_edit_bttn_layout = LayoutInflater.from(CommentsActivity.this).inflate(
-							R.layout.delete_edit_bttn_layout, comtsTable, false);
+					View delete_edit_bttn_layout = getLayoutInflater().inflate(R.layout.delete_edit_bttn_layout,
+							comtsTable, false);
 					ViewGroup parent_layout = (ViewGroup) tableRow.findViewById(R.id.cmts_bttn_delete_edit_layout);
 					parent_layout.addView(delete_edit_bttn_layout);
 
@@ -303,8 +204,7 @@ public class CommentsActivity extends RoboActivity {
 					edit_bttn.setOnClickListener(new OnClickListener() {
 						@Override
 						public void onClick(View v) {
-							View edit_layout = LayoutInflater.from(CommentsActivity.this).inflate(R.layout.edit_layout,
-									tableRow, false);
+							View edit_layout = getLayoutInflater().inflate(R.layout.edit_layout, tableRow, false);
 							EditText textToEdit = (EditText) edit_layout.findViewById(R.id.cmts_edtxt_edit);
 							textToEdit.setText(comment.getStatement());
 							ViewGroup parent_layout = (ViewGroup) tableRow.findViewById(R.id.comment_content_layout);
@@ -316,16 +216,68 @@ public class CommentsActivity extends RoboActivity {
 				publishProgress(tableRow);
 			}
 		}
-	}
 
-	private void createEditSubmitBttn(View parent, final View row, final int id) {
-		Button edit_submit_bttn = (Button) parent.findViewById(R.id.cmts_bttn_edit_submit);
-		edit_submit_bttn.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				new EditCommentAsyncTask().execute(id, row);
+		private void createEditSubmitBttn(View parent, final View row, final int commentId) {
+			Button edit_submit_bttn = (Button) parent.findViewById(R.id.cmts_bttn_edit_submit);
+			edit_submit_bttn.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					new EditCommentAsyncTask().execute(commentId, row);
+				}
+			});
+		}
+
+		private void initButtonsAndCheck() {
+			Button refresh_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_refresh);
+
+			refresh_bttn.setOnClickListener(new OnClickListener() {
+
+				public void onClick(View v) {
+					new BuildCommentsAsyncTask().execute();
+				}
+			});
+
+			Button next_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_next);
+			Button prev_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_prev);
+			next_bttn.setOnClickListener(new OnClickListener() {
+
+				public void onClick(View v) {
+					currpage++;
+					new BuildCommentsAsyncTask().execute();
+				}
+			});
+			prev_bttn.setOnClickListener(new OnClickListener() {
+
+				public void onClick(View v) {
+					currpage--;
+					new BuildCommentsAsyncTask().execute();
+				}
+			});
+
+			Button submit_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_submit);
+			submit_bttn.setOnClickListener(new OnClickListener() {
+
+				public void onClick(View v) {
+					new SubmitCommentAsyncTask().execute();
+				}
+			});
+			checkButtons();
+		}
+
+		private void checkButtons() {
+			Button next_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_next);
+			Button prev_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_prev);
+			if (currpage <= 1) {
+				prev_bttn.setEnabled(false);
+			} else {
+				prev_bttn.setEnabled(true);
 			}
-		});
+			if (currpage == maxpage) {
+				next_bttn.setEnabled(false);
+			} else {
+				next_bttn.setEnabled(true);
+			}
+		}
 	}
 
 	/**
@@ -335,12 +287,12 @@ public class CommentsActivity extends RoboActivity {
 	 */
 	private class SubmitCommentAsyncTask extends AsyncTask<Void, Void, Void> {
 
-		boolean dowork = false;
+		private boolean doWork = false;
 
 		@Override
 		protected void onPreExecute() {
 			EditText commenttxt = (EditText) cmmts_layout.findViewById(R.id.comments_edttxt_input);
-			if (commenttxt.getText().toString().matches("")) {
+			if (StringUtils.isBlank(commenttxt.getText().toString())) {
 				commenttxt.requestFocus();
 				commenttxt.setError(getString(R.string.no_text_entered));
 			} else if (StringUtils.isBlank(cwApplication.getAuthenticatedUser().getUsername())) {
@@ -350,13 +302,13 @@ public class CommentsActivity extends RoboActivity {
 				commenttxt.setError(null);
 				Toast.makeText(CommentsActivity.this, getResources().getString(R.string.comment_sending),
 						Toast.LENGTH_SHORT).show();
-				dowork = true;
+				doWork = true;
 			}
 		}
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			if (dowork) {
+			if (doWork) {
 				EditText commenttxt = (EditText) cmmts_layout.findViewById(R.id.comments_edttxt_input);
 				if (cwApplication.getAuthenticatedUser() != null) {
 					try {
@@ -365,7 +317,7 @@ public class CommentsActivity extends RoboActivity {
 										getString(R.string.cw_posting_url),
 										getString(R.string.cw_cookie_full, cwApplication.getAuthenticatedUser()
 												.getUid(), cwApplication.getAuthenticatedUser().getPasswordHash()),
-										getString(R.string.cw_cmmt_submit_data, area, id,
+										getString(R.string.cw_cmmt_submit_data, area, objectId,
 												getString(R.string.cw_command_newentry), URLEncoder.encode(commenttxt
 														.getText().toString(), getString(R.string.utf8)), 1));
 					} catch (IOException e) {
@@ -379,7 +331,7 @@ public class CommentsActivity extends RoboActivity {
 
 		@Override
 		protected void onPostExecute(Void result) {
-			if (dowork) {
+			if (doWork) {
 				Toast.makeText(CommentsActivity.this, getResources().getString(R.string.comment_sent),
 						Toast.LENGTH_SHORT).show();
 			}
@@ -407,7 +359,7 @@ public class CommentsActivity extends RoboActivity {
 							getString(R.string.cw_posting_url),
 							getString(R.string.cw_cookie_full, cwApplication.getAuthenticatedUser().getUid(),
 									cwApplication.getAuthenticatedUser().getPasswordHash()),
-							getString(R.string.cw_cmmt_delete_data, area, id, ids[0],
+							getString(R.string.cw_cmmt_delete_data, area, objectId, ids[0],
 									getString(R.string.cw_command_remove), 1));
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -451,7 +403,7 @@ public class CommentsActivity extends RoboActivity {
 							getString(R.string.cw_posting_url),
 							getString(R.string.cw_cookie_full, cwApplication.getAuthenticatedUser().getUid(),
 									cwApplication.getAuthenticatedUser().getPasswordHash()),
-							getString(R.string.cw_cmmt_edit_data, area, id, (Integer) params[0],
+							getString(R.string.cw_cmmt_edit_data, area, objectId, (Integer) params[0],
 									getString(R.string.cw_command_update),
 									URLEncoder.encode(textToEdit.getText().toString(), getString(R.string.utf8)), 1));
 				} catch (IOException e) {

@@ -21,8 +21,9 @@ import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
  * limitations under the License.
  */
 /**
- * Manages activities belonging to the shoutbox. It is used for facilitating the exchange of
- * activities within tabs. Switch shoutbox activities with this group.
+ * Manages activities belonging to the shoutbox. It is used for facilitating the
+ * exchange of activities within tabs. Switch shoutbox activities with this
+ * group.
  * 
  * @author Alexander Dridiger
  * @see CwNavigationMainTabActivity
@@ -35,9 +36,8 @@ public class ShoutboxActivityGroup extends CwBasicActivityGroup {
 		super.onCreate(savedInstanceState);
 
 		// Start the root activity withing the group and get its view
-		View view = getLocalActivityManager().startActivity("ShoutboxActivity",
-				new Intent(this, ShoutboxActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
-				.getDecorView();
+		View view = getLocalActivityManager().startActivity(ShoutboxActivity.class.getSimpleName(),
+				new Intent(this, ShoutboxActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
 		// Replace the view of this ActivityGroup
 		replaceView(view);
 	}
