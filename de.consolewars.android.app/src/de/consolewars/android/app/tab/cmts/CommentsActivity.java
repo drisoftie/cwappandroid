@@ -164,8 +164,7 @@ public class CommentsActivity extends RoboActivity {
 				TextView usernameTxt = (TextView) tableRow.findViewById(R.id.cmts_username);
 				usernameTxt.setText(comment.getUsername());
 				usernameTxt.setSelected(true);
-				viewUtility.setUserIcon(((ImageView) tableRow.findViewById(R.id.cmts_usericon)),
-						getString(R.string.blogs_userpic_url, comment.getUid(), 50));
+				viewUtility.setUserIcon(((ImageView) tableRow.findViewById(R.id.cmts_usericon)), comment.getUid(), 50);
 				((TextView) tableRow.findViewById(R.id.cmts_date)).setText(createDate(comment.getUnixtime() * 1000L));
 				((TextView) tableRow.findViewById(R.id.cmts_date)).setSelected(true);
 				TextView content = (TextView) tableRow.findViewById(R.id.comment_content);

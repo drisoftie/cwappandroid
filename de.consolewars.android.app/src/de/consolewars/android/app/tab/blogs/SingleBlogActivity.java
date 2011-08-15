@@ -163,7 +163,7 @@ public class SingleBlogActivity extends RoboActivity {
 
 		private void createHeader(View parent, Blog blog) {
 			ImageView icon = (ImageView) parent.findViewById(R.id.singleblog_header_usericon);
-			viewUtility.setUserIcon(icon, getString(R.string.blogs_userpic_url, blog.getUid(), 60));
+			viewUtility.setUserIcon(icon, blog.getUid(), 60);
 
 			TextView text = (TextView) parent.findViewById(R.id.singleblog_header_title);
 			text.setText(getString(R.string.singleblogs_author, blog.getAuthor().toUpperCase()));

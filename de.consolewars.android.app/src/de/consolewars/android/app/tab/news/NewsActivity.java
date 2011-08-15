@@ -201,10 +201,8 @@ public class NewsActivity extends RoboActivity {
 							getSingleNews(tableRow.getId());
 						}
 					});
-					((ImageView) tableRow.findViewById(R.id.news_row_category_icon)).setImageResource(NewsActivity.this
-							.getResources().getIdentifier(
-									getString(R.string.cat_drawable, newsToAdd.getCategoryshort()),
-									getString(R.string.drawable), getApplicationContext().getPackageName()));
+					viewUtility.setCategoryIcon(((ImageView) tableRow.findViewById(R.id.news_row_category_icon)),
+							newsToAdd.getCategoryshort());
 					((TextView) tableRow.findViewById(R.id.news_row_title)).setText(createTitle(newsToAdd.getTitle()));
 					((TextView) tableRow.findViewById(R.id.news_row_date)).setText(createDate(
 							newsToAdd.getUnixtime() * 1000L, "'um' HH:mm'Uhr'"));

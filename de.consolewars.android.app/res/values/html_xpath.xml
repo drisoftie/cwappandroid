@@ -25,8 +25,11 @@
 	<string
 		name="youtube_embedding">"&lt;object width=\"%1$d\" height=\"%2$d\"&gt;&lt;param name=\"movie\" value=\"%3$s\"&gt;&lt;/param&gt;&lt;param name=\"allowFullScreen\" value=\"true\"&gt;&lt;/param&gt;&lt;param name=\"allowscriptaccess\" value=\"always\"&gt;&lt;/param&gt;&lt;embed src=\"%3$s\" type=\"application/x-shockwave-flash\" allowscriptaccess=\"always\" allowfullscreen=\"true\" width=\"%1$d\" height=\"%2$d\"&gt;&lt;/embed&gt;"</string>
 	<string
-		name="blogs_userpic_url">http://www.consolewars.de/gen/fetchavatars.php?type=profile&amp;u=%1$d&amp;sizex=%2$s
+		name="userpic_url">http://www.consolewars.de/gen/fetchavatars.php?type=profile&amp;u=%1$d&amp;sizex=%2$s
 	</string>
+	<string
+        name="catpic_url">http://www.consolewars.de/images/system-icons/%1$s.png
+    </string>
 	<string
 		name="general_picture">http://www.consolewars.de/gen/fetchpics.php?aidx=%1$d&amp;database=attachments&amp;noborder=0&amp;sizex=%2$s
 	</string>

@@ -194,7 +194,7 @@ public class MessagesActivity extends RoboActivity {
 		}
 
 		private int createMessageIcon(boolean read) {
-			int imageResource = R.drawable.cat_side;
+			int imageResource;
 			if (read) {
 				imageResource = R.drawable.pm_old;
 			} else {
