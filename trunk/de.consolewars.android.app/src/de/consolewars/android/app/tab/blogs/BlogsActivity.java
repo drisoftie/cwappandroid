@@ -286,7 +286,7 @@ public class BlogsActivity extends RoboActivity {
 					// set each table row with the given information from the
 					// returned blogs
 					viewUtility.setUserIcon(((ImageView) tableRow.findViewById(R.id.blogs_row_user_icon)),
-							getString(R.string.blogs_userpic_url, blog.getUid(), 30));
+							blog.getUid(), 30);
 					((TextView) tableRow.findViewById(R.id.blogs_row_title)).setText(createTitle(blog.getTitle()));
 					((TextView) tableRow.findViewById(R.id.blogs_row_date)).setText(createDate(
 							blog.getUnixtime() * 1000L, "'um' HH:mm'Uhr'"));
@@ -355,7 +355,7 @@ public class BlogsActivity extends RoboActivity {
 					// set each table row with the given information from the
 					// returned blogs
 					viewUtility.setUserIcon(((ImageView) tableRow.findViewById(R.id.blogs_row_user_icon)),
-							getString(R.string.blogs_userpic_url, blog.getUid(), 30));
+							blog.getUid(), 30);
 					((TextView) tableRow.findViewById(R.id.blogs_row_title)).setText(createTitle(blog.getTitle()));
 					((TextView) tableRow.findViewById(R.id.blogs_row_date)).setText(createDate(
 							blog.getUnixtime() * 1000L, "'um' HH:mm'Uhr'"));

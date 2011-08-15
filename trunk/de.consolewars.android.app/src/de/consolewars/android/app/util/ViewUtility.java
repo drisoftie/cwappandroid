@@ -36,12 +36,18 @@ public class ViewUtility {
 		return progress_layout;
 	}
 
-	public void setUserIcon(ImageView view, String requestUrl) {
-		URL newurl;
-		Bitmap mIcon_val = null;
+	public void setUserIcon(ImageView view, int userId, int iconSize) {
+		setIcon(view, context.getString(R.string.userpic_url, userId, iconSize));
+	}
+
+	public void setCategoryIcon(ImageView view, String categoryShort) {
+		setIcon(view, context.getString(R.string.catpic_url, categoryShort));
+	}
+
+	private void setIcon(ImageView view, String url) {
 		try {
-			newurl = new URL(requestUrl);
-			mIcon_val = BitmapFactory.decodeStream(newurl.openConnection().getInputStream());
+			URL newurl = new URL(url);
+			Bitmap mIcon_val = BitmapFactory.decodeStream(newurl.openConnection().getInputStream());
 			view.setImageBitmap(mIcon_val);
 		} catch (MalformedURLException e) {
 			e.printStackTrace();

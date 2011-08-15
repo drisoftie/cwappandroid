@@ -99,7 +99,7 @@ public class OverviewActivity extends RoboActivity {
 	 *            user id is needed to get the appropriate picture
 	 */
 	private void loadPicture(ImageView view, int uid) {
-		viewUtility.setUserIcon(view, getString(R.string.blogs_userpic_url, uid, 60));
+		viewUtility.setUserIcon(view, uid, 60);
 	}
 
 	/**

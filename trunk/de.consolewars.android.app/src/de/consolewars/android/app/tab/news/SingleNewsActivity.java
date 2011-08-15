@@ -181,9 +181,7 @@ public class SingleNewsActivity extends RoboActivity {
 
 		private void createHeader(View parent, News news) {
 			ImageView icon = (ImageView) parent.findViewById(R.id.header_icon);
-			icon.setImageResource(getResources().getIdentifier(
-					getString(R.string.cat_drawable, news.getCategoryshort()), getString(R.string.drawable),
-					getApplicationContext().getPackageName()));
+			viewUtility.setCategoryIcon(icon, news.getCategoryshort());
 
 			ImageView usericon = (ImageView) parent.findViewById(R.id.header_descr_usericon);
 			loadPicture(usericon, news);
@@ -214,7 +212,7 @@ public class SingleNewsActivity extends RoboActivity {
 					getString(R.string.xpath_get_author), getString(R.string.href));
 			userID = Integer.valueOf(picURL.subSequence(getString(R.string.prefix_userpic).length(), picURL.length())
 					.toString());
-			viewUtility.setUserIcon(view, getString(R.string.blogs_userpic_url, userID, 50));
+			viewUtility.setUserIcon(view, userID, 50);
 		}
 
 		/**
