@@ -26,17 +26,8 @@
 			android:layout_toLeftOf="@id/msg_bttn_new_mssg"
 			android:prompt="@string/msg_option"/>
 	</RelativeLayout>
-	<ScrollView
-		android:id="@+id/msgs_scroll_view"
-		android:layout_width="fill_parent"
-		android:layout_height="fill_parent"
-		android:layout_below="@id/msg_filter">
-		<TableLayout
-			android:id="@+id/msgs_table"
-			xmlns:android="http://schemas.android.com/apk/res/android"
-			android:layout_width="fill_parent"
-			android:layout_height="fill_parent"
-			android:padding="3dip">
-		</TableLayout>
-	</ScrollView>
+	<ListView android:id="@+id/msgs_list_view"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@+id/msg_filter"/>
 </RelativeLayout>
