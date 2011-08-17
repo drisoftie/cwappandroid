@@ -1,5 +1,6 @@
 package de.consolewars.android.app.tab.news;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -118,6 +119,7 @@ public class NewsActivity extends RoboActivity {
 			} catch (ConsolewarsAPIException e) {
 				e.printStackTrace();
 				Log.e(getString(R.string.exc_auth_tag), e.getMessage(), e);
+				news = new ArrayList<News>();
 			}
 			createNewsRows();
 			return null;
@@ -278,8 +280,7 @@ public class NewsActivity extends RoboActivity {
 		}
 
 		/**
-		 * Changes the current activity to a {@link SingleNewsActivity} with the
-		 * selected news.
+		 * Changes the current activity to a {@link SingleNewsActivity} with the selected news.
 		 * 
 		 * @param id
 		 */
@@ -297,8 +298,8 @@ public class NewsActivity extends RoboActivity {
 		}
 
 		/**
-		 * Creates the string for the ui cell showing the author of a news and
-		 * the amount of comments.
+		 * Creates the string for the ui cell showing the author of a news and the amount of
+		 * comments.
 		 * 
 		 * @param commentAmount
 		 * @param author
@@ -319,8 +320,8 @@ public class NewsActivity extends RoboActivity {
 		}
 
 		/**
-		 * Creates the string for the ui cell showing the author of a news and
-		 * the amount of comments.
+		 * Creates the string for the ui cell showing the author of a news and the amount of
+		 * comments.
 		 * 
 		 * @param commentAmount
 		 * @param author

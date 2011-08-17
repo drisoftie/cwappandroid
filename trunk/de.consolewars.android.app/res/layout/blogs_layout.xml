@@ -21,15 +21,12 @@
 			android:layout_toLeftOf="@id/blogs_bttn_refresh"
 			android:prompt="@string/blogs_filter"/>
 	</RelativeLayout>
-	<ScrollView
-		android:id="@+id/blogs_scroll_view"
+	<ListView
+		android:id="@+id/list"
 		android:layout_width="fill_parent"
-		android:layout_height="fill_parent">
-		<TableLayout
-			android:id="@+id/blogs_table"
-			android:layout_width="fill_parent"
-			android:layout_height="fill_parent"
-			android:layout_margin="3dip">
-		</TableLayout>
-	</ScrollView>
+		android:layout_height="fill_parent"/>
+	<!-- <ScrollView android:id="@+id/blogs_scroll_view" android:layout_width="fill_parent" 
+		android:layout_height="fill_parent"> <TableLayout android:id="@+id/blogs_table" android:layout_width="fill_parent" 
+		android:layout_height="fill_parent" android:layout_margin="3dip"> </TableLayout> 
+		</ScrollView> -->
 </LinearLayout>
