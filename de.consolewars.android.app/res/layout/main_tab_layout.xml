@@ -4,25 +4,107 @@
 	android:id="@android:id/tabhost"
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent">
-	<LinearLayout
-		android:orientation="vertical"
+	<RelativeLayout
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent">
-		<HorizontalScrollView
+		<TabWidget
+			android:id="@android:id/tabs"
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
-			android:fillViewport="true"
-			android:scrollbars="none"
-			android:fadingEdgeLength="80dp">
-			<TabWidget
-				android:id="@android:id/tabs"
-				android:layout_width="fill_parent"
-				android:layout_height="wrap_content"/>
-		</HorizontalScrollView>
+			android:visibility="gone"/>
+		<RelativeLayout
+			android:id="@+id/slider_stub"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_alignParentBottom="true"
+			android:visibility="invisible">
+			<ImageView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_centerInParent="true"
+				android:visibility="invisible"
+				android:src="@drawable/tab_slider"/>
+		</RelativeLayout>
 		<FrameLayout
 			android:id="@android:id/tabcontent"
 			android:layout_width="fill_parent"
 			android:layout_height="fill_parent"
+			android:layout_above="@id/slider_stub"
 			android:background="@color/overview_banner_bg_down"/>
-	</LinearLayout>
+		<de.consolewars.android.app.view.WrappingSlidingDrawer
+			android:id="@+id/tab_slider"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_alignParentBottom="true"
+			android:handle="@+id/tab_slider_handle"
+			android:content="@+id/tab_scroller">
+			<RelativeLayout
+				android:id="@+id/tab_slider_handle"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:background="@drawable/def_slider">
+				<ImageView
+					android:id="@+id/tab_bttn_slider_handle"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_centerInParent="true"
+					android:src="@drawable/tab_slider"/>
+			</RelativeLayout>
+			<HorizontalScrollView
+				android:id="@+id/tab_scroller"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:fadeScrollbars="false"
+				android:scrollbarAlwaysDrawHorizontalTrack="true"
+				android:scrollbarTrackHorizontal="@drawable/scrollbar_horizontal_track"
+				android:scrollbarThumbHorizontal="@drawable/scrollbar_horizontal_thumb"
+				android:fillViewport="true"
+				android:scrollbarSize="2dip"
+				android:fadingEdgeLength="80dp">
+				<RadioGroup
+					android:id="@+id/custom_tabs"
+					android:layout_width="fill_parent"
+					android:layout_height="wrap_content"
+					android:orientation="horizontal"
+					android:checkedButton="@+id/tab_overview">
+					<RadioButton
+						android:id="@+id/tab_overview"
+						android:width="72dip"
+						android:height="72dip"
+						android:button="@drawable/def_tab_overview"
+						android:background="@drawable/def_checktab"/>
+					<RadioButton
+						android:id="@+id/tab_news"
+						android:width="72dip"
+						android:height="72dip"
+						android:button="@drawable/def_tab_news"
+						android:background="@drawable/def_checktab"/>
+					<RadioButton
+						android:id="@+id/tab_blogs"
+						android:width="72dip"
+						android:height="72dip"
+						android:button="@drawable/def_tab_blogs"
+						android:background="@drawable/def_checktab"/>
+					<RadioButton
+						android:id="@+id/tab_msgs"
+						android:width="72dip"
+						android:height="72dip"
+						android:button="@drawable/def_tab_msgs"
+						android:background="@drawable/def_checktab"/>
+					<RadioButton
+						android:id="@+id/tab_board"
+						android:width="72dip"
+						android:height="72dip"
+						android:button="@drawable/def_tab_board"
+						android:background="@drawable/def_checktab"/>
+					<RadioButton
+						android:id="@+id/tab_shout"
+						android:width="72dip"
+						android:height="72dip"
+						android:button="@drawable/def_tab_shout"
+						android:background="@drawable/def_checktab"/>
+				</RadioGroup>
+			</HorizontalScrollView>
+		</de.consolewars.android.app.view.WrappingSlidingDrawer>
+	</RelativeLayout>
 </TabHost>
