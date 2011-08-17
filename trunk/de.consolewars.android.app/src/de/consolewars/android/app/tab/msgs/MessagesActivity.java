@@ -180,7 +180,7 @@ public class MessagesActivity extends RoboActivity {
 		private List<Message> rows;
 
 		public MessageRowAdapter(Context context, List<Message> rows) {
-			super(getApplicationContext(), R.layout.msgs_row_layout, rows);
+			super(context, R.layout.msgs_row_layout, rows);
 			mInflater = LayoutInflater.from(context);
 			this.rows = rows;
 		}
