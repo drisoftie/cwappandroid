@@ -30,6 +30,10 @@ public final class DateUtility {
 		return cal;
 	}
 	
+	/**
+	 * @param unixtime as type long
+	 * @return
+	 */
 	public static Calendar createCalendarFromUnixtime(long unixtime) {
 		Date date = new Date(unixtime);
 		TimeZone zone = TimeZone.getDefault();

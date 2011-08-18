@@ -31,6 +31,7 @@ import com.google.inject.Inject;
 import de.consolewars.android.app.CWManager;
 import de.consolewars.android.app.Filter;
 import de.consolewars.android.app.R;
+import de.consolewars.android.app.tab.CwBasicActivityGroup;
 import de.consolewars.android.app.util.DateUtility;
 import de.consolewars.android.app.util.StyleSpannableStringBuilder;
 import de.consolewars.android.app.util.ViewUtility;
@@ -298,8 +299,7 @@ public class NewsActivity extends RoboActivity {
 		}
 
 		/**
-		 * Creates the string for the ui cell showing the author of a news and the amount of
-		 * comments.
+		 * Creates the string for the ui cell showing the author of a news and the amount of comments.
 		 * 
 		 * @param commentAmount
 		 * @param author
@@ -320,8 +320,7 @@ public class NewsActivity extends RoboActivity {
 		}
 
 		/**
-		 * Creates the string for the ui cell showing the author of a news and the amount of
-		 * comments.
+		 * Creates the string for the ui cell showing the author of a news and the amount of comments.
 		 * 
 		 * @param commentAmount
 		 * @param author
@@ -356,8 +355,8 @@ public class NewsActivity extends RoboActivity {
 
 	@Override
 	public void onBackPressed() {
-		if (getParent() instanceof NewsActivityGroup) {
-			((NewsActivityGroup) getParent()).back();
+		if (getParent() instanceof CwBasicActivityGroup) {
+			((CwBasicActivityGroup) getParent()).back();
 		}
 	}
 }

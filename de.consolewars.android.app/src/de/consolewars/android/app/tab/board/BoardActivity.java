@@ -21,6 +21,7 @@ import com.google.inject.Inject;
 import de.consolewars.android.app.CWApplication;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.db.AppDataHandler;
+import de.consolewars.android.app.tab.CwBasicActivityGroup;
 import de.consolewars.android.app.util.ViewUtility;
 
 /*
@@ -175,8 +176,8 @@ public class BoardActivity extends RoboActivity {
 		if (webView.canGoBack()) {
 			webView.goBack();
 		} else {
-			if (getParent() instanceof BoardActivityGroup) {
-				((BoardActivityGroup) getParent()).back();
+			if (getParent() instanceof CwBasicActivityGroup) {
+				((CwBasicActivityGroup) getParent()).back();
 			}
 		}
 	}
