@@ -24,6 +24,7 @@ import com.google.inject.Inject;
 
 import de.consolewars.android.app.CWManager.CommentArea;
 import de.consolewars.android.app.R;
+import de.consolewars.android.app.tab.CwBasicActivityGroup;
 import de.consolewars.android.app.tab.cmts.CommentsActivity;
 import de.consolewars.android.app.util.DateUtility;
 import de.consolewars.android.app.util.MediaSnapper;
@@ -73,8 +74,7 @@ public class SingleNewsActivity extends RoboActivity {
 	}
 
 	/**
-	 * Asynchronous task to receive a single news from the API and build up the
-	 * ui.
+	 * Asynchronous task to receive a single news from the API and build up the ui.
 	 * 
 	 * @author Alexander Dridiger
 	 */
@@ -157,8 +157,8 @@ public class SingleNewsActivity extends RoboActivity {
 		}
 
 		/**
-		 * Sets a video, if one exists in a news. Can't be invoked without
-		 * calling Looper.prepare(). Don't use this within an AsyncTask!
+		 * Sets a video, if one exists in a news. Can't be invoked without calling Looper.prepare(). Don't use this
+		 * within an AsyncTask!
 		 * 
 		 * @param url
 		 */
@@ -197,8 +197,7 @@ public class SingleNewsActivity extends RoboActivity {
 		}
 
 		/**
-		 * Downloads the user picture and decodes it into a {@link Bitmap} to be
-		 * set into an ImageView.
+		 * Downloads the user picture and decodes it into a {@link Bitmap} to be set into an ImageView.
 		 * 
 		 * @param view
 		 *            the ImageView
@@ -226,8 +225,8 @@ public class SingleNewsActivity extends RoboActivity {
 
 	@Override
 	public void onBackPressed() {
-		if (getParent() instanceof NewsActivityGroup) {
-			((NewsActivityGroup) getParent()).back();
+		if (getParent() instanceof CwBasicActivityGroup) {
+			((CwBasicActivityGroup) getParent()).back();
 		}
 	}
 }

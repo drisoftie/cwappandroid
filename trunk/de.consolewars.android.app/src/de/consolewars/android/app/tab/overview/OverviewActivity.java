@@ -54,7 +54,7 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
  * limitations under the License.
  */
 /**
- * Central Activity to handle the ui for the overvieew.
+ * Central Activity to handle the ui for the overview.
  * 
  * @author Alexander Dridiger
  */

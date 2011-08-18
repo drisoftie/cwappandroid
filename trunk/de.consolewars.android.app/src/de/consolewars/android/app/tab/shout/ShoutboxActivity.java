@@ -20,6 +20,7 @@ import com.google.inject.Inject;
 import de.consolewars.android.app.CWApplication;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.db.AppDataHandler;
+import de.consolewars.android.app.tab.CwBasicActivityGroup;
 import de.consolewars.android.app.util.ViewUtility;
 
 /*
@@ -199,8 +200,8 @@ public class ShoutboxActivity extends RoboActivity {
 
 	@Override
 	public void onBackPressed() {
-		if (getParent() instanceof ShoutboxActivityGroup) {
-			((ShoutboxActivityGroup) getParent()).back();
+		if (getParent() instanceof CwBasicActivityGroup) {
+			((CwBasicActivityGroup) getParent()).back();
 		}
 	}
 }
