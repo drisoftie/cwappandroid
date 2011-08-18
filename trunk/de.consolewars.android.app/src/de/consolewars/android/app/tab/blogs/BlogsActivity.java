@@ -233,22 +233,23 @@ public class BlogsActivity extends RoboActivity {
 
 		@Override
 		protected void onPostExecute(Void result) {
-			ListView lv = (ListView) findViewById(R.id.list);
-			lv.setOnScrollListener(new OnScrollListener() {
-				@Override
-				public void onScrollStateChanged(AbsListView view, int scrollState) {
-					// do nothing
-				}
-
-				@Override
-				public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-					if (firstVisibleItem + visibleItemCount >= totalItemCount && !loading) {
-						loading = true;
-						new BuildBlogsAsyncTask().execute();
-					}
-				}
-			});
+//			ListView lv = (ListView) findViewById(R.id.list);
+//			lv.setOnScrollListener(new OnScrollListener() {
+//				@Override
+//				public void onScrollStateChanged(AbsListView view, int scrollState) {
+//					// do nothing
+//				}
+//
+//				@Override
+//				public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+//					if (firstVisibleItem + visibleItemCount >= totalItemCount && !loading) {
+//						loading = true;
+//						new BuildBlogsAsyncTask().execute();
+//					}
+//				}
+//			});
 			// createLastRow();
+			adapter.notifyDataSetChanged();
 		}
 
 		private void createLastRow() {
