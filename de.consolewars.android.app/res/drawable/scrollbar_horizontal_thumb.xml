@@ -9,7 +9,8 @@
 	<!-- yellow -->
 	<gradient
 		android:startColor="#000"
-		android:endColor="#FFFF00"
+		android:endColor="#000"
+		android:centerColor="#FFFF00"
 		android:angle="0"/>
 
 	<!-- gray -->
