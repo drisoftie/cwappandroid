@@ -145,7 +145,7 @@ public class NewsActivity extends RoboActivity {
 					R.layout.day_down_row_layout, null);
 			Button downBttn = (Button) lastrowLayout.findViewById(R.id.day_down_row_bttn);
 			downBttn.setOnClickListener(new OnClickListener() {
-
+				@Override
 				public void onClick(View v) {
 					currentNewsDate.setTimeInMillis(oldestNewsDate.getTimeInMillis() - 1L);
 					oldestNewsDate.setTimeInMillis(DateUtility.getDay(oldestNewsDate, -1).getTimeInMillis());
