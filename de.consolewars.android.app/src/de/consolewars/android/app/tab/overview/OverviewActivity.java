@@ -79,8 +79,8 @@ public class OverviewActivity extends RoboActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		/*
-		 * TODO: Might become a source of error someday, if activity design
-		 * changes. Would be better to handle it with intents.
+		 * TODO: Might become a source of error someday, if activity design changes. Would be better to handle it with
+		 * intents.
 		 */
 		if (getParent().getParent() instanceof CwNavigationMainTabActivity) {
 			mainTabs = (CwNavigationMainTabActivity) getParent().getParent();
@@ -90,8 +90,7 @@ public class OverviewActivity extends RoboActivity {
 	}
 
 	/**
-	 * Downloads the user picture and decodes it into a {@link Bitmap} to be set
-	 * into an ImageView.
+	 * Downloads the user picture and decodes it into a {@link Bitmap} to be set into an ImageView.
 	 * 
 	 * @param view
 	 *            the ImageView
@@ -203,7 +202,7 @@ public class OverviewActivity extends RoboActivity {
 
 			cell.setTag(tag);
 			cell.setOnClickListener(new OnClickListener() {
-
+				@Override
 				public void onClick(View v) {
 					if (v.getTag() instanceof String && ((String) v.getTag()).matches(tag)) {
 						mainTabs.getUsedTabHost().setCurrentTabByTag(tag);

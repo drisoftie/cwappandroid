@@ -5,6 +5,7 @@ import java.util.IllegalFormatException;
 import roboguice.activity.RoboActivity;
 import android.os.Bundle;
 import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.widget.TextView;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwBasicActivityGroup;
@@ -37,6 +38,7 @@ public class SingleMessageActivity extends RoboActivity {
 		setContentView(R.layout.singlemsg_layout);
 
 		TextView msg_view = (TextView) findViewById(R.id.singlemsg_content);
+		msg_view.setMovementMethod(LinkMovementMethod.getInstance());
 		String text = "";
 
 		// looking for the correct intent
