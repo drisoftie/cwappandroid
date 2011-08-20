@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -61,8 +62,7 @@ public class SingleBlogActivity extends RoboActivity {
 	}
 
 	/**
-	 * Asynchronous task to receive a single news from the API and build up the
-	 * ui.
+	 * Asynchronous task to receive a single news from the API and build up the ui.
 	 * 
 	 * @author Alexander Dridiger
 	 */
@@ -118,6 +118,7 @@ public class SingleBlogActivity extends RoboActivity {
 			}
 
 			TextView text = (TextView) blogView.findViewById(R.id.singleblog_text_content);
+			text.setMovementMethod(LinkMovementMethod.getInstance());
 			if (id == -1 || blog == null) {
 				text.setText("Fehler");
 			} else {

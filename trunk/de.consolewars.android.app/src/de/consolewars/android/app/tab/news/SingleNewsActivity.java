@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -112,7 +113,7 @@ public class SingleNewsActivity extends RoboActivity {
 				e.printStackTrace();
 			}
 			TextView text = (TextView) newsView.findViewById(R.id.singlenews_newstext);
-
+			text.setMovementMethod(LinkMovementMethod.getInstance());
 			if (id == -1) {
 				text.setText(getString(R.string.failure));
 			} else if (news != null) {

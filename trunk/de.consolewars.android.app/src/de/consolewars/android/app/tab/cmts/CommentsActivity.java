@@ -11,6 +11,7 @@ import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -163,6 +164,7 @@ public class CommentsActivity extends RoboActivity {
 				((TextView) tableRow.findViewById(R.id.cmts_date)).setText(createDate(comment.getUnixtime() * 1000L));
 				((TextView) tableRow.findViewById(R.id.cmts_date)).setSelected(true);
 				TextView content = (TextView) tableRow.findViewById(R.id.comment_content);
+				content.setMovementMethod(LinkMovementMethod.getInstance());
 				content.setText(Html.fromHtml(comment.getStatement(),
 						new TextViewHandler(CommentsActivity.this.getApplicationContext()), null));
 

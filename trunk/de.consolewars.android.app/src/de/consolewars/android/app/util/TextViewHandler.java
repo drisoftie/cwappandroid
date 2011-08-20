@@ -50,6 +50,7 @@ public class TextViewHandler implements ImageGetter, TagHandler {
 		this.context = context;
 	}
 
+	@Override
 	public Drawable getDrawable(String source) {
 		try {
 			if (source.startsWith("/")) {
@@ -61,33 +62,29 @@ public class TextViewHandler implements ImageGetter, TagHandler {
 
 			// Log.i("****PICSIZE******", String.valueOf(con.getContentLength()));
 			/*
-			 * 1st approach // Drawable pic = Drawable.createFromStream(newurl.openStream(), "src");
-			 * Bitmap bm = BitmapFactory.decodeFile(myJpgPath, options);
+			 * 1st approach // Drawable pic = Drawable.createFromStream(newurl.openStream(), "src"); Bitmap bm =
+			 * BitmapFactory.decodeFile(myJpgPath, options);
 			 */
 			/*
-			 * 2nd approach // BitmapFactory.Options options = new BitmapFactory.Options(); //
-			 * options.inSampleSize = 16; // if (con.getContentLength() > 262144.0) { // Double
-			 * dLength = Double.valueOf(con.getContentLength()); // Double quot =
-			 * Math.log(Math.ceil(dLength / 262144.0)) / Math.log(2.0); // } Bitmap bmp =
-			 * BitmapFactory.decodeStream(con.getInputStream(), null, options);
+			 * 2nd approach // BitmapFactory.Options options = new BitmapFactory.Options(); // options.inSampleSize =
+			 * 16; // if (con.getContentLength() > 262144.0) { // Double dLength =
+			 * Double.valueOf(con.getContentLength()); // Double quot = Math.log(Math.ceil(dLength / 262144.0)) /
+			 * Math.log(2.0); // } Bitmap bmp = BitmapFactory.decodeStream(con.getInputStream(), null, options);
 			 */
 			/*
-			 * 3rd approach // BufferedInputStream bis = new
-			 * BufferedInputStream(con.getInputStream(), 8190); // // ByteArrayBuffer baf = new
-			 * ByteArrayBuffer(50); // int current = 0; // while ((current = bis.read()) != -1) { //
-			 * baf.append((byte) current); // } // byte[] imageData = baf.toByteArray(); Bitmap bmp
-			 * = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
+			 * 3rd approach // BufferedInputStream bis = new BufferedInputStream(con.getInputStream(), 8190); // //
+			 * ByteArrayBuffer baf = new ByteArrayBuffer(50); // int current = 0; // while ((current = bis.read()) !=
+			 * -1) { // baf.append((byte) current); // } // byte[] imageData = baf.toByteArray(); Bitmap bmp =
+			 * BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
 			 */
 			/*
-			 * 4th approach // // Decode image size // BitmapFactory.Options o = new
-			 * BitmapFactory.Options(); // o.inJustDecodeBounds = true; //
-			 * BitmapFactory.decodeStream(con.getInputStream(), null, o); // // // // The new size
-			 * we want to scale to // final int REQUIRED_SIZE = 70; // // // Find the correct scale
-			 * value. It should be the power of 2. // int width_tmp = o.outWidth, height_tmp =
-			 * o.outHeight; // int scale = 1; // while (true) { // if (width_tmp / 2 < REQUIRED_SIZE
-			 * || height_tmp / 2 < REQUIRED_SIZE) // break; // width_tmp /= 2; // height_tmp /= 2;
-			 * // scale *= 2; // } // // // Decode with inSampleSize // BitmapFactory.Options o2 =
-			 * new BitmapFactory.Options(); // o2.inSampleSize = scale; // Bitmap bmp =
+			 * 4th approach // // Decode image size // BitmapFactory.Options o = new BitmapFactory.Options(); //
+			 * o.inJustDecodeBounds = true; // BitmapFactory.decodeStream(con.getInputStream(), null, o); // // // //
+			 * The new size we want to scale to // final int REQUIRED_SIZE = 70; // // // Find the correct scale value.
+			 * It should be the power of 2. // int width_tmp = o.outWidth, height_tmp = o.outHeight; // int scale = 1;
+			 * // while (true) { // if (width_tmp / 2 < REQUIRED_SIZE || height_tmp / 2 < REQUIRED_SIZE) // break; //
+			 * width_tmp /= 2; // height_tmp /= 2; // scale *= 2; // } // // // Decode with inSampleSize //
+			 * BitmapFactory.Options o2 = new BitmapFactory.Options(); // o2.inSampleSize = scale; // Bitmap bmp =
 			 * BitmapFactory.decodeStream(newurl.openConnection().getInputStream(), // null, // o2);
 			 * Log.i("****PICLOAD******", (bmp != null) ? (bmp.toString()) : ("null"));
 			 */
