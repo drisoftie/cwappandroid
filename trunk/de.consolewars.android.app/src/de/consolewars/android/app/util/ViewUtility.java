@@ -7,6 +7,7 @@ import java.net.URL;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -36,6 +37,17 @@ public class ViewUtility {
 		return progress_layout;
 	}
 
+	/**
+	 * Sets HTML links in the given TextView as clickable.
+	 * 
+	 * @param view
+	 * @param url
+	 */
+	public void setClickableTextView(TextView view) {
+		view.setMovementMethod(LinkMovementMethod.getInstance());
+	}
+	
+	
 	/**
 	 * Returns a user icon as a Bitmap with the given size (longest edge).
 	 * 

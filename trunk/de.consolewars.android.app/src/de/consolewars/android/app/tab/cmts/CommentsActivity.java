@@ -11,7 +11,6 @@ import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
-import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,7 +25,7 @@ import android.widget.Toast;
 
 import com.google.inject.Inject;
 
-import de.consolewars.android.app.CWApplication;
+import de.consolewars.android.app.CWLoginManager;
 import de.consolewars.android.app.CWManager;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwBasicActivityGroup;
@@ -57,7 +56,7 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
 public class CommentsActivity extends RoboActivity {
 
 	@Inject
-	private CWApplication cwApplication;
+	private CWLoginManager cwLoginManager;
 	@Inject
 	private CWManager cwManager;
 	@Inject
@@ -164,11 +163,11 @@ public class CommentsActivity extends RoboActivity {
 				((TextView) tableRow.findViewById(R.id.cmts_date)).setText(createDate(comment.getUnixtime() * 1000L));
 				((TextView) tableRow.findViewById(R.id.cmts_date)).setSelected(true);
 				TextView content = (TextView) tableRow.findViewById(R.id.comment_content);
-				content.setMovementMethod(LinkMovementMethod.getInstance());
+				viewUtility.setClickableTextView(content);
 				content.setText(Html.fromHtml(comment.getStatement(),
 						new TextViewHandler(CommentsActivity.this.getApplicationContext()), null));
 
-				if (cwApplication.getAuthenticatedUser().getUid() == comment.getUid()) {
+				if (cwLoginManager.getUser().getUid() == comment.getUid()) {
 					View delete_edit_bttn_layout = getLayoutInflater().inflate(R.layout.delete_edit_bttn_layout,
 							comtsTable, false);
 					ViewGroup parent_layout = (ViewGroup) tableRow.findViewById(R.id.cmts_bttn_delete_edit_layout);
@@ -291,7 +290,7 @@ public class CommentsActivity extends RoboActivity {
 			if (StringUtils.isBlank(commenttxt.getText().toString())) {
 				commenttxt.requestFocus();
 				commenttxt.setError(getString(R.string.no_text_entered));
-			} else if (StringUtils.isBlank(cwApplication.getAuthenticatedUser().getUsername())) {
+			} else if (StringUtils.isBlank(cwLoginManager.getUser().getUsername())) {
 				commenttxt.requestFocus();
 				commenttxt.setError(getString(R.string.not_logged_in));
 			} else {

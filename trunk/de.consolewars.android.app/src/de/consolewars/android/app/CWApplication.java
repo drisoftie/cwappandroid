@@ -10,7 +10,6 @@ import com.google.inject.Module;
 import com.google.inject.Singleton;
 
 import de.consolewars.android.app.db.DatabaseManager;
-import de.consolewars.api.data.AuthenticatedUser;
 
 /*
  * Copyright [2010] [Alexander Dridiger]
@@ -27,8 +26,7 @@ import de.consolewars.api.data.AuthenticatedUser;
  * limitations under the License.
  */
 /**
- * Application stands as a singleton for the whole app and provides access to
- * underlying functionalities.
+ * Application stands as a singleton for the whole app and provides access to underlying functionalities.
  * 
  * @author Alexander Dridiger
  */
@@ -37,7 +35,6 @@ public class CWApplication extends RoboApplication {
 
 	@Inject
 	private DatabaseManager databaseManager;
-	private AuthenticatedUser user;
 
 	@Override
 	protected void addApplicationModules(List<Module> modules) {
@@ -48,22 +45,5 @@ public class CWApplication extends RoboApplication {
 	public final void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
 		databaseManager.openDatabase();
-	}
-
-	/**
-	 * @return the user
-	 */
-	public AuthenticatedUser getAuthenticatedUser() {
-		if (user == null) {
-			user = new AuthenticatedUser();
-		}
-		return user;
-	}
-
-	/**
-	 * @param user
-	 */
-	public void setAuthenticatedUser(AuthenticatedUser user) {
-		this.user = user;
 	}
 }

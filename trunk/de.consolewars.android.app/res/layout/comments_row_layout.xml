@@ -3,36 +3,40 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent"
 	android:layout_height="wrap_content"
-	android:orientation="horizontal"
+	android:orientation="vertical"
 	android:background="@color/comments_cell_bg">
 	<RelativeLayout
-		android:layout_width="wrap_content"
+		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:layout_margin="@dimen/comments_cell_margin"
-		android:layout_weight="50"
+		android:layout_marginBottom="1dp"
 		android:background="@drawable/def_comments_author_cell_bg">
+		<ImageView
+			android:id="@+id/cmts_usericon"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentLeft="true"
+			android:layout_marginTop="@dimen/blogs_row_icon_padding_top"
+			android:layout_marginLeft="@dimen/blogs_row_icon_padding_left"
+			android:layout_marginBottom="2dp"/>
 		<TextView
 			android:id="@+id/cmts_username"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_margin="@dimen/blogs_row_title_padding"
+			android:layout_toRightOf="@id/cmts_usericon"
+			android:layout_centerVertical="true"
 			android:marqueeRepeatLimit="marquee_forever"
 			android:singleLine="true"
 			android:ellipsize="marquee"
 			android:textColor="@color/blogs_table_text_title"/>
-		<ImageView
-			android:id="@+id/cmts_usericon"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_below="@id/cmts_username"
-			android:layout_marginTop="@dimen/blogs_row_icon_padding_top"
-			android:layout_marginLeft="@dimen/blogs_row_icon_padding_left"/>
 		<TextView
 			android:id="@+id/cmts_date"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_below="@id/cmts_usericon"
+			android:layout_alignParentRight="true"
 			android:layout_margin="@dimen/blogs_row_title_padding"
+			android:layout_centerVertical="true"
 			android:marqueeRepeatLimit="marquee_forever"
 			android:singleLine="true"
 			android:ellipsize="marquee"
@@ -41,7 +45,7 @@
 			android:id="@+id/cmts_bttn_delete_edit_layout"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_below="@id/cmts_date"
+			android:layout_toLeftOf="@id/cmts_date"
 			android:layout_marginTop="@dimen/blogs_row_icon_padding_top"
 			android:layout_marginLeft="@dimen/blogs_row_icon_padding_left"/>
 	</RelativeLayout>
@@ -49,14 +53,16 @@
 		android:id="@+id/comment_content_layout"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:layout_margin="@dimen/comments_cell_margin"
-		android:layout_weight="90"
+		android:layout_marginLeft="@dimen/comments_cell_margin"
+		android:layout_marginRight="@dimen/comments_cell_margin"
+		android:layout_marginBottom="6dp"
 		android:background="@drawable/def_comments_cell_bg">
 		<TextView
 			android:id="@+id/comment_content"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_margin="@dimen/blogs_row_author_margin"
+			android:minLines="3"
 			android:textColor="@color/blogs_table_text_title"/>
 	</RelativeLayout>
 </LinearLayout>

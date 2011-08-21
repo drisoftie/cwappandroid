@@ -52,6 +52,8 @@
 	<string name="try_login">Einlogversuch gestartet...</string>
 	<string name="logged_in">Sie wurden erfolgreich eingeloggt.</string>
 	<string name="login_failed">Einlogversuch gescheitert.</string>
+	<string name="logging_out">Sie werden ausgeloggt...</string>
+	<string name="logged_out">Sie wurden erfolgreich ausgeloggt.</string>
 	<string name="comment_sending">Kommentar wird gesendet...</string>
 	<string name="comment_sent">Kommentar wurde erfolgreich gepostet.</string>
 	<string name="comment_delete_question">Wollen Sie wirklich diesen Kommentar löschen?</string>

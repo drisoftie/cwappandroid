@@ -28,8 +28,8 @@ import android.widget.TextView;
 
 import com.google.inject.Inject;
 
+import de.consolewars.android.app.CWLoginManager;
 import de.consolewars.android.app.CWManager;
-import de.consolewars.android.app.CWApplication;
 import de.consolewars.android.app.Filter;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.util.DateUtility;
@@ -60,7 +60,7 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
 public class BlogsActivity extends RoboActivity {
 
 	@Inject
-	private CWApplication cwApplication;
+	private CWLoginManager cwLoginManager;
 	@Inject
 	private CWManager cwManager;
 	@Inject
@@ -183,15 +183,14 @@ public class BlogsActivity extends RoboActivity {
 
 			try {
 				if (Filter.BLOGS_USER.equals(currentFilter)) {
-					blogs = cwManager.getUserBlogs(cwApplication.getAuthenticatedUser().getUid(), 50,
-							oldestBlogsDate.getTime());
+					blogs = cwManager.getUserBlogs(cwLoginManager.getUser().getUid(), 50, oldestBlogsDate.getTime());
 					int count = 0;
 					while (blogs.isEmpty() && count < 6) {
 						currentBlogsDate.setTimeInMillis(oldestBlogsDate.getTimeInMillis() - 1L);
 						oldestBlogsDate.setTimeInMillis(DateUtility.getDay(oldestBlogsDate, -30).getTimeInMillis());
 						count++;
-						blogs = cwManager.getUserBlogs(cwApplication.getAuthenticatedUser().getUid(), 50,
-								oldestBlogsDate.getTime());
+						blogs = cwManager
+								.getUserBlogs(cwLoginManager.getUser().getUid(), 50, oldestBlogsDate.getTime());
 					}
 					createUserBlogRows();
 				} else {
@@ -380,8 +379,7 @@ public class BlogsActivity extends RoboActivity {
 		}
 
 		/**
-		 * Changes the current activity to a {@link SingleBlogActivity} with the
-		 * selected blog.
+		 * Changes the current activity to a {@link SingleBlogActivity} with the selected blog.
 		 * 
 		 * @param id
 		 *            the blog id to find the selected blog
@@ -412,8 +410,7 @@ public class BlogsActivity extends RoboActivity {
 		}
 
 		/**
-		 * Creates the string for the ui cell showing the author of a blog and
-		 * the amount of comments.
+		 * Creates the string for the ui cell showing the author of a blog and the amount of comments.
 		 * 
 		 * @param commentAmount
 		 * @param author
@@ -434,8 +431,7 @@ public class BlogsActivity extends RoboActivity {
 		}
 
 		/**
-		 * Creates the string for the ui cell showing the author of a blog and
-		 * the amount of comments.
+		 * Creates the string for the ui cell showing the author of a blog and the amount of comments.
 		 * 
 		 * @param commentAmount
 		 * @param author

@@ -50,15 +50,14 @@ public class CWManager {
 	@Inject
 	private API api;
 	@Inject
+	private CWLoginManager cwLoginManager;
+	@Inject
 	private HttpPoster httpPoster;
 	@Inject
 	private Context context;
-	@Inject
-	private CWApplication cwApplication;
 
 	public enum CommentArea {
-		NEWS(Comment.AREA_NEWS),
-		BLOGS(Comment.AREA_BLOGS);
+		NEWS(Comment.AREA_NEWS), BLOGS(Comment.AREA_BLOGS);
 
 		private int value;
 
@@ -72,8 +71,7 @@ public class CWManager {
 	}
 
 	/**
-	 * Method wrapper for {@link API.authenticate(String username, String
-	 * password)}.
+	 * Method wrapper for {@link API.authenticate(String username, String password)}.
 	 * 
 	 * @param username
 	 * @param password
@@ -157,9 +155,9 @@ public class CWManager {
 	 * @throws ConsolewarsAPIException
 	 */
 	public List<Message> getMessages(Filter filter, int count) throws ConsolewarsAPIException {
-		if (cwApplication.getAuthenticatedUser() != null) {
-			return api.getMessages(cwApplication.getAuthenticatedUser().getUid(), cwApplication.getAuthenticatedUser()
-					.getPasswordHash(), filter.getFilter(), count);
+		if (cwLoginManager.isLoggedIn()) {
+			return api.getMessages(cwLoginManager.getUser().getUid(), cwLoginManager.getUser().getPasswordHash(),
+					filter.getFilter(), count);
 		} else {
 			return new ArrayList<Message>();
 		}
@@ -171,8 +169,8 @@ public class CWManager {
 
 		try {
 			String url = context.getString(R.string.cw_message_url);
-			String cookies = context.getString(R.string.cw_cookie_full, cwApplication.getAuthenticatedUser().getUid(),
-					cwApplication.getAuthenticatedUser().getPasswordHash());
+			String cookies = context.getString(R.string.cw_cookie_full, cwLoginManager.getUser().getUid(),
+					cwLoginManager.getUser().getPasswordHash());
 			String data = context.getString(R.string.cw_mssg_submit_data,
 					URLEncoder.encode(message, context.getString(R.string.utf8)),
 					URLEncoder.encode(recipient, context.getString(R.string.utf8)), saveCopy ? 1 : 0,
@@ -195,8 +193,8 @@ public class CWManager {
 
 		try {
 			String url = context.getString(R.string.cw_message_url);
-			String cookies = context.getString(R.string.cw_cookie_full, cwApplication.getAuthenticatedUser().getUid(),
-					cwApplication.getAuthenticatedUser().getPasswordHash());
+			String cookies = context.getString(R.string.cw_cookie_full, cwLoginManager.getUser(), cwLoginManager
+					.getUser().getPasswordHash());
 			List<String> pms = new ArrayList<String>();
 			for (Integer messageId : messageIds) {
 				pms.add(context.getString(R.string.cw_mssg_delete_param, messageId));
@@ -215,8 +213,8 @@ public class CWManager {
 		try {
 			securityToken = MediaSnapper.snapWithCookies(context, context.getString(R.string.xpath_get_securitytoken),
 					context.getString(R.string.value), context.getString(R.string.cw_getsecuritytoken_url), context
-							.getString(R.string.cw_cookie_full, cwApplication.getAuthenticatedUser().getUid(),
-									cwApplication.getAuthenticatedUser().getPasswordHash()));
+							.getString(R.string.cw_cookie_full, cwLoginManager.getUser().getUid(), cwLoginManager
+									.getUser().getPasswordHash()));
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		} catch (XPatherException e1) {
@@ -226,12 +224,12 @@ public class CWManager {
 	}
 
 	public boolean sendComment(String comment, int objectId, int area) {
-		if (cwApplication.getAuthenticatedUser() != null) {
+		if (cwLoginManager.isLoggedIn()) {
 			try {
 				httpPoster.sendPost(context.getString(R.string.cw_posting_url), context.getString(
-						R.string.cw_cookie_full, cwApplication.getAuthenticatedUser().getUid(), cwApplication
-								.getAuthenticatedUser().getPasswordHash()), context.getString(
-						R.string.cw_cmmt_submit_data, area, objectId, context.getString(R.string.cw_command_newentry),
+						R.string.cw_cookie_full, cwLoginManager.getUser().getUid(), cwLoginManager.getUser()
+								.getPasswordHash()), context.getString(R.string.cw_cmmt_submit_data, area, objectId,
+						context.getString(R.string.cw_command_newentry),
 						URLEncoder.encode(comment, context.getString(R.string.utf8)), 1));
 				return true;
 			} catch (IOException e) {
@@ -242,13 +240,12 @@ public class CWManager {
 	}
 
 	public boolean deleteComment(int commentId, int objectId, int area) {
-		if (cwApplication.getAuthenticatedUser() != null) {
+		if (cwLoginManager.isLoggedIn()) {
 			try {
 				httpPoster.sendPost(context.getString(R.string.cw_posting_url), context.getString(
-						R.string.cw_cookie_full, cwApplication.getAuthenticatedUser().getUid(), cwApplication
-								.getAuthenticatedUser().getPasswordHash()), context.getString(
-						R.string.cw_cmmt_delete_data, area, objectId, commentId,
-						context.getString(R.string.cw_command_remove), 1));
+						R.string.cw_cookie_full, cwLoginManager.getUser().getUid(), cwLoginManager.getUser()
+								.getPasswordHash()), context.getString(R.string.cw_cmmt_delete_data, area, objectId,
+						commentId, context.getString(R.string.cw_command_remove), 1));
 				return true;
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -258,13 +255,12 @@ public class CWManager {
 	}
 
 	public boolean updateComment(String newText, int commentId, int objectId, int area) {
-		if (cwApplication.getAuthenticatedUser() != null) {
+		if (cwLoginManager.isLoggedIn()) {
 			try {
 				httpPoster.sendPost(context.getString(R.string.cw_posting_url), context.getString(
-						R.string.cw_cookie_full, cwApplication.getAuthenticatedUser().getUid(), cwApplication
-								.getAuthenticatedUser().getPasswordHash()), context.getString(
-						R.string.cw_cmmt_edit_data, area, objectId, commentId,
-						context.getString(R.string.cw_command_update),
+						R.string.cw_cookie_full, cwLoginManager.getUser().getUid(), cwLoginManager.getUser()
+								.getPasswordHash()), context.getString(R.string.cw_cmmt_edit_data, area, objectId,
+						commentId, context.getString(R.string.cw_command_update),
 						URLEncoder.encode(newText, context.getString(R.string.utf8)), 1));
 				return true;
 			} catch (IOException e) {

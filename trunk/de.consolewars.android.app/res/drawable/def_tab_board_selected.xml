@@ -3,14 +3,14 @@
 	<item>
 		<shape android:shape="rectangle">
 			<gradient
-				android:startColor="#FF444444"
-				android:endColor="#FF000000"
+				android:startColor="#FFAAAAAA"
+				android:endColor="#FF333333"
 				android:angle="270"/>
 		</shape>
 	</item>
 	<item>
 		<bitmap
-			android:src="@drawable/tab_msgs"
+			android:src="@drawable/tab_board_selected"
 			android:gravity="center"/>
 	</item>
 </layer-list>

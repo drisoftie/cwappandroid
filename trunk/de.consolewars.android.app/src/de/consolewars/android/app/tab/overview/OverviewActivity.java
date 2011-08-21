@@ -1,9 +1,6 @@
 package de.consolewars.android.app.tab.overview;
 
-import java.security.GeneralSecurityException;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -26,16 +23,14 @@ import android.widget.ViewFlipper;
 
 import com.google.inject.Inject;
 
-import de.consolewars.android.app.CWApplication;
+import de.consolewars.android.app.CWLoginManager;
 import de.consolewars.android.app.CWManager;
 import de.consolewars.android.app.Filter;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.db.AppDataHandler;
-import de.consolewars.android.app.db.DatabaseManager;
+import de.consolewars.android.app.tab.CwBasicActivityGroup;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
-import de.consolewars.android.app.util.HashEncrypter;
 import de.consolewars.android.app.util.ViewUtility;
-import de.consolewars.api.data.AuthenticatedUser;
 import de.consolewars.api.data.Message;
 import de.consolewars.api.exception.ConsolewarsAPIException;
 
@@ -61,11 +56,9 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
 public class OverviewActivity extends RoboActivity {
 
 	@Inject
-	private CWApplication cwApplication;
+	private CWLoginManager cwLoginManager;
 	@Inject
 	private AppDataHandler appDataHandler;
-	@Inject
-	private DatabaseManager databaseManager;
 	@Inject
 	private CWManager cwManager;
 	@Inject
@@ -118,7 +111,6 @@ public class OverviewActivity extends RoboActivity {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			appDataHandler.loadCurrentUser();
 			buildUserView(overview_layout);
 			createBanner(overview_layout);
 			return null;
@@ -135,25 +127,43 @@ public class OverviewActivity extends RoboActivity {
 		 * @param parent
 		 */
 		private void buildUserView(final View parent) {
+			final ViewGroup userLoggedLayout = (ViewGroup) parent.findViewById(R.id.overview_logged_user_layout);
+			final TextView usrnmTxt = (TextView) parent.findViewById(R.id.overview_username);
 			final EditText usrnmEdttxt = (EditText) parent.findViewById(R.id.overview_edttxt_username);
 			final ImageView icon = (ImageView) parent.findViewById(R.id.overview_usericon);
-			if (appDataHandler.getHashPw() != null) {
-				loadPicture(icon, cwApplication.getAuthenticatedUser().getUid());
-			}
-			if (appDataHandler.getUserName() != null) {
-				usrnmEdttxt.setText(appDataHandler.getUserName());
+			Button loginBttn = (Button) parent.findViewById(R.id.overview_login_user_bttn);
+			Button logoutBttn = (Button) parent.findViewById(R.id.overview_logout_user_bttn);
+			if (cwLoginManager.isLoggedIn()) {
+				loadPicture(icon, cwLoginManager.getUser().getUid());
+				userLoggedLayout.setVisibility(View.INVISIBLE);
+				loginBttn.setVisibility(View.INVISIBLE);
+				logoutBttn.setVisibility(View.VISIBLE);
+				usrnmTxt.setText(appDataHandler.getUserName());
 			} else {
+				userLoggedLayout.setVisibility(View.VISIBLE);
+				loginBttn.setVisibility(View.VISIBLE);
+				logoutBttn.setVisibility(View.INVISIBLE);
 				usrnmEdttxt.setText("Kein User gespeichert");
 			}
 
-			Button confirmBttn = (Button) parent.findViewById(R.id.overview_set_user_bttn);
-			confirmBttn.setOnClickListener(new OnClickListener() {
+			loginBttn.setOnClickListener(new OnClickListener() {
+				@Override
 				public void onClick(View v) {
 					new LoginUserAsyncTask().execute();
 				}
 			});
+
+			logoutBttn.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					new LogoutUserAsyncTask().execute();
+				}
+			});
 		}
 
+		/**
+		 * @param parent
+		 */
 		private void createBanner(final View parent) {
 			ViewFlipper flipper = (ViewFlipper) parent.findViewById(R.id.overview_banner_flipper);
 			int newsAmount = 0;
@@ -193,6 +203,13 @@ public class OverviewActivity extends RoboActivity {
 			flipper.startFlipping();
 		}
 
+		/**
+		 * @param tag
+		 * @param icon
+		 * @param title
+		 * @param details
+		 * @return
+		 */
 		private ViewGroup createBannerCell(final String tag, int icon, String title, String details) {
 			ViewGroup cell = (ViewGroup) LayoutInflater.from(getParent()).inflate(R.layout.overview_banner_cell_layout,
 					null);
@@ -218,7 +235,7 @@ public class OverviewActivity extends RoboActivity {
 	 * 
 	 * @author Alexander Dridiger
 	 */
-	private class LoginUserAsyncTask extends AsyncTask<Void, Void, Void> {
+	private class LoginUserAsyncTask extends AsyncTask<Void, Void, Bitmap> {
 
 		boolean doWork = false;
 
@@ -242,58 +259,82 @@ public class OverviewActivity extends RoboActivity {
 		}
 
 		@Override
-		protected Void doInBackground(Void... params) {
+		protected Bitmap doInBackground(Void... params) {
 			if (doWork) {
 				EditText usrnmEdttxt = (EditText) overview_layout.findViewById(R.id.overview_edttxt_username);
 				EditText passwEdttxt = (EditText) overview_layout.findViewById(R.id.overview_edttxt_passw);
-				persistUser(usrnmEdttxt.getText().toString(), passwEdttxt.getText().toString());
-				AuthenticatedUser authUser = null;
-				try {
-					authUser = cwManager.getAuthUser(appDataHandler.getUserName(), passwEdttxt.getText().toString());
-					cwApplication.setAuthenticatedUser(authUser);
-				} catch (ConsolewarsAPIException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
+				cwLoginManager.saveAndLoginUser(usrnmEdttxt.getText().toString(), passwEdttxt.getText().toString());
 			}
-			return null;
+			return viewUtility.getUserIcon(cwLoginManager.getUser().getUid(), 60);
 		}
 
 		@Override
-		protected void onPostExecute(Void result) {
-			if (doWork && cwApplication.getAuthenticatedUser().getSuccess().matches(getString(R.string.success_yes))) {
-				ImageView icon = (ImageView) overview_layout.findViewById(R.id.overview_usericon);
-				loadPicture(icon, cwApplication.getAuthenticatedUser().getUid());
+		protected void onPostExecute(Bitmap result) {
+			ViewGroup userLoggedLayout = (ViewGroup) findViewById(R.id.overview_logged_user_layout);
+			TextView usrnmTxt = (TextView) findViewById(R.id.overview_username);
+			Button loginBttn = (Button) findViewById(R.id.overview_login_user_bttn);
+			Button logoutBttn = (Button) findViewById(R.id.overview_logout_user_bttn);
+			ImageView icon = (ImageView) overview_layout.findViewById(R.id.overview_usericon);
+			if (doWork && cwLoginManager.isLoggedIn()) {
+				userLoggedLayout.setVisibility(View.INVISIBLE);
+				usrnmTxt.setText(cwLoginManager.getUser().getUsername());
+				icon.setImageBitmap(result);
+				loginBttn.setVisibility(View.INVISIBLE);
+				logoutBttn.setVisibility(View.VISIBLE);
 				Toast.makeText(OverviewActivity.this, getResources().getString(R.string.logged_in), Toast.LENGTH_SHORT)
 						.show();
 			} else if (doWork) {
+				icon.setImageBitmap(result);
+				userLoggedLayout.setVisibility(View.VISIBLE);
+				loginBttn.setVisibility(View.VISIBLE);
+				logoutBttn.setVisibility(View.INVISIBLE);
 				Toast.makeText(OverviewActivity.this, getResources().getString(R.string.login_failed),
 						Toast.LENGTH_SHORT).show();
 			}
 		}
+	}
 
-		private void persistUser(String userName, String pw) {
-			Calendar calendar = GregorianCalendar.getInstance();
-			if (appDataHandler.getUserDbId() != -1) {
-				try {
-					databaseManager.updateUserData(appDataHandler.getUserDbId(), userName,
-							HashEncrypter.encrypt(getString(R.string.db_cry), pw), calendar.getTimeInMillis());
-					appDataHandler.loadCurrentUser();
-				} catch (GeneralSecurityException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			} else {
-				try {
-					databaseManager.insertUserData(userName, HashEncrypter.encrypt(getString(R.string.db_cry), pw),
-							calendar.getTimeInMillis());
-					appDataHandler.loadCurrentUser();
-				} catch (GeneralSecurityException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
+	/**
+	 * Asynchronous task to logout a user.
+	 * 
+	 * @author Alexander Dridiger
+	 */
+	private class LogoutUserAsyncTask extends AsyncTask<Void, Void, Bitmap> {
+
+		@Override
+		protected void onPreExecute() {
+			Toast.makeText(OverviewActivity.this, getResources().getString(R.string.logging_out), Toast.LENGTH_SHORT)
+					.show();
+		}
+
+		@Override
+		protected Bitmap doInBackground(Void... params) {
+			cwLoginManager.logoutUser();
+			return viewUtility.getUserIcon(-1, 60);
+		}
+
+		@Override
+		protected void onPostExecute(Bitmap result) {
+			TextView usrnmTxt = (TextView) findViewById(R.id.overview_username);
+			ViewGroup userLoggedLayout = (ViewGroup) findViewById(R.id.overview_logged_user_layout);
+			ImageView icon = (ImageView) findViewById(R.id.overview_usericon);
+			Button loginBttn = (Button) findViewById(R.id.overview_login_user_bttn);
+			Button logoutBttn = (Button) findViewById(R.id.overview_logout_user_bttn);
+			icon.setImageBitmap(result);
+			usrnmTxt.setText("");
+			userLoggedLayout.setVisibility(View.VISIBLE);
+
+			loginBttn.setVisibility(View.VISIBLE);
+			logoutBttn.setVisibility(View.INVISIBLE);
+			Toast.makeText(OverviewActivity.this, getResources().getString(R.string.logged_out), Toast.LENGTH_SHORT)
+					.show();
+		}
+	}
+
+	@Override
+	public void onBackPressed() {
+		if (getParent() instanceof CwBasicActivityGroup) {
+			((CwBasicActivityGroup) getParent()).back();
 		}
 	}
 }
