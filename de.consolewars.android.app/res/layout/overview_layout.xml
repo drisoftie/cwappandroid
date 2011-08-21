@@ -40,18 +40,42 @@
 					android:layout_margin="4dp"/>
 			</LinearLayout>
 			<Button
-				android:id="@+id/overview_set_user_bttn"
+				android:id="@+id/overview_login_user_bttn"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_alignBaseline="@id/overview_usericon_layout"
 				android:layout_alignParentRight="true"
-				android:background="@drawable/def_overview_login_bttn"/>
+				android:background="@drawable/def_bttn_login"/>
+			<Button
+				android:id="@+id/overview_logout_user_bttn"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_alignBaseline="@id/overview_usericon_layout"
+				android:layout_alignParentRight="true"
+				android:background="@drawable/def_bttn_logout"/>
 			<LinearLayout
-				android:id="@+id/overview_logged_user_layout2"
+				android:id="@+id/overview_logged_user_info_layout"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_toRightOf="@id/overview_usericon_layout"
-				android:layout_toLeftOf="@id/overview_set_user_bttn"
+				android:layout_toLeftOf="@id/overview_login_user_bttn"
+				android:layout_below="@id/overview_logged_as_text">
+				<TextView
+					android:id="@+id/overview_username"
+					android:layout_width="fill_parent"
+					android:layout_height="wrap_content"
+					android:height="2dp"
+					android:singleLine="true"
+					android:ellipsize="start"
+					android:textSize="15dp"
+					android:textColor="@color/overview_text"/>
+			</LinearLayout>
+			<LinearLayout
+				android:id="@+id/overview_logged_user_layout"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_toRightOf="@id/overview_usericon_layout"
+				android:layout_toLeftOf="@id/overview_login_user_bttn"
 				android:layout_below="@id/overview_logged_as_text"
 				android:orientation="vertical">
 				<EditText

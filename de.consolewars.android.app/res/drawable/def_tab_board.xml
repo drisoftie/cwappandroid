@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<selector
-	xmlns:android="http://schemas.android.com/apk/res/android">
-		<item
-		android:drawable="@drawable/tab_board_selected"
-		android:state_checked="true"/>
-	<item
-		android:state_checked="true"
-		android:state_pressed="true"
-		android:drawable="@drawable/tab_board_selected"/>
-	<item android:drawable="@drawable/tab_board"/>
-</selector>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+	<item>
+		<shape android:shape="rectangle">
+			<gradient
+				android:startColor="#FF444444"
+				android:endColor="#FF000000"
+				android:angle="270"/>
+		</shape>
+	</item>
+	<item>
+		<bitmap
+			android:src="@drawable/tab_board"
+			android:gravity="center"/>
+	</item>
+</layer-list>

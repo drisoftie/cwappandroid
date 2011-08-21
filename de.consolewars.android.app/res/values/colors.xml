@@ -87,7 +87,7 @@
 	<color
 		name="comments_bg_down">#def4f6</color>				
 	<color
-		name="comments_author_bg_up">#cee4f6</color>	
+		name="comments_author_bg_up">#def4f6</color>	
 	<color
-		name="comments_author_bg_down">#def4f6</color>	
+		name="comments_author_bg_down">#cee4f6</color>	
 </resources>

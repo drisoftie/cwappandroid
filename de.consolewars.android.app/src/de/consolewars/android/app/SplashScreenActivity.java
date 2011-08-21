@@ -1,7 +1,5 @@
 package de.consolewars.android.app;
 
-import java.security.GeneralSecurityException;
-
 import roboguice.activity.RoboActivity;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -11,11 +9,7 @@ import android.widget.ProgressBar;
 
 import com.google.inject.Inject;
 
-import de.consolewars.android.app.db.AppDataHandler;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
-import de.consolewars.android.app.util.HashEncrypter;
-import de.consolewars.api.data.AuthenticatedUser;
-import de.consolewars.api.exception.ConsolewarsAPIException;
 
 /**
  * Activity handling the splash screen.
@@ -25,11 +19,7 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
 public class SplashScreenActivity extends RoboActivity {
 
 	@Inject
-	private CWApplication cwApplication;
-	@Inject
-	private CWManager cwManager;
-	@Inject
-	private AppDataHandler appDataHandler;
+	private CWLoginManager cwLoginManager;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -59,17 +49,7 @@ public class SplashScreenActivity extends RoboActivity {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			appDataHandler.loadCurrentUser();
-			AuthenticatedUser user = null;
-			try {
-				user = cwManager.getAuthUser(appDataHandler.getUserName(),
-						HashEncrypter.decrypt(getString(R.string.db_cry), appDataHandler.getHashPw()));
-			} catch (ConsolewarsAPIException e) {
-				e.printStackTrace();
-			} catch (GeneralSecurityException e) {
-				e.printStackTrace();
-			}
-			cwApplication.setAuthenticatedUser(user);
+			cwLoginManager.checkSavedUserAndLogin();
 			return null;
 		}
 

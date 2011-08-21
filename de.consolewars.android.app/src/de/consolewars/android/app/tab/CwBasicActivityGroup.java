@@ -33,8 +33,7 @@ import de.consolewars.android.app.db.DatabaseManager;
  * limitations under the License.
  */
 /**
- * Basic implementation of an {@link ActivityGroup} supporting {@link Activity} switching and
- * {@link View} caching.
+ * Basic implementation of an {@link ActivityGroup} supporting {@link Activity} switching and {@link View} caching.
  * 
  * @author Alexander Dridiger
  */
@@ -60,22 +59,21 @@ public abstract class CwBasicActivityGroup extends RoboActivityGroup implements 
 			viewCache.remove(viewCache.size() - 1);
 			setContentView(viewCache.get(viewCache.size() - 1));
 		} else {
-			AlertDialog.Builder dialog = new AlertDialog.Builder(this)
-					.setMessage(getString(R.string.close_app)).setCancelable(false)
-					.setPositiveButton(getString(R.string.yes), new OnClickListener() {
-
+			AlertDialog.Builder dialog = new AlertDialog.Builder(this).setMessage(getString(R.string.close_app))
+					.setCancelable(false).setPositiveButton(getString(R.string.yes), new OnClickListener() {
+						@Override
 						public void onClick(DialogInterface dialog, int which) {
 							if (getParent() instanceof CwNavigationMainTabActivity) {
 								if (appDataHandler.loadCurrentUser()) {
-									databaseManager.updateDate(appDataHandler.getUserDbId(),
-											GregorianCalendar.getInstance().getTimeInMillis());
+									databaseManager.updateDate(appDataHandler.getUserDbId(), GregorianCalendar
+											.getInstance().getTimeInMillis());
 								}
 								databaseManager.closeDatabase();
 							}
 							finish();
 						}
 					}).setNegativeButton(getString(R.string.no), new OnClickListener() {
-
+						@Override
 						public void onClick(DialogInterface dialog, int which) {
 							dialog.cancel();
 						}

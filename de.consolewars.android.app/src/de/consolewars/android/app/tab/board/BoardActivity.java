@@ -18,9 +18,8 @@ import android.widget.Button;
 
 import com.google.inject.Inject;
 
-import de.consolewars.android.app.CWApplication;
+import de.consolewars.android.app.CWLoginManager;
 import de.consolewars.android.app.R;
-import de.consolewars.android.app.db.AppDataHandler;
 import de.consolewars.android.app.tab.CwBasicActivityGroup;
 import de.consolewars.android.app.util.ViewUtility;
 
@@ -46,9 +45,7 @@ import de.consolewars.android.app.util.ViewUtility;
 public class BoardActivity extends RoboActivity {
 
 	@Inject
-	private CWApplication cwApplication;
-	@Inject
-	private AppDataHandler appDataHandler;
+	private CWLoginManager cwLoginManager;
 	@Inject
 	private ViewUtility viewUtility;
 
@@ -96,21 +93,6 @@ public class BoardActivity extends RoboActivity {
 			refresh.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View arg0) {
-					// Log.i("********AllCookies**********",
-					// CookieManager.getInstance().getCookie(
-					// getString(R.string.cw_domain)));
-					// String[] keyValueSets =
-					// CookieManager.getInstance().getCookie(getString(R.string.cw_domain))
-					// .split(";");
-					// for (String cookie : keyValueSets) {
-					// String[] keyValue = cookie.split("=");
-					// String key = keyValue[0];
-					// String value = "";
-					// if (keyValue.length > 1)
-					// value = keyValue[1];
-					// mainTabs.getHttpClient().getCookieStore().addCookie(
-					// new BasicClientCookie(key.trim(), value.trim()));
-					// }
 					new OpenBoardAsyncTask().execute();
 				}
 			});
@@ -147,25 +129,22 @@ public class BoardActivity extends RoboActivity {
 					return true;
 				}
 			});
-			if (!appDataHandler.loadCurrentUser() && appDataHandler.getHashPw().matches("")
-					&& appDataHandler.getUserName().matches("")) {
+			if (!cwLoginManager.isLoggedIn()) {
+				CookieSyncManager.createInstance(BoardActivity.this);
+				CookieManager cookieManager = CookieManager.getInstance();
+				cookieManager.removeAllCookie();
+				CookieSyncManager.getInstance().sync();
 				webView.loadUrl(getString(R.string.cw_url_slash));
 			} else {
-				if (cwApplication.getAuthenticatedUser() != null
-						&& cwApplication.getAuthenticatedUser().getSuccess().matches(getString(R.string.success_yes))) {
-					CookieSyncManager.createInstance(BoardActivity.this);
-					CookieManager cookieManager = CookieManager.getInstance();
-					// cookieManager.removeAllCookie();
-					cookieManager.setCookie(getString(R.string.cw_domain), getString(R.string.cw_cookie_userid) + "="
-							+ cwApplication.getAuthenticatedUser().getUid());
-					cookieManager.setCookie(getString(R.string.cw_domain), getString(R.string.cw_cookie_pw) + "="
-							+ cwApplication.getAuthenticatedUser().getPasswordHash());
-					CookieSyncManager.getInstance().sync();
-					webView.loadUrl(getString(R.string.cw_messageboard_mobile_url));
-				} else {
-					webView.loadUrl(getString(R.string.cw_url_slash));
-				}
-
+				CookieSyncManager.createInstance(BoardActivity.this);
+				CookieManager cookieManager = CookieManager.getInstance();
+				// cookieManager.removeAllCookie();
+				cookieManager.setCookie(getString(R.string.cw_domain), getString(R.string.cw_cookie_userid) + "="
+						+ cwLoginManager.getUser().getUid());
+				cookieManager.setCookie(getString(R.string.cw_domain), getString(R.string.cw_cookie_pw) + "="
+						+ cwLoginManager.getUser().getPasswordHash());
+				CookieSyncManager.getInstance().sync();
+				webView.loadUrl(getString(R.string.cw_messageboard_mobile_url));
 			}
 			return board_layout;
 		}

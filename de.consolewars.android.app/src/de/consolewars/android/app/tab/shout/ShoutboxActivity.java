@@ -17,9 +17,8 @@ import android.widget.Button;
 
 import com.google.inject.Inject;
 
-import de.consolewars.android.app.CWApplication;
+import de.consolewars.android.app.CWLoginManager;
 import de.consolewars.android.app.R;
-import de.consolewars.android.app.db.AppDataHandler;
 import de.consolewars.android.app.tab.CwBasicActivityGroup;
 import de.consolewars.android.app.util.ViewUtility;
 
@@ -45,11 +44,9 @@ import de.consolewars.android.app.util.ViewUtility;
 public class ShoutboxActivity extends RoboActivity {
 
 	@Inject
-	private CWApplication cwApplication;
-	@Inject
-	private AppDataHandler appDataHandler;
-	@Inject
 	private ViewUtility viewUtility;
+	@Inject
+	private CWLoginManager cwLoginManager;
 
 	private ViewGroup shoutbox_layout;
 
@@ -86,59 +83,13 @@ public class ShoutboxActivity extends RoboActivity {
 		@Override
 		protected void onPostExecute(View result) {
 			setContentView(result);
-			// WebView webView = (WebView) findViewById(R.id.shoutbox);
-			// if
-			// (!CWApplication.getInstance().getDataHandler().loadCurrentUser()
-			// &&
-			// CWApplication.getInstance().getDataHandler().getHashPw().matches("")
-			// &&
-			// CWApplication.getInstance().getDataHandler().getUserName().matches(""))
-			// {
-			// webView.loadUrl(getString(R.string.cw_url_slash));
-			// } else {
-			// if (CWApplication.getInstance().getAuthenticatedUser() != null
-			// &&
-			// CWApplication.getInstance().getAuthenticatedUser().getSuccess()
-			// .matches(getString(R.string.success_yes))) {
-			// CookieSyncManager.createInstance(ShoutboxActivity.this);
-			// CookieManager cookieManager = CookieManager.getInstance();
-			// cookieManager.removeAllCookie();
-			// cookieManager.setCookie(getString(R.string.cw_domain),
-			// getString(R.string.cw_cookie_userid) + "="
-			// + CWApplication.getInstance().getAuthenticatedUser().getUid());
-			// cookieManager.setCookie(getString(R.string.cw_domain),
-			// getString(R.string.cw_cookie_pw)
-			// + "=" +
-			// CWApplication.getInstance().getAuthenticatedUser().getPasswordHash());
-			// CookieSyncManager.getInstance().sync();
-			// webView.loadUrl(getString(R.string.cw_shoutbox));
-			// } else {
-			// webView.loadUrl(getString(R.string.cw_url_slash));
-			// }
-			//
-			// }
 		}
 
 		private View loginAndOpenShoutbox() {
 			Button refresh = (Button) shoutbox_layout.findViewById(R.id.shoutbox_refresh);
 			refresh.setOnClickListener(new OnClickListener() {
-
+				@Override
 				public void onClick(View arg0) {
-					// Log.i("********AllCookies**********",
-					// CookieManager.getInstance().getCookie(
-					// getString(R.string.cw_domain)));
-					// String[] keyValueSets =
-					// CookieManager.getInstance().getCookie(getString(R.string.cw_domain))
-					// .split(";");
-					// for (String cookie : keyValueSets) {
-					// String[] keyValue = cookie.split("=");
-					// String key = keyValue[0];
-					// String value = "";
-					// if (keyValue.length > 1)
-					// value = keyValue[1];
-					// mainTabs.getHttpClient().getCookieStore().addCookie(
-					// new BasicClientCookie(key.trim(), value.trim()));
-					// }
 					new BuildShoutboxAsyncTask().execute();
 				}
 			});
@@ -153,7 +104,7 @@ public class ShoutboxActivity extends RoboActivity {
 
 			webView.requestFocus(View.FOCUS_DOWN);
 			webView.setOnTouchListener(new View.OnTouchListener() {
-
+				@Override
 				public boolean onTouch(View v, MotionEvent event) {
 					switch (event.getAction()) {
 					case MotionEvent.ACTION_DOWN:
@@ -174,25 +125,22 @@ public class ShoutboxActivity extends RoboActivity {
 					return true;
 				}
 			});
-			if (!appDataHandler.loadCurrentUser() && appDataHandler.getHashPw().matches("")
-					&& appDataHandler.getUserName().matches("")) {
+			if (!cwLoginManager.isLoggedIn()) {
+				CookieSyncManager.createInstance(ShoutboxActivity.this);
+				CookieManager cookieManager = CookieManager.getInstance();
+				cookieManager.removeAllCookie();
+				CookieSyncManager.getInstance().sync();
 				webView.loadUrl(getString(R.string.cw_url_slash));
 			} else {
-				if (cwApplication.getAuthenticatedUser() != null
-						&& cwApplication.getAuthenticatedUser().getSuccess().matches(getString(R.string.success_yes))) {
-					CookieSyncManager.createInstance(ShoutboxActivity.this);
-					CookieManager cookieManager = CookieManager.getInstance();
-					// cookieManager.removeAllCookie();
-					cookieManager.setCookie(getString(R.string.cw_domain), getString(R.string.cw_cookie_userid) + "="
-							+ cwApplication.getAuthenticatedUser().getUid());
-					cookieManager.setCookie(getString(R.string.cw_domain), getString(R.string.cw_cookie_pw) + "="
-							+ cwApplication.getAuthenticatedUser().getPasswordHash());
-					CookieSyncManager.getInstance().sync();
-					webView.loadUrl(getString(R.string.cw_shoutbox));
-				} else {
-					webView.loadUrl(getString(R.string.cw_url_slash));
-				}
-
+				CookieSyncManager.createInstance(ShoutboxActivity.this);
+				CookieManager cookieManager = CookieManager.getInstance();
+				// cookieManager.removeAllCookie();
+				cookieManager.setCookie(getString(R.string.cw_domain), getString(R.string.cw_cookie_userid) + "="
+						+ cwLoginManager.getUser().getUid());
+				cookieManager.setCookie(getString(R.string.cw_domain), getString(R.string.cw_cookie_pw) + "="
+						+ cwLoginManager.getUser().getPasswordHash());
+				CookieSyncManager.getInstance().sync();
+				webView.loadUrl(getString(R.string.cw_shoutbox));
 			}
 			return shoutbox_layout;
 		}

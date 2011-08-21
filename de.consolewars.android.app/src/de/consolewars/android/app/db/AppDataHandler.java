@@ -43,6 +43,9 @@ public class AppDataHandler {
 	private long date = -1;
 	private String stringDate = "";
 
+	/**
+	 * @return
+	 */
 	public boolean loadCurrentUser() {
 		boolean existingUser = false;
 

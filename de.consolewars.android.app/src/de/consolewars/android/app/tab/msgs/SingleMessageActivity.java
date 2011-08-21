@@ -5,11 +5,14 @@ import java.util.IllegalFormatException;
 import roboguice.activity.RoboActivity;
 import android.os.Bundle;
 import android.text.Html;
-import android.text.method.LinkMovementMethod;
 import android.widget.TextView;
+
+import com.google.inject.Inject;
+
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwBasicActivityGroup;
 import de.consolewars.android.app.util.TextViewHandler;
+import de.consolewars.android.app.util.ViewUtility;
 
 /*
  * Copyright [2010] [Alexander Dridiger]
@@ -32,13 +35,16 @@ import de.consolewars.android.app.util.TextViewHandler;
  */
 public class SingleMessageActivity extends RoboActivity {
 
+	@Inject
+	ViewUtility viewUtility;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.singlemsg_layout);
 
 		TextView msg_view = (TextView) findViewById(R.id.singlemsg_content);
-		msg_view.setMovementMethod(LinkMovementMethod.getInstance());
+		viewUtility.setClickableTextView(msg_view);
 		String text = "";
 
 		// looking for the correct intent
@@ -47,13 +53,13 @@ public class SingleMessageActivity extends RoboActivity {
 		}
 
 		try {
-			msg_view.setText(Html.fromHtml(text, new TextViewHandler(SingleMessageActivity.this
-					.getApplicationContext()), null));
+			msg_view.setText(Html.fromHtml(text,
+					new TextViewHandler(SingleMessageActivity.this.getApplicationContext()), null));
 		} catch (IllegalFormatException ife) {
 			msg_view.setText(text);
 		}
 	}
-	
+
 	@Override
 	public void onBackPressed() {
 		if (getParent() instanceof CwBasicActivityGroup) {
