@@ -37,6 +37,6 @@
 	<dimen name="blogs_row_author_margin">2dp</dimen>
 	<dimen name="overview_logged_as_padding">2dp</dimen>
 	<dimen name="overview_usericon_margin_left">25dp</dimen>
-	<dimen name="messagewriter_text_margin">2dp</dimen>
+	<dimen name="writer_text_margin">2dp</dimen>
 	<dimen name="comments_cell_margin">2dp</dimen>
 </resources>

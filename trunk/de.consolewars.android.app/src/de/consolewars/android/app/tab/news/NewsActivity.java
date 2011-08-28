@@ -1,10 +1,10 @@
 package de.consolewars.android.app.tab.news;
 
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+
+import org.apache.commons.lang.StringUtils;
 
 import roboguice.activity.RoboActivity;
 import android.app.ActivityGroup;
@@ -12,7 +12,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.style.ForegroundColorSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -36,7 +35,6 @@ import de.consolewars.android.app.util.DateUtility;
 import de.consolewars.android.app.util.StyleSpannableStringBuilder;
 import de.consolewars.android.app.util.ViewUtility;
 import de.consolewars.api.data.News;
-import de.consolewars.api.exception.ConsolewarsAPIException;
 
 /*
  * Copyright [2010] [Alexander Dridiger]
@@ -63,8 +61,6 @@ public class NewsActivity extends RoboActivity {
 	private CWManager cwManager;
 	@Inject
 	private ViewUtility viewUtility;
-
-	private List<News> news;
 
 	private ViewGroup news_layout;
 	private Calendar oldestNewsDate;
@@ -114,14 +110,7 @@ public class NewsActivity extends RoboActivity {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			try {
-				oldestNewsDate.setTimeInMillis(DateUtility.getDay(oldestNewsDate, 0).getTimeInMillis());
-				news = cwManager.getNews(50, currentFilter, oldestNewsDate.getTime());
-			} catch (ConsolewarsAPIException e) {
-				e.printStackTrace();
-				Log.e(getString(R.string.exc_auth_tag), e.getMessage(), e);
-				news = new ArrayList<News>();
-			}
+			oldestNewsDate.setTimeInMillis(DateUtility.getDay(oldestNewsDate, 0).getTimeInMillis());
 			createNewsRows();
 			return null;
 		}
@@ -175,7 +164,7 @@ public class NewsActivity extends RoboActivity {
 			Calendar tempCal = Calendar.getInstance(Locale.GERMANY);
 			tempCal.setTimeInMillis(currentNewsDate.getTimeInMillis() + 1L);
 
-			for (News newsToAdd : news) {
+			for (News newsToAdd : cwManager.getNews()) {
 				if (DateUtility.getDay(tempCal, -1).getTimeInMillis() > newsToAdd.getUnixtime() * 1000L) {
 					currentNewsDate.setTimeInMillis(currentNewsDate.getTimeInMillis() + 1L);
 					currentNewsDate.setTimeInMillis(DateUtility.getDay(currentNewsDate, -1).getTimeInMillis() - 1L);
@@ -187,39 +176,64 @@ public class NewsActivity extends RoboActivity {
 					publishProgress(separator);
 				} else if ((currentNewsDate.getTimeInMillis() >= newsToAdd.getUnixtime() * 1000L)
 						&& (DateUtility.getDay(tempCal, -1).getTimeInMillis() <= newsToAdd.getUnixtime() * 1000L)) {
-					// get the table row by an inflater and set the needed
-					// information
-					final View tableRow = LayoutInflater.from(NewsActivity.this).inflate(R.layout.news_row_layout,
-							newsTable, false);
-					tableRow.setId(newsToAdd.getId());
-					tableRow.setOnClickListener(new View.OnClickListener() {
+					// check if the news has to be filtered
+					if (currentFilter.equals(Filter.NEWS_ALL) || matchesFilter(newsToAdd)) {
+						// get the table row by an inflater and set the needed information
+						final View tableRow = LayoutInflater.from(NewsActivity.this).inflate(R.layout.news_row_layout,
+								newsTable, false);
+						tableRow.setId(newsToAdd.getId());
+						tableRow.setOnClickListener(new View.OnClickListener() {
 
-						public void onClick(View v) {
-							if (selectedRow != null) {
-								selectedRow.setBackgroundDrawable(getResources().getDrawable(R.drawable.table_cell_bg));
+							public void onClick(View v) {
+								if (selectedRow != null) {
+									selectedRow.setBackgroundDrawable(getResources().getDrawable(
+											R.drawable.table_cell_bg));
+								}
+								tableRow.setBackgroundDrawable(getResources().getDrawable(
+										R.drawable.table_cell_bg_selected));
+								selectedRow = tableRow;
+								getSingleNews(tableRow.getId());
 							}
-							tableRow.setBackgroundDrawable(getResources()
-									.getDrawable(R.drawable.table_cell_bg_selected));
-							selectedRow = tableRow;
-							getSingleNews(tableRow.getId());
-						}
-					});
-					viewUtility.setCategoryIcon(((ImageView) tableRow.findViewById(R.id.news_row_category_icon)),
-							newsToAdd.getCategoryshort());
-					((TextView) tableRow.findViewById(R.id.news_row_title)).setText(createTitle(newsToAdd.getTitle()));
-					((TextView) tableRow.findViewById(R.id.news_row_date)).setText(createDate(
-							newsToAdd.getUnixtime() * 1000L, "'um' HH:mm'Uhr'"));
-					TextView cmtAmount = (TextView) tableRow.findViewById(R.id.news_row_cmmts_amount);
-					cmtAmount.setText(createAmount(newsToAdd.getComments()));
-					TextView picAmount = (TextView) tableRow.findViewById(R.id.news_row_pics_amount);
-					picAmount.setText(createAmount(newsToAdd.getPiclist().length));
-					TextView author = (TextView) tableRow.findViewById(R.id.news_row_author);
-					author.setText(createAuthor(newsToAdd.getAuthor()));
-					author.setSelected(true);
+						});
+						viewUtility.setCategoryIcon(((ImageView) tableRow.findViewById(R.id.news_row_category_icon)),
+								newsToAdd.getCategoryshort());
+						((TextView) tableRow.findViewById(R.id.news_row_title)).setText(createTitle(newsToAdd
+								.getTitle()));
+						((TextView) tableRow.findViewById(R.id.news_row_date)).setText(createDate(
+								newsToAdd.getUnixtime() * 1000L, "'um' HH:mm'Uhr'"));
+						TextView cmtAmount = (TextView) tableRow.findViewById(R.id.news_row_cmmts_amount);
+						cmtAmount.setText(createAmount(newsToAdd.getComments()));
+						TextView picAmount = (TextView) tableRow.findViewById(R.id.news_row_pics_amount);
+						picAmount.setText(createAmount(newsToAdd.getPiclist().length));
+						TextView author = (TextView) tableRow.findViewById(R.id.news_row_author);
+						author.setText(createAuthor(newsToAdd.getAuthor()));
+						author.setSelected(true);
 
-					publishProgress(tableRow);
+						publishProgress(tableRow);
+					}
 				}
 			}
+		}
+
+		private boolean matchesFilter(News news) {
+			boolean matches = false;
+			String cat = news.getCategoryshort().toLowerCase();
+			if (currentFilter.equals(Filter.NEWS_MS) && !cat.contains("ps") && !cat.contains("vita")
+					&& !cat.contains("son") && !StringUtils.contains(cat, 'w') && !cat.contains("nin")
+					&& !cat.contains("ds") && !cat.contains("n64") && !cat.contains("ngc") && !cat.contains("gb")
+					&& !cat.contains("snes")) {
+				matches = true;
+			} else if (currentFilter.equals(Filter.NEWS_NIN) && !cat.contains("ps") && !cat.contains("vita")
+					&& !cat.contains("son") && !StringUtils.contains(cat, 'x') && !cat.contains("ms")
+					&& !cat.contains("360")) {
+				matches = true;
+			} else if (currentFilter.equals(Filter.NEWS_SONY) && !StringUtils.contains(cat, 'w')
+					&& !cat.contains("nin") && !cat.contains("ds") && !cat.contains("n64") && !cat.contains("ngc")
+					&& !cat.contains("gb") && !cat.contains("snes") && !StringUtils.contains(cat, 'x')
+					&& !cat.contains("ms") && !cat.contains("360")) {
+				matches = true;
+			}
+			return matches;
 		}
 
 		/**

@@ -23,6 +23,10 @@
 	<string
 		name="db_password_attribute">passw</string>
 	<string
+		name="db_lastknownnews">lastKnownNewsID</string>
+	<string
+		name="db_lastknownblog">lastKnownBlogID</string>			
+	<string
 		name="db_savednews_attribute">savedWholeNews</string>
 	<string
 		name="db_savedblog_attribute">savedWholeBlog</string>
@@ -59,7 +63,7 @@
 	<string
 		name="db_wherearg_id">id=?</string>
 	<string
-		name="db_create_table_userdata">CREATE TABLE %1$s (id INTEGER PRIMARY KEY, username TEXT NOT NULL, passw TEXT NOT NULL, date INTEGER NOT NULL)</string>
+		name="db_create_table_userdata">CREATE TABLE %1$s (id INTEGER PRIMARY KEY, username TEXT NOT NULL, passw TEXT NOT NULL, date INTEGER NOT NULL, lastKnownNewsID INTEGER, lastKnownBlogID INTEGER)</string>
 	<string
 		name="db_create_table_newsdata">CREATE TABLE %1$s (id INTEGER PRIMARY KEY, savedWholeNews INTEGER NOT NULL, newsID INTEGER, article TEXT, author TEXT, category TEXT, catShort TEXT, descr TEXT, title TEXT, date INTEGER, url TEXT, picsExist INTEGER, vidsExist INTEGER)</string>
 	<string

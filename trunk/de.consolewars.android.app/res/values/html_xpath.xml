@@ -3,9 +3,13 @@
 	<string
 		name="cw_domain">http://www.consolewars.de</string>	
 	<string
-		name="cw_url">http://www.consolewars.de%1$s</string>
+		name="cw_url_append">http://www.consolewars.de%1$s</string>
 	<string
 		name="cw_url_slash">http://www.consolewars.de/</string>
+	<string
+		name="cw_usercenter">http://www.%1$s.consolewars.de/settings/?page=%2$s</string>	
+	<string
+		name="cw_usercenter_personal">personal</string>
 	<string
 		name="cw_shoutbox">http://www.consolewars.de/chat</string>	
 	<string
@@ -55,6 +59,9 @@
 		name="cw_posting_url">http://www.consolewars.de/gen/processtalkback.php
 	</string>
 	<string
+		name="cw_blogpost_url">http://www.%1$s.consolewars.de/settings/writeeditblog.php
+	</string>			
+	<string
 		name="cw_getsecuritytoken_url">http://www.consolewars.de/messageboard/private.php?do=newpm
 	</string>			
 	<string
@@ -62,6 +69,12 @@
 	</string>			
 	<string
 		name="cw_login">http://www.consolewars.de/messageboard/login.php?do=login&amp;cookieuser=1&amp;do=login&amp;s=&amp;vb_login_md5password=%1$s&amp;vb_login_md5password_utf=%1$s&amp;vb_login_password=&amp;vb_login_username=%2$s
+	</string>
+	<string
+		name="cw_blog_submit_data">subject=%1$s&amp;article=%2$s&amp;date=%3$s&amp;time=%4$s&amp;allow_comments=%5$d&amp;gosubmit=ABSCHIGGE!&amp;gosubmit.x=1&amp;labels=%6$s&amp;is_visible=%7$d&amp;is_newsblog=%8$d&amp;bid=%9$d
+	</string>
+	<string
+		name="cw_blog_delete_data">bid=%1$d&amp;godelete.x=1&amp;godelete=%2$s
 	</string>
 	<string
 		name="cw_cmmt_submit_data">reference_area=%1$d&amp;reference_id=%2$d&amp;talkback_command=%3$s&amp;talkback_content=%4$s&amp;talkback_viewpage=%5$d
@@ -89,5 +102,11 @@
 	</string>		
 	<string
 		name="cw_command_update">update
-	</string>					
+	</string>	
+	<string
+		name="cw_command_blogsubmit">ABSCHIGGE!
+	</string>
+		<string
+		name="cw_command_blogdelete">LÖSCHE!
+	</string>
 </resources>

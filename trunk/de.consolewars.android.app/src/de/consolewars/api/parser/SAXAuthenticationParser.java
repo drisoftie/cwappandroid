@@ -1,5 +1,6 @@
 package de.consolewars.api.parser;
 
+import android.util.Log;
 import de.consolewars.api.data.AuthenticatedUser;
 
 /*

@@ -62,8 +62,27 @@
 	<string name="comment_editing">Ihr Kommentar wird editiert...</string>
 	<string name="comment_edited">Der Kommentar wurde erfolgreich editiert.</string>
 	<string name="not_logged_in">Sie sind nicht eingeloggt.</string>
+
+	<!-- blogs -->
+	<string name="blog_delete_question">Wollen Sie wirklich diesen Blog löschen?</string>
+	<string name="blog_deleting">Ihr Blog wird gelöscht...</string>
+	<string name="blog_deleted">Der Blog wurde erfolgreich gelöscht.</string>
+	<string name="blogswriter_sending">Blog wird abgeschickt...</string>
+	<string name="blogswriter_sent">Blog wurde erfolgreich geschrieben.</string>
+	<string name="blogswriter_too_short">Blogtext ist zu kurz. Mindestens 150 Zeichen benötigt.
+	</string>
+	<string name="blogswriter_blogtitle">Blogtitel:</string>
+	<string name="blogswriter_blogcontent">Bloginhalt:</string>
+	<string name="blogswriter_tags">Tags (mit Komma getrennt):</string>
+	<string name="blogswriter_date">Datum:</string>
+	<string name="blogswriter_time">Zeit:</string>
+	<string name="blogswriter_visible">ist sichtbar</string>
+	<string name="blogswriter_comments_allowed">Kommentare erlauben</string>
+	<string name="blogswriter_newsblog">Ist ein Newsblog</string>
+
+	<!-- messages -->
 	<string name="messagewriter_sending">Nachricht wird gesendet...</string>
-	<string name="messagewriter_sent">Nachricht wurde erfolgreicht versendet.</string>
+	<string name="messagewriter_sent">Nachricht wurde erfolgreich versendet.</string>
 	<string name="messagewriter_recipients">Empfänger:</string>
 	<string name="messagewriter_messagetitle">Titel:</string>
 	<string name="messagewriter_message">Nachricht:</string>
@@ -72,6 +91,8 @@
 	<string name="messagewriter_signature">Signatur anzeigen</string>
 	<string name="messagewriter_parseurl">Links automatisch umwandeln</string>
 	<string name="messagewriter_disablesmilies">Grafische Smileys deaktivieren</string>
+
+
 	<string name="ok">OK</string>
 	<string name="dateformat_detailed">EEEE, dd. MMMMM yyyy \'um\' HH:mm \'Uhr\'</string>
 	<string-array name="news_filter_options">

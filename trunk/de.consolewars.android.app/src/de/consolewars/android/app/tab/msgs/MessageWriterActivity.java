@@ -17,7 +17,7 @@ import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwBasicActivityGroup;
 
 /*
- * Copyright [2010] [Alexander Dridiger]
+ * Copyright [2011] [Alexander Dridiger]
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,8 +31,7 @@ import de.consolewars.android.app.tab.CwBasicActivityGroup;
  * limitations under the License.
  */
 /**
- * Central Activity to handle the ui for the shoutbox. <br>
- * NOTE: Currently not working.
+ * Activity to handle message writing and sending.
  * 
  * @author Alexander Dridiger
  */

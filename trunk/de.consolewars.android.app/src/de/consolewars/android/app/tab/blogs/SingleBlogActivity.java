@@ -4,6 +4,8 @@ import java.util.IllegalFormatException;
 
 import roboguice.activity.RoboActivity;
 import android.app.ActivityGroup;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -15,12 +17,15 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.inject.Inject;
 
+import de.consolewars.android.app.CWLoginManager;
 import de.consolewars.android.app.CWManager;
 import de.consolewars.android.app.CWManager.CommentArea;
 import de.consolewars.android.app.R;
+import de.consolewars.android.app.tab.CwBasicActivityGroup;
 import de.consolewars.android.app.tab.cmts.CommentsActivity;
 import de.consolewars.android.app.util.DateUtility;
 import de.consolewars.android.app.util.TextViewHandler;
@@ -49,6 +54,8 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
  */
 public class SingleBlogActivity extends RoboActivity {
 
+	@Inject
+	private CWLoginManager cwLoginManager;
 	@Inject
 	private CWManager cwManager;
 	@Inject
@@ -132,6 +139,8 @@ public class SingleBlogActivity extends RoboActivity {
 					text.setText(blog.getArticle());
 				}
 				createCommentBttn(blogView, blog);
+				createEditBttn(blogView, blog);
+				createDeleteBttn(blogView, blog);
 				createHeader(blogView, blog);
 			}
 			return blogView;
@@ -140,7 +149,7 @@ public class SingleBlogActivity extends RoboActivity {
 		private void createCommentBttn(View blogView, final Blog blog) {
 			Button bttn = (Button) blogView.findViewById(R.id.singleblog_comments_bttn);
 			bttn.setOnClickListener(new OnClickListener() {
-
+				@Override
 				public void onClick(View v) {
 					Intent commentsIntent = new Intent(SingleBlogActivity.this, CommentsActivity.class);
 
@@ -159,6 +168,56 @@ public class SingleBlogActivity extends RoboActivity {
 					((BlogsActivityGroup) getParent()).replaceView(view);
 				}
 			});
+
+		}
+
+		private void createEditBttn(View blogView, final Blog blog) {
+			if (cwLoginManager.isLoggedIn() && blog.getUid() == cwLoginManager.getUser().getUid()) {
+				Button bttn = (Button) blogView.findViewById(R.id.singleblog_edit_bttn);
+				bttn.setVisibility(View.VISIBLE);
+				bttn.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						Intent blogswriterIntent = new Intent(SingleBlogActivity.this, BlogsWriterActivity.class);
+
+						Bundle extra = new Bundle();
+						extra.putInt(getString(R.string.id), blog.getId());
+
+						blogswriterIntent.putExtras(extra);
+
+						View view = ((ActivityGroup) getParent())
+								.getLocalActivityManager()
+								.startActivity(BlogsWriterActivity.class.getSimpleName(),
+										blogswriterIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
+						// replace the view
+						((BlogsActivityGroup) getParent()).replaceView(view);
+					}
+				});
+			}
+		}
+
+		private void createDeleteBttn(View blogView, final Blog blog) {
+			if (cwLoginManager.isLoggedIn() && blog.getUid() == cwLoginManager.getUser().getUid()) {
+				Button bttn = (Button) blogView.findViewById(R.id.singleblog_delete_bttn);
+				bttn.setVisibility(View.VISIBLE);
+				bttn.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						AlertDialog.Builder dialog = new AlertDialog.Builder(SingleBlogActivity.this.getParent())
+								.setMessage(getString(R.string.blog_delete_question)).setCancelable(false)
+								.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog, int which) {
+										new DeleteBlogAsyncTask().execute(blog.getId());
+									}
+								}).setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog, int which) {
+										dialog.cancel();
+									}
+								});
+						dialog.create().show();
+					}
+				});
+			}
 		}
 
 		private void createHeader(View parent, Blog blog) {
@@ -180,6 +239,42 @@ public class SingleBlogActivity extends RoboActivity {
 		 */
 		private CharSequence createDate(long unixtime) {
 			return DateUtility.createDate(unixtime, getString(R.string.dateformat_detailed));
+		}
+	}
+
+	/**
+	 * Asynchronous task to delete a blog.
+	 * 
+	 * @author Alexander Dridiger
+	 */
+	private class DeleteBlogAsyncTask extends AsyncTask<Integer, Void, Void> {
+
+		@Override
+		protected void onPreExecute() {
+			Toast.makeText(SingleBlogActivity.this, getResources().getString(R.string.blog_deleting),
+					Toast.LENGTH_SHORT).show();
+		}
+
+		@Override
+		protected Void doInBackground(Integer... params) {
+			cwManager.deleteBlog(params[0], getString(R.string.cw_command_blogdelete));
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			Toast.makeText(SingleBlogActivity.this, getResources().getString(R.string.blog_deleted), Toast.LENGTH_SHORT)
+					.show();
+			if (SingleBlogActivity.this.getParent() instanceof CwBasicActivityGroup) {
+				((CwBasicActivityGroup) SingleBlogActivity.this.getParent()).back();
+			}
+		}
+	}
+
+	@Override
+	public void onBackPressed() {
+		if (getParent() instanceof CwBasicActivityGroup) {
+			((CwBasicActivityGroup) getParent()).back();
 		}
 	}
 }

@@ -29,6 +29,7 @@ import com.google.inject.Inject;
 import de.consolewars.android.app.CWManager;
 import de.consolewars.android.app.Filter;
 import de.consolewars.android.app.R;
+import de.consolewars.android.app.tab.CwBasicActivityGroup;
 import de.consolewars.android.app.util.DateUtility;
 import de.consolewars.android.app.util.StyleSpannableStringBuilder;
 import de.consolewars.android.app.util.ViewUtility;
@@ -127,7 +128,7 @@ public class MessagesActivity extends RoboActivity {
 			spinner.setAdapter(adapter);
 			spinner.setSelection(currentFilter.getPosition());
 			spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
-
+				@Override
 				public void onItemSelected(AdapterView<?> aView, View view, int position, long id) {
 					Filter selected;
 					if (position == Filter.MSGS_OUTBOX.getPosition()) {
@@ -140,7 +141,7 @@ public class MessagesActivity extends RoboActivity {
 						new BuildMessagesAsyncTask().execute();
 					}
 				}
-
+				@Override
 				public void onNothingSelected(AdapterView<?> arg0) {
 				}
 			});
@@ -227,8 +228,7 @@ public class MessagesActivity extends RoboActivity {
 		}
 
 		/**
-		 * Changes the current activity to a {@link SingleMessageActivity} with
-		 * the selected news.
+		 * Changes the current activity to a {@link SingleMessageActivity} with the selected news.
 		 * 
 		 * @param text
 		 */
@@ -296,6 +296,13 @@ public class MessagesActivity extends RoboActivity {
 			styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF009933), author);
 
 			return styleStringBuilder;
+		}
+	}
+
+	@Override
+	public void onBackPressed() {
+		if (getParent() instanceof CwBasicActivityGroup) {
+			((CwBasicActivityGroup) getParent()).back();
 		}
 	}
 }

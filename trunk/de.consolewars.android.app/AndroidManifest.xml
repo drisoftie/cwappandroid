@@ -63,6 +63,8 @@
 		<activity android:name=".tab.msgs.MessageWriterActivity" android:screenOrientation="portrait" android:configChanges="keyboardHidden|orientation"></activity>
 		<activity android:name=".tab.board.BoardActivityGroup" android:screenOrientation="portrait" android:configChanges="keyboardHidden|orientation"></activity>
 		<activity android:name=".tab.board.BoardActivity" android:screenOrientation="portrait" android:configChanges="keyboardHidden|orientation"></activity>
+		<activity android:name=".tab.blogs.BlogsWriterActivity" android:screenOrientation="portrait" android:configChanges="keyboardHidden|orientation"></activity>
+		<activity android:name=".tab.overview.ProfileActivity" android:screenOrientation="portrait" android:configChanges="keyboardHidden|orientation"></activity>
 
 
 
