@@ -125,7 +125,7 @@ public class SingleNewsActivity extends RoboActivity {
 				}
 				createHeader(newsView, news);
 				createCommentBttn();
-				vidURL = MediaSnapper.snapFromCleanedHTMLWithXPath(getString(R.string.cw_url, news.getUrl()),
+				vidURL = MediaSnapper.snapFromCleanedHTMLWithXPath(getString(R.string.cw_url_append, news.getUrl()),
 						getString(R.string.xpath_get_video), getString(R.string.value));
 				initVideos(news.getUrl());
 			}
@@ -207,7 +207,7 @@ public class SingleNewsActivity extends RoboActivity {
 		private void loadPicture(ImageView view, News news) {
 			int userID = -1;
 
-			String picURL = MediaSnapper.snapFromCleanedHTMLWithXPath(getString(R.string.cw_url, news.getUrl()),
+			String picURL = MediaSnapper.snapFromCleanedHTMLWithXPath(getString(R.string.cw_url_append, news.getUrl()),
 					getString(R.string.xpath_get_author), getString(R.string.href));
 			userID = Integer.valueOf(picURL.subSequence(getString(R.string.prefix_userpic).length(), picURL.length())
 					.toString());

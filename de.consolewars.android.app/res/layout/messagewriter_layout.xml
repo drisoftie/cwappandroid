@@ -21,8 +21,8 @@
 					android:id="@+id/messagewriter_txt_recipients"
 					android:layout_width="fill_parent"
 					android:layout_height="wrap_content"
-					android:textColor="@color/messagewriter_text"
-					android:layout_marginLeft="@dimen/messagewriter_text_margin"
+					android:textColor="@color/writer_text"
+					android:layout_marginLeft="@dimen/writer_text_margin"
 					android:textStyle="bold"
 					android:text="@string/messagewriter_recipients"/>
 				<EditText
@@ -36,9 +36,9 @@
 					android:id="@+id/messagewriter_txt_title"
 					android:layout_width="fill_parent"
 					android:layout_height="wrap_content"
-					android:textColor="@color/messagewriter_text"
-					android:layout_marginLeft="@dimen/messagewriter_text_margin"
-					android:layout_marginTop="@dimen/messagewriter_text_margin"
+					android:textColor="@color/writer_text"
+					android:layout_marginLeft="@dimen/writer_text_margin"
+					android:layout_marginTop="@dimen/writer_text_margin"
 					android:textStyle="bold"
 					android:text="@string/messagewriter_messagetitle"/>
 				<EditText
@@ -52,9 +52,9 @@
 					android:id="@+id/messagewriter_txt_message"
 					android:layout_width="fill_parent"
 					android:layout_height="wrap_content"
-					android:textColor="@color/messagewriter_text"
-					android:layout_marginLeft="@dimen/messagewriter_text_margin"
-					android:layout_marginTop="@dimen/messagewriter_text_margin"
+					android:textColor="@color/writer_text"
+					android:layout_marginLeft="@dimen/writer_text_margin"
+					android:layout_marginTop="@dimen/writer_text_margin"
 					android:textStyle="bold"
 					android:text="@string/messagewriter_message"/>
 				<EditText
@@ -62,41 +62,43 @@
 					android:layout_width="fill_parent"
 					android:layout_height="wrap_content"
 					android:minLines="7"
+					android:scrollbars="vertical"
+					android:gravity="top"
 					android:textSize="15dp"/>
 				<CheckBox
 					android:id="@+id/messagewriter_check_receipt"
-					android:layout_width="wrap_content"
+					android:layout_width="fill_parent"
 					android:layout_height="wrap_content"
-					android:textColor="@color/messagewriter_text"
-					android:layout_marginLeft="@dimen/messagewriter_text_margin"
+					android:textColor="@color/writer_text"
+					android:layout_marginLeft="@dimen/writer_text_margin"
 					android:text="@string/messagewriter_receipt"/>
 				<CheckBox
 					android:id="@+id/messagewriter_check_copy"
-					android:layout_width="wrap_content"
+					android:layout_width="fill_parent"
 					android:layout_height="wrap_content"
-					android:textColor="@color/messagewriter_text"
-					android:layout_marginLeft="@dimen/messagewriter_text_margin"
+					android:textColor="@color/writer_text"
+					android:layout_marginLeft="@dimen/writer_text_margin"
 					android:text="@string/messagewriter_copy"/>
 				<CheckBox
 					android:id="@+id/messagewriter_check_signature"
-					android:layout_width="wrap_content"
+					android:layout_width="fill_parent"
 					android:layout_height="wrap_content"
-					android:textColor="@color/messagewriter_text"
-					android:layout_marginLeft="@dimen/messagewriter_text_margin"
+					android:textColor="@color/writer_text"
+					android:layout_marginLeft="@dimen/writer_text_margin"
 					android:text="@string/messagewriter_signature"/>
 				<CheckBox
 					android:id="@+id/messagewriter_check_parseurl"
-					android:layout_width="wrap_content"
+					android:layout_width="fill_parent"
 					android:layout_height="wrap_content"
-					android:textColor="@color/messagewriter_text"
-					android:layout_marginLeft="@dimen/messagewriter_text_margin"
+					android:textColor="@color/writer_text"
+					android:layout_marginLeft="@dimen/writer_text_margin"
 					android:text="@string/messagewriter_parseurl"/>
 				<CheckBox
 					android:id="@+id/messagewriter_check_disablesmilies"
-					android:layout_width="wrap_content"
+					android:layout_width="fill_parent"
 					android:layout_height="wrap_content"
-					android:textColor="@color/messagewriter_text"
-					android:layout_marginLeft="@dimen/messagewriter_text_margin"
+					android:textColor="@color/writer_text"
+					android:layout_marginLeft="@dimen/writer_text_margin"
 					android:text="@string/messagewriter_disablesmilies"/>
 			</LinearLayout>
 			<Button

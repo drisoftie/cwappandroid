@@ -42,8 +42,7 @@ public class DatabaseManager {
 	private Context context;
 
 	/**
-	 * Constructor to get an Android {@link Context} and initializing the
-	 * database.
+	 * Constructor to get an Android {@link Context} and initializing the database.
 	 * 
 	 * @param context
 	 *            needed for {@link SQLiteOpenHelper}
@@ -80,11 +79,13 @@ public class DatabaseManager {
 	 * 
 	 * @return the row ID of the newly inserted row, or -1 if an error occurred
 	 */
-	public long insertUserData(String username, String hashPw, long date) {
+	public long insertUserData(String username, String hashPw, long date, int lastNewsID, int lastBlogID) {
 		ContentValues insertVal = new ContentValues();
 		insertVal.put(context.getString(R.string.db_username_attribute), username);
 		insertVal.put(context.getString(R.string.db_password_attribute), hashPw);
 		insertVal.put(context.getString(R.string.db_date_attribute), date);
+		insertVal.put(context.getString(R.string.db_lastknownnews), lastNewsID);
+		insertVal.put(context.getString(R.string.db_lastknownblog), lastBlogID);
 		return db.insert(userdata_table, "", insertVal);
 	}
 
@@ -126,8 +127,7 @@ public class DatabaseManager {
 	}
 
 	/**
-	 * Wrapping the query method of the actual database {@link
-	 * SQLiteDatabase.query()}.
+	 * Wrapping the query method of the actual database {@link SQLiteDatabase.query()}.
 	 * 
 	 * @param table
 	 * @param columns

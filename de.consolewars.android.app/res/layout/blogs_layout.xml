@@ -14,11 +14,17 @@
 			android:layout_height="wrap_content"
 			android:layout_alignParentRight="true"
 			android:background="@drawable/refresh_bump"/>
+		<Button
+			android:id="@+id/blogs_bttn_new_blog"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_toLeftOf="@id/blogs_bttn_refresh"
+			android:background="@drawable/def_bttn_new_mssg"/>
 		<Spinner
 			android:id="@+id/blogs_filter_spinner"
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
-			android:layout_toLeftOf="@id/blogs_bttn_refresh"
+			android:layout_toLeftOf="@id/blogs_bttn_new_blog"
 			android:prompt="@string/blogs_filter"/>
 	</RelativeLayout>
 	<ScrollView

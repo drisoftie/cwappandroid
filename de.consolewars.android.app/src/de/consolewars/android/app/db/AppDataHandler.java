@@ -23,8 +23,7 @@ import de.consolewars.android.app.R;
  * limitations under the License.
  */
 /**
- * Helper class providing access to app-specific data. Access to the db is also
- * leveraged by it.
+ * Helper class providing access to app-specific data. Access to the db is also leveraged by it.
  * 
  * @author Alexander Dridiger
  */
@@ -42,6 +41,8 @@ public class AppDataHandler {
 	private int userDbId = -1;
 	private long date = -1;
 	private String stringDate = "";
+	private int lastNewsID = -1;
+	private int lastBlogID = -1;
 
 	/**
 	 * @return
@@ -54,10 +55,12 @@ public class AppDataHandler {
 		String columnUsername = getString(R.string.db_username_attribute);
 		String columnPassw = getString(R.string.db_password_attribute);
 		String columnDate = getString(R.string.db_date_attribute);
+		String columnLastNews = getString(R.string.db_lastknownnews);
+		String columnLastBlog = getString(R.string.db_lastknownblog);
 
 		databaseManager.openDatabase();
 		Cursor cursor = databaseManager.fireQuery(tableName, new String[] { columnId, columnUsername, columnPassw,
-				columnDate }, null, null, null, null, getString(R.string.db_id_desc));
+				columnDate, columnLastNews, columnLastBlog }, null, null, null, null, getString(R.string.db_id_desc));
 		if (cursor.getCount() > 0 && cursor.moveToFirst()) {
 			for (String columnName : cursor.getColumnNames()) {
 				if (columnName.matches(columnUsername)) {
@@ -69,12 +72,21 @@ public class AppDataHandler {
 				} else if (columnName.matches(columnDate)) {
 					date = cursor.getLong(cursor.getColumnIndex(columnName));
 					stringDate = cursor.getString(cursor.getColumnIndex(columnName));
+				} else if (columnName.matches(columnLastNews)) {
+					lastNewsID = cursor.getInt(cursor.getColumnIndex(columnName));
+				} else if (columnName.matches(columnLastBlog)) {
+					lastBlogID = cursor.getInt(cursor.getColumnIndex(columnName));
 				}
 			}
 			existingUser = true;
 		}
 		cursor.close();
 		return existingUser;
+	}
+	
+	public void loadSavedNews(){
+		
+		
 	}
 
 	private String getString(int id) {
@@ -84,7 +96,7 @@ public class AppDataHandler {
 	/**
 	 * @return the userName
 	 */
-	public String getUserName() {
+	public String getUsername() {
 		return userName;
 	}
 
@@ -125,5 +137,19 @@ public class AppDataHandler {
 
 	public String getStringDate() {
 		return stringDate;
+	}
+
+	/**
+	 * @return the lastNewsID
+	 */
+	public int getLastNewsID() {
+		return lastNewsID;
+	}
+
+	/**
+	 * @return the lastBlogID
+	 */
+	public int getLastBlogID() {
+		return lastBlogID;
 	}
 }

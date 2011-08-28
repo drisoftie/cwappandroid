@@ -1,5 +1,6 @@
 package de.consolewars.android.app.tab.overview;
 
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -52,7 +53,7 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
  * 
  * @author Alexander Dridiger
  */
-public class OverviewActivity extends RoboActivity {
+public class ProfileActivity extends RoboActivity {
 
 	@Inject
 	private CWLoginManager cwLoginManager;
@@ -65,7 +66,7 @@ public class OverviewActivity extends RoboActivity {
 
 	private CwNavigationMainTabActivity mainTabs;
 
-	private ViewGroup overview_layout;
+	ViewGroup overview_layout;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -104,7 +105,7 @@ public class OverviewActivity extends RoboActivity {
 		protected void onPreExecute() {
 			// first set progressbar view
 			ViewGroup progress_layout = viewUtility.getCenteredProgressBarLayout(
-					LayoutInflater.from(OverviewActivity.this.getParent()), R.string.tab_overv_head);
+					LayoutInflater.from(ProfileActivity.this.getParent()), R.string.tab_overv_head);
 			setContentView(progress_layout);
 		}
 
@@ -128,6 +129,7 @@ public class OverviewActivity extends RoboActivity {
 		private void buildUserView(final View parent) {
 			final ViewGroup userLoggedLayout = (ViewGroup) parent.findViewById(R.id.overview_logged_user_layout);
 			final TextView usrnmTxt = (TextView) parent.findViewById(R.id.overview_username);
+			final EditText usrnmEdttxt = (EditText) parent.findViewById(R.id.overview_edttxt_username);
 			final ImageView icon = (ImageView) parent.findViewById(R.id.overview_usericon);
 			Button loginBttn = (Button) parent.findViewById(R.id.overview_login_user_bttn);
 			Button logoutBttn = (Button) parent.findViewById(R.id.overview_logout_user_bttn);
@@ -135,10 +137,11 @@ public class OverviewActivity extends RoboActivity {
 				loadPicture(icon, cwLoginManager.getUser().getUid());
 				setVisibility(View.INVISIBLE, userLoggedLayout, loginBttn);
 				setVisibility(View.VISIBLE, logoutBttn);
-				usrnmTxt.setText(cwLoginManager.getUser().getUsername());
+				usrnmTxt.setText(appDataHandler.getUsername());
 			} else {
 				setVisibility(View.VISIBLE, userLoggedLayout, loginBttn);
 				setVisibility(View.INVISIBLE, logoutBttn);
+				usrnmEdttxt.setText("Kein User gespeichert");
 			}
 
 			loginBttn.setOnClickListener(new OnClickListener() {
@@ -166,26 +169,12 @@ public class OverviewActivity extends RoboActivity {
 			int msgsAmount = 0;
 			if (appDataHandler.getDate() != -1) {
 				try {
-					newsAmount = 0;
-					if (cwManager.getNews().size() > 0) {
-						if (appDataHandler.getLastNewsID() > 0
-								&& cwManager.getNews().get(0).getId() > appDataHandler.getLastNewsID()) {
-							newsAmount = cwManager.getNews().get(0).getId() - appDataHandler.getLastNewsID();
-						}
-					}
-					blogsAmount = 0;
-					if (cwManager.getBlogs().size() > 0) {
-						if (appDataHandler.getLastBlogID() > 0
-								&& cwManager.getBlogs().get(0).getId() > appDataHandler.getLastBlogID()) {
-							newsAmount = cwManager.getBlogs().get(0).getId() - appDataHandler.getLastBlogID();
-						}
-					}
-					if (cwManager.getBlogs().size() > 0) {
-						if (appDataHandler.getLastBlogID() > 0
-								&& cwManager.getBlogs().get(0).getId() > appDataHandler.getLastBlogID()) {
-							newsAmount = cwManager.getBlogs().get(0).getId() - appDataHandler.getLastBlogID();
-						}
-					}
+					Date date = new Date(appDataHandler.getDate());
+					newsAmount = cwManager.getNews(5, Filter.NEWS_ALL, date).size();
+					blogsAmount = cwManager.getBlogs(5, Filter.BLOGS_NORMAL, date).size();
+					blogsAmount += cwManager.getBlogs(5, Filter.BLOGS_NEWS, date).size();
+					blogsAmount += cwManager.getBlogs(5, Filter.BLOGS_USER, date).size();
+
 					List<Message> msgs = cwManager.getMessages(Filter.MSGS_INBOX, 5);
 					msgs.addAll(cwManager.getMessages(Filter.MSGS_OUTBOX, 5));
 					for (Message msg : msgs) {
@@ -206,8 +195,8 @@ public class OverviewActivity extends RoboActivity {
 			flipper.addView(createBannerCell(getString(R.string.tab_msgs_tag), R.drawable.banner_msgs,
 					getString(R.string.overview_banner_msgs_title),
 					getString(R.string.overview_banner_details, msgsAmount, "Nachrichten")));
-			flipper.setInAnimation(AnimationUtils.loadAnimation(OverviewActivity.this, R.anim.overview_marquee_in));
-			flipper.setOutAnimation(AnimationUtils.loadAnimation(OverviewActivity.this, R.anim.overview_marquee_out));
+			flipper.setInAnimation(AnimationUtils.loadAnimation(ProfileActivity.this, R.anim.overview_marquee_in));
+			flipper.setOutAnimation(AnimationUtils.loadAnimation(ProfileActivity.this, R.anim.overview_marquee_out));
 			flipper.setFlipInterval(3000);
 			flipper.startFlipping();
 		}
@@ -261,7 +250,7 @@ public class OverviewActivity extends RoboActivity {
 			} else {
 				usrnmEdttxt.setError(null);
 				passwEdttxt.setError(null);
-				Toast.makeText(OverviewActivity.this, getResources().getString(R.string.try_login), Toast.LENGTH_SHORT)
+				Toast.makeText(ProfileActivity.this, getResources().getString(R.string.try_login), Toast.LENGTH_SHORT)
 						.show();
 				doWork = true;
 			}
@@ -269,13 +258,6 @@ public class OverviewActivity extends RoboActivity {
 
 		@Override
 		protected Bitmap doInBackground(Void... params) {
-			if (doWork) {
-				EditText usrnmEdttxt = (EditText) overview_layout.findViewById(R.id.overview_edttxt_username);
-				EditText passwEdttxt = (EditText) overview_layout.findViewById(R.id.overview_edttxt_passw);
-				cwLoginManager.saveAndLoginUser(usrnmEdttxt.getText().toString(), passwEdttxt.getText().toString(),
-						cwManager.getNews().size() > 0 ? cwManager.getNews().get(0).getId() : -1, cwManager.getBlogs()
-								.size() > 0 ? cwManager.getBlogs().get(0).getId() : -1);
-			}
 			return viewUtility.getUserIcon(cwLoginManager.getUser().getUid(), 60);
 		}
 
@@ -291,13 +273,13 @@ public class OverviewActivity extends RoboActivity {
 				icon.setImageBitmap(result);
 				setVisibility(View.INVISIBLE, userLoggedLayout, loginBttn);
 				setVisibility(View.VISIBLE, logoutBttn);
-				Toast.makeText(OverviewActivity.this, getResources().getString(R.string.logged_in), Toast.LENGTH_SHORT)
+				Toast.makeText(ProfileActivity.this, getResources().getString(R.string.logged_in), Toast.LENGTH_SHORT)
 						.show();
 			} else if (doWork) {
 				icon.setImageBitmap(result);
 				setVisibility(View.VISIBLE, userLoggedLayout, loginBttn);
 				setVisibility(View.INVISIBLE, logoutBttn);
-				Toast.makeText(OverviewActivity.this, getResources().getString(R.string.login_failed),
+				Toast.makeText(ProfileActivity.this, getResources().getString(R.string.login_failed),
 						Toast.LENGTH_SHORT).show();
 			}
 		}
@@ -312,7 +294,7 @@ public class OverviewActivity extends RoboActivity {
 
 		@Override
 		protected void onPreExecute() {
-			Toast.makeText(OverviewActivity.this, getResources().getString(R.string.logging_out), Toast.LENGTH_SHORT)
+			Toast.makeText(ProfileActivity.this, getResources().getString(R.string.logging_out), Toast.LENGTH_SHORT)
 					.show();
 		}
 
@@ -333,7 +315,7 @@ public class OverviewActivity extends RoboActivity {
 			usrnmTxt.setText("");
 			setVisibility(View.VISIBLE, userLoggedLayout, loginBttn);
 			setVisibility(View.INVISIBLE, logoutBttn);
-			Toast.makeText(OverviewActivity.this, getResources().getString(R.string.logged_out), Toast.LENGTH_SHORT)
+			Toast.makeText(ProfileActivity.this, getResources().getString(R.string.logged_out), Toast.LENGTH_SHORT)
 					.show();
 		}
 	}

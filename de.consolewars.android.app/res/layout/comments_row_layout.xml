@@ -11,41 +11,47 @@
 		android:layout_margin="@dimen/comments_cell_margin"
 		android:layout_marginBottom="1dp"
 		android:background="@drawable/def_comments_author_cell_bg">
-		<ImageView
-			android:id="@+id/cmts_usericon"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_alignParentLeft="true"
-			android:layout_marginTop="@dimen/blogs_row_icon_padding_top"
-			android:layout_marginLeft="@dimen/blogs_row_icon_padding_left"
-			android:layout_marginBottom="2dp"/>
-		<TextView
-			android:id="@+id/cmts_username"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_margin="@dimen/blogs_row_title_padding"
-			android:layout_toRightOf="@id/cmts_usericon"
-			android:layout_centerVertical="true"
-			android:marqueeRepeatLimit="marquee_forever"
-			android:singleLine="true"
-			android:ellipsize="marquee"
-			android:textColor="@color/blogs_table_text_title"/>
-		<TextView
-			android:id="@+id/cmts_date"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_alignParentRight="true"
-			android:layout_margin="@dimen/blogs_row_title_padding"
-			android:layout_centerVertical="true"
-			android:marqueeRepeatLimit="marquee_forever"
-			android:singleLine="true"
-			android:ellipsize="marquee"
-			android:textColor="@color/blogs_table_text_title"/>
+		<RelativeLayout
+			android:id="@+id/cmts_bttn_header_layout"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content">
+			<ImageView
+				android:id="@+id/cmts_usericon"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_alignParentLeft="true"
+				android:layout_marginTop="@dimen/blogs_row_icon_padding_top"
+				android:layout_marginLeft="@dimen/blogs_row_icon_padding_left"
+				android:layout_marginBottom="2dp"/>
+			<TextView
+				android:id="@+id/cmts_username"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_margin="@dimen/blogs_row_title_padding"
+				android:layout_toRightOf="@id/cmts_usericon"
+				android:layout_centerVertical="true"
+				android:marqueeRepeatLimit="marquee_forever"
+				android:singleLine="true"
+				android:ellipsize="marquee"
+				android:textColor="@color/blogs_table_text_title"/>
+			<TextView
+				android:id="@+id/cmts_date"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_alignParentRight="true"
+				android:layout_margin="@dimen/blogs_row_title_padding"
+				android:layout_centerVertical="true"
+				android:marqueeRepeatLimit="marquee_forever"
+				android:singleLine="true"
+				android:ellipsize="marquee"
+				android:textColor="@color/blogs_table_text_title"/>
+		</RelativeLayout>
 		<LinearLayout
 			android:id="@+id/cmts_bttn_delete_edit_layout"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_toLeftOf="@id/cmts_date"
+			android:layout_alignParentRight="true"
+			android:layout_below="@id/cmts_bttn_header_layout"
 			android:layout_marginTop="@dimen/blogs_row_icon_padding_top"
 			android:layout_marginLeft="@dimen/blogs_row_icon_padding_left"/>
 	</RelativeLayout>

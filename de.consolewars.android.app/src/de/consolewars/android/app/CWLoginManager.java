@@ -42,7 +42,7 @@ public class CWLoginManager {
 	@Inject
 	private AppDataHandler appDataHandler;
 
-	private boolean isLoggedIn;
+	private boolean isLoggedIn = false;
 
 	private AuthenticatedUser user;
 
@@ -68,7 +68,7 @@ public class CWLoginManager {
 		isLoggedIn = false;
 	}
 
-	public boolean saveAndLoginUser(String username, String passw) {
+	public boolean saveAndLoginUser(String username, String passw, int lastNewsID, int lastBlogID) {
 		Calendar calendar = GregorianCalendar.getInstance();
 		if (appDataHandler.getUserDbId() != -1) {
 			try {
@@ -80,7 +80,8 @@ public class CWLoginManager {
 		} else {
 			try {
 				databaseManager.insertUserData(username,
-						HashEncrypter.encrypt(context.getString(R.string.db_cry), passw), calendar.getTimeInMillis());
+						HashEncrypter.encrypt(context.getString(R.string.db_cry), passw), calendar.getTimeInMillis(),
+						lastNewsID, lastBlogID);
 			} catch (GeneralSecurityException e) {
 				e.printStackTrace();
 			}
@@ -93,18 +94,20 @@ public class CWLoginManager {
 	 */
 	public boolean checkSavedUserAndLogin() {
 		if (appDataHandler.loadCurrentUser()) {
-			AuthenticatedUser user = null;
+			user = null;
 			try {
-				user = cwManager.getAuthUser(appDataHandler.getUserName(),
+				user = cwManager.getAuthUser(appDataHandler.getUsername(),
 						HashEncrypter.decrypt(context.getString(R.string.db_cry), appDataHandler.getHashPw()));
 			} catch (ConsolewarsAPIException e) {
 				e.printStackTrace();
 			} catch (GeneralSecurityException e) {
 				e.printStackTrace();
 			}
-			if (user.getSuccess().matches(context.getString(R.string.success_yes))) {
-				this.user = user;
+			if (getUser().getSuccess().equals(context.getString(R.string.success_yes))
+					&& getUser().getUsername().length() > 0) {
 				isLoggedIn = true;
+			} else {
+				isLoggedIn = false;
 			}
 		} else {
 			isLoggedIn = false;

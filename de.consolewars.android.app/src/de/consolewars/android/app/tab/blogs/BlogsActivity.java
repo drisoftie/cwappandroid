@@ -32,6 +32,7 @@ import de.consolewars.android.app.CWLoginManager;
 import de.consolewars.android.app.CWManager;
 import de.consolewars.android.app.Filter;
 import de.consolewars.android.app.R;
+import de.consolewars.android.app.tab.CwBasicActivityGroup;
 import de.consolewars.android.app.util.DateUtility;
 import de.consolewars.android.app.util.StyleSpannableStringBuilder;
 import de.consolewars.android.app.util.ViewUtility;
@@ -213,6 +214,24 @@ public class BlogsActivity extends RoboActivity {
 		@Override
 		protected void onPostExecute(Void result) {
 			createLastRow();
+			initSendBlogBttn();
+		}
+
+		private void initSendBlogBttn() {
+			Button new_bttn = (Button) blogs_layout.findViewById(R.id.blogs_bttn_new_blog);
+			new_bttn.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View arg0) {
+					Intent newBlogIntent = new Intent(BlogsActivity.this, BlogsWriterActivity.class);
+
+					View view = ((ActivityGroup) getParent())
+							.getLocalActivityManager()
+							.startActivity(BlogsWriterActivity.class.getSimpleName(),
+									newBlogIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
+					// replace the view
+					((BlogsActivityGroup) getParent()).replaceView(view);
+				}
+			});
 		}
 
 		private void createLastRow() {
@@ -444,6 +463,13 @@ public class BlogsActivity extends RoboActivity {
 			styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF7e6003), String.valueOf(commentAmount));
 
 			return styleStringBuilder;
+		}
+	}
+
+	@Override
+	public void onBackPressed() {
+		if (getParent() instanceof CwBasicActivityGroup) {
+			((CwBasicActivityGroup) getParent()).back();
 		}
 	}
 }
