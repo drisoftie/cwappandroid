@@ -183,7 +183,8 @@ public class BlogsWriterActivity extends RoboActivity {
 		@Override
 		protected Void doInBackground(Void... params) {
 			initView();
-			if (BlogsWriterActivity.this.getIntent().getExtras().getInt(getString(R.string.id), -1) != -1) {
+			if (BlogsWriterActivity.this.getIntent().hasExtra(getString(R.string.id))
+					&& BlogsWriterActivity.this.getIntent().getExtras().getInt(getString(R.string.id), -1) != -1) {
 				id = BlogsWriterActivity.this.getIntent().getExtras().getInt(getString(R.string.id));
 				Blog blog = null;
 				try {

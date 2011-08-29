@@ -174,16 +174,12 @@ public class OverviewActivity extends RoboActivity {
 						}
 					}
 					blogsAmount = 0;
-					if (cwManager.getBlogs().size() > 0) {
+					if (cwManager.getBlogs(Filter.BLOGS_NORMAL).size() > 0) {
 						if (appDataHandler.getLastBlogID() > 0
-								&& cwManager.getBlogs().get(0).getId() > appDataHandler.getLastBlogID()) {
-							newsAmount = cwManager.getBlogs().get(0).getId() - appDataHandler.getLastBlogID();
-						}
-					}
-					if (cwManager.getBlogs().size() > 0) {
-						if (appDataHandler.getLastBlogID() > 0
-								&& cwManager.getBlogs().get(0).getId() > appDataHandler.getLastBlogID()) {
-							newsAmount = cwManager.getBlogs().get(0).getId() - appDataHandler.getLastBlogID();
+								&& cwManager.getBlogs(Filter.BLOGS_NORMAL).get(0).getId() > appDataHandler
+										.getLastBlogID()) {
+							blogsAmount = cwManager.getBlogs(Filter.BLOGS_NORMAL).get(0).getId()
+									- appDataHandler.getLastBlogID();
 						}
 					}
 					List<Message> msgs = cwManager.getMessages(Filter.MSGS_INBOX, 5);
@@ -273,8 +269,9 @@ public class OverviewActivity extends RoboActivity {
 				EditText usrnmEdttxt = (EditText) overview_layout.findViewById(R.id.overview_edttxt_username);
 				EditText passwEdttxt = (EditText) overview_layout.findViewById(R.id.overview_edttxt_passw);
 				cwLoginManager.saveAndLoginUser(usrnmEdttxt.getText().toString(), passwEdttxt.getText().toString(),
-						cwManager.getNews().size() > 0 ? cwManager.getNews().get(0).getId() : -1, cwManager.getBlogs()
-								.size() > 0 ? cwManager.getBlogs().get(0).getId() : -1);
+						cwManager.getNews().size() > 0 ? cwManager.getNews().get(0).getId() : -1,
+						cwManager.getBlogs(Filter.BLOGS_NORMAL).size() > 0 ? cwManager.getBlogs(Filter.BLOGS_NORMAL)
+								.get(0).getId() : -1);
 			}
 			return viewUtility.getUserIcon(cwLoginManager.getUser().getUid(), 60);
 		}

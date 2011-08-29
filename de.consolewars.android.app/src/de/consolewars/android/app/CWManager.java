@@ -61,6 +61,7 @@ public class CWManager {
 
 	private List<News> news;
 	private List<Blog> blogs;
+	private List<Blog> userBlogs;
 	private List<Message> msgs;
 	private int newestNews = -1;
 	private int newestBlog = -1;
@@ -97,32 +98,85 @@ public class CWManager {
 	 * @throws ConsolewarsAPIException
 	 */
 	public void setupEntities() throws ConsolewarsAPIException {
-		// if (appDataHandler.getLastNewsID() > 0 && getNews(1, Filter.NEWS_ALL, null).size() == 1) {
-		// News newNews = getNews(1, Filter.NEWS_ALL, null).get(0);
-		// this.newestNews = newNews.getId();
-		// }
-		getNewsAndStore(100, Filter.NEWS_ALL, null);
-		getBlogsAndStore(100, Filter.BLOGS_NEWS, null);
-		getMessagesAndStore(Filter.MSGS_INBOX, 100);
+		List<News> news = getNews(1, Filter.NEWS_ALL, null);
+		if (!news.isEmpty()) {
+			News newNews = news.get(0);
+			this.newestNews = newNews.getId();
+			getNewsByIDAndStore(this.newestNews, true);
+		}
+		List<Blog> newsBlogs = getBlogs(1, Filter.BLOGS_NEWS, null);
+		int newsBlogsID = -1;
+		List<Blog> normalBlogs = getBlogs(1, Filter.BLOGS_NORMAL, null);
+		int normalBlogsID = -1;
+		if (!newsBlogs.isEmpty()) {
+			newsBlogsID = newsBlogs.get(0).getId();
+		}
+		if (!normalBlogs.isEmpty()) {
+			normalBlogsID = normalBlogs.get(0).getId();
+		}
+		// if one id is higher as the other, set it as newest id
+		newestBlog = (newsBlogsID - normalBlogsID >= 0) ? (newsBlogsID) : (normalBlogsID);
+		getBlogsByIDAndStore(this.newestBlog, true);
+
+		getUserBlogsAndStore(cwLoginManager.getUser().getUid(), 10, null);
+		getMessagesAndStore(Filter.MSGS_INBOX, 10);
 	}
 
 	/**
 	 * @return the blogs
 	 */
-	public List<Blog> getBlogs() {
-		if (blogs == null) {
-			blogs = new ArrayList<Blog>();
+	public List<Blog> getBlogs(Filter filter) {
+		if (filter.equals(Filter.BLOGS_USER)) {
+			if (userBlogs == null) {
+				userBlogs = new ArrayList<Blog>();
+			}
+			return userBlogs;
+		} else {
+			if (blogs == null) {
+				blogs = new ArrayList<Blog>();
+			}
+			return blogs;
 		}
-		return blogs;
 	}
 
 	public List<Blog> getBlogsAndStore(int count, Filter filter, Date date) {
+		if (filter.equals(Filter.BLOGS_USER)) {
+			userBlogs = getUserBlogsAndStore(cwLoginManager.getUser().getUid(), count, date);
+			return userBlogs;
+		}
 		try {
 			blogs = getBlogs(count, filter, date);
 		} catch (ConsolewarsAPIException e) {
 			e.printStackTrace();
 		}
-		return getBlogs();
+		return getBlogs(filter);
+	}
+
+	public List<Blog> getUserBlogsAndStore(int userId, int count, Date date) {
+		try {
+			userBlogs = getUserBlogs(userId, count, date);
+		} catch (ConsolewarsAPIException e) {
+			e.printStackTrace();
+		}
+		return getBlogs(Filter.BLOGS_USER);
+	}
+
+	public void getBlogsByIDAndStore(int startID, boolean desc) throws ConsolewarsAPIException {
+		int amount = 10;
+		if (startID < amount && startID > 0 && desc) {
+			amount = startID;
+		}
+		int[] ids = new int[amount];
+		for (int i = 0; i < amount; i++) {
+			// if descending, reduce -1 to the startID etc., else add +1
+			ids[i] = (desc) ? (startID - i) : (startID + i);
+		}
+
+		if (desc) {
+			getBlogs(Filter.BLOGS_NORMAL).addAll(api.getBlogs(ids));
+		} else {
+			getBlogs(Filter.BLOGS_NORMAL).addAll(0, api.getBlogs(ids));
+		}
 	}
 
 	/**
@@ -195,6 +249,24 @@ public class CWManager {
 		return getNews();
 	}
 
+	public void getNewsByIDAndStore(int startID, boolean desc) throws ConsolewarsAPIException {
+		int amount = 10;
+		if (startID < amount && startID > 0 && desc) {
+			amount = startID;
+		}
+		int[] ids = new int[amount];
+		for (int i = 0; i < amount; i++) {
+			// if descending, reduce -1 to the startID etc., else add +1
+			ids[i] = (desc) ? (startID - i) : (startID + i);
+		}
+
+		if (desc) {
+			getNews().addAll(api.getNews(ids));
+		} else {
+			getNews().addAll(0, api.getNews(ids));
+		}
+	}
+
 	/**
 	 * Method wrapper for {@link API.getNews()}.
 	 * 
@@ -205,7 +277,7 @@ public class CWManager {
 	 * @throws ConsolewarsAPIException
 	 */
 	public List<News> getNews(int count, Filter filter, Date date) throws ConsolewarsAPIException {
-		return api.getNewsList(50, filter.getFilter(), date);
+		return api.getNewsList(count, filter.getFilter(), date);
 	}
 
 	/**
@@ -445,5 +517,19 @@ public class CWManager {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * @return the newestNews
+	 */
+	public int getNewestNews() {
+		return newestNews;
+	}
+
+	/**
+	 * @return the newestBlog
+	 */
+	public int getNewestBlog() {
+		return newestBlog;
 	}
 }

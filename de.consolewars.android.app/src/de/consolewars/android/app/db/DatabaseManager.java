@@ -127,6 +127,23 @@ public class DatabaseManager {
 	}
 
 	/**
+	 * Convenient method to update dates.
+	 * 
+	 * @param id
+	 *            the id of the entity to be updated; mandatory
+	 * @param date
+	 *            mandatory
+	 * @return the number of rows affected
+	 */
+	public int updateIDs(int id, int newsID, int blogID) {
+		ContentValues update = new ContentValues();
+		update.put(context.getString(R.string.db_lastknownnews), newsID);
+		update.put(context.getString(R.string.db_lastknownblog), blogID);
+		return db.update(userdata_table, update, context.getString(R.string.db_wherearg_id),
+				new String[] { Long.toString(id) });
+	}
+
+	/**
 	 * Wrapping the query method of the actual database {@link SQLiteDatabase.query()}.
 	 * 
 	 * @param table

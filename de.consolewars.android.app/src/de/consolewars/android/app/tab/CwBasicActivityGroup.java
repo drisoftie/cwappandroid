@@ -14,6 +14,7 @@ import android.view.View;
 
 import com.google.inject.Inject;
 
+import de.consolewars.android.app.CWManager;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.db.AppDataHandler;
 import de.consolewars.android.app.db.DatabaseManager;
@@ -39,6 +40,8 @@ import de.consolewars.android.app.db.DatabaseManager;
  */
 public abstract class CwBasicActivityGroup extends RoboActivityGroup implements ICwActivityGroup {
 
+	@Inject
+	private CWManager cwManager;
 	@Inject
 	private AppDataHandler appDataHandler;
 	@Inject
@@ -67,6 +70,8 @@ public abstract class CwBasicActivityGroup extends RoboActivityGroup implements 
 								if (appDataHandler.loadCurrentUser()) {
 									databaseManager.updateDate(appDataHandler.getUserDbId(), GregorianCalendar
 											.getInstance().getTimeInMillis());
+									databaseManager.updateIDs(appDataHandler.getUserDbId(), cwManager.getNewestNews(),
+											cwManager.getNewestBlog());
 								}
 								databaseManager.closeDatabase();
 							}
