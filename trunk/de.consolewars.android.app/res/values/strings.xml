@@ -69,8 +69,7 @@
 	<string name="blog_deleted">Der Blog wurde erfolgreich gelöscht.</string>
 	<string name="blogswriter_sending">Blog wird abgeschickt...</string>
 	<string name="blogswriter_sent">Blog wurde erfolgreich geschrieben.</string>
-	<string name="blogswriter_too_short">Blogtext ist zu kurz. Mindestens 150 Zeichen benötigt.
-	</string>
+	<string name="blogswriter_too_short">Blogtext ist zu kurz. Mindestens 150 Zeichen benötigt.	</string>
 	<string name="blogswriter_blogtitle">Blogtitel:</string>
 	<string name="blogswriter_blogcontent">Bloginhalt:</string>
 	<string name="blogswriter_tags">Tags (mit Komma getrennt):</string>
@@ -79,6 +78,7 @@
 	<string name="blogswriter_visible">ist sichtbar</string>
 	<string name="blogswriter_comments_allowed">Kommentare erlauben</string>
 	<string name="blogswriter_newsblog">Ist ein Newsblog</string>
+	<string name="blogmode_normal">normal</string>
 
 	<!-- messages -->
 	<string name="messagewriter_sending">Nachricht wird gesendet...</string>

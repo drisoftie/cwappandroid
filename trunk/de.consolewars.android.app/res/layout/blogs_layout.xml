@@ -27,7 +27,7 @@
 			android:layout_toLeftOf="@id/blogs_bttn_new_blog"
 			android:prompt="@string/blogs_filter"/>
 	</RelativeLayout>
-	<ScrollView
+	<de.consolewars.android.app.view.ScrollDetectorScrollView
 		android:id="@+id/blogs_scroll_view"
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent">
@@ -35,7 +35,6 @@
 			android:id="@+id/blogs_table"
 			android:layout_width="fill_parent"
 			android:layout_height="fill_parent"
-			android:layout_margin="3dip">
-		</TableLayout>
-	</ScrollView>
+			android:layout_margin="3dip"/>
+	</de.consolewars.android.app.view.ScrollDetectorScrollView>
 </LinearLayout>
