@@ -1,10 +1,12 @@
 package de.consolewars.android.app.tab;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.GregorianCalendar;
+import java.util.Date;
 import java.util.List;
 
 import roboguice.activity.RoboActivityGroup;
+import roboguice.util.Ln;
 import android.app.Activity;
 import android.app.ActivityGroup;
 import android.app.AlertDialog;
@@ -13,11 +15,12 @@ import android.content.DialogInterface.OnClickListener;
 import android.view.View;
 
 import com.google.inject.Inject;
+import com.j256.ormlite.dao.Dao;
 
-import de.consolewars.android.app.CWManager;
+import de.consolewars.android.app.CwManager;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.db.AppDataHandler;
-import de.consolewars.android.app.db.DatabaseManager;
+import de.consolewars.android.app.db.domain.CwUser;
 
 /*
  * Copyright [2010] [Alexander Dridiger]
@@ -34,18 +37,19 @@ import de.consolewars.android.app.db.DatabaseManager;
  * limitations under the License.
  */
 /**
- * Basic implementation of an {@link ActivityGroup} supporting {@link Activity} switching and {@link View} caching.
+ * Basic implementation of an {@link ActivityGroup} supporting {@link Activity}
+ * switching and {@link View} caching.
  * 
  * @author Alexander Dridiger
  */
 public abstract class CwBasicActivityGroup extends RoboActivityGroup implements ICwActivityGroup {
 
 	@Inject
-	private CWManager cwManager;
+	private CwManager cwManager;
 	@Inject
 	private AppDataHandler appDataHandler;
 	@Inject
-	private DatabaseManager databaseManager;
+	private Dao<CwUser, Integer> cwUserDao;
 
 	private List<View> viewCache;
 
@@ -68,12 +72,16 @@ public abstract class CwBasicActivityGroup extends RoboActivityGroup implements 
 						public void onClick(DialogInterface dialog, int which) {
 							if (getParent() instanceof CwNavigationMainTabActivity) {
 								if (appDataHandler.loadCurrentUser()) {
-									databaseManager.updateDate(appDataHandler.getUserDbId(), GregorianCalendar
-											.getInstance().getTimeInMillis());
-									databaseManager.updateIDs(appDataHandler.getUserDbId(), cwManager.getNewestNews(),
-											cwManager.getNewestBlog());
+									CwUser cwUser = appDataHandler.getCwUser();
+									cwUser.setDate(new Date());
+									cwUser.setLastBlogId(cwManager.getNewestBlog());
+									cwUser.setLastNewsId(cwManager.getNewestNews());
+									try {
+										cwUserDao.update(cwUser);
+									} catch (SQLException e) {
+										Ln.e(e);
+									}
 								}
-								databaseManager.closeDatabase();
 							}
 							finish();
 						}

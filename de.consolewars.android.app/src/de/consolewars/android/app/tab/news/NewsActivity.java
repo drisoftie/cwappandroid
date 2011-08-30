@@ -23,7 +23,7 @@ import android.widget.TextView;
 
 import com.google.inject.Inject;
 
-import de.consolewars.android.app.CWManager;
+import de.consolewars.android.app.CwManager;
 import de.consolewars.android.app.Filter;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwBasicActivityGroup;
@@ -57,7 +57,7 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
 public class NewsActivity extends RoboActivity {
 
 	@Inject
-	private CWManager cwManager;
+	private CwManager cwManager;
 	@Inject
 	private ViewUtility viewUtility;
 

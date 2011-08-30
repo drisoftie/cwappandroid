@@ -24,7 +24,7 @@ import android.widget.Toast;
 
 import com.google.inject.Inject;
 
-import de.consolewars.android.app.CWManager;
+import de.consolewars.android.app.CwManager;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwBasicActivityGroup;
 import de.consolewars.android.app.util.DateUtility;
@@ -53,7 +53,7 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
 public class BlogsWriterActivity extends RoboActivity {
 
 	@Inject
-	private CWManager cwManager;
+	private CwManager cwManager;
 
 	private View blogswriter_layout;
 

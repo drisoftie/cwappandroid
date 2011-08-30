@@ -21,9 +21,9 @@ import android.widget.Toast;
 
 import com.google.inject.Inject;
 
-import de.consolewars.android.app.CWLoginManager;
-import de.consolewars.android.app.CWManager;
-import de.consolewars.android.app.CWManager.CommentArea;
+import de.consolewars.android.app.CwLoginManager;
+import de.consolewars.android.app.CwManager;
+import de.consolewars.android.app.CwManager.CommentArea;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwBasicActivityGroup;
 import de.consolewars.android.app.tab.cmts.CommentsActivity;
@@ -55,9 +55,9 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
 public class SingleBlogActivity extends RoboActivity {
 
 	@Inject
-	private CWLoginManager cwLoginManager;
+	private CwLoginManager cwLoginManager;
 	@Inject
-	private CWManager cwManager;
+	private CwManager cwManager;
 	@Inject
 	private ViewUtility viewUtility;
 
@@ -172,7 +172,7 @@ public class SingleBlogActivity extends RoboActivity {
 		}
 
 		private void createEditBttn(View blogView, final Blog blog) {
-			if (cwLoginManager.isLoggedIn() && blog.getUid() == cwLoginManager.getUser().getUid()) {
+			if (cwLoginManager.isLoggedIn() && blog.getUid() == cwLoginManager.getAuthenticatedUser().getUid()) {
 				Button bttn = (Button) blogView.findViewById(R.id.singleblog_edit_bttn);
 				bttn.setVisibility(View.VISIBLE);
 				bttn.setOnClickListener(new OnClickListener() {
@@ -197,7 +197,7 @@ public class SingleBlogActivity extends RoboActivity {
 		}
 
 		private void createDeleteBttn(View blogView, final Blog blog) {
-			if (cwLoginManager.isLoggedIn() && blog.getUid() == cwLoginManager.getUser().getUid()) {
+			if (cwLoginManager.isLoggedIn() && blog.getUid() == cwLoginManager.getAuthenticatedUser().getUid()) {
 				Button bttn = (Button) blogView.findViewById(R.id.singleblog_delete_bttn);
 				bttn.setVisibility(View.VISIBLE);
 				bttn.setOnClickListener(new OnClickListener() {

@@ -12,7 +12,7 @@ import android.widget.Toast;
 
 import com.google.inject.Inject;
 
-import de.consolewars.android.app.CWManager;
+import de.consolewars.android.app.CwManager;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwBasicActivityGroup;
 
@@ -38,7 +38,7 @@ import de.consolewars.android.app.tab.CwBasicActivityGroup;
 public class MessageWriterActivity extends RoboActivity {
 
 	@Inject
-	private CWManager cwManager;
+	private CwManager cwManager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

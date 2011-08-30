@@ -22,7 +22,7 @@ import android.widget.TextView;
 
 import com.google.inject.Inject;
 
-import de.consolewars.android.app.CWManager.CommentArea;
+import de.consolewars.android.app.CwManager.CommentArea;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwBasicActivityGroup;
 import de.consolewars.android.app.tab.cmts.CommentsActivity;

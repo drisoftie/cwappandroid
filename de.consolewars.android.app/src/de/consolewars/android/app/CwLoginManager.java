@@ -1,16 +1,17 @@
 package de.consolewars.android.app;
 
 import java.security.GeneralSecurityException;
-import java.util.Calendar;
 import java.util.GregorianCalendar;
 
+import roboguice.util.Ln;
 import android.content.Context;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.j256.ormlite.dao.Dao;
 
 import de.consolewars.android.app.db.AppDataHandler;
-import de.consolewars.android.app.db.DatabaseManager;
+import de.consolewars.android.app.db.domain.CwUser;
 import de.consolewars.android.app.util.HashEncrypter;
 import de.consolewars.api.data.AuthenticatedUser;
 import de.consolewars.api.exception.ConsolewarsAPIException;
@@ -31,62 +32,41 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
  */
 
 @Singleton
-public class CWLoginManager {
+public class CwLoginManager {
 
 	@Inject
-	private CWManager cwManager;
-	@Inject
-	private DatabaseManager databaseManager;
+	private CwManager cwManager;
 	@Inject
 	private Context context;
 	@Inject
 	private AppDataHandler appDataHandler;
+	@Inject
+	private Dao<CwUser, Integer> cwUserDao;
 
 	private boolean isLoggedIn = false;
-
 	private AuthenticatedUser user;
 
-	/**
-	 * @return the isLoggedIn
-	 */
-	public boolean isLoggedIn() {
-		return isLoggedIn;
-	}
-
-	/**
-	 * @return the user
-	 */
-	public AuthenticatedUser getUser() {
-		if (user == null) {
-			user = new AuthenticatedUser();
-		}
-		return user;
-	}
-
-	public void logoutUser() {
-		user = new AuthenticatedUser();
-		isLoggedIn = false;
-	}
-
-	public boolean saveAndLoginUser(String username, String passw, int lastNewsID, int lastBlogID) {
-		Calendar calendar = GregorianCalendar.getInstance();
-		if (appDataHandler.getUserDbId() != -1) {
-			try {
-				databaseManager.updateUserData(appDataHandler.getUserDbId(), username,
-						HashEncrypter.encrypt(context.getString(R.string.db_cry), passw), calendar.getTimeInMillis());
-			} catch (GeneralSecurityException e) {
-				e.printStackTrace();
+	public boolean saveAndLoginUser(String userName, String passw, int lastNewsId, int lastBlogId) {
+		try {
+			CwUser cwUser;
+			if (appDataHandler.getCwUser() != null) {
+				cwUser = appDataHandler.getCwUser();
+			} else {
+				cwUser = new CwUser();
 			}
-		} else {
-			try {
-				databaseManager.insertUserData(username,
-						HashEncrypter.encrypt(context.getString(R.string.db_cry), passw), calendar.getTimeInMillis(),
-						lastNewsID, lastBlogID);
-			} catch (GeneralSecurityException e) {
-				e.printStackTrace();
-			}
+
+			cwUser.setName(userName);
+			cwUser.setHashPassword(HashEncrypter.encrypt(context.getString(R.string.db_cry), passw));
+			cwUser.setDate(GregorianCalendar.getInstance().getTime());
+			cwUser.setLastBlogId(lastBlogId);
+			cwUser.setLastNewsId(lastNewsId);
+
+			cwUserDao.createOrUpdate(cwUser);
+			return checkSavedUserAndLogin();
+		} catch (Exception e) {
+			Ln.e(e);
 		}
-		return checkSavedUserAndLogin();
+		return false;
 	}
 
 	/**
@@ -94,17 +74,15 @@ public class CWLoginManager {
 	 */
 	public boolean checkSavedUserAndLogin() {
 		if (appDataHandler.loadCurrentUser()) {
-			user = null;
 			try {
-				user = cwManager.getAuthUser(appDataHandler.getUsername(),
-						HashEncrypter.decrypt(context.getString(R.string.db_cry), appDataHandler.getHashPw()));
+				user = cwManager.getAuthUser(appDataHandler.getCwUser().getName(), HashEncrypter.decrypt(
+						context.getString(R.string.db_cry), appDataHandler.getCwUser().getHashPassword()));
 			} catch (ConsolewarsAPIException e) {
 				e.printStackTrace();
 			} catch (GeneralSecurityException e) {
 				e.printStackTrace();
 			}
-			if (getUser().getSuccess().equals(context.getString(R.string.success_yes))
-					&& getUser().getUsername().length() > 0) {
+			if (context.getString(R.string.success_yes).equals(user.getSuccess()) && user.getUsername().length() > 0) {
 				isLoggedIn = true;
 			} else {
 				isLoggedIn = false;
@@ -115,4 +93,22 @@ public class CWLoginManager {
 		return isLoggedIn;
 	}
 
+	/**
+	 * @return the isLoggedIn
+	 */
+	public boolean isLoggedIn() {
+		return isLoggedIn;
+	}
+
+	public AuthenticatedUser getAuthenticatedUser() {
+		if (user == null) {
+			user = new AuthenticatedUser();
+		}
+		return user;
+	}
+
+	public void logoutUser() {
+		user = new AuthenticatedUser();
+		isLoggedIn = false;
+	}
 }
