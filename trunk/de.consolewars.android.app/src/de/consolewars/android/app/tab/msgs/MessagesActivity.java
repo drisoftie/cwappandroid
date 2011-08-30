@@ -26,7 +26,7 @@ import android.widget.TextView;
 
 import com.google.inject.Inject;
 
-import de.consolewars.android.app.CWManager;
+import de.consolewars.android.app.CwManager;
 import de.consolewars.android.app.Filter;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwBasicActivityGroup;
@@ -58,7 +58,7 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
 public class MessagesActivity extends RoboActivity {
 
 	@Inject
-	private CWManager cwManager;
+	private CwManager cwManager;
 	@Inject
 	private ViewUtility viewUtility;
 
@@ -141,6 +141,7 @@ public class MessagesActivity extends RoboActivity {
 						new BuildMessagesAsyncTask().execute();
 					}
 				}
+
 				@Override
 				public void onNothingSelected(AdapterView<?> arg0) {
 				}
@@ -228,7 +229,8 @@ public class MessagesActivity extends RoboActivity {
 		}
 
 		/**
-		 * Changes the current activity to a {@link SingleMessageActivity} with the selected news.
+		 * Changes the current activity to a {@link SingleMessageActivity} with
+		 * the selected news.
 		 * 
 		 * @param text
 		 */

@@ -22,8 +22,8 @@ import android.widget.ViewFlipper;
 
 import com.google.inject.Inject;
 
-import de.consolewars.android.app.CWLoginManager;
-import de.consolewars.android.app.CWManager;
+import de.consolewars.android.app.CwLoginManager;
+import de.consolewars.android.app.CwManager;
 import de.consolewars.android.app.Filter;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.db.AppDataHandler;
@@ -55,11 +55,11 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
 public class OverviewActivity extends RoboActivity {
 
 	@Inject
-	private CWLoginManager cwLoginManager;
+	private CwLoginManager cwLoginManager;
 	@Inject
 	private AppDataHandler appDataHandler;
 	@Inject
-	private CWManager cwManager;
+	private CwManager cwManager;
 	@Inject
 	private ViewUtility viewUtility;
 
@@ -71,8 +71,8 @@ public class OverviewActivity extends RoboActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		/*
-		 * TODO: Might become a source of error someday, if activity design changes. Would be better to handle it with
-		 * intents.
+		 * TODO: Might become a source of error someday, if activity design
+		 * changes. Would be better to handle it with intents.
 		 */
 		if (getParent().getParent() instanceof CwNavigationMainTabActivity) {
 			mainTabs = (CwNavigationMainTabActivity) getParent().getParent();
@@ -82,7 +82,8 @@ public class OverviewActivity extends RoboActivity {
 	}
 
 	/**
-	 * Downloads the user picture and decodes it into a {@link Bitmap} to be set into an ImageView.
+	 * Downloads the user picture and decodes it into a {@link Bitmap} to be set
+	 * into an ImageView.
 	 * 
 	 * @param view
 	 *            the ImageView
@@ -132,10 +133,10 @@ public class OverviewActivity extends RoboActivity {
 			Button loginBttn = (Button) parent.findViewById(R.id.overview_login_user_bttn);
 			Button logoutBttn = (Button) parent.findViewById(R.id.overview_logout_user_bttn);
 			if (cwLoginManager.isLoggedIn()) {
-				loadPicture(icon, cwLoginManager.getUser().getUid());
+				loadPicture(icon, cwLoginManager.getAuthenticatedUser().getUid());
 				setVisibility(View.INVISIBLE, userLoggedLayout, loginBttn);
 				setVisibility(View.VISIBLE, logoutBttn);
-				usrnmTxt.setText(cwLoginManager.getUser().getUsername());
+				usrnmTxt.setText(cwLoginManager.getAuthenticatedUser().getUsername());
 			} else {
 				setVisibility(View.VISIBLE, userLoggedLayout, loginBttn);
 				setVisibility(View.INVISIBLE, logoutBttn);
@@ -164,28 +165,29 @@ public class OverviewActivity extends RoboActivity {
 			int newsAmount = 0;
 			int blogsAmount = 0;
 			int msgsAmount = 0;
-			if (appDataHandler.getDate() != -1) {
+			if (appDataHandler.getCwUser() != null) {
 				try {
 					newsAmount = 0;
 					if (cwManager.getNews().size() > 0) {
-						if (appDataHandler.getLastNewsID() > 0
-								&& cwManager.getNews().get(0).getId() > appDataHandler.getLastNewsID()) {
-							newsAmount = cwManager.getNews().get(0).getId() - appDataHandler.getLastNewsID();
+						if (appDataHandler.getCwUser().getLastNewsId() > 0
+								&& cwManager.getNews().get(0).getId() > appDataHandler.getCwUser().getLastNewsId()) {
+							newsAmount = cwManager.getNews().get(0).getId()
+									- appDataHandler.getCwUser().getLastNewsId();
 						}
 					}
 					blogsAmount = 0;
 					if (cwManager.getBlogs(Filter.BLOGS_NORMAL).size() > 0) {
-						if (appDataHandler.getLastBlogID() > 0
-								&& cwManager.getBlogs(Filter.BLOGS_NORMAL).get(0).getId() > appDataHandler
-										.getLastBlogID()) {
+						if (appDataHandler.getCwUser().getLastBlogId() > 0
+								&& cwManager.getBlogs(Filter.BLOGS_NORMAL).get(0).getId() > appDataHandler.getCwUser()
+										.getLastBlogId()) {
 							blogsAmount = cwManager.getBlogs(Filter.BLOGS_NORMAL).get(0).getId()
-									- appDataHandler.getLastBlogID();
+									- appDataHandler.getCwUser().getLastBlogId();
 						}
 					}
 					List<Message> msgs = cwManager.getMessages(Filter.MSGS_INBOX, 5);
 					msgs.addAll(cwManager.getMessages(Filter.MSGS_OUTBOX, 5));
 					for (Message msg : msgs) {
-						if (msg.getUnixtime() > appDataHandler.getDate()) {
+						if (msg.getUnixtime() > appDataHandler.getCwUser().getDate().getTime()) {
 							msgsAmount++;
 						}
 					}
@@ -273,7 +275,7 @@ public class OverviewActivity extends RoboActivity {
 						cwManager.getBlogs(Filter.BLOGS_NORMAL).size() > 0 ? cwManager.getBlogs(Filter.BLOGS_NORMAL)
 								.get(0).getId() : -1);
 			}
-			return viewUtility.getUserIcon(cwLoginManager.getUser().getUid(), 60);
+			return viewUtility.getUserIcon(cwLoginManager.getAuthenticatedUser().getUid(), 60);
 		}
 
 		@Override
@@ -284,7 +286,7 @@ public class OverviewActivity extends RoboActivity {
 			Button logoutBttn = (Button) findViewById(R.id.overview_logout_user_bttn);
 			ImageView icon = (ImageView) overview_layout.findViewById(R.id.overview_usericon);
 			if (doWork && cwLoginManager.isLoggedIn()) {
-				usrnmTxt.setText(cwLoginManager.getUser().getUsername());
+				usrnmTxt.setText(cwLoginManager.getAuthenticatedUser().getUsername());
 				icon.setImageBitmap(result);
 				setVisibility(View.INVISIBLE, userLoggedLayout, loginBttn);
 				setVisibility(View.VISIBLE, logoutBttn);

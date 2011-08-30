@@ -21,8 +21,8 @@ import android.widget.TextView;
 
 import com.google.inject.Inject;
 
-import de.consolewars.android.app.CWLoginManager;
-import de.consolewars.android.app.CWManager;
+import de.consolewars.android.app.CwLoginManager;
+import de.consolewars.android.app.CwManager;
 import de.consolewars.android.app.Filter;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwBasicActivityGroup;
@@ -56,9 +56,9 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
 public class BlogsActivity extends RoboActivity {
 
 	@Inject
-	private CWLoginManager cwLoginManager;
+	private CwLoginManager cwLoginManager;
 	@Inject
-	private CWManager cwManager;
+	private CwManager cwManager;
 	@Inject
 	private ViewUtility viewUtility;
 
@@ -235,7 +235,7 @@ public class BlogsActivity extends RoboActivity {
 				matches = true;
 			} else if (currentFilter.equals(Filter.BLOGS_NORMAL) && mode.equals(getString(R.string.blogmode_normal))) {
 				matches = true;
-			} else if (currentFilter.equals(Filter.BLOGS_USER) && uid == cwLoginManager.getUser().getUid()) {
+			} else if (currentFilter.equals(Filter.BLOGS_USER) && uid == cwLoginManager.getAuthenticatedUser().getUid()) {
 				matches = true;
 			}
 			return matches;

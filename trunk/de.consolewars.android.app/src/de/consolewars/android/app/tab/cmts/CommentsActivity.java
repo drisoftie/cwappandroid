@@ -25,8 +25,8 @@ import android.widget.Toast;
 
 import com.google.inject.Inject;
 
-import de.consolewars.android.app.CWLoginManager;
-import de.consolewars.android.app.CWManager;
+import de.consolewars.android.app.CwLoginManager;
+import de.consolewars.android.app.CwManager;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwBasicActivityGroup;
 import de.consolewars.android.app.util.DateUtility;
@@ -56,9 +56,9 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
 public class CommentsActivity extends RoboActivity {
 
 	@Inject
-	private CWLoginManager cwLoginManager;
+	private CwLoginManager cwLoginManager;
 	@Inject
-	private CWManager cwManager;
+	private CwManager cwManager;
 	@Inject
 	private ViewUtility viewUtility;
 	private List<Comment> comments = new ArrayList<Comment>();
@@ -167,7 +167,7 @@ public class CommentsActivity extends RoboActivity {
 				content.setText(Html.fromHtml(comment.getStatement(),
 						new TextViewHandler(CommentsActivity.this.getApplicationContext()), null));
 
-				if (cwLoginManager.getUser().getUid() == comment.getUid()) {
+				if (cwLoginManager.getAuthenticatedUser().getUid() == comment.getUid()) {
 					View delete_edit_bttn_layout = getLayoutInflater().inflate(R.layout.delete_edit_bttn_layout,
 							comtsTable, false);
 					ViewGroup parent_layout = (ViewGroup) tableRow.findViewById(R.id.cmts_bttn_delete_edit_layout);
@@ -290,7 +290,7 @@ public class CommentsActivity extends RoboActivity {
 			if (StringUtils.isBlank(commenttxt.getText().toString())) {
 				commenttxt.requestFocus();
 				commenttxt.setError(getString(R.string.no_text_entered));
-			} else if (StringUtils.isBlank(cwLoginManager.getUser().getUsername())) {
+			} else if (StringUtils.isBlank(cwLoginManager.getAuthenticatedUser().getUsername())) {
 				commenttxt.requestFocus();
 				commenttxt.setError(getString(R.string.not_logged_in));
 			} else {

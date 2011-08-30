@@ -20,9 +20,9 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
 public class SplashScreenActivity extends RoboActivity {
 
 	@Inject
-	private CWManager cwManager;
+	private CwManager cwManager;
 	@Inject
-	private CWLoginManager cwLoginManager;
+	private CwLoginManager cwLoginManager;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {

@@ -3,7 +3,7 @@
 	android:versionCode="2" android:versionName="1.5-SNAPSHOT"
 	package="de.consolewars.android.app">
 	<application android:debuggable="true" android:icon="@drawable/cw_logo"
-		android:label="@string/app_name" android:name="de.consolewars.android.app.CWApplication"
+		android:label="@string/app_name" android:name="de.consolewars.android.app.CwApplication"
 		android:persistent="false" android:theme="@style/CheckTheme">
 		<activity android:configChanges="keyboardHidden|orientation"
 			android:icon="@drawable/cw_logo" android:name=".SplashScreenActivity"

@@ -1,12 +1,16 @@
 package de.consolewars.android.app.db;
 
-import android.content.Context;
-import android.database.Cursor;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import roboguice.util.Ln;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.j256.ormlite.dao.Dao;
 
-import de.consolewars.android.app.R;
+import de.consolewars.android.app.db.domain.CwUser;
 
 /*
  * Copyright [2010] [Alexander Dridiger]
@@ -23,7 +27,8 @@ import de.consolewars.android.app.R;
  * limitations under the License.
  */
 /**
- * Helper class providing access to app-specific data. Access to the db is also leveraged by it.
+ * Helper class providing access to app-specific data. Access to the db is also
+ * leveraged by it.
  * 
  * @author Alexander Dridiger
  */
@@ -31,125 +36,34 @@ import de.consolewars.android.app.R;
 public class AppDataHandler {
 
 	@Inject
-	private Context context;
-	@Inject
-	private DatabaseManager databaseManager;
+	private Dao<CwUser, Integer> cwUserDao;
 
-	private String userName = "";
-	private String hashPw = "";
-	private int cwUserId = -1;
-	private int userDbId = -1;
-	private long date = -1;
-	private String stringDate = "";
-	private int lastNewsID = -1;
-	private int lastBlogID = -1;
+	private CwUser cwUser;
 
 	/**
 	 * @return
 	 */
 	public boolean loadCurrentUser() {
-		boolean existingUser = false;
-
-		String tableName = getString(R.string.db_table_userdata_name);
-		String columnId = getString(R.string.db_id_attribute);
-		String columnUsername = getString(R.string.db_username_attribute);
-		String columnPassw = getString(R.string.db_password_attribute);
-		String columnDate = getString(R.string.db_date_attribute);
-		String columnLastNews = getString(R.string.db_lastknownnews);
-		String columnLastBlog = getString(R.string.db_lastknownblog);
-
-		databaseManager.openDatabase();
-		Cursor cursor = databaseManager.fireQuery(tableName, new String[] { columnId, columnUsername, columnPassw,
-				columnDate, columnLastNews, columnLastBlog }, null, null, null, null, getString(R.string.db_id_desc));
-		if (cursor.getCount() > 0 && cursor.moveToFirst()) {
-			for (String columnName : cursor.getColumnNames()) {
-				if (columnName.matches(columnUsername)) {
-					userName = cursor.getString(cursor.getColumnIndex(columnName));
-				} else if (columnName.matches(columnPassw)) {
-					hashPw = cursor.getString(cursor.getColumnIndex(columnName));
-				} else if (columnName.matches(columnId)) {
-					userDbId = cursor.getInt(cursor.getColumnIndex(columnName));
-				} else if (columnName.matches(columnDate)) {
-					date = cursor.getLong(cursor.getColumnIndex(columnName));
-					stringDate = cursor.getString(cursor.getColumnIndex(columnName));
-				} else if (columnName.matches(columnLastNews)) {
-					lastNewsID = cursor.getInt(cursor.getColumnIndex(columnName));
-				} else if (columnName.matches(columnLastBlog)) {
-					lastBlogID = cursor.getInt(cursor.getColumnIndex(columnName));
-				}
-			}
-			existingUser = true;
+		List<CwUser> cwUsers = new ArrayList<CwUser>();
+		try {
+			cwUsers = cwUserDao.queryForAll();
+		} catch (SQLException e) {
+			Ln.e(e);
 		}
-		cursor.close();
-		return existingUser;
-	}
-	
-	public void loadSavedNews(){
-		
-		
+
+		if (cwUsers.size() > 0) {
+			cwUser = cwUsers.get(0);
+			return true;
+		}
+
+		return false;
 	}
 
-	private String getString(int id) {
-		return context.getString(id);
+	public void loadSavedNews() {
+
 	}
 
-	/**
-	 * @return the userName
-	 */
-	public String getUsername() {
-		return userName;
-	}
-
-	/**
-	 * @return the hashPw
-	 */
-	public String getHashPw() {
-		return hashPw;
-	}
-
-	/**
-	 * @return the cwUserID
-	 */
-	public int getCwUserID() {
-		return cwUserId;
-	}
-
-	/**
-	 * @param cwUserID
-	 */
-	public void setCwUserID(int cwUserID) {
-		this.cwUserId = cwUserID;
-	}
-
-	/**
-	 * @return the id
-	 */
-	public int getUserDbId() {
-		return userDbId;
-	}
-
-	/**
-	 * @return the date
-	 */
-	public long getDate() {
-		return date;
-	}
-
-	public String getStringDate() {
-		return stringDate;
-	}
-
-	/**
-	 * @return the lastNewsID
-	 */
-	public int getLastNewsID() {
-		return lastNewsID;
-	}
-
-	/**
-	 * @return the lastBlogID
-	 */
-	public int getLastBlogID() {
-		return lastBlogID;
+	public CwUser getCwUser() {
+		return cwUser;
 	}
 }

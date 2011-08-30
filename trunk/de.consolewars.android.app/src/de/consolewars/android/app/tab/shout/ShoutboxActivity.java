@@ -17,7 +17,7 @@ import android.widget.Button;
 
 import com.google.inject.Inject;
 
-import de.consolewars.android.app.CWLoginManager;
+import de.consolewars.android.app.CwLoginManager;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwBasicActivityGroup;
 import de.consolewars.android.app.util.ViewUtility;
@@ -46,7 +46,7 @@ public class ShoutboxActivity extends RoboActivity {
 	@Inject
 	private ViewUtility viewUtility;
 	@Inject
-	private CWLoginManager cwLoginManager;
+	private CwLoginManager cwLoginManager;
 
 	private ViewGroup shoutbox_layout;
 
@@ -136,9 +136,9 @@ public class ShoutboxActivity extends RoboActivity {
 				CookieManager cookieManager = CookieManager.getInstance();
 				// cookieManager.removeAllCookie();
 				cookieManager.setCookie(getString(R.string.cw_domain), getString(R.string.cw_cookie_userid) + "="
-						+ cwLoginManager.getUser().getUid());
+						+ cwLoginManager.getAuthenticatedUser().getUid());
 				cookieManager.setCookie(getString(R.string.cw_domain), getString(R.string.cw_cookie_pw) + "="
-						+ cwLoginManager.getUser().getPasswordHash());
+						+ cwLoginManager.getAuthenticatedUser().getPasswordHash());
 				CookieSyncManager.getInstance().sync();
 				webView.loadUrl(getString(R.string.cw_shoutbox));
 			}

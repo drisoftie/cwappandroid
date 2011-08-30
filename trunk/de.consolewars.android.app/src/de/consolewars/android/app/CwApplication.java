@@ -3,13 +3,13 @@ package de.consolewars.android.app;
 import java.util.List;
 
 import roboguice.application.RoboApplication;
-import android.content.res.Configuration;
 
-import com.google.inject.Inject;
 import com.google.inject.Module;
 import com.google.inject.Singleton;
+import com.j256.ormlite.android.apptools.OpenHelperManager;
+import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 
-import de.consolewars.android.app.db.DatabaseManager;
+import de.consolewars.android.app.db.CwSqliteOpenHelper;
 
 /*
  * Copyright [2010] [Alexander Dridiger]
@@ -26,24 +26,30 @@ import de.consolewars.android.app.db.DatabaseManager;
  * limitations under the License.
  */
 /**
- * Application stands as a singleton for the whole app and provides access to underlying functionalities.
+ * Application stands as a singleton for the whole app and provides access to
+ * underlying functionalities.
  * 
  * @author Alexander Dridiger
  */
 @Singleton
-public class CWApplication extends RoboApplication {
+public class CwApplication extends RoboApplication {
 
-	@Inject
-	private DatabaseManager databaseManager;
+	private OrmLiteSqliteOpenHelper ormLiteSqliteOpenHelper;
 
 	@Override
-	protected void addApplicationModules(List<Module> modules) {
-		modules.add(new CWAndroidModule());
+	public void onCreate() {
+		OpenHelperManager.setOpenHelperClass(CwSqliteOpenHelper.class);
+		ormLiteSqliteOpenHelper = OpenHelperManager.getHelper(this);
+		getInjector().injectMembers(ormLiteSqliteOpenHelper);
 	}
 
 	@Override
-	public final void onConfigurationChanged(Configuration newConfig) {
-		super.onConfigurationChanged(newConfig);
-		databaseManager.openDatabase();
+	public void onTerminate() {
+		OpenHelperManager.releaseHelper();
+	}
+
+	@Override
+	protected void addApplicationModules(List<Module> modules) {
+		modules.add(new CwAndroidModule(ormLiteSqliteOpenHelper));
 	}
 }
