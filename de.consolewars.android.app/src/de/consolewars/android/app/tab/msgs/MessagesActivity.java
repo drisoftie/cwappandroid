@@ -179,18 +179,16 @@ public class MessagesActivity extends RoboActivity {
 	public class MessageRowAdapter extends ArrayAdapter<Message> {
 
 		private LayoutInflater mInflater;
-		private List<Message> rows;
-
+		
 		public MessageRowAdapter(Context context, List<Message> rows) {
 			super(context, R.layout.msgs_row_layout, rows);
 			mInflater = LayoutInflater.from(context);
-			this.rows = rows;
 		}
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 
-			final Message row = rows.get(position);
+			final Message row = getItem(position);
 
 			ViewHolder holder;
 			if (convertView == null) {
