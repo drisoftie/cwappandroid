@@ -41,7 +41,7 @@ public final class DateUtility {
 		Calendar cal = Calendar.getInstance(zone, Locale.GERMANY);
 		// Log.i("****TIMEZONE*****", zone.getDisplayName());
 		cal.setTimeInMillis(date.getTime());
-
+		date = null;
 		return cal;
 	}
 	

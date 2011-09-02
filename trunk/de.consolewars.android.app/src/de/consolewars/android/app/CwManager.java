@@ -160,7 +160,7 @@ public class CwManager {
 		return getBlogs(Filter.BLOGS_USER);
 	}
 
-	public void getBlogsByIDAndStore(int startID, boolean desc) throws ConsolewarsAPIException {
+	public List<Blog> getBlogsByIDAndStore(int startID, boolean desc) throws ConsolewarsAPIException {
 		int amount = 10;
 		if (startID < amount && startID > 0 && desc) {
 			amount = startID;
@@ -176,6 +176,7 @@ public class CwManager {
 		} else {
 			getBlogs(Filter.BLOGS_NORMAL).addAll(0, api.getBlogs(ids));
 		}
+		return getBlogs(Filter.BLOGS_NORMAL);
 	}
 
 	/**
