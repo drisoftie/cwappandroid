@@ -28,6 +28,7 @@
 			android:layout_marginLeft="@dimen/news_row_day_separator_margin"/>
 	</RelativeLayout>
 	<RelativeLayout
+		android:id="@+id/blogs_row"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:layout_below="@id/blogs_separator"

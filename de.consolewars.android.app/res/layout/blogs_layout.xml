@@ -1,40 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:orientation="vertical"
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent">
+	<Button
+		android:id="@+id/blogs_bttn_refresh"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignParentRight="true"
+		android:background="@drawable/refresh_bump"/>
+	<Button
+		android:id="@+id/blogs_bttn_new_blog"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_toLeftOf="@id/blogs_bttn_refresh"
+		android:background="@drawable/def_bttn_new_mssg"/>
+	<Spinner
+		android:id="@+id/blogs_filter_spinner"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_toLeftOf="@id/blogs_bttn_new_blog"
+		android:prompt="@string/blogs_filter"/>
 	<RelativeLayout
-		android:id="@+id/blogs_header"
+		android:id="@+id/blogs_progressbar"
 		android:layout_width="fill_parent"
-		android:layout_height="wrap_content">
-		<Button
-			android:id="@+id/blogs_bttn_refresh"
+		android:layout_height="wrap_content"
+		android:layout_alignParentBottom="true">
+		<ProgressBar
+			android:id="@+id/centered_progressbar"
+			style="?android:attr/progressBarStyleLarge"
+			android:max="100"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_alignParentRight="true"
-			android:background="@drawable/refresh_bump"/>
-		<Button
-			android:id="@+id/blogs_bttn_new_blog"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_toLeftOf="@id/blogs_bttn_refresh"
-			android:background="@drawable/def_bttn_new_mssg"/>
-		<Spinner
-			android:id="@+id/blogs_filter_spinner"
-			android:layout_width="fill_parent"
-			android:layout_height="wrap_content"
-			android:layout_toLeftOf="@id/blogs_bttn_new_blog"
-			android:prompt="@string/blogs_filter"/>
+			android:layout_centerInParent="true"/>
 	</RelativeLayout>
-	<de.consolewars.android.app.view.ScrollDetectorScrollView
-		android:id="@+id/blogs_scroll_view"
+	<ListView
+		android:id="@+id/list"
 		android:layout_width="fill_parent"
-		android:layout_height="fill_parent">
-		<TableLayout
-			android:id="@+id/blogs_table"
-			android:layout_width="fill_parent"
-			android:layout_height="fill_parent"
-			android:layout_margin="3dip"/>
-	</de.consolewars.android.app.view.ScrollDetectorScrollView>
-</LinearLayout>
+		android:layout_height="fill_parent"
+		android:layout_above="@id/blogs_progressbar"
+		android:layout_below="@id/blogs_filter_spinner"/>
+</RelativeLayout>
+	
