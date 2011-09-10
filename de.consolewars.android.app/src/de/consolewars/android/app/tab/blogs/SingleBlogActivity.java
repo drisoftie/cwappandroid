@@ -25,12 +25,12 @@ import de.consolewars.android.app.CwLoginManager;
 import de.consolewars.android.app.CwManager;
 import de.consolewars.android.app.CwManager.CommentArea;
 import de.consolewars.android.app.R;
+import de.consolewars.android.app.db.domain.CwBlog;
 import de.consolewars.android.app.tab.CwBasicActivityGroup;
-import de.consolewars.android.app.tab.cmts.CommentsActivity;
+import de.consolewars.android.app.tab.cmts.CommentsFragment;
 import de.consolewars.android.app.util.DateUtility;
 import de.consolewars.android.app.util.TextViewHandler;
 import de.consolewars.android.app.util.ViewUtility;
-import de.consolewars.api.data.Blog;
 import de.consolewars.api.exception.ConsolewarsAPIException;
 
 /*
@@ -113,11 +113,11 @@ public class SingleBlogActivity extends RoboActivity {
 				id = getIntent().getIntExtra(getString(R.string.id), -1);
 			}
 
-			Blog blog = null;
+			CwBlog blog = null;
 
 			if (id != -1) {
 				try {
-					blog = cwManager.getBlogById(id);
+					blog = cwManager.getCwBlogById(id);
 				} catch (ConsolewarsAPIException e) {
 					e.printStackTrace();
 				}
@@ -132,7 +132,7 @@ public class SingleBlogActivity extends RoboActivity {
 					// String fString = String.format(blog.getArticle(), "");
 					// CharSequence styledString = Html.fromHtml(fString);
 					// text.setText(styledString);
-					text.setText(Html.fromHtml(blog.getArticle(true),
+					text.setText(Html.fromHtml(blog.getArticle(),
 							new TextViewHandler(SingleBlogActivity.this.getApplicationContext()), null));
 				} catch (IllegalFormatException ife) {
 					// FIXME Wrong format handling
@@ -146,23 +146,23 @@ public class SingleBlogActivity extends RoboActivity {
 			return blogView;
 		}
 
-		private void createCommentBttn(View blogView, final Blog blog) {
+		private void createCommentBttn(View blogView, final CwBlog blog) {
 			Button bttn = (Button) blogView.findViewById(R.id.singleblog_comments_bttn);
 			bttn.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					Intent commentsIntent = new Intent(SingleBlogActivity.this, CommentsActivity.class);
+					Intent commentsIntent = new Intent(SingleBlogActivity.this, CommentsFragment.class);
 
 					Bundle extra = new Bundle();
 					extra.putInt(getString(R.string.type), CommentArea.BLOGS.getValue());
-					extra.putInt(getString(R.string.id), blog.getId());
+					extra.putInt(getString(R.string.id), blog.getSubjectId());
 					extra.putInt(getString(R.string.comments_amount), blog.getComments());
 
 					commentsIntent.putExtras(extra);
 
 					View view = ((ActivityGroup) getParent())
 							.getLocalActivityManager()
-							.startActivity(CommentsActivity.class.getSimpleName(),
+							.startActivity(CommentsFragment.class.getSimpleName(),
 									commentsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
 					// replace the view
 					((BlogsActivityGroup) getParent()).replaceView(view);
@@ -171,7 +171,7 @@ public class SingleBlogActivity extends RoboActivity {
 
 		}
 
-		private void createEditBttn(View blogView, final Blog blog) {
+		private void createEditBttn(View blogView, final CwBlog blog) {
 			if (cwLoginManager.isLoggedIn() && blog.getUid() == cwLoginManager.getAuthenticatedUser().getUid()) {
 				Button bttn = (Button) blogView.findViewById(R.id.singleblog_edit_bttn);
 				bttn.setVisibility(View.VISIBLE);
@@ -181,7 +181,7 @@ public class SingleBlogActivity extends RoboActivity {
 						Intent blogswriterIntent = new Intent(SingleBlogActivity.this, BlogsWriterActivity.class);
 
 						Bundle extra = new Bundle();
-						extra.putInt(getString(R.string.id), blog.getId());
+						extra.putInt(getString(R.string.id), blog.getSubjectId());
 
 						blogswriterIntent.putExtras(extra);
 
@@ -196,7 +196,7 @@ public class SingleBlogActivity extends RoboActivity {
 			}
 		}
 
-		private void createDeleteBttn(View blogView, final Blog blog) {
+		private void createDeleteBttn(View blogView, final CwBlog blog) {
 			if (cwLoginManager.isLoggedIn() && blog.getUid() == cwLoginManager.getAuthenticatedUser().getUid()) {
 				Button bttn = (Button) blogView.findViewById(R.id.singleblog_delete_bttn);
 				bttn.setVisibility(View.VISIBLE);
@@ -207,7 +207,7 @@ public class SingleBlogActivity extends RoboActivity {
 								.setMessage(getString(R.string.blog_delete_question)).setCancelable(false)
 								.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
 									public void onClick(DialogInterface dialog, int which) {
-										new DeleteBlogAsyncTask().execute(blog.getId());
+										new DeleteBlogAsyncTask().execute(blog.getSubjectId());
 									}
 								}).setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
 									public void onClick(DialogInterface dialog, int which) {
@@ -220,7 +220,7 @@ public class SingleBlogActivity extends RoboActivity {
 			}
 		}
 
-		private void createHeader(View parent, Blog blog) {
+		private void createHeader(View parent, CwBlog blog) {
 			ImageView icon = (ImageView) parent.findViewById(R.id.singleblog_header_usericon);
 			viewUtility.setUserIcon(icon, blog.getUid(), 60);
 

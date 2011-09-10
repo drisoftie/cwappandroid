@@ -74,15 +74,19 @@ public class CwLoginManager {
 	 */
 	public boolean checkSavedUserAndLogin() {
 		if (appDataHandler.loadCurrentUser()) {
+			user = new AuthenticatedUser();
 			try {
 				user = cwManager.getAuthUser(appDataHandler.getCwUser().getName(), HashEncrypter.decrypt(
 						context.getString(R.string.db_cry), appDataHandler.getCwUser().getHashPassword()));
 			} catch (ConsolewarsAPIException e) {
+				isLoggedIn = false;
 				e.printStackTrace();
 			} catch (GeneralSecurityException e) {
+				isLoggedIn = false;
 				e.printStackTrace();
 			}
-			if (context.getString(R.string.success_yes).equals(user.getSuccess()) && user.getUsername().length() > 0) {
+			if (user != null && context.getString(R.string.success_yes).equals(user.getSuccess())
+					&& user.getUsername().length() > 0) {
 				isLoggedIn = true;
 			} else {
 				isLoggedIn = false;

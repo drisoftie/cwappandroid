@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent">
+	<de.consolewars.android.app.view.ScrollDetectorScrollView
+		android:id="@+id/news_scroll_view"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent">
+		<TableLayout
+			android:id="@+id/news_table"
+			android:layout_width="fill_parent"
+			android:layout_height="fill_parent"
+			android:layout_margin="3dip"/>
+	</de.consolewars.android.app.view.ScrollDetectorScrollView>
+	<Button
+		android:id="@+id/news_bttn_refresh"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignParentRight="true"
+		android:layout_alignParentTop="true"
+		android:background="@drawable/refresh_bump"/>
+</RelativeLayout>

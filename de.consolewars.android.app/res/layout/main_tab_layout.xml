@@ -12,100 +12,10 @@
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
 			android:visibility="gone"/>
-		<RelativeLayout
-			android:id="@+id/slider_stub"
-			android:layout_width="fill_parent"
-			android:layout_height="wrap_content"
-			android:layout_alignParentBottom="true"
-			android:visibility="invisible">
-			<ImageView
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_centerInParent="true"
-				android:visibility="invisible"
-				android:src="@drawable/tab_slider"/>
-		</RelativeLayout>
 		<FrameLayout
 			android:id="@android:id/tabcontent"
 			android:layout_width="fill_parent"
 			android:layout_height="fill_parent"
-			android:layout_above="@id/slider_stub"
 			android:background="@color/overview_banner_bg_down"/>
-		<de.consolewars.android.app.view.WrappingSlidingDrawer
-			android:id="@+id/tab_slider"
-			android:layout_width="fill_parent"
-			android:layout_height="wrap_content"
-			android:layout_alignParentBottom="true"
-			android:handle="@+id/tab_slider_handle"
-			android:content="@+id/tab_scroller">
-			<RelativeLayout
-				android:id="@+id/tab_slider_handle"
-				android:layout_width="fill_parent"
-				android:layout_height="wrap_content"
-				android:background="@drawable/def_slider">
-			</RelativeLayout>
-			<HorizontalScrollView
-				android:id="@+id/tab_scroller"
-				android:layout_width="fill_parent"
-				android:layout_height="wrap_content"
-				android:fadeScrollbars="false"
-				android:scrollbarAlwaysDrawHorizontalTrack="true"
-				android:scrollbarTrackHorizontal="@drawable/scrollbar_horizontal_track"
-				android:scrollbarThumbHorizontal="@drawable/scrollbar_horizontal_thumb"
-				android:fillViewport="true"
-				android:scrollbarSize="3dip"
-				android:fadingEdgeLength="80dp"
-				android:background="#343534">
-				<RelativeLayout
-					android:layout_width="fill_parent"
-					android:layout_height="wrap_content">
-					<RadioGroup
-						android:id="@+id/custom_tabs"
-						android:layout_width="fill_parent"
-						android:layout_height="wrap_content"
-						android:layout_centerHorizontal="true"
-						android:gravity="center"
-						android:orientation="horizontal"
-						android:checkedButton="@+id/tab_overview">
-						<RadioButton
-							android:id="@+id/tab_overview"
-							android:layout_height="55dp"
-							android:layout_width="55dp"
-							android:button="@null"
-							android:background="@drawable/def_checktab_overview"/>
-						<RadioButton
-							android:id="@+id/tab_news"
-							android:layout_height="55dp"
-							android:layout_width="55dp"
-							android:button="@null"
-							android:background="@drawable/def_checktab_news"/>
-						<RadioButton
-							android:id="@+id/tab_blogs"
-							android:layout_height="55dp"
-							android:layout_width="55dp"
-							android:button="@null"
-							android:background="@drawable/def_checktab_blogs"/>
-						<RadioButton
-							android:id="@+id/tab_msgs"
-							android:layout_height="55dp"
-							android:layout_width="55dp"
-							android:button="@null"
-							android:background="@drawable/def_checktab_msgs"/>
-						<RadioButton
-							android:id="@+id/tab_board"
-							android:layout_height="55dp"
-							android:layout_width="55dp"
-							android:button="@null"
-							android:background="@drawable/def_checktab_board"/>
-						<RadioButton
-							android:id="@+id/tab_shout"
-							android:layout_height="55dp"
-							android:layout_width="55dp"
-							android:button="@null"
-							android:background="@drawable/def_checktab_shout"/>
-					</RadioGroup>
-				</RelativeLayout>
-			</HorizontalScrollView>
-		</de.consolewars.android.app.view.WrappingSlidingDrawer>
 	</RelativeLayout>
 </TabHost>

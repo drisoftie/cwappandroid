@@ -1,6 +1,6 @@
 package de.consolewars.api.event;
 
-import de.consolewars.api.data.News;
+import de.consolewars.android.app.db.domain.CwBlog;
 
 /*
  * Copyright [2009] Dimitrios Kapanikis
@@ -19,8 +19,8 @@ import de.consolewars.api.data.News;
  * 
  */
 
-public interface NewsUpdateListener {
+public interface CwBlogUpdateListener {
 
-	public void newsReceived(ListEventObject<News> event);
+	public void blogsReceived(ListEventObject<CwBlog> event);
 
 }

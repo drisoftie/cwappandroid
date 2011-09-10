@@ -5,14 +5,17 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 
-import roboguice.activity.RoboActivity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -22,16 +25,14 @@ import android.widget.ImageView;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.google.inject.Inject;
-
-import de.consolewars.android.app.CwLoginManager;
-import de.consolewars.android.app.CwManager;
+import de.consolewars.android.app.CwApplication;
+import de.consolewars.android.app.CwManager.CommentArea;
 import de.consolewars.android.app.R;
-import de.consolewars.android.app.tab.CwBasicActivityGroup;
+import de.consolewars.android.app.db.domain.CwBlog;
+import de.consolewars.android.app.db.domain.CwNews;
+import de.consolewars.android.app.db.domain.CwSubject;
 import de.consolewars.android.app.util.DateUtility;
 import de.consolewars.android.app.util.TextViewHandler;
-import de.consolewars.android.app.util.ViewUtility;
 import de.consolewars.api.data.Comment;
 import de.consolewars.api.exception.ConsolewarsAPIException;
 
@@ -53,35 +54,51 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
  * @author Alexander Dridiger
  * 
  */
-public class CommentsActivity extends RoboActivity {
+public class CommentsFragment extends Fragment {
 
-	@Inject
-	private CwLoginManager cwLoginManager;
-	@Inject
-	private CwManager cwManager;
-	@Inject
-	private ViewUtility viewUtility;
+	private LayoutInflater inflater;
+	private Context context;
+
 	private List<Comment> comments = new ArrayList<Comment>();
 	private ViewGroup cmmts_layout;
 	private View rowToDelete;
 	private int area;
-	private int objectId;
 	private int currpage = 1;
 	private int maxpage = 1;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+	private CwSubject subject;
 
+	public CommentsFragment() {
+		super();
+	}
+
+	public CommentsFragment(CwSubject subject) {
+		super();
+		setHasOptionsMenu(true);
+		this.subject = subject;
+	}
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		this.inflater = inflater;
+		context = getActivity().getApplicationContext();
+		cmmts_layout = (ViewGroup) inflater.inflate(R.layout.comments_layout, null);
 		resolveBundle();
+		return cmmts_layout;
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
 		new BuildCommentsAsyncTask().execute();
 	}
 
 	private void resolveBundle() {
-		Bundle extra = CommentsActivity.this.getIntent().getExtras();
-
-		objectId = extra.getInt(getString(R.string.id), -1);
-		area = extra.getInt(getString(R.string.type));
+		if (subject instanceof CwNews) {
+			area = CommentArea.NEWS.getValue();
+		} else if (subject instanceof CwBlog) {
+			area = CommentArea.BLOGS.getValue();
+		}
 	}
 
 	/**
@@ -101,45 +118,48 @@ public class CommentsActivity extends RoboActivity {
 
 		@Override
 		protected void onPreExecute() {
-			cmmts_layout = (ViewGroup) LayoutInflater.from(CommentsActivity.this.getParent()).inflate(
-					R.layout.comments_layout, null);
-			setContentView(cmmts_layout);
 			// first set progressbar
-			ViewGroup progress_layout = viewUtility.getCenteredProgressBarLayout(
-					LayoutInflater.from(CommentsActivity.this.getParent()), R.string.comments);
+			ViewGroup progress_layout = CwApplication.cwViewUtil().getCenteredProgressBarLayout(inflater,
+					R.string.comments);
 			TableLayout comtsTable = (TableLayout) cmmts_layout.findViewById(R.id.comments_table);
 			comtsTable.removeAllViews();
 			comtsTable.addView(progress_layout);
+			initButtonsAndCheck();
+			checkButtons();
 		}
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			try {
-				comments = cwManager.getComments(objectId, area, 10, currpage);
-			} catch (ConsolewarsAPIException e) {
-				e.printStackTrace();
-				Log.e(getString(R.string.exc_auth_tag), e.getMessage(), e);
+			if (!isCancelled()) {
+				try {
+					comments = CwApplication.cwManager().getComments(subject.getSubjectId(), area, 20, currpage);
+				} catch (ConsolewarsAPIException e) {
+					e.printStackTrace();
+					Log.e(getString(R.string.exc_auth_tag), e.getMessage(), e);
+				}
+				createCommentsRows();
 			}
-			createCommentsRows();
 			return null;
 		}
 
 		@Override
 		protected void onProgressUpdate(View... rows) {
-			if (rowToDelete != null) {
-				Button delete_bttn = (Button) rowToDelete.findViewById(R.id.cmts_bttn_delete);
-				delete_bttn.setVisibility(View.VISIBLE);
+			if (!isCancelled()) {
+				if (rowToDelete != null) {
+					Button delete_bttn = (Button) rowToDelete.findViewById(R.id.cmts_bttn_delete);
+					delete_bttn.setVisibility(View.VISIBLE);
+				}
+				TableLayout cmtsTable = (TableLayout) cmmts_layout.findViewById(R.id.comments_table);
+				cmtsTable.addView(rows[0], cmtsTable.getChildCount() - 1);
 			}
-			TableLayout cmtsTable = (TableLayout) cmmts_layout.findViewById(R.id.comments_table);
-			cmtsTable.addView(rows[0], cmtsTable.getChildCount() - 1);
 		}
 
 		@Override
 		protected void onPostExecute(Void result) {
-			initButtonsAndCheck();
 			// sets the comments view for this Activity
 			TableLayout cmtsTable = (TableLayout) cmmts_layout.findViewById(R.id.comments_table);
 			cmtsTable.removeViewAt(cmtsTable.getChildCount() - 1);
+			checkButtons();
 		}
 
 		/**
@@ -150,65 +170,73 @@ public class CommentsActivity extends RoboActivity {
 			TableLayout comtsTable = (TableLayout) cmmts_layout.findViewById(R.id.comments_table);
 
 			for (final Comment comment : comments) {
-				maxpage = comment.getPagecount();
-				// get the table row by an inflater and set the needed
-				// information
-				final ViewGroup tableRow = (ViewGroup) getLayoutInflater().inflate(R.layout.comments_row_layout,
-						comtsTable, false);
+				if (!isCancelled()) {
+					maxpage = comment.getPagecount();
+					// get the table row by an inflater and set the needed
+					// information
+					final ViewGroup tableRow = (ViewGroup) inflater.inflate(R.layout.comments_row_layout, comtsTable,
+							false);
 
-				TextView usernameTxt = (TextView) tableRow.findViewById(R.id.cmts_username);
-				usernameTxt.setText(comment.getUsername());
-				usernameTxt.setSelected(true);
-				viewUtility.setUserIcon(((ImageView) tableRow.findViewById(R.id.cmts_usericon)), comment.getUid(), 50);
-				((TextView) tableRow.findViewById(R.id.cmts_date)).setText(createDate(comment.getUnixtime() * 1000L));
-				((TextView) tableRow.findViewById(R.id.cmts_date)).setSelected(true);
-				TextView content = (TextView) tableRow.findViewById(R.id.comment_content);
-				viewUtility.setClickableTextView(content);
-				content.setText(Html.fromHtml(comment.getStatement(),
-						new TextViewHandler(CommentsActivity.this.getApplicationContext()), null));
+					TextView usernameTxt = (TextView) tableRow.findViewById(R.id.cmts_username);
+					usernameTxt.setText(comment.getUsername());
+					usernameTxt.setSelected(true);
+					CwApplication.cwViewUtil().setUserIcon(((ImageView) tableRow.findViewById(R.id.cmts_usericon)),
+							comment.getUid(), 50);
+					((TextView) tableRow.findViewById(R.id.cmts_date))
+							.setText(createDate(comment.getUnixtime() * 1000L));
+					((TextView) tableRow.findViewById(R.id.cmts_date)).setSelected(true);
+					TextView content = (TextView) tableRow.findViewById(R.id.comment_content);
+					CwApplication.cwViewUtil().setClickableTextView(content);
+					content.setText(Html.fromHtml(comment.getStatement(), new TextViewHandler(context), null));
 
-				if (cwLoginManager.getAuthenticatedUser().getUid() == comment.getUid()) {
-					View delete_edit_bttn_layout = getLayoutInflater().inflate(R.layout.delete_edit_bttn_layout,
-							comtsTable, false);
-					ViewGroup parent_layout = (ViewGroup) tableRow.findViewById(R.id.cmts_bttn_delete_edit_layout);
-					parent_layout.addView(delete_edit_bttn_layout);
+					if (CwApplication.cwLoginManager().getAuthenticatedUser().getUid() == comment.getUid()) {
+						View delete_edit_bttn_layout = inflater.inflate(R.layout.delete_edit_bttn_layout, comtsTable,
+								false);
+						ViewGroup parent_layout = (ViewGroup) tableRow.findViewById(R.id.cmts_bttn_delete_edit_layout);
+						parent_layout.addView(delete_edit_bttn_layout);
 
-					Button delete_bttn = (Button) delete_edit_bttn_layout.findViewById(R.id.cmts_bttn_delete);
+						Button delete_bttn = (Button) delete_edit_bttn_layout.findViewById(R.id.cmts_bttn_delete);
 
-					// first ask the user, if he wants to delete a comment
-					delete_bttn.setOnClickListener(new OnClickListener() {
-						@Override
-						public void onClick(View v) {
-							AlertDialog.Builder dialog = new AlertDialog.Builder(CommentsActivity.this.getParent())
-									.setMessage(getString(R.string.comment_delete_question)).setCancelable(false)
-									.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
-										public void onClick(DialogInterface dialog, int which) {
-											rowToDelete = tableRow;
-											new DeleteCommentAsyncTask().execute(comment.getCid());
-										}
-									}).setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
-										public void onClick(DialogInterface dialog, int which) {
-											dialog.cancel();
-										}
-									});
-							dialog.create().show();
-						}
-					});
+						// first ask the user, if he wants to delete a comment
+						delete_bttn.setOnClickListener(new OnClickListener() {
+							@Override
+							public void onClick(View v) {
+								AlertDialog.Builder dialog = new AlertDialog.Builder(context)
+										.setMessage(getString(R.string.comment_delete_question))
+										.setCancelable(false)
+										.setPositiveButton(getString(R.string.yes),
+												new DialogInterface.OnClickListener() {
+													public void onClick(DialogInterface dialog, int which) {
+														rowToDelete = tableRow;
+														new DeleteCommentAsyncTask().execute(comment.getCid());
+													}
+												})
+										.setNegativeButton(getString(R.string.no),
+												new DialogInterface.OnClickListener() {
+													public void onClick(DialogInterface dialog, int which) {
+														dialog.cancel();
+													}
+												});
+								dialog.create().show();
+							}
+						});
 
-					Button edit_bttn = (Button) delete_edit_bttn_layout.findViewById(R.id.cmts_bttn_edit);
-					edit_bttn.setOnClickListener(new OnClickListener() {
-						@Override
-						public void onClick(View v) {
-							View edit_layout = getLayoutInflater().inflate(R.layout.edit_layout, tableRow, false);
-							EditText textToEdit = (EditText) edit_layout.findViewById(R.id.cmts_edtxt_edit);
-							textToEdit.setText(comment.getStatement());
-							ViewGroup parent_layout = (ViewGroup) tableRow.findViewById(R.id.comment_content_layout);
-							parent_layout.addView(edit_layout);
-							createEditSubmitBttn(edit_layout, tableRow, comment.getCid());
-						}
-					});
+						Button edit_bttn = (Button) delete_edit_bttn_layout.findViewById(R.id.cmts_bttn_edit);
+						edit_bttn.setOnClickListener(new OnClickListener() {
+							@Override
+							public void onClick(View v) {
+								View edit_layout = inflater.inflate(R.layout.edit_layout, tableRow, false);
+								EditText textToEdit = (EditText) edit_layout.findViewById(R.id.cmts_edtxt_edit);
+								textToEdit.setText(comment.getStatement());
+								ViewGroup parent_layout = (ViewGroup) tableRow
+										.findViewById(R.id.comment_content_layout);
+								parent_layout.addView(edit_layout);
+								createEditSubmitBttn(edit_layout, tableRow, comment.getCid());
+							}
+						});
+					}
+					publishProgress(tableRow);
 				}
-				publishProgress(tableRow);
 			}
 		}
 
@@ -224,10 +252,10 @@ public class CommentsActivity extends RoboActivity {
 
 		private void initButtonsAndCheck() {
 			Button refresh_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_refresh);
-
 			refresh_bttn.setOnClickListener(new OnClickListener() {
-
+				@Override
 				public void onClick(View v) {
+					cancel(true);
 					new BuildCommentsAsyncTask().execute();
 				}
 			});
@@ -235,15 +263,17 @@ public class CommentsActivity extends RoboActivity {
 			Button next_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_next);
 			Button prev_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_prev);
 			next_bttn.setOnClickListener(new OnClickListener() {
-
+				@Override
 				public void onClick(View v) {
+					cancel(true);
 					currpage++;
 					new BuildCommentsAsyncTask().execute();
 				}
 			});
 			prev_bttn.setOnClickListener(new OnClickListener() {
-
+				@Override
 				public void onClick(View v) {
+					cancel(true);
 					currpage--;
 					new BuildCommentsAsyncTask().execute();
 				}
@@ -251,12 +281,11 @@ public class CommentsActivity extends RoboActivity {
 
 			Button submit_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_submit);
 			submit_bttn.setOnClickListener(new OnClickListener() {
-
+				@Override
 				public void onClick(View v) {
 					new SubmitCommentAsyncTask().execute();
 				}
 			});
-			checkButtons();
 		}
 
 		private void checkButtons() {
@@ -290,13 +319,12 @@ public class CommentsActivity extends RoboActivity {
 			if (StringUtils.isBlank(commenttxt.getText().toString())) {
 				commenttxt.requestFocus();
 				commenttxt.setError(getString(R.string.no_text_entered));
-			} else if (StringUtils.isBlank(cwLoginManager.getAuthenticatedUser().getUsername())) {
+			} else if (StringUtils.isBlank(CwApplication.cwLoginManager().getAuthenticatedUser().getUsername())) {
 				commenttxt.requestFocus();
 				commenttxt.setError(getString(R.string.not_logged_in));
 			} else {
 				commenttxt.setError(null);
-				Toast.makeText(CommentsActivity.this, getResources().getString(R.string.comment_sending),
-						Toast.LENGTH_SHORT).show();
+				Toast.makeText(context, getResources().getString(R.string.comment_sending), Toast.LENGTH_SHORT).show();
 				doWork = true;
 			}
 		}
@@ -305,7 +333,7 @@ public class CommentsActivity extends RoboActivity {
 		protected Void doInBackground(Void... params) {
 			if (doWork) {
 				EditText commenttxt = (EditText) cmmts_layout.findViewById(R.id.comments_edttxt_input);
-				cwManager.sendComment(commenttxt.getText().toString(), objectId, area);
+				CwApplication.cwManager().sendComment(commenttxt.getText().toString(), subject.getSubjectId(), area);
 			}
 			return null;
 		}
@@ -313,8 +341,7 @@ public class CommentsActivity extends RoboActivity {
 		@Override
 		protected void onPostExecute(Void result) {
 			if (doWork) {
-				Toast.makeText(CommentsActivity.this, getResources().getString(R.string.comment_sent),
-						Toast.LENGTH_SHORT).show();
+				Toast.makeText(context, getResources().getString(R.string.comment_sent), Toast.LENGTH_SHORT).show();
 			}
 		}
 	}
@@ -328,13 +355,12 @@ public class CommentsActivity extends RoboActivity {
 
 		@Override
 		protected void onPreExecute() {
-			Toast.makeText(CommentsActivity.this, getResources().getString(R.string.comment_deleting),
-					Toast.LENGTH_SHORT).show();
+			Toast.makeText(context, getResources().getString(R.string.comment_deleting), Toast.LENGTH_SHORT).show();
 		}
 
 		@Override
 		protected Void doInBackground(Integer... ids) {
-			cwManager.deleteComment(ids[0], objectId, area);
+			CwApplication.cwManager().deleteComment(ids[0], subject.getSubjectId(), area);
 			return null;
 		}
 
@@ -344,8 +370,7 @@ public class CommentsActivity extends RoboActivity {
 				TableLayout comtsTable = (TableLayout) rowToDelete.getParent();
 				comtsTable.removeView(rowToDelete);
 			}
-			Toast.makeText(CommentsActivity.this, getResources().getString(R.string.comment_deleted),
-					Toast.LENGTH_SHORT).show();
+			Toast.makeText(context, getResources().getString(R.string.comment_deleted), Toast.LENGTH_SHORT).show();
 		}
 	}
 
@@ -358,15 +383,15 @@ public class CommentsActivity extends RoboActivity {
 
 		@Override
 		protected void onPreExecute() {
-			Toast.makeText(CommentsActivity.this, getResources().getString(R.string.comment_editing),
-					Toast.LENGTH_SHORT).show();
+			Toast.makeText(context, getResources().getString(R.string.comment_editing), Toast.LENGTH_SHORT).show();
 		}
 
 		@Override
 		protected View doInBackground(Object... params) {
 			View row = (View) params[1];
 			EditText textToEdit = (EditText) row.findViewById(R.id.cmts_edtxt_edit);
-			cwManager.updateComment(textToEdit.getText().toString(), (Integer) params[0], objectId, area);
+			CwApplication.cwManager().updateComment(textToEdit.getText().toString(), (Integer) params[0],
+					subject.getSubjectId(), area);
 			return row;
 		}
 
@@ -375,18 +400,16 @@ public class CommentsActivity extends RoboActivity {
 			ViewGroup parent_layout = (ViewGroup) row.findViewById(R.id.comment_content_layout);
 			EditText textToEdit = (EditText) row.findViewById(R.id.cmts_edtxt_edit);
 			TextView content = (TextView) row.findViewById(R.id.comment_content);
-			content.setText(Html.fromHtml(textToEdit.getText().toString(),
-					new TextViewHandler(CommentsActivity.this.getApplicationContext()), null));
+			content.setText(Html.fromHtml(textToEdit.getText().toString(), new TextViewHandler(context), null));
 			parent_layout.removeViewAt(1);
-			Toast.makeText(CommentsActivity.this, getResources().getString(R.string.comment_edited), Toast.LENGTH_SHORT)
-					.show();
+			Toast.makeText(context, getResources().getString(R.string.comment_edited), Toast.LENGTH_SHORT).show();
 		}
 	}
 
 	@Override
-	public void onBackPressed() {
-		if (getParent() instanceof CwBasicActivityGroup) {
-			((CwBasicActivityGroup) getParent()).back();
-		}
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		super.onCreateOptionsMenu(menu, inflater);
+		menu.clear();
+		inflater.inflate(R.menu.comments_menu, menu);
 	}
 }

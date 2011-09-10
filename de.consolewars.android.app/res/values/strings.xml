@@ -2,10 +2,12 @@
 <resources>
 	<string name="app_name">CWApp</string>
 	<string name="api_key">F021DC4D41665F75</string>
+	<string name="bug_key">34a994a3</string>
 	<string name="general_splashtext">Consolewars-App Prototyp</string>
+
+	<!-- Tab specific -->
 	<string name="tab_news_tag">news</string>
 	<string name="tab_news_head">News</string>
-	<string name="loading">Lade %1$s im Hintergrund</string>
 	<string name="tab_blogs_tag">blogs</string>
 	<string name="tab_blogs_head">Blogs</string>
 	<string name="tab_msgs_tag">message</string>
@@ -16,6 +18,9 @@
 	<string name="tab_overv_head">Übersicht</string>
 	<string name="tab_board_tag">messageboard</string>
 	<string name="tab_board_head">Forum</string>
+
+
+	<string name="loading">Lade %1$s im Hintergrund</string>
 	<string name="overview_logged_as">Eingeloggt als:</string>
 	<string name="overview_confirm">Bestätigen</string>
 	<string name="overview_banner_details">%1$d neue %2$s</string>
@@ -25,6 +30,7 @@
 	<string name="news">News</string>
 	<string name="blog">Blog</string>
 	<string name="singlenews">Einzelnews</string>
+	<string name="singleblog">Einzelblog</string>
 	<string name="comments">Kommentare</string>
 	<string name="shoutbox">Shoutbox</string>
 	<string name="board">Forum</string>
@@ -69,7 +75,8 @@
 	<string name="blog_deleted">Der Blog wurde erfolgreich gelöscht.</string>
 	<string name="blogswriter_sending">Blog wird abgeschickt...</string>
 	<string name="blogswriter_sent">Blog wurde erfolgreich geschrieben.</string>
-	<string name="blogswriter_too_short">Blogtext ist zu kurz. Mindestens 150 Zeichen benötigt.	</string>
+	<string name="blogswriter_too_short">Blogtext ist zu kurz. Mindestens 150 Zeichen benötigt.
+	</string>
 	<string name="blogswriter_blogtitle">Blogtitel:</string>
 	<string name="blogswriter_blogcontent">Bloginhalt:</string>
 	<string name="blogswriter_tags">Tags (mit Komma getrennt):</string>
@@ -97,9 +104,9 @@
 	<string name="dateformat_detailed">EEEE, dd. MMMMM yyyy \'um\' HH:mm \'Uhr\'</string>
 	<string-array name="news_filter_options">
 		<item>Alle News</item>
-		<item>Nur Microsoftnews und \"andere\"</item>
-		<item>Nur Nintendonews und \"andere\"</item>
-		<item>Nur Sonynews und \"andere\"</item>
+		<item>Nur Microsoft</item>
+		<item>Nur Nintendo</item>
+		<item>Nur Sony</item>
 	</string-array>
 	<string-array name="blogs_filter_options">
 		<item>Blogs</item>
@@ -109,5 +116,9 @@
 	<string-array name="msgs_filter_options">
 		<item>Posteingang</item>
 		<item>Postausgang</item>
+	</string-array>
+	<string-array name="singlenews_paging">
+		<item>News</item>
+		<item>Kommentare</item>
 	</string-array>
 </resources>

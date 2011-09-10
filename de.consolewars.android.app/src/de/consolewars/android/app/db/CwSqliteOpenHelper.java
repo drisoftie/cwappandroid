@@ -12,7 +12,11 @@ import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 
 import de.consolewars.android.app.R;
+import de.consolewars.android.app.db.domain.CwBlog;
+import de.consolewars.android.app.db.domain.CwNews;
+import de.consolewars.android.app.db.domain.CwPicture;
 import de.consolewars.android.app.db.domain.CwUser;
+import de.consolewars.android.app.db.domain.CwVideo;
 
 /**
  * Custom helper to handle SQLite Database creation and management.
@@ -37,10 +41,10 @@ public class CwSqliteOpenHelper extends OrmLiteSqliteOpenHelper {
 	public void onCreate(SQLiteDatabase db, ConnectionSource connectionSource) {
 		try {
 			TableUtils.createTable(connectionSource, CwUser.class);
-			// TableUtils.createTable(connectionSource, CwNews.class);
-			// TableUtils.createTable(connectionSource, CwBlog.class);
-			// TableUtils.createTable(connectionSource, CwPicture.class);
-			// TableUtils.createTable(connectionSource, CwVideo.class);
+			TableUtils.createTable(connectionSource, CwNews.class);
+			TableUtils.createTable(connectionSource, CwBlog.class);
+			TableUtils.createTable(connectionSource, CwPicture.class);
+			TableUtils.createTable(connectionSource, CwVideo.class);
 		} catch (SQLException e) {
 			Ln.e(e);
 		}
@@ -50,10 +54,10 @@ public class CwSqliteOpenHelper extends OrmLiteSqliteOpenHelper {
 	public void onUpgrade(SQLiteDatabase db, ConnectionSource connectionSource, int oldVersion, int newVersion) {
 		try {
 			TableUtils.dropTable(connectionSource, CwUser.class, true);
-			// TableUtils.dropTable(connectionSource, CwNews.class, true);
-			// TableUtils.dropTable(connectionSource, CwBlog.class, true);
-			// TableUtils.dropTable(connectionSource, CwPicture.class, true);
-			// TableUtils.dropTable(connectionSource, CwVideo.class, true);
+			TableUtils.dropTable(connectionSource, CwNews.class, true);
+			TableUtils.dropTable(connectionSource, CwBlog.class, true);
+			TableUtils.dropTable(connectionSource, CwPicture.class, true);
+			TableUtils.dropTable(connectionSource, CwVideo.class, true);
 			onCreate(db);
 		} catch (SQLException e) {
 			Ln.e(e);

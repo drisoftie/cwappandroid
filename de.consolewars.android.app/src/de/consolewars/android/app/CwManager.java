@@ -2,6 +2,7 @@ package de.consolewars.android.app;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -15,14 +16,15 @@ import android.content.Context;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.consolewars.android.app.db.AppDataHandler;
+import de.consolewars.android.app.db.domain.CwBlog;
+import de.consolewars.android.app.db.domain.CwNews;
 import de.consolewars.android.app.util.HttpPoster;
 import de.consolewars.android.app.util.MediaSnapper;
 import de.consolewars.api.API;
 import de.consolewars.api.data.AuthenticatedUser;
-import de.consolewars.api.data.Blog;
 import de.consolewars.api.data.Comment;
 import de.consolewars.api.data.Message;
-import de.consolewars.api.data.News;
 import de.consolewars.api.exception.ConsolewarsAPIException;
 
 /*
@@ -52,13 +54,15 @@ public class CwManager {
 	@Inject
 	private CwLoginManager cwLoginManager;
 	@Inject
+	private AppDataHandler appDataHandler;
+	@Inject
 	private HttpPoster httpPoster;
 	@Inject
 	private Context context;
 
-	private List<News> news;
-	private List<Blog> blogs;
-	private List<Blog> userBlogs;
+	private List<CwNews> news;
+	private List<CwBlog> blogs;
+	private List<CwBlog> userBlogs;
 	private List<Message> msgs;
 	private int newestNews = -1;
 	private int newestBlog = -1;
@@ -94,29 +98,75 @@ public class CwManager {
 	 * 
 	 * @throws ConsolewarsAPIException
 	 */
-	public void setupEntities() throws ConsolewarsAPIException {
-		List<News> news = getNews(1, Filter.NEWS_ALL, null);
+	public void setupEntities() {
+		news = null;
+		blogs = null;
+		userBlogs = null;
+		msgs = null;
+		List<CwNews> news = new ArrayList<CwNews>();
+		try {
+			news = getCwNews(1, Filter.NEWS_ALL, null);
+		} catch (ConsolewarsAPIException e) {
+			e.printStackTrace();
+		}
 		if (!news.isEmpty()) {
-			News newNews = news.get(0);
-			this.newestNews = newNews.getId();
-			getNewsByIDAndStore(this.newestNews, true);
+			CwNews newNews = news.get(0);
+			this.newestNews = newNews.getSubjectId();
+			try {
+				getCwNewsByIDAndStore(this.newestNews, true);
+			} catch (ConsolewarsAPIException e) {
+				e.printStackTrace();
+			}
+			if (getCwNews().isEmpty()) {
+				getCwNewsAndStore(10, Filter.NEWS_ALL, null);
+			}
+		} else {
+			if (appDataHandler.getCwUser().getLastNewsId() > 0) {
+				try {
+					getCwNews().addAll(
+							appDataHandler.loadSavedNews(appDataHandler.getCwUser().getLastNewsId() + 1, true));
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			} else {
+				try {
+					getCwNews().addAll(appDataHandler.loadSavedNews(10));
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
 		}
-		List<Blog> newsBlogs = getBlogs(1, Filter.BLOGS_NEWS, null);
+		List<CwBlog> newsBlogs = null;
+		try {
+			newsBlogs = getCwBlogs(1, Filter.BLOGS_NEWS, null);
+		} catch (ConsolewarsAPIException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		int newsBlogsID = -1;
-		List<Blog> normalBlogs = getBlogs(1, Filter.BLOGS_NORMAL, null);
+		List<CwBlog> normalBlogs = null;
+		try {
+			normalBlogs = getCwBlogs(1, Filter.BLOGS_NORMAL, null);
+		} catch (ConsolewarsAPIException e) {
+			e.printStackTrace();
+		}
 		int normalBlogsID = -1;
-		if (!newsBlogs.isEmpty()) {
-			newsBlogsID = newsBlogs.get(0).getId();
+		if (newsBlogs != null && !newsBlogs.isEmpty()) {
+			newsBlogsID = newsBlogs.get(0).getSubjectId();
 		}
-		if (!normalBlogs.isEmpty()) {
-			normalBlogsID = normalBlogs.get(0).getId();
+		if (normalBlogs != null && !normalBlogs.isEmpty()) {
+			normalBlogsID = normalBlogs.get(0).getSubjectId();
 		}
-		// if one id is higher as the other, set it as newest id
+		// if one id is higher than the other, set it as newest id
 		newestBlog = (newsBlogsID - normalBlogsID >= 0) ? (newsBlogsID) : (normalBlogsID);
-		getBlogsByIDAndStore(this.newestBlog, true);
+		try {
+			getCwBlogsByIDAndStore(this.newestBlog, true);
+		} catch (ConsolewarsAPIException e) {
+			e.printStackTrace();
+		}
 
 		if (cwLoginManager.isLoggedIn()) {
-			getUserBlogsAndStore(cwLoginManager.getAuthenticatedUser().getUid(), 10, null);			
+			getUserCwBlogsAndStore(cwLoginManager.getAuthenticatedUser().getUid(), 10, null);
 		}
 		getMessagesAndStore(Filter.MSGS_INBOX, 10);
 	}
@@ -124,44 +174,45 @@ public class CwManager {
 	/**
 	 * @return the blogs
 	 */
-	public List<Blog> getBlogs(Filter filter) {
+	public List<CwBlog> getCwBlogs(Filter filter) {
 		if (filter.equals(Filter.BLOGS_USER)) {
 			if (userBlogs == null) {
-				userBlogs = new ArrayList<Blog>();
+				userBlogs = new ArrayList<CwBlog>();
 			}
 			return userBlogs;
 		} else {
 			if (blogs == null) {
-				blogs = new ArrayList<Blog>();
+				blogs = new ArrayList<CwBlog>();
 			}
 			return blogs;
 		}
 	}
 
-	public List<Blog> getBlogsAndStore(int count, Filter filter, Date date) {
+	public List<CwBlog> getCwBlogsAndStore(int count, Filter filter, Date date) {
 		if (filter.equals(Filter.BLOGS_USER)) {
-			userBlogs = getUserBlogsAndStore(cwLoginManager.getAuthenticatedUser().getUid(), count, date);
+			userBlogs = getUserCwBlogsAndStore(cwLoginManager.getAuthenticatedUser().getUid(), count, date);
 			return userBlogs;
 		}
 		try {
-			blogs = getBlogs(count, filter, date);
+			blogs = getCwBlogs(count, filter, date);
 		} catch (ConsolewarsAPIException e) {
 			e.printStackTrace();
 		}
-		return getBlogs(filter);
+		return getCwBlogs(filter);
 	}
 
-	public List<Blog> getUserBlogsAndStore(int userId, int count, Date date) {
+	public List<CwBlog> getUserCwBlogsAndStore(int userId, int count, Date date) {
 		try {
-			userBlogs = getUserBlogs(userId, count, date);
+			userBlogs = getUserCwBlogs(userId, count, date);
 		} catch (ConsolewarsAPIException e) {
 			e.printStackTrace();
 		}
-		return getBlogs(Filter.BLOGS_USER);
+		return getCwBlogs(Filter.BLOGS_USER);
 	}
 
-	public List<Blog> getBlogsByIDAndStore(int startID, boolean desc) throws ConsolewarsAPIException {
+	public List<CwBlog> getCwBlogsByIDAndStore(int startID, boolean desc) throws ConsolewarsAPIException {
 		int amount = 10;
+
 		if (startID < amount && startID > 0 && desc) {
 			amount = startID;
 		}
@@ -170,13 +221,12 @@ public class CwManager {
 			// if descending, reduce -1 to the startID etc., else add +1
 			ids[i] = (desc) ? (startID - i) : (startID + i);
 		}
-
 		if (desc) {
-			getBlogs(Filter.BLOGS_NORMAL).addAll(api.getBlogs(ids));
+			getCwBlogs(Filter.BLOGS_NORMAL).addAll(api.getCwBlogs(ids));
 		} else {
-			getBlogs(Filter.BLOGS_NORMAL).addAll(0, api.getBlogs(ids));
+			getCwBlogs(Filter.BLOGS_NORMAL).addAll(0, api.getCwBlogs(ids));
 		}
-		return getBlogs(Filter.BLOGS_NORMAL);
+		return getCwBlogs(Filter.BLOGS_NORMAL);
 	}
 
 	/**
@@ -188,8 +238,8 @@ public class CwManager {
 	 * @return
 	 * @throws ConsolewarsAPIException
 	 */
-	public List<Blog> getBlogs(int count, Filter filter, Date date) throws ConsolewarsAPIException {
-		return api.getBlogsList(-1, count, filter.getFilter(), date);
+	public List<CwBlog> getCwBlogs(int count, Filter filter, Date date) throws ConsolewarsAPIException {
+		return api.getCwBlogsList(-1, count, filter.getFilter(), date);
 	}
 
 	/**
@@ -200,8 +250,8 @@ public class CwManager {
 	 * @return
 	 * @throws ConsolewarsAPIException
 	 */
-	public List<Blog> getUserBlogs(int userId, int count, Date date) throws ConsolewarsAPIException {
-		return api.getBlogsList(userId, count, Filter.BLOGS_USER.getFilter(), date);
+	public List<CwBlog> getUserCwBlogs(int userId, int count, Date date) throws ConsolewarsAPIException {
+		return api.getCwBlogsList(userId, count, Filter.BLOGS_USER.getFilter(), date);
 	}
 
 	/**
@@ -211,8 +261,8 @@ public class CwManager {
 	 * @return
 	 * @throws ConsolewarsAPIException
 	 */
-	public Blog getBlogById(int blogId) throws ConsolewarsAPIException {
-		return api.getBlog(blogId);
+	public CwBlog getCwBlogById(int blogId) throws ConsolewarsAPIException {
+		return api.getCwBlog(blogId);
 	}
 
 	/**
@@ -232,26 +282,82 @@ public class CwManager {
 	/**
 	 * @return the news
 	 */
-	public List<News> getNews() {
+	public List<CwNews> getCwNews() {
 		if (news == null) {
-			news = new ArrayList<News>();
+			news = new ArrayList<CwNews>();
 		}
 		return news;
 	}
 
-	public List<News> getNewsAndStore(int count, Filter filter, Date date) {
+	public CwNews getSingleCwNews(int id, boolean fromSavedNews) {
+		CwNews news = null;
+		if (fromSavedNews) {
+			for (CwNews n : getCwNews()) {
+				if (n.getSubjectId() == id && n.getArticle() != null) {
+					return n;
+				}
+			}
+			try {
+				news = appDataHandler.loadSingleSavedNews(id);
+				if (news.getArticle() != null) {
+					return news;
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		news = getCwSingleNews(id);
 		try {
-			news = getNews(count, filter, date);
+			appDataHandler.createOrUpdateNews(news);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return news;
+	}
+
+	public CwNews getCwSingleNews(int id) {
+		CwNews news = null;
+		try {
+			news = api.getCwNews(id);
 		} catch (ConsolewarsAPIException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return getNews();
+		return news;
 	}
 
-	public void getNewsByIDAndStore(int startID, boolean desc) throws ConsolewarsAPIException {
+	public List<CwNews> getCwNewsAndStore(int count, Filter filter, Date date) {
+		try {
+			news = getCwNews(count, filter, date);
+		} catch (ConsolewarsAPIException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if (news != null) {
+			for (CwNews n : news) {
+				try {
+					appDataHandler.createOrUpdateNews(n);
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return getCwNews();
+	}
+
+	public void getCwNewsByIDAndStore(int startID, boolean desc) throws ConsolewarsAPIException {
 		int amount = 10;
-		if (startID < amount && startID > 0 && desc) {
+
+		List<CwNews> savedNews = null;
+		try {
+			savedNews = appDataHandler.loadSavedNews(startID + 1, true);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		if (savedNews != null && !savedNews.isEmpty()) {
+			amount = startID - savedNews.get(0).getSubjectId();
+			getCwNews().addAll(savedNews);
+		} else if (startID < amount && startID > 0 && desc) {
 			amount = startID;
 		}
 		int[] ids = new int[amount];
@@ -261,9 +367,9 @@ public class CwManager {
 		}
 
 		if (desc) {
-			getNews().addAll(api.getNews(ids));
+			getCwNews().addAll(api.getCwNews(ids));
 		} else {
-			getNews().addAll(0, api.getNews(ids));
+			getCwNews().addAll(0, api.getCwNews(ids));
 		}
 	}
 
@@ -276,8 +382,8 @@ public class CwManager {
 	 * @return
 	 * @throws ConsolewarsAPIException
 	 */
-	public List<News> getNews(int count, Filter filter, Date date) throws ConsolewarsAPIException {
-		return api.getNewsList(count, filter.getFilter(), date);
+	public List<CwNews> getCwNews(int count, Filter filter, Date date) throws ConsolewarsAPIException {
+		return api.getCwNewsList(count, filter.getFilter(), date);
 	}
 
 	/**
@@ -311,8 +417,8 @@ public class CwManager {
 	 */
 	public List<Message> getMessages(Filter filter, int count) throws ConsolewarsAPIException {
 		if (cwLoginManager.isLoggedIn()) {
-			return api.getMessages(cwLoginManager.getAuthenticatedUser().getUid(), cwLoginManager.getAuthenticatedUser().getPasswordHash(),
-					filter.getFilter(), count);
+			return api.getMessages(cwLoginManager.getAuthenticatedUser().getUid(), cwLoginManager
+					.getAuthenticatedUser().getPasswordHash(), filter.getFilter(), count);
 		} else {
 			return new ArrayList<Message>();
 		}
@@ -367,8 +473,8 @@ public class CwManager {
 
 		try {
 			String url = context.getString(R.string.cw_message_url);
-			String cookies = context.getString(R.string.cw_cookie_full, cwLoginManager.getAuthenticatedUser(), cwLoginManager
-					.getAuthenticatedUser().getPasswordHash());
+			String cookies = context.getString(R.string.cw_cookie_full, cwLoginManager.getAuthenticatedUser(),
+					cwLoginManager.getAuthenticatedUser().getPasswordHash());
 			List<String> pms = new ArrayList<String>();
 			for (Integer messageId : messageIds) {
 				pms.add(context.getString(R.string.cw_mssg_delete_param, messageId));
@@ -390,8 +496,8 @@ public class CwManager {
 		try {
 			securityToken = MediaSnapper.snapWithCookies(context, context.getString(R.string.xpath_get_securitytoken),
 					context.getString(R.string.value), context.getString(R.string.cw_getsecuritytoken_url), context
-							.getString(R.string.cw_cookie_full, cwLoginManager.getAuthenticatedUser().getUid(), cwLoginManager
-									.getAuthenticatedUser().getPasswordHash()));
+							.getString(R.string.cw_cookie_full, cwLoginManager.getAuthenticatedUser().getUid(),
+									cwLoginManager.getAuthenticatedUser().getPasswordHash()));
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		} catch (XPatherException e1) {
@@ -417,10 +523,12 @@ public class CwManager {
 			boolean isVisible, boolean isNewsblog, int blogID) {
 		if (cwLoginManager.isLoggedIn()) {
 			try {
-				String url = context.getString(R.string.cw_blogpost_url,
-						URLEncoder.encode(cwLoginManager.getAuthenticatedUser().getUsername(), context.getString(R.string.utf8)));
-				String cookies = context.getString(R.string.cw_cookie_full, cwLoginManager.getAuthenticatedUser().getUid(),
-						cwLoginManager.getAuthenticatedUser().getPasswordHash());
+				String url = context.getString(
+						R.string.cw_blogpost_url,
+						URLEncoder.encode(cwLoginManager.getAuthenticatedUser().getUsername(),
+								context.getString(R.string.utf8)));
+				String cookies = context.getString(R.string.cw_cookie_full, cwLoginManager.getAuthenticatedUser()
+						.getUid(), cwLoginManager.getAuthenticatedUser().getPasswordHash());
 				String data = context.getString(R.string.cw_blog_submit_data, URLEncoder.encode(title,
 						context.getString(R.string.utf8)),
 						URLEncoder.encode(content, context.getString(R.string.utf8)), URLEncoder.encode(date,
@@ -439,9 +547,10 @@ public class CwManager {
 	public boolean deleteBlog(int id, String command) {
 		if (cwLoginManager.isLoggedIn()) {
 			try {
-				String url = context.getString(R.string.cw_blogpost_url, cwLoginManager.getAuthenticatedUser().getUsername());
-				String cookies = context.getString(R.string.cw_cookie_full, cwLoginManager.getAuthenticatedUser().getUid(),
-						cwLoginManager.getAuthenticatedUser().getPasswordHash());
+				String url = context.getString(R.string.cw_blogpost_url, cwLoginManager.getAuthenticatedUser()
+						.getUsername());
+				String cookies = context.getString(R.string.cw_cookie_full, cwLoginManager.getAuthenticatedUser()
+						.getUid(), cwLoginManager.getAuthenticatedUser().getPasswordHash());
 				String data = context.getString(R.string.cw_blog_delete_data, id,
 						URLEncoder.encode(command, context.getString(R.string.utf8)));
 				httpPoster.sendPost(url, cookies, data);
@@ -463,9 +572,9 @@ public class CwManager {
 		if (cwLoginManager.isLoggedIn()) {
 			try {
 				httpPoster.sendPost(context.getString(R.string.cw_posting_url), context.getString(
-						R.string.cw_cookie_full, cwLoginManager.getAuthenticatedUser().getUid(), cwLoginManager.getAuthenticatedUser()
-								.getPasswordHash()), context.getString(R.string.cw_cmmt_submit_data, area, objectId,
-						context.getString(R.string.cw_command_newentry),
+						R.string.cw_cookie_full, cwLoginManager.getAuthenticatedUser().getUid(), cwLoginManager
+								.getAuthenticatedUser().getPasswordHash()), context.getString(
+						R.string.cw_cmmt_submit_data, area, objectId, context.getString(R.string.cw_command_newentry),
 						URLEncoder.encode(comment, context.getString(R.string.utf8)), 1));
 				return true;
 			} catch (IOException e) {
@@ -485,9 +594,10 @@ public class CwManager {
 		if (cwLoginManager.isLoggedIn()) {
 			try {
 				httpPoster.sendPost(context.getString(R.string.cw_posting_url), context.getString(
-						R.string.cw_cookie_full, cwLoginManager.getAuthenticatedUser().getUid(), cwLoginManager.getAuthenticatedUser()
-								.getPasswordHash()), context.getString(R.string.cw_cmmt_delete_data, area, objectId,
-						commentId, context.getString(R.string.cw_command_remove), 1));
+						R.string.cw_cookie_full, cwLoginManager.getAuthenticatedUser().getUid(), cwLoginManager
+								.getAuthenticatedUser().getPasswordHash()), context.getString(
+						R.string.cw_cmmt_delete_data, area, objectId, commentId,
+						context.getString(R.string.cw_command_remove), 1));
 				return true;
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -507,9 +617,10 @@ public class CwManager {
 		if (cwLoginManager.isLoggedIn()) {
 			try {
 				httpPoster.sendPost(context.getString(R.string.cw_posting_url), context.getString(
-						R.string.cw_cookie_full, cwLoginManager.getAuthenticatedUser().getUid(), cwLoginManager.getAuthenticatedUser()
-								.getPasswordHash()), context.getString(R.string.cw_cmmt_edit_data, area, objectId,
-						commentId, context.getString(R.string.cw_command_update),
+						R.string.cw_cookie_full, cwLoginManager.getAuthenticatedUser().getUid(), cwLoginManager
+								.getAuthenticatedUser().getPasswordHash()), context.getString(
+						R.string.cw_cmmt_edit_data, area, objectId, commentId,
+						context.getString(R.string.cw_command_update),
 						URLEncoder.encode(newText, context.getString(R.string.utf8)), 1));
 				return true;
 			} catch (IOException e) {

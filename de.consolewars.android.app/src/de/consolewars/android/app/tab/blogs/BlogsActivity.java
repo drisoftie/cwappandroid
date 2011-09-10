@@ -1,42 +1,37 @@
 package de.consolewars.android.app.tab.blogs;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import roboguice.activity.RoboActivity;
 import android.app.ActivityGroup;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.style.ForegroundColorSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TableLayout;
 import android.widget.TextView;
 
 import com.google.inject.Inject;
 
+import de.consolewars.android.app.CwLoginManager;
 import de.consolewars.android.app.CwManager;
 import de.consolewars.android.app.Filter;
 import de.consolewars.android.app.R;
+import de.consolewars.android.app.db.domain.CwBlog;
 import de.consolewars.android.app.tab.CwBasicActivityGroup;
 import de.consolewars.android.app.util.DateUtility;
 import de.consolewars.android.app.util.StyleSpannableStringBuilder;
 import de.consolewars.android.app.util.ViewUtility;
-import de.consolewars.api.data.Blog;
+import de.consolewars.android.app.view.IScrollListener;
+import de.consolewars.android.app.view.ScrollDetectorScrollView;
 import de.consolewars.api.exception.ConsolewarsAPIException;
 
 /*
@@ -61,41 +56,36 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
 public class BlogsActivity extends RoboActivity {
 
 	@Inject
+	private CwLoginManager cwLoginManager;
+	@Inject
 	private CwManager cwManager;
 	@Inject
 	private ViewUtility viewUtility;
 
-	private List<Blog> blogs = new ArrayList<Blog>();
-	private int oldestBlogsID = -1;
+	private ViewGroup blogs_layout;
+	private TableLayout blogsTable;
+	private Button refresh;
+	private ScrollDetectorScrollView scroll;
+	private Spinner spinner;
+
+	// remember last selected table row to draw the background
+	private View selectedRow;
 
 	private Filter currentFilter = Filter.BLOGS_NORMAL;
+	private int oldestBlogsID = -1;
+	private boolean initUI = false;;
 
-	private LayoutInflater inflater;
-	private ViewGroup blogs_layout;
-	private ListView list;
-	private Button refresh;
-	private Spinner spinner;
-	private View progress;
-
-	BlogsSeparatorAdapter adapter;
-
-	private boolean initUI = false;
+	// text styling
+	private StyleSpannableStringBuilder styleStringBuilder;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		inflater = LayoutInflater.from(getParent());
-		blogs_layout = (ViewGroup) inflater.inflate(R.layout.blogs_layout, null);
-		setContentView(blogs_layout);
+		blogs_layout = (ViewGroup) LayoutInflater.from(getParent()).inflate(R.layout.blogs_layout, null);
+		blogsTable = (TableLayout) blogs_layout.findViewById(R.id.blogs_table);
 		refresh = (Button) blogs_layout.findViewById(R.id.blogs_bttn_refresh);
-		spinner = (Spinner) blogs_layout.findViewById(R.id.blogs_filter_spinner);
-		progress = blogs_layout.findViewById(R.id.blogs_progressbar);
-		list = (ListView) blogs_layout.findViewById(R.id.list);
-
-		adapter = new BlogsSeparatorAdapter(BlogsActivity.this, new ArrayList<UIBlog>());
-		list.setAdapter(adapter);
-		progress.setVisibility(View.GONE);
+		scroll = (ScrollDetectorScrollView) blogs_layout.findViewById(R.id.blogs_scroll_view);
+		setContentView(blogs_layout);
 		new BuildBlogsAsyncTask().execute();
 	}
 
@@ -104,117 +94,158 @@ public class BlogsActivity extends RoboActivity {
 	 * 
 	 * @author Alexander Dridiger
 	 */
-	private class BuildBlogsAsyncTask extends AsyncTask<Boolean, UIBlog, Void> {
-
-		boolean doesWork = false;
+	private class BuildBlogsAsyncTask extends AsyncTask<Boolean, View, Void> {
 
 		@Override
 		protected void onPreExecute() {
-			doesWork = true;
-			progress.setVisibility(View.VISIBLE);
+			// first set progressbar
+			ViewGroup progress_layout = viewUtility.getCenteredProgressBarLayout(getLayoutInflater(),
+					R.string.tab_blogs_head);
+			blogsTable.addView(progress_layout);
+			scroll.removeScrollListener();
+			refresh.setClickable(false);
 		}
 
 		@Override
 		protected Void doInBackground(Boolean... params) {
-			if ((params.length > 0 && params[0]) || blogs.isEmpty()) {
-				if (!cwManager.getBlogs(currentFilter).isEmpty()) {
+			if (params.length > 0 && params[0]) {
+				if (!cwManager.getCwBlogs(currentFilter).isEmpty()) {
 					if (currentFilter.equals(Filter.BLOGS_USER)) {
-						blogs = cwManager.getBlogsAndStore(50, currentFilter, null);
+						cwManager.getCwBlogsAndStore(50, currentFilter, null);
 					} else {
 						try {
-							blogs = cwManager.getBlogsByIDAndStore(
-									cwManager.getBlogs(currentFilter)
-											.get(cwManager.getBlogs(Filter.BLOGS_NORMAL).size() - 1).getId(), true);
+							cwManager.getCwBlogsByIDAndStore(
+									cwManager.getCwBlogs(currentFilter)
+											.get(cwManager.getCwBlogs(Filter.BLOGS_NORMAL).size() - 1).getSubjectId(), true);
 						} catch (ConsolewarsAPIException e) {
 							e.printStackTrace();
 						}
 					}
 				}
 			}
-			for (int i = 0; i < blogs.size(); i++) {
-				if (!isCancelled() && (oldestBlogsID == -1 || blogs.get(i).getId() < oldestBlogsID)) {
-					Blog blog = blogs.get(i);
-					UIBlog uiblog = new UIBlog();
-					uiblog.blog = blog;
-					if (i == 0 || isSeparator(blogs.get(i - 1), blog)) {
-						uiblog.seperatorTxt = DateUtility
-								.createDate(blog.getUnixtime() * 1000L, "EEEE, dd. MMMMM yyyy");
-					}
-					uiblog.icon = viewUtility.getUserIcon(blog.getUid(), 40);
-					uiblog.titleTxt = createTitle(blog.getTitle());
-					uiblog.dateTxt = DateUtility.createDate(blog.getUnixtime() * 1000L, "'um' HH:mm'Uhr'");
-					uiblog.amountTxt = createCommentsAmount(blog.getComments());
-					uiblog.authorTxt = createAuthor(blog.getAuthor());
-					if (i == blogs.size() - 1) {
-						oldestBlogsID = blog.getId();
-					}
-					publishProgress(uiblog);
-				}
-			}
+			createBlogRows();
 			return null;
 		}
 
 		@Override
-		protected void onProgressUpdate(UIBlog... rows) {
+		protected void onProgressUpdate(View... rows) {
 			if (!isCancelled()) {
-				adapter.add(rows[0]);
+				blogsTable.addView(rows[0], blogsTable.getChildCount() - 1);
 			}
 		}
 
 		@Override
 		protected void onPostExecute(Void result) {
+			blogsTable.removeViewAt(blogsTable.getChildCount() - 1);
 			if (!initUI) {
 				initFilter();
 				initRefreshBttn();
-				initScroll();
 			}
+			refresh.setClickable(true);
+			initScroll();
+//			initSendBlogBttn();
 			initUI = true;
-			progress.setVisibility(View.GONE);
-			doesWork = false;
 		}
 
-		private void initScroll() {
-			list.setOnScrollListener(new OnScrollListener() {
-				@Override
-				public void onScrollStateChanged(AbsListView view, int scrollState) {
-					// do nothing
-				}
+//		private void initSendBlogBttn() {
+//			Button new_bttn = (Button) blogs_layout.findViewById(R.id.blogs_bttn_new_blog);
+//			new_bttn.setOnClickListener(new OnClickListener() {
+//				@Override
+//				public void onClick(View arg0) {
+//					Intent newBlogIntent = new Intent(BlogsActivity.this, BlogsWriterActivity.class);
+//
+//					View view = ((ActivityGroup) getParent())
+//							.getLocalActivityManager()
+//							.startActivity(BlogsWriterActivity.class.getSimpleName(),
+//									newBlogIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
+//					// replace the view
+//					((BlogsActivityGroup) getParent()).replaceView(view);
+//				}
+//			});
+//		}
 
-				@Override
-				public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-					if (!doesWork && !blogs.isEmpty() && firstVisibleItem + visibleItemCount >= totalItemCount - 1) {
-						new BuildBlogsAsyncTask().execute(true);
+		/**
+		 * Create rows displaying single blogs to be displayed in a table.
+		 */
+		private void createBlogRows() {
+			// create table based on current blogs
+			ViewGroup separator = null;
+			TextView separatorTxt = null;
+
+			for (int i = 0; i < cwManager.getCwBlogs(currentFilter).size(); i++) {
+				CwBlog blog = cwManager.getCwBlogs(currentFilter).get(i);
+				if (!isCancelled() && (oldestBlogsID == -1 || blog.getSubjectId() < oldestBlogsID)) {
+					if (i == 0
+							|| DateUtility.getDay(
+									DateUtility.createCalendarFromUnixtime(cwManager.getCwBlogs(currentFilter).get(i - 1)
+											.getUnixtime() * 1000L), 0).getTimeInMillis() > blog.getUnixtime() * 1000L) {
+						// current blog was not created on the same date as the last blog --> separator necessary
+						separator = (ViewGroup) LayoutInflater.from(BlogsActivity.this.getParent()).inflate(
+								R.layout.blogs_row_day_separator_layout, null);
+						separatorTxt = (TextView) separator.findViewById(R.id.blogs_row_day_separator_text);
+						separatorTxt.setText(createDate(
+								DateUtility.getDay(DateUtility.createCalendarFromUnixtime(blog.getUnixtime() * 1000L),
+										0).getTimeInMillis(), "EEEE, dd. MMMMM yyyy"));
+						publishProgress(separator);
+					}
+					if (matchesFilter(blog.getUid(), blog.getMode())) {
+						// get the table row by an inflater and set the needed information
+						final View tableRow = LayoutInflater.from(BlogsActivity.this).inflate(
+								R.layout.blogs_row_layout, blogsTable, false);
+						tableRow.setId(blog.getSubjectId());
+						tableRow.setOnClickListener(new View.OnClickListener() {
+							@Override
+							public void onClick(View v) {
+								// set the correct background when a table row was
+								// selected by the user
+								if (selectedRow != null) {
+									selectedRow.setBackgroundDrawable(getResources().getDrawable(
+											R.drawable.table_cell_bg));
+								}
+								tableRow.setBackgroundDrawable(getResources().getDrawable(
+										R.drawable.table_cell_bg_selected));
+								selectedRow = tableRow;
+								getSingleBlog(tableRow.getId());
+							}
+						});
+						// set each table row with the given information from the
+						// returned blogs
+						viewUtility.setUserIcon(((ImageView) tableRow.findViewById(R.id.blogs_row_user_icon)),
+								blog.getUid(), 40);
+						((TextView) tableRow.findViewById(R.id.blogs_row_title)).setText(createTitle(blog.getTitle()));
+						((TextView) tableRow.findViewById(R.id.blogs_row_date)).setText(createDate(
+								blog.getUnixtime() * 1000L, "'um' HH:mm'Uhr'"));
+						TextView amount = (TextView) tableRow.findViewById(R.id.blogs_row_cmmts_amount);
+						amount.setText(createCommentsAmount(blog.getComments()));
+
+						TextView author = (TextView) tableRow.findViewById(R.id.blogs_row_author);
+						author.setText(createAuthor(blog.getAuthor()));
+						author.setSelected(true);
+
+						publishProgress(tableRow);
 					}
 				}
-			});
-
-		}
-
-		/**
-		 * Check if the blog on the given position must be separated from the last blogs.
-		 * 
-		 * @param position
-		 * @return
-		 */
-		private boolean isSeparator(Blog formerBlog, Blog newerBlog) {
-			boolean separator = false;
-			// check if the last blog was created on the same date as the current blog
-			if (DateUtility.getDay(DateUtility.createCalendarFromUnixtime(formerBlog.getUnixtime() * 1000L), 0)
-					.getTimeInMillis() > newerBlog.getUnixtime() * 1000L) {
-				// current blog was not created on the same date as the last blog --> separator necessary
-				separator = true;
 			}
-			return separator;
 		}
 
-		/**
-		 * @param parent
-		 */
+		private boolean matchesFilter(int uid, String mode) {
+			boolean matches = false;
+			if (currentFilter.equals(Filter.BLOGS_NEWS) && !mode.equals(getString(R.string.blogmode_normal))) {
+				matches = true;
+			} else if (currentFilter.equals(Filter.BLOGS_NORMAL) && mode.equals(getString(R.string.blogmode_normal))) {
+				matches = true;
+			} else if (currentFilter.equals(Filter.BLOGS_USER) && uid == cwLoginManager.getAuthenticatedUser().getUid()) {
+				matches = true;
+			}
+			return matches;
+		}
+
 		private void initRefreshBttn() {
 			refresh.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View arg0) {
 					cancel(true);
+					blogsTable.removeAllViews();
 					oldestBlogsID = -1;
 					new BuildBlogsAsyncTask().execute();
 				}
@@ -222,16 +253,14 @@ public class BlogsActivity extends RoboActivity {
 		}
 
 		/**
-		 * Filter ui and logic for filtering news.
+		 * Filter ui and logic for filtering blogs.
 		 * 
-		 * @param parentView
-		 *            to find the inflated view elements.
 		 */
 		private void initFilter() {
-			ArrayAdapter<CharSequence> spinneradapter = ArrayAdapter.createFromResource(getParent(),
+			ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getParent(),
 					R.array.blogs_filter_options, android.R.layout.simple_spinner_item);
-			spinneradapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-			spinner.setAdapter(spinneradapter);
+			adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+			spinner.setAdapter(adapter);
 			spinner.setSelection(currentFilter.getPosition());
 			spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
 				@Override
@@ -248,6 +277,7 @@ public class BlogsActivity extends RoboActivity {
 					if (!currentFilter.equals(selected)) {
 						cancel(true);
 						currentFilter = selected;
+						blogsTable.removeAllViews();
 						oldestBlogsID = -1;
 						new BuildBlogsAsyncTask().execute();
 					}
@@ -260,134 +290,35 @@ public class BlogsActivity extends RoboActivity {
 			});
 		}
 
-		/**
-		 * Formatted string of a blog title.
-		 * 
-		 * @param title
-		 * @return a formatted {@link CharSequence}
-		 */
-		public CharSequence createTitle(String title) {
-			// TODO text formatting
-			return title;
-		}
-
-		ForegroundColorSpan brown = new ForegroundColorSpan(0xFF007711);
-
-		/**
-		 * Creates the string for the ui cell showing the author of a blog and the amount of comments.
-		 * 
-		 * @param commentAmount
-		 * @param author
-		 * @return a formatted {@link CharSequence}
-		 */
-		private CharSequence createCommentsAmount(int commentAmount) {
-			// TODO more text formatting
-			// an empty author string means that the blog was not written by a
-			StyleSpannableStringBuilder styleStringBuilder = new StyleSpannableStringBuilder();
-			styleStringBuilder.appendWithStyle(brown, String.valueOf(commentAmount));
-
-			return styleStringBuilder;
-		}
-
-		ForegroundColorSpan green1 = new ForegroundColorSpan(0xFF007711);
-		ForegroundColorSpan green2 = new ForegroundColorSpan(0xFF009933);
-
-		/**
-		 * Creates the string for the ui cell showing the author of a blog and the amount of comments.
-		 * 
-		 * @param commentAmount
-		 * @param author
-		 * @return a formatted {@link CharSequence}
-		 */
-		private CharSequence createAuthor(String author) {
-			// TODO more text formatting
-			// an empty author string means that the blog was not written by a
-			if (author.matches("")) {
-				author = getString(R.string.news_author_unknown);
-			}
-			StyleSpannableStringBuilder styleStringBuilder = new StyleSpannableStringBuilder();
-			styleStringBuilder.appendWithStyle(green1, getString(R.string.news_author_by));
-			styleStringBuilder.append(" ");
-			styleStringBuilder.appendWithStyle(green2, author);
-
-			return styleStringBuilder;
-		}
-
-	}
-
-	protected class BlogsSeparatorAdapter extends ArrayAdapter<UIBlog> {
-
-		private final int SEPERATOR = 0;
-		private final int BLOGELEMENT = 1;
-
-		public BlogsSeparatorAdapter(Context context, List<UIBlog> rows) {
-			super(context, R.layout.blogs_row_layout, rows);
-		}
-
-		@Override
-		public int getViewTypeCount() {
-			return 2;
-		}
-
-		@Override
-		public int getItemViewType(int position) {
-			if (getItem(position).seperatorTxt != null) {
-				return SEPERATOR;
-			} else {
-				return BLOGELEMENT;
-			}
-		}
-
-		@Override
-		public View getView(final int position, View convertView, ViewGroup parent) {
-			Log.i("*********COUNT**********", getCount() + "");
-			Log.i("*********POS**********", position + "");
-			UIBlog blog = getItem(position);
-			ViewHolder holder;
-			if (convertView == null) {
-				holder = new ViewHolder();
-				if (getItemViewType(position) == SEPERATOR) {
-					convertView = inflater.inflate(R.layout.blogs_row_day_separator_item_layout, null);
-					View separator = convertView.findViewById(R.id.blogs_separator);
-					separator.setOnClickListener(new OnClickListener() {
-						@Override
-						public void onClick(View v) {
-							// do nothing
-						}
-					});
-					holder.separator = (TextView) separator.findViewById(R.id.blogs_row_day_separator_text);
-				} else {
-					convertView = inflater.inflate(R.layout.blogs_row_layout, null);
-				}
-				holder.usericon = (ImageView) convertView.findViewById(R.id.blogs_row_user_icon);
-				holder.title = (TextView) convertView.findViewById(R.id.blogs_row_title);
-				holder.date = (TextView) convertView.findViewById(R.id.blogs_row_date);
-				holder.amount = (TextView) convertView.findViewById(R.id.blogs_row_cmmts_amount);
-				holder.author = (TextView) convertView.findViewById(R.id.blogs_row_author);
-				convertView.setTag(holder);
-			} else {
-				holder = (ViewHolder) convertView.getTag();
-			}
-			if (holder.separator != null) {
-				if (blog.seperatorTxt == null) {
-					View separator = convertView.findViewById(R.id.blogs_separator);
-					separator.setVisibility(View.GONE);
-				}
-				holder.separator.setText(blog.seperatorTxt);
-			}
-			holder.usericon.setImageBitmap(blog.icon);
-			holder.title.setText(blog.titleTxt);
-			holder.date.setText(blog.dateTxt);
-			holder.amount.setText(blog.amountTxt);
-			holder.author.setText(blog.authorTxt);
-
-			convertView.findViewById(R.id.blogs_row).setOnClickListener(new OnClickListener() {
+		private void initScroll() {
+			scroll.setOnScrollListener(new IScrollListener() {
 				@Override
-				public void onClick(View view) {
-					getSingleBlog(getItem(position).blog.getId());
+				public void onScrollChanged(ScrollDetectorScrollView scrollView, int x, int y, int oldx, int oldy) {
+					if (!isCancelled()) {
+						// Grab the last child placed in the ScrollView, we need it to determinate the bottom position.
+						View view = (View) scrollView.getChildAt(scrollView.getChildCount() - 1);
+
+						// Calculate the scrolldiff
+						int diff = (view.getBottom() - (scrollView.getHeight() + scrollView.getScrollY()));
+
+						// if diff is zero, then the bottom has been reached
+						if (diff == 0) {
+							if (currentFilter.equals(Filter.BLOGS_USER)) {
+								blogsTable.removeAllViews();
+							}
+							new BuildBlogsAsyncTask().execute(true);
+						}
+					}
 				}
 			});
-			return convertView;
+		}
+
+		/**
+		 * @param unixtime
+		 * @return
+		 */
+		private CharSequence createDate(long unixtime, String format) {
+			return DateUtility.createDate(unixtime, format);
 		}
 
 		/**
@@ -410,25 +341,53 @@ public class BlogsActivity extends RoboActivity {
 			((BlogsActivityGroup) getParent()).replaceView(view);
 		}
 
-		class ViewHolder {
-			TextView separator;
-			ImageView usericon;
-			TextView title;
-			TextView date;
-			TextView amount;
-			TextView author;
+		/**
+		 * Formatted string of a blog title.
+		 * 
+		 * @param title
+		 * @return a formatted {@link CharSequence}
+		 */
+		private CharSequence createTitle(String title) {
+			// TODO text formatting
+			return title;
 		}
 
-	}
+		/**
+		 * Creates the string for the ui cell showing the author of a blog and the amount of comments.
+		 * 
+		 * @param commentAmount
+		 * @param author
+		 * @return a formatted {@link CharSequence}
+		 */
+		private CharSequence createAuthor(String author) {
+			// TODO more text formatting
+			// an empty author string means that the blog was not written by a
+			if (author.matches("")) {
+				author = getString(R.string.news_author_unknown);
+			}
+			styleStringBuilder = new StyleSpannableStringBuilder();
+			styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF007711), getString(R.string.news_author_by));
+			styleStringBuilder.append(" ");
+			styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF009933), author);
 
-	private class UIBlog {
-		Blog blog;
-		CharSequence seperatorTxt;
-		Bitmap icon;
-		CharSequence titleTxt;
-		CharSequence dateTxt;
-		CharSequence amountTxt;
-		CharSequence authorTxt;
+			return styleStringBuilder;
+		}
+
+		/**
+		 * Creates the string for the ui cell showing the author of a blog and the amount of comments.
+		 * 
+		 * @param commentAmount
+		 * @param author
+		 * @return a formatted {@link CharSequence}
+		 */
+		private CharSequence createCommentsAmount(int commentAmount) {
+			// TODO more text formatting
+			// an empty author string means that the blog was not written by a
+			styleStringBuilder = new StyleSpannableStringBuilder();
+			styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF7e6003), String.valueOf(commentAmount));
+
+			return styleStringBuilder;
+		}
 	}
 
 	@Override

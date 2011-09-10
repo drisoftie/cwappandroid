@@ -26,9 +26,9 @@ import com.google.inject.Inject;
 
 import de.consolewars.android.app.CwManager;
 import de.consolewars.android.app.R;
+import de.consolewars.android.app.db.domain.CwBlog;
 import de.consolewars.android.app.tab.CwBasicActivityGroup;
 import de.consolewars.android.app.util.DateUtility;
-import de.consolewars.api.data.Blog;
 import de.consolewars.api.exception.ConsolewarsAPIException;
 
 /*
@@ -186,9 +186,9 @@ public class BlogsWriterActivity extends RoboActivity {
 			if (BlogsWriterActivity.this.getIntent().hasExtra(getString(R.string.id))
 					&& BlogsWriterActivity.this.getIntent().getExtras().getInt(getString(R.string.id), -1) != -1) {
 				id = BlogsWriterActivity.this.getIntent().getExtras().getInt(getString(R.string.id));
-				Blog blog = null;
+				CwBlog blog = null;
 				try {
-					blog = cwManager.getBlogById(id);
+					blog = cwManager.getCwBlogById(id);
 				} catch (ConsolewarsAPIException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

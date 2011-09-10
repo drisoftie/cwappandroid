@@ -7,10 +7,10 @@ import android.os.Bundle;
 import android.view.Window;
 import android.widget.ProgressBar;
 
+import com.bugsense.trace.BugSenseHandler;
 import com.google.inject.Inject;
 
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
-import de.consolewars.api.exception.ConsolewarsAPIException;
 
 /**
  * Activity handling the splash screen.
@@ -30,6 +30,8 @@ public class SplashScreenActivity extends RoboActivity {
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		setContentView(R.layout.splash_layout);
 		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.titlebar_layout);
+
+		BugSenseHandler.setup(this, getString(R.string.bug_key));
 
 		new SplashAsyncTask().execute();
 	}
@@ -53,11 +55,7 @@ public class SplashScreenActivity extends RoboActivity {
 		@Override
 		protected Void doInBackground(Void... params) {
 			cwLoginManager.checkSavedUserAndLogin();
-			try {
-				cwManager.setupEntities();
-			} catch (ConsolewarsAPIException e) {
-				e.printStackTrace();
-			}
+			cwManager.setupEntities();
 			return null;
 		}
 

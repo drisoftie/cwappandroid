@@ -31,7 +31,7 @@
 	<string
 		name="db_savedblog_attribute">savedWholeBlog</string>
 	<string
-		name="db_newsid_attribute">newsID</string>
+		name="db_subjectid_attribute">subjectId</string>
 	<string
 		name="db_blogid_attribute">blogID</string>
 	<string
