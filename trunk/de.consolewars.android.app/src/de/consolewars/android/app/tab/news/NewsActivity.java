@@ -3,7 +3,6 @@ package de.consolewars.android.app.tab.news;
 import org.apache.commons.lang.StringUtils;
 
 import roboguice.activity.RoboActivity;
-import android.app.ActivityGroup;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -26,13 +25,12 @@ import com.google.inject.Inject;
 import de.consolewars.android.app.CwManager;
 import de.consolewars.android.app.Filter;
 import de.consolewars.android.app.R;
-import de.consolewars.android.app.tab.CwBasicActivityGroup;
+import de.consolewars.android.app.db.domain.CwNews;
 import de.consolewars.android.app.util.DateUtility;
 import de.consolewars.android.app.util.StyleSpannableStringBuilder;
 import de.consolewars.android.app.util.ViewUtility;
 import de.consolewars.android.app.view.IScrollListener;
 import de.consolewars.android.app.view.ScrollDetectorScrollView;
-import de.consolewars.api.data.News;
 import de.consolewars.api.exception.ConsolewarsAPIException;
 
 /*
@@ -55,7 +53,6 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
  * @author Alexander Dridiger
  */
 public class NewsActivity extends RoboActivity {
-
 	@Inject
 	private CwManager cwManager;
 	@Inject
@@ -80,11 +77,10 @@ public class NewsActivity extends RoboActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		news_layout = (ViewGroup) LayoutInflater.from(getParent()).inflate(R.layout.news_layout, null);
+		news_layout = (ViewGroup) LayoutInflater.from(this).inflate(R.layout.news_layout, null);
 		newsTable = (TableLayout) news_layout.findViewById(R.id.news_table);
 		refresh = (Button) news_layout.findViewById(R.id.news_bttn_refresh);
 		scroll = (ScrollDetectorScrollView) news_layout.findViewById(R.id.news_scroll_view);
-		spinner = (Spinner) news_layout.findViewById(R.id.news_filter_spinner);
 		setContentView(news_layout);
 		new BuildNewsAsyncTask().execute();
 	}
@@ -100,7 +96,7 @@ public class NewsActivity extends RoboActivity {
 		protected void onPreExecute() {
 			// first set progressbar
 			ViewGroup progress_layout = viewUtility.getCenteredProgressBarLayout(
-					LayoutInflater.from(NewsActivity.this.getParent()), R.string.tab_news_head);
+					LayoutInflater.from(NewsActivity.this), R.string.tab_news_head);
 			newsTable.addView(progress_layout);
 			scroll.removeScrollListener();
 			refresh.setClickable(false);
@@ -109,10 +105,10 @@ public class NewsActivity extends RoboActivity {
 		@Override
 		protected Void doInBackground(Boolean... params) {
 			if (params.length > 0 && params[0]) {
-				if (!cwManager.getNews().isEmpty()) {
+				if (!cwManager.getCwNews().isEmpty()) {
 					try {
-						cwManager.getNewsByIDAndStore(cwManager.getNews().get(cwManager.getNews().size() - 1).getId(),
-								true);
+						cwManager.getCwNewsByIDAndStore(cwManager.getCwNews().get(cwManager.getCwNews().size() - 1)
+								.getSubjectId(), true);
 					} catch (ConsolewarsAPIException e) {
 						e.printStackTrace();
 					}
@@ -149,15 +145,15 @@ public class NewsActivity extends RoboActivity {
 			ViewGroup separator = null;
 			TextView separatorTxt = null;
 
-			for (int i = 0; i < cwManager.getNews().size(); i++) {
-				News newsToAdd = cwManager.getNews().get(i);
-				if (!isCancelled() && (oldestNewsID == -1 || newsToAdd.getId() < oldestNewsID)) {
+			for (int i = 0; i < cwManager.getCwNews().size(); i++) {
+				CwNews newsToAdd = cwManager.getCwNews().get(i);
+				if (!isCancelled() && (oldestNewsID == -1 || newsToAdd.getSubjectId() < oldestNewsID)) {
 					if (i == 0
-							|| DateUtility
-									.getDay(DateUtility.createCalendarFromUnixtime(cwManager.getNews().get(i - 1)
+							|| DateUtility.getDay(
+									DateUtility.createCalendarFromUnixtime(cwManager.getCwNews().get(i - 1)
 											.getUnixtime() * 1000L), 0).getTimeInMillis() > newsToAdd.getUnixtime() * 1000L) {
 						// current news was not created on the same date as the last news --> separator necessary
-						separator = (ViewGroup) LayoutInflater.from(NewsActivity.this.getParent()).inflate(
+						separator = (ViewGroup) LayoutInflater.from(NewsActivity.this).inflate(
 								R.layout.news_row_day_separator_layout, null);
 						separatorTxt = (TextView) separator.findViewById(R.id.news_row_day_separator_text);
 						separatorTxt.setText(createDate(
@@ -167,11 +163,11 @@ public class NewsActivity extends RoboActivity {
 						publishProgress(separator);
 					}
 					// check if the news has to be filtered
-					if (currentFilter.equals(Filter.NEWS_ALL) || matchesFilter(newsToAdd.getCategoryshort())) {
+					if (currentFilter.equals(Filter.NEWS_ALL) || matchesFilter(newsToAdd.getCategoryShort())) {
 						// get the table row by an inflater and set the needed information
 						final View tableRow = LayoutInflater.from(NewsActivity.this).inflate(R.layout.news_row_layout,
 								newsTable, false);
-						tableRow.setId(newsToAdd.getId());
+						tableRow.setId(newsToAdd.getSubjectId());
 						tableRow.setOnClickListener(new View.OnClickListener() {
 							@Override
 							public void onClick(View v) {
@@ -186,7 +182,7 @@ public class NewsActivity extends RoboActivity {
 							}
 						});
 						viewUtility.setCategoryIcon(((ImageView) tableRow.findViewById(R.id.news_row_category_icon)),
-								newsToAdd.getCategoryshort());
+								newsToAdd.getCategoryShort());
 						((TextView) tableRow.findViewById(R.id.news_row_title)).setText(createTitle(newsToAdd
 								.getTitle()));
 						((TextView) tableRow.findViewById(R.id.news_row_date)).setText(createDate(
@@ -194,15 +190,15 @@ public class NewsActivity extends RoboActivity {
 						TextView cmtAmount = (TextView) tableRow.findViewById(R.id.news_row_cmmts_amount);
 						cmtAmount.setText(createAmount(newsToAdd.getComments()));
 						TextView picAmount = (TextView) tableRow.findViewById(R.id.news_row_pics_amount);
-						picAmount.setText(createAmount(newsToAdd.getPiclist().length));
+						picAmount.setText(createAmount(newsToAdd.getPictures().size()));
 						TextView author = (TextView) tableRow.findViewById(R.id.news_row_author);
 						author.setText(createAuthor(newsToAdd.getAuthor()));
 						author.setSelected(true);
 
 						publishProgress(tableRow);
 					}
-					if (i == cwManager.getNews().size() - 1) {
-						oldestNewsID = newsToAdd.getId();
+					if (i == cwManager.getCwNews().size() - 1) {
+						oldestNewsID = newsToAdd.getSubjectId();
 					}
 				}
 			}
@@ -250,7 +246,7 @@ public class NewsActivity extends RoboActivity {
 		 *            to find the inflated view elements.
 		 */
 		private void initFilter() {
-			ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getParent(),
+			ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(NewsActivity.this,
 					R.array.news_filter_options, android.R.layout.simple_spinner_item);
 			adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 			spinner.setAdapter(adapter);
@@ -304,21 +300,14 @@ public class NewsActivity extends RoboActivity {
 		}
 
 		/**
-		 * Changes the current activity to a {@link SingleNewsActivity} with the selected news.
+		 * Changes the current activity to a {@link SingleNewsFragment} with the selected news.
 		 * 
 		 * @param id
 		 */
 		private void getSingleNews(int id) {
-			Intent singleNewsIntent = new Intent(NewsActivity.this, SingleNewsActivity.class);
-
-			singleNewsIntent.putExtra(NewsActivity.class.getName(), id);
-
-			View view = ((ActivityGroup) getParent())
-					.getLocalActivityManager()
-					.startActivity(SingleNewsActivity.class.getSimpleName(),
-							singleNewsIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
-			// replace the view
-			((NewsActivityGroup) getParent()).replaceView(view);
+			Intent singleNewsIntent = new Intent(NewsActivity.this, SingleNewsFragment.class);
+			singleNewsIntent.putExtra(NewsActivity.class.getName(), id).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(singleNewsIntent);
 		}
 
 		/**
@@ -373,13 +362,6 @@ public class NewsActivity extends RoboActivity {
 		private CharSequence createTitle(String title) {
 			// TODO text formatting
 			return title;
-		}
-	}
-
-	@Override
-	public void onBackPressed() {
-		if (getParent() instanceof CwBasicActivityGroup) {
-			((CwBasicActivityGroup) getParent()).back();
 		}
 	}
 }

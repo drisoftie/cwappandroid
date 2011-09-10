@@ -2,7 +2,7 @@
 <RelativeLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent"
-	android:layout_height="fill_parent"
+	android:layout_height="wrap_content"
 	android:background="@drawable/table_row_separator_bg">
 	<ImageView
 		android:id="@+id/blogs_row_day_separator_icon"

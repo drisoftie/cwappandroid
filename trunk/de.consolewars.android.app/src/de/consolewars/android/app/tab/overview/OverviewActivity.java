@@ -71,8 +71,8 @@ public class OverviewActivity extends RoboActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		/*
-		 * TODO: Might become a source of error someday, if activity design
-		 * changes. Would be better to handle it with intents.
+		 * TODO: Might become a source of error someday, if activity design changes. Would be better to handle it with
+		 * intents.
 		 */
 		if (getParent().getParent() instanceof CwNavigationMainTabActivity) {
 			mainTabs = (CwNavigationMainTabActivity) getParent().getParent();
@@ -82,8 +82,7 @@ public class OverviewActivity extends RoboActivity {
 	}
 
 	/**
-	 * Downloads the user picture and decodes it into a {@link Bitmap} to be set
-	 * into an ImageView.
+	 * Downloads the user picture and decodes it into a {@link Bitmap} to be set into an ImageView.
 	 * 
 	 * @param view
 	 *            the ImageView
@@ -168,19 +167,20 @@ public class OverviewActivity extends RoboActivity {
 			if (appDataHandler.getCwUser() != null) {
 				try {
 					newsAmount = 0;
-					if (cwManager.getNews().size() > 0) {
+					if (cwManager.getCwNews().size() > 0) {
 						if (appDataHandler.getCwUser().getLastNewsId() > 0
-								&& cwManager.getNews().get(0).getId() > appDataHandler.getCwUser().getLastNewsId()) {
-							newsAmount = cwManager.getNews().get(0).getId()
+								&& cwManager.getCwNews().get(0).getSubjectId() > appDataHandler.getCwUser()
+										.getLastNewsId()) {
+							newsAmount = cwManager.getCwNews().get(0).getSubjectId()
 									- appDataHandler.getCwUser().getLastNewsId();
 						}
 					}
 					blogsAmount = 0;
-					if (cwManager.getBlogs(Filter.BLOGS_NORMAL).size() > 0) {
+					if (cwManager.getCwBlogs(Filter.BLOGS_NORMAL).size() > 0) {
 						if (appDataHandler.getCwUser().getLastBlogId() > 0
-								&& cwManager.getBlogs(Filter.BLOGS_NORMAL).get(0).getId() > appDataHandler.getCwUser()
-										.getLastBlogId()) {
-							blogsAmount = cwManager.getBlogs(Filter.BLOGS_NORMAL).get(0).getId()
+								&& cwManager.getCwBlogs(Filter.BLOGS_NORMAL).get(0).getSubjectId() > appDataHandler
+										.getCwUser().getLastBlogId()) {
+							blogsAmount = cwManager.getCwBlogs(Filter.BLOGS_NORMAL).get(0).getSubjectId()
 									- appDataHandler.getCwUser().getLastBlogId();
 						}
 					}
@@ -271,9 +271,9 @@ public class OverviewActivity extends RoboActivity {
 				EditText usrnmEdttxt = (EditText) overview_layout.findViewById(R.id.overview_edttxt_username);
 				EditText passwEdttxt = (EditText) overview_layout.findViewById(R.id.overview_edttxt_passw);
 				cwLoginManager.saveAndLoginUser(usrnmEdttxt.getText().toString(), passwEdttxt.getText().toString(),
-						cwManager.getNews().size() > 0 ? cwManager.getNews().get(0).getId() : -1,
-						cwManager.getBlogs(Filter.BLOGS_NORMAL).size() > 0 ? cwManager.getBlogs(Filter.BLOGS_NORMAL)
-								.get(0).getId() : -1);
+						cwManager.getCwNews().size() > 0 ? cwManager.getCwNews().get(0).getSubjectId() : -1, cwManager
+								.getCwBlogs(Filter.BLOGS_NORMAL).size() > 0 ? cwManager.getCwBlogs(Filter.BLOGS_NORMAL)
+								.get(0).getSubjectId() : -1);
 			}
 			return viewUtility.getUserIcon(cwLoginManager.getAuthenticatedUser().getUid(), 60);
 		}

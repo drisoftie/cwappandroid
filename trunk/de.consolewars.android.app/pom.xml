@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>CWApp</groupId>
@@ -116,6 +118,11 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>android.support</groupId>
+			<artifactId>compatibility-v4</artifactId>
+			<version>r3</version>
+		</dependency>
+		<dependency>
 			<groupId>net.sourceforge.htmlcleaner</groupId>
 			<artifactId>htmlcleaner</artifactId>
 			<version>${htmlcleaner-version}</version>
@@ -150,14 +157,19 @@
 			<artifactId>ormlite-android</artifactId>
 			<version>${ormlite-version}</version>
 		</dependency>
+		<dependency>
+			<groupId>bugsense</groupId>
+			<artifactId>bugsense</artifactId>
+			<version>0.6.0</version>
+		</dependency>
 		<!-- dependency> <groupId>org.springframework.android</groupId> <artifactId>spring-android-rest-template</artifactId> 
 			<version>${spring-android-version}</version> </dependency> <dependency> <groupId>org.springframework.android</groupId> 
 			<artifactId>spring-android-auth</artifactId> <version>${spring-android-version}</version> 
 			</dependency> <dependency> <groupId>org.simpleframework</groupId> <artifactId>simple-xml</artifactId> 
 			<version>${simple-version}</version> <exclusions> <exclusion> <artifactId>stax</artifactId> 
 			<groupId>stax</groupId> </exclusion> <exclusion> <artifactId>stax-api</artifactId> 
-			<groupId>stax</groupId> </exclusion> <exclusion> <artifactId>xpp3</artifactId> 
-			<groupId>xpp3</groupId> </exclusion> </exclusions> </dependency -->
+			<groupId>stax</groupId> </exclusion> <exclusion> <artifactId>xpp3</artifactId> <groupId>xpp3</groupId> 
+			</exclusion> </exclusions> </dependency -->
 	</dependencies>
 
 	<profiles>
@@ -178,7 +190,7 @@
 								<phase>package</phase>
 								<inherited>true</inherited>
 								<configuration>
-									<archiveDirectory />
+									<archiveDirectory/>
 									<includes>
 										<include>target/*.apk</include>
 									</includes>

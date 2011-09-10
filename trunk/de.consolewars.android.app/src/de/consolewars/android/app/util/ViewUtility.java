@@ -3,6 +3,8 @@ package de.consolewars.android.app.util;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -28,6 +30,23 @@ public class ViewUtility {
 	@Inject
 	private Context context;
 
+	private Map<String, Bitmap> picCache;
+
+	public Map<String, Bitmap> getPicCache() {
+		if (picCache == null) {
+			picCache = new HashMap<String, Bitmap>();
+		}
+		return picCache;
+	}
+
+	public ViewUtility() {
+
+	}
+
+	public ViewUtility(Context context) {
+		this.context = context;
+	}
+
 	public ViewGroup getCenteredProgressBarLayout(LayoutInflater layoutInflater, int textId) {
 		ViewGroup progress_layout = (ViewGroup) layoutInflater.inflate(R.layout.centered_progressbar, null);
 
@@ -46,8 +65,7 @@ public class ViewUtility {
 	public void setClickableTextView(TextView view) {
 		view.setMovementMethod(LinkMovementMethod.getInstance());
 	}
-	
-	
+
 	/**
 	 * Returns a user icon as a Bitmap with the given size (longest edge).
 	 * 
@@ -92,16 +110,35 @@ public class ViewUtility {
 	 * @return
 	 */
 	private Bitmap getBitmap(String url) {
+		if (getPicCache().get(url) != null) {
+			return getPicCache().get(url);
+		}
 		Bitmap bitmap = null;
+		URL newurl = null;
 		try {
-			URL newurl = new URL(url);
+			newurl = new URL(url);
 			bitmap = BitmapFactory.decodeStream(newurl.openConnection().getInputStream());
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		newurl = null;
+		getPicCache().put(url, bitmap);
 		return bitmap;
+	}
+
+	public void cacheBitmap(String url, Bitmap bitmap) {
+		if (bitmap != null && url != null) {
+			getPicCache().put(url, bitmap);
+		}
+	}
+
+	public Bitmap getCachedBitmap(String url) {
+		if (getPicCache().get(url) != null) {
+			return getPicCache().get(url);
+		}
+		return null;
 	}
 
 	/**

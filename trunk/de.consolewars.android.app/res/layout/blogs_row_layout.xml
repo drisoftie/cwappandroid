@@ -2,8 +2,8 @@
 <RelativeLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:id="@+id/blogs_row"
-	android:layout_width="wrap_content"
-	android:layout_height="fill_parent"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
 	android:background="@drawable/listview_selector">
 	<ImageView
 		android:id="@+id/blogs_row_user_icon"
@@ -53,4 +53,15 @@
 		android:singleLine="true"
 		android:ellipsize="marquee"
 		android:layout_margin="@dimen/blogs_row_author_margin"/>
+	<RatingBar
+		android:id="@+id/blogs_row_rating"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_below="@id/blogs_row_date"
+		android:layout_toRightOf="@id/blogs_row_user_icon"
+		android:numStars="5"
+		android:rating="0.0"
+		android:stepSize="0.1"
+		android:isIndicator="true"
+		style="?android:attr/ratingBarStyleSmall"/>
 </RelativeLayout>

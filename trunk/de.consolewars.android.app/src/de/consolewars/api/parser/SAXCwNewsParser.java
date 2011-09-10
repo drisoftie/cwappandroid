@@ -2,7 +2,7 @@ package de.consolewars.api.parser;
 
 import java.util.StringTokenizer;
 
-import de.consolewars.api.data.News;
+import de.consolewars.android.app.db.domain.CwNews;
 import de.consolewars.api.data.Picture;
 
 /*
@@ -28,15 +28,15 @@ import de.consolewars.api.data.Picture;
  * @author cerpin (arrewk@gmail.com)
  * 
  */
-public class SAXNewsParser extends AbstractSAXParser<News> {
+public class SAXCwNewsParser extends AbstractSAXParser<CwNews> {
 
-	public SAXNewsParser(String APIURL) {
+	public SAXCwNewsParser(String APIURL) {
 		super(APIURL);
 	}
 
 	@Override
-	protected News createTempItem() {
-		return new News();
+	protected CwNews createTempItem() {
+		return new CwNews();
 	}
 
 	@Override
@@ -52,7 +52,7 @@ public class SAXNewsParser extends AbstractSAXParser<News> {
 		if (qName.equals("title")) {
 			getTempItem().setTitle(tempValue);
 		} else if (qName.equals("id")) {
-			getTempItem().setId(Integer.parseInt(tempValue));
+			getTempItem().setSubjectId(Integer.parseInt(tempValue));
 		} else if (qName.equals("description")) {
 			getTempItem().setDescription(tempValue);
 		} else if (qName.equals("mode")) {
@@ -62,17 +62,17 @@ public class SAXNewsParser extends AbstractSAXParser<News> {
 		} else if (qName.equals("category")) {
 			getTempItem().setCategory(tempValue);
 		} else if (qName.equals("categoryshort")) {
-			getTempItem().setCategoryshort(tempValue);
+			getTempItem().setCategoryShort(tempValue);
 		} else if (qName.equals("author")) {
 			getTempItem().setAuthor(tempValue);
 		} else if (qName.equals("piclist")) {
-			getTempItem().setPiclist(fetchPicList(tempValue));
+			// getTempItem().setPiclist(fetchPicList(tempValue));
 		} else if (qName.equals("comments")) {
 			getTempItem().setComments(Integer.parseInt(tempValue));
 		} else if (qName.equals("url")) {
 			getTempItem().setUrl(tempValue);
 		} else if (qName.equals("picid")) {
-			getTempItem().setPicid(Integer.parseInt(tempValue));
+			getTempItem().setPicId(Integer.parseInt(tempValue));
 		} else if (qName.equals("article")) {
 			getTempItem().setArticle(tempValue);
 		}

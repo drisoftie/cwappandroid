@@ -6,28 +6,27 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
 
-import com.google.inject.Singleton;
-
 import roboguice.inject.InjectResource;
 
+import com.google.inject.Singleton;
+
 import de.consolewars.android.app.R;
+import de.consolewars.android.app.db.domain.CwBlog;
+import de.consolewars.android.app.db.domain.CwNews;
 import de.consolewars.api.data.AuthStatus;
 import de.consolewars.api.data.AuthenticatedUser;
-import de.consolewars.api.data.Blog;
 import de.consolewars.api.data.Comment;
-import de.consolewars.api.data.IUnixtime;
 import de.consolewars.api.data.Message;
-import de.consolewars.api.data.News;
-import de.consolewars.api.event.BlogUpdateListener;
+import de.consolewars.api.event.CwBlogUpdateListener;
+import de.consolewars.api.event.CwNewsUpdateListener;
 import de.consolewars.api.event.ListEventObject;
-import de.consolewars.api.event.NewsUpdateListener;
 import de.consolewars.api.exception.ConsolewarsAPIException;
 import de.consolewars.api.parser.SAXAuthStatusParser;
 import de.consolewars.api.parser.SAXAuthenticationParser;
-import de.consolewars.api.parser.SAXBlogParser;
 import de.consolewars.api.parser.SAXCommentParser;
+import de.consolewars.api.parser.SAXCwBlogParser;
+import de.consolewars.api.parser.SAXCwNewsParser;
 import de.consolewars.api.parser.SAXMessageParser;
-import de.consolewars.api.parser.SAXNewsParser;
 import de.consolewars.api.util.DateUtil;
 import de.consolewars.api.util.URLCreator;
 
@@ -62,8 +61,8 @@ public class API {
 	@InjectResource(R.string.api_key)
 	private String APIKey;
 
-	private CheckBlogThread bloglistUpdateThread;
-	private CheckNewsThread newslistUpdateThread;
+	private CheckCwBlogThread bloglistUpdateThread;
+	private CheckCwNewsThread newslistUpdateThread;
 	// private Thread[] checkUpdateThreads = { bloglistUpdateThread, newslistUpdateThread };
 
 	// minimum checkInterval
@@ -74,8 +73,8 @@ public class API {
 	public final boolean DEBUG = false;
 
 	/**
-	 * checking if apikey is valid or not OK - when apikey is valid FAILED - when apikey is invalid
-	 * INACTIVE when apikey is banned/inactive
+	 * checking if apikey is valid or not OK - when apikey is valid FAILED - when apikey is invalid INACTIVE when apikey
+	 * is banned/inactive
 	 * 
 	 * @return authstatus object
 	 */
@@ -129,17 +128,17 @@ public class API {
 	/**
 	 * 
 	 * @param uid
-	 *            user-id if you wanna get blogs of one certain user only, with UID_ANY you get
-	 *            recent blogs of all users
+	 *            user-id if you wanna get blogs of one certain user only, with UID_ANY you get recent blogs of all
+	 *            users
 	 * @param count
 	 *            number of blogs to retrieve
 	 * @param filter
 	 *            what kind of blogs should be returned: 0 normal, 1 newsblogs, 2 other
 	 * @return list of blogs
 	 */
-	public ArrayList<Blog> getBlogsList(int uid, int count, int filter) throws ConsolewarsAPIException {
+	public ArrayList<CwBlog> getCwBlogsList(int uid, int count, int filter) throws ConsolewarsAPIException {
 
-		ArrayList<Blog> blogs = new ArrayList<Blog>();
+		ArrayList<CwBlog> blogs = new ArrayList<CwBlog>();
 
 		// name of the api-php file
 		String apiname = "getblogslist";
@@ -155,7 +154,7 @@ public class API {
 		if (filter != BLANK_ARGUMENT)
 			blogListURL.addArgument("filter", filter);
 
-		SAXBlogParser parser = new SAXBlogParser(blogListURL.toString());
+		SAXCwBlogParser parser = new SAXCwBlogParser(blogListURL.toString());
 		blogs = parser.parseDocument();
 
 		parser = null;
@@ -175,13 +174,11 @@ public class API {
 	 *            returns only blogs since this date/time
 	 * @return list of blogs which are not older than <i>since</i>
 	 */
-	@SuppressWarnings("unchecked")
-	public ArrayList<Blog> getBlogsList(int uid, int count, int filter, Date since)
-			throws ConsolewarsAPIException {
+	public ArrayList<CwBlog> getCwBlogsList(int uid, int count, int filter, Date since) throws ConsolewarsAPIException {
 		if (since == null)
-			return getBlogsList(uid, count, filter);
+			return getCwBlogsList(uid, count, filter);
 		else {
-			return (ArrayList<Blog>) filterListByDate(getBlogsList(uid, count, filter), since);
+			return (ArrayList<CwBlog>) filterCwBlogsListByDate(getCwBlogsList(uid, count, filter), since);
 		}
 	}
 
@@ -192,8 +189,8 @@ public class API {
 	 *            blog ide
 	 * @return one single blog; null if no blog is available
 	 */
-	public Blog getBlog(int id) throws ConsolewarsAPIException {
-		ArrayList<Blog> blogs = this.getBlogs(new int[] { id });
+	public CwBlog getCwBlog(int id) throws ConsolewarsAPIException {
+		ArrayList<CwBlog> blogs = this.getCwBlogs(new int[] { id });
 		return (blogs.isEmpty()) ? (null) : (blogs.get(0));
 	}
 
@@ -204,8 +201,8 @@ public class API {
 	 *            ids of the blogs
 	 * @return several blogs as requested by their ids
 	 */
-	public ArrayList<Blog> getBlogs(int[] id) throws ConsolewarsAPIException {
-		ArrayList<Blog> blogs = new ArrayList<Blog>();
+	public ArrayList<CwBlog> getCwBlogs(int[] id) throws ConsolewarsAPIException {
+		ArrayList<CwBlog> blogs = new ArrayList<CwBlog>();
 
 		// name of the api-php file
 		String apiname = "getblogs";
@@ -216,7 +213,7 @@ public class API {
 		blogsURL.addArgument("apitoken", APIKey);
 		blogsURL.addArgument("id", id);
 
-		SAXBlogParser parser = new SAXBlogParser(blogsURL.toString());
+		SAXCwBlogParser parser = new SAXCwBlogParser(blogsURL.toString());
 		blogs = parser.parseDocument();
 		parser = null;
 
@@ -233,8 +230,8 @@ public class API {
 	 * @param talkback_lastpage
 	 * @return list of comments
 	 */
-	public ArrayList<Comment> getComments(int id, int area, int count, int talkback_viewpage,
-			int talkback_lastpage) throws ConsolewarsAPIException {
+	public ArrayList<Comment> getComments(int id, int area, int count, int talkback_viewpage, int talkback_lastpage)
+			throws ConsolewarsAPIException {
 
 		ArrayList<Comment> comments = new ArrayList<Comment>();
 
@@ -266,8 +263,7 @@ public class API {
 	 * 
 	 * @return the requested private messages
 	 */
-	public ArrayList<Message> getMessages(int uid, String pass, int folder, int count)
-			throws ConsolewarsAPIException {
+	public ArrayList<Message> getMessages(int uid, String pass, int folder, int count) throws ConsolewarsAPIException {
 		ArrayList<Message> msgs = new ArrayList<Message>();
 
 		// name of the api-php file
@@ -295,13 +291,13 @@ public class API {
 	 * @param count
 	 *            the amount of news
 	 * @param filter
-	 *            optional filter. Current filter rules: 1=only Microsoftnews and "others" 2=only
-	 *            Nintendonews and "others" 3=only Sonynews and "others"
+	 *            optional filter. Current filter rules: 1=only Microsoftnews and "others" 2=only Nintendonews and
+	 *            "others" 3=only Sonynews and "others"
 	 * @return
 	 * @throws ConsolewarsAPIException
 	 */
-	public ArrayList<News> getNewsList(int count, int filter) throws ConsolewarsAPIException {
-		ArrayList<News> news = new ArrayList<News>();
+	public ArrayList<CwNews> getCwNewsList(int count, int filter) throws ConsolewarsAPIException {
+		ArrayList<CwNews> news = new ArrayList<CwNews>();
 
 		// name of the api-php file
 		String apiname = "getnewslist";
@@ -313,21 +309,20 @@ public class API {
 		if (filter != BLANK_ARGUMENT)
 			newslistURL.addArgument("filter", filter);
 
-		SAXNewsParser parser = new SAXNewsParser(newslistURL.toString());
+		SAXCwNewsParser parser = new SAXCwNewsParser(newslistURL.toString());
 
 		news = parser.parseDocument();
 
 		parser = null;
 
-		return removeNewsTeaser(news);
+		return removeCwNewsTeaser(news);
 	}
 
-	@SuppressWarnings("unchecked")
-	public ArrayList<News> getNewsList(int count, int filter, Date since) throws ConsolewarsAPIException {
+	public ArrayList<CwNews> getCwNewsList(int count, int filter, Date since) throws ConsolewarsAPIException {
 		if (since == null)
-			return getNewsList(count, filter);
+			return getCwNewsList(count, filter);
 		else {
-			return (ArrayList<News>) filterListByDate(getNewsList(count, filter), since);
+			return (ArrayList<CwNews>) filterCwNewsListByDate(getCwNewsList(count, filter), since);
 		}
 	}
 
@@ -337,8 +332,8 @@ public class API {
 	 * @param id
 	 * @return a list of news
 	 */
-	public ArrayList<News> getNews(int[] id) throws ConsolewarsAPIException {
-		ArrayList<News> news = new ArrayList<News>();
+	public ArrayList<CwNews> getCwNews(int[] id) throws ConsolewarsAPIException {
+		ArrayList<CwNews> news = new ArrayList<CwNews>();
 
 		// name of the api-php file
 		String apiname = "getnews";
@@ -348,7 +343,7 @@ public class API {
 		newslistURL.addArgument("apitoken", APIKey);
 		newslistURL.addArgument("id", id);
 
-		SAXNewsParser parser = new SAXNewsParser(newslistURL.toString());
+		SAXCwNewsParser parser = new SAXCwNewsParser(newslistURL.toString());
 		news = parser.parseDocument();
 
 		parser = null;
@@ -363,8 +358,8 @@ public class API {
 	 *            news-id
 	 * @return a single news; null if no news is available
 	 */
-	public News getNews(int id) throws ConsolewarsAPIException {
-		ArrayList<News> news = getNews(new int[] { id });
+	public CwNews getCwNews(int id) throws ConsolewarsAPIException {
+		ArrayList<CwNews> news = getCwNews(new int[] { id });
 		return (news.isEmpty()) ? (null) : (news.get(0));
 	}
 
@@ -374,10 +369,10 @@ public class API {
 	 * @param l
 	 *            update listener
 	 */
-	public void addBlogUpdateListener(BlogUpdateListener l) {
+	public void addBlogUpdateListener(CwBlogUpdateListener l) {
 		listeners.add(l);
 		if (bloglistUpdateThread == null) {
-			bloglistUpdateThread = new CheckBlogThread(minInterval);
+			bloglistUpdateThread = new CheckCwBlogThread(minInterval);
 			bloglistUpdateThread.start();
 		}
 	}
@@ -388,10 +383,10 @@ public class API {
 	 * @param l
 	 *            update listener
 	 */
-	public void addNewsUpdateListener(NewsUpdateListener l) {
+	public void addNewsUpdateListener(CwNewsUpdateListener l) {
 		listeners.add(l);
 		if (newslistUpdateThread == null) {
-			newslistUpdateThread = new CheckNewsThread(minInterval);
+			newslistUpdateThread = new CheckCwNewsThread(minInterval);
 			newslistUpdateThread.start();
 		}
 	}
@@ -437,7 +432,7 @@ public class API {
 	 * @param news
 	 * @return
 	 */
-	private ArrayList<News> removeNewsTeaser(ArrayList<News> news) {
+	private ArrayList<CwNews> removeCwNewsTeaser(ArrayList<CwNews> news) {
 		// usually the teaser is the first item in the list
 		if (news.size() > 0) {
 			if (news.get(0).getMode().equals("TEASER")) {
@@ -486,9 +481,31 @@ public class API {
 	 *            list items should not be older than this time
 	 * @return filtered list by date
 	 */
-	private ArrayList<? extends IUnixtime> filterListByDate(ArrayList<? extends IUnixtime> list, Date since) {
-		ArrayList<IUnixtime> filteredList = new ArrayList<IUnixtime>();
-		for (IUnixtime item : list) {
+	private ArrayList<CwNews> filterCwNewsListByDate(ArrayList<CwNews> list, Date since) {
+		ArrayList<CwNews> filteredList = new ArrayList<CwNews>();
+		for (CwNews news : list) {
+			long sinceTime = since.getTime() / DateUtil.SECOND;
+			long itemTime = news.getUnixtime();
+			// if time of the item is after the requested "sinceTime"
+			if (itemTime >= sinceTime) {
+				filteredList.add(news);
+			}
+		}
+		return filteredList;
+	}
+
+	/**
+	 * filter list by date
+	 * 
+	 * @param list
+	 *            original list
+	 * @param since
+	 *            list items should not be older than this time
+	 * @return filtered list by date
+	 */
+	private ArrayList<CwBlog> filterCwBlogsListByDate(ArrayList<CwBlog> list, Date since) {
+		ArrayList<CwBlog> filteredList = new ArrayList<CwBlog>();
+		for (CwBlog item : list) {
 			long sinceTime = since.getTime() / DateUtil.SECOND;
 			long itemTime = item.getUnixtime();
 			// if time of the item is after the requested "sinceTime"
@@ -499,18 +516,18 @@ public class API {
 		return filteredList;
 	}
 
-	private void fireBlogReceivedEvent(ListEventObject<Blog> event) {
+	private void fireBlogReceivedEvent(ListEventObject<CwBlog> event) {
 		for (Object listener : listeners) {
-			if (listener instanceof BlogUpdateListener) {
-				((BlogUpdateListener) listener).blogsReceived(event);
+			if (listener instanceof CwBlogUpdateListener) {
+				((CwBlogUpdateListener) listener).blogsReceived(event);
 			}
 		}
 	}
 
-	private void fireNewsReceivedEvent(ListEventObject<News> event) {
+	private void fireCwNewsReceivedEvent(ListEventObject<CwNews> event) {
 		for (Object listener : listeners) {
-			if (listener instanceof NewsUpdateListener) {
-				((NewsUpdateListener) listener).newsReceived(event);
+			if (listener instanceof CwNewsUpdateListener) {
+				((CwNewsUpdateListener) listener).newsReceived(event);
 			}
 		}
 	}
@@ -592,21 +609,20 @@ public class API {
 		}
 	}
 
-	private class CheckBlogThread extends APIThread<Blog> {
+	private class CheckCwBlogThread extends APIThread<CwBlog> {
 
-		public CheckBlogThread(long checkInterval) {
+		public CheckCwBlogThread(long checkInterval) {
 			super(checkInterval);
 		}
 
 		/**
-		 * checking if there are new news entries since the last update Note: since consolewars
-		 * allows to set the time by yourself this method is not safe to receive ALL blogs therefore
-		 * implemented but not used anywhere
+		 * checking if there are new news entries since the last update Note: since consolewars allows to set the time
+		 * by yourself this method is not safe to receive ALL blogs therefore implemented but not used anywhere
 		 * 
 		 */
 		@SuppressWarnings("unused")
-		private ArrayList<Blog> checkUpdateByDate() throws ConsolewarsAPIException {
-			return getBlogsList(BLANK_ARGUMENT, getItemCount(), BLANK_ARGUMENT, getLastUpdate());
+		private ArrayList<CwBlog> checkUpdateByDate() throws ConsolewarsAPIException {
+			return getCwBlogsList(BLANK_ARGUMENT, getItemCount(), BLANK_ARGUMENT, getLastUpdate());
 		}
 
 		@Override
@@ -614,20 +630,20 @@ public class API {
 			if (DEBUG)
 				System.out.println(new Date() + ": checking for new blogs");
 
-			ArrayList<Blog> blogs = checkUpdateByComparing();
+			ArrayList<CwBlog> blogs = checkUpdateByComparing();
 
 			// ArrayList<Blog> blogs = checkUpdateByDate();
 			if (blogs.size() > 0)
-				fireBlogReceivedEvent(new ListEventObject<Blog>(this, blogs));
+				fireBlogReceivedEvent(new ListEventObject<CwBlog>(this, blogs));
 		}
 
 		@Override
-		protected ArrayList<Blog> getItemList() throws ConsolewarsAPIException {
-			return getBlogsList(BLANK_ARGUMENT, getItemCount(), BLANK_ARGUMENT);
+		protected ArrayList<CwBlog> getItemList() throws ConsolewarsAPIException {
+			return getCwBlogsList(BLANK_ARGUMENT, getItemCount(), BLANK_ARGUMENT);
 		}
 
 		@Override
-		protected boolean contains(ArrayList<Blog> a, Blog item) {
+		protected boolean contains(ArrayList<CwBlog> a, CwBlog item) {
 
 			for (int i = 0; i < a.size(); i++) {
 				if (a.get(i).equals(item)) {
@@ -639,24 +655,23 @@ public class API {
 
 	}
 
-	private class CheckNewsThread extends APIThread<News> {
+	private class CheckCwNewsThread extends APIThread<CwNews> {
 
-		public CheckNewsThread(long checkInterval) {
+		public CheckCwNewsThread(long checkInterval) {
 			super(checkInterval);
 		}
 
 		/**
-		 * checking if there are new news entries since the last update Note: since consolewars
-		 * allows to set the time by yourself this method is not safe to receive ALL news therefore
-		 * implemented but not used anywhere
+		 * checking if there are new news entries since the last update Note: since consolewars allows to set the time
+		 * by yourself this method is not safe to receive ALL news therefore implemented but not used anywhere
 		 * 
 		 * @throws ConsolewarsAPIException
 		 */
 		@SuppressWarnings("unused")
 		private void checkUpdateByDate() throws ConsolewarsAPIException {
-			ArrayList<News> news = getNewsList(getItemCount(), BLANK_ARGUMENT, getLastUpdate());
+			ArrayList<CwNews> news = getCwNewsList(getItemCount(), BLANK_ARGUMENT, getLastUpdate());
 			if (news.size() > 0)
-				fireNewsReceivedEvent(new ListEventObject<News>(this, news));
+				fireCwNewsReceivedEvent(new ListEventObject<CwNews>(this, news));
 		}
 
 		@Override
@@ -664,21 +679,21 @@ public class API {
 			if (DEBUG)
 				System.out.println(new Date() + ": checking for news");
 
-			ArrayList<News> news = checkUpdateByComparing();
+			ArrayList<CwNews> news = checkUpdateByComparing();
 
 			// ArrayList<News> news = checkUpdateByDate();
 			if (news.size() > 0)
-				fireNewsReceivedEvent(new ListEventObject<News>(this, news));
+				fireCwNewsReceivedEvent(new ListEventObject<CwNews>(this, news));
 
 		}
 
 		@Override
-		protected ArrayList<News> getItemList() throws ConsolewarsAPIException {
-			return getNewsList(getItemCount(), BLANK_ARGUMENT);
+		protected ArrayList<CwNews> getItemList() throws ConsolewarsAPIException {
+			return getCwNewsList(getItemCount(), BLANK_ARGUMENT);
 		}
 
 		@Override
-		protected boolean contains(ArrayList<News> a, News item) {
+		protected boolean contains(ArrayList<CwNews> a, CwNews item) {
 
 			for (int i = 0; i < a.size(); i++) {
 				if (a.get(i).equals(item)) {

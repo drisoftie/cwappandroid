@@ -22,8 +22,8 @@ import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
  * limitations under the License.
  */
 /**
- * Manages activities belonging to news. It is used for facilitating the
- * exchange of activities within tabs. Switch news activities with this group.
+ * Manages activities belonging to news. It is used for facilitating the exchange of activities within tabs. Switch news
+ * activities with this group.
  * 
  * @author Alexander Dridiger
  * @see CwNavigationMainTabActivity
@@ -52,7 +52,7 @@ public class NewsActivityGroup extends CwBasicActivityGroup {
 
 	private View startNewsActivity() {
 		// Start the root activity within the group and get its view
-		return getLocalActivityManager().startActivity(NewsActivity.class.getSimpleName(),
-				new Intent(this, NewsActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
+		return getLocalActivityManager().startActivity(CwNewsFragmentActivity.class.getSimpleName(),
+				new Intent(this, CwNewsFragmentActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
 	}
 }

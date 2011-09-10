@@ -1,0 +1,47 @@
+<menu
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:name="News">
+	<item
+		android:id="@+id/cmts_operations"
+		android:title="Kommentar-Funktionen"
+		android:icon="@drawable/comments_bttn">
+		<menu>
+			<item
+				android:id="@+id/cmts_refresh"
+				android:title="Refreshe Kommentare">
+			</item>
+		</menu>
+	</item>
+	<group android:id="@+id/navigation">
+		<item
+			android:id="@+id/menu_overview"
+			android:title="@string/tab_overv_head"
+			android:icon="@drawable/tab_overview">
+		</item>
+		<item
+			android:id="@+id/menu_news"
+			android:title="@string/tab_news_head"
+			android:icon="@drawable/tab_news">
+		</item>
+		<item
+			android:id="@+id/menu_blogs"
+			android:title="@string/tab_blogs_head"
+			android:icon="@drawable/tab_blogs">
+		</item>
+		<item
+			android:id="@+id/menu_msgs"
+			android:title="@string/tab_msgs_head"
+			android:icon="@drawable/tab_msgs">
+		</item>
+		<item
+			android:id="@+id/menu_board"
+			android:title="@string/tab_board_head"
+			android:icon="@drawable/tab_board">
+		</item>
+		<item
+			android:id="@+id/menu_shoutbox"
+			android:title="@string/tab_shout_head"
+			android:icon="@drawable/tab_shout">
+		</item>
+	</group>
+</menu>

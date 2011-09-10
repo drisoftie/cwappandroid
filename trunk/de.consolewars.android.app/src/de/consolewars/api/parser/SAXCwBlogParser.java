@@ -1,6 +1,6 @@
 package de.consolewars.api.parser;
 
-import de.consolewars.api.data.Blog;
+import de.consolewars.android.app.db.domain.CwBlog;
 
 /*
  * Copyright [2009] Dimitrios Kapanikis
@@ -22,15 +22,15 @@ import de.consolewars.api.data.Blog;
 /**
  * @author cerpin (arrewk@gmail.com)
  */
-public class SAXBlogParser extends AbstractSAXParser<Blog> {
+public class SAXCwBlogParser extends AbstractSAXParser<CwBlog> {
 
-	public SAXBlogParser(String APIURL) {
+	public SAXCwBlogParser(String APIURL) {
 		super(APIURL);
 	}
 
 	@Override
-	protected Blog createTempItem() {
-		return new Blog();
+	protected CwBlog createTempItem() {
+		return new CwBlog();
 	}
 
 	@Override
@@ -46,7 +46,7 @@ public class SAXBlogParser extends AbstractSAXParser<Blog> {
 		if (qName.equals("title")) {
 			getTempItem().setTitle(tempValue);
 		} else if (qName.equals("id")) {
-			getTempItem().setId(Integer.parseInt(tempValue));
+			getTempItem().setSubjectId(Integer.parseInt(tempValue));
 		} else if (qName.equals("mode")) {
 			getTempItem().setMode(tempValue);
 		} else if (qName.equals("unixtime")) {

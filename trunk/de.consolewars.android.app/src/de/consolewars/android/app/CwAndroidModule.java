@@ -9,7 +9,11 @@ import com.j256.ormlite.dao.Dao;
 
 import de.consolewars.android.app.db.AppDataHandler;
 import de.consolewars.android.app.db.DaoProvider;
+import de.consolewars.android.app.db.domain.CwBlog;
+import de.consolewars.android.app.db.domain.CwNews;
+import de.consolewars.android.app.db.domain.CwPicture;
 import de.consolewars.android.app.db.domain.CwUser;
+import de.consolewars.android.app.db.domain.CwVideo;
 
 public class CwAndroidModule extends AbstractAndroidModule {
 
@@ -24,11 +28,23 @@ public class CwAndroidModule extends AbstractAndroidModule {
 	protected void configure() {
 		bind(OrmLiteSqliteOpenHelper.class).toInstance(ormLiteSqliteOpenHelper);
 
-		requestStaticInjection(AppDataHandler.class);
-		requestStaticInjection(SplashScreenActivity.class);
+		requestStaticInjection(AppDataHandler.class, SplashScreenActivity.class);
 
 		bind(new TypeLiteral<Dao<CwUser, Integer>>() {
 		}).toProvider(new DaoProvider<CwUser, Integer>(ormLiteSqliteOpenHelper.getConnectionSource(), CwUser.class))
+				.in(Singleton.class);
+		bind(new TypeLiteral<Dao<CwNews, Integer>>() {
+		}).toProvider(new DaoProvider<CwNews, Integer>(ormLiteSqliteOpenHelper.getConnectionSource(), CwNews.class))
+				.in(Singleton.class);
+		bind(new TypeLiteral<Dao<CwBlog, Integer>>() {
+		}).toProvider(new DaoProvider<CwBlog, Integer>(ormLiteSqliteOpenHelper.getConnectionSource(), CwBlog.class))
+				.in(Singleton.class);
+		bind(new TypeLiteral<Dao<CwPicture, Integer>>() {
+		}).toProvider(
+				new DaoProvider<CwPicture, Integer>(ormLiteSqliteOpenHelper.getConnectionSource(), CwPicture.class))
+				.in(Singleton.class);
+		bind(new TypeLiteral<Dao<CwVideo, Integer>>() {
+		}).toProvider(new DaoProvider<CwVideo, Integer>(ormLiteSqliteOpenHelper.getConnectionSource(), CwVideo.class))
 				.in(Singleton.class);
 	}
 }

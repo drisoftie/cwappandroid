@@ -5,17 +5,18 @@ import android.app.ActivityGroup;
 import android.app.TabActivity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.ImageView;
-import android.widget.RadioGroup;
-import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.TabHost;
 import de.consolewars.android.app.R;
-import de.consolewars.android.app.tab.blogs.BlogsActivityGroup;
+import de.consolewars.android.app.tab.blogs.CwBlogsFragmentActivity;
 import de.consolewars.android.app.tab.board.BoardActivityGroup;
 import de.consolewars.android.app.tab.msgs.MessagesActivityGroup;
-import de.consolewars.android.app.tab.news.NewsActivityGroup;
+import de.consolewars.android.app.tab.news.CwNewsFragmentActivity;
 import de.consolewars.android.app.tab.overview.OverviewActivityGroup;
 import de.consolewars.android.app.tab.shout.ShoutboxActivityGroup;
 
@@ -34,10 +35,9 @@ import de.consolewars.android.app.tab.shout.ShoutboxActivityGroup;
  * limitations under the License.
  */
 /**
- * Activity to manage the main navigation of the app, i.e. its tabs. Initializes the tabs and their
- * corresponding {@link ActivityGroup}s and exposes the {@link TabHost} for tab management. The
- * {@link TabHost} is managed by the Android activity lifecycle. No switching or further application
- * logic is provided here.
+ * Activity to manage the main navigation of the app, i.e. its tabs. Initializes the tabs and their corresponding
+ * {@link ActivityGroup}s and exposes the {@link TabHost} for tab management. The {@link TabHost} is managed by the
+ * Android activity lifecycle. No switching or further application logic is provided here.
  * 
  * @author Alexander Dridiger
  */
@@ -46,9 +46,16 @@ public class CwNavigationMainTabActivity extends RoboTabActivity {
 	// unique tabhost of this activity
 	private TabHost usedTabHost;
 
+	public static final int OVERVIEW_TAB = 0;
+	public static final int NEWS_TAB = 1;
+	public static final int BLOGS_TAB = 2;
+	public static final int MESSAGES_TAB = 3;
+	public static final int BOARD_TAB = 4;
+	public static final int SHOUTBOX_TAB = 5;
+
 	/**
-	 * The {@link TabHost} for this {@link TabActivity}. Before used, check for null since the
-	 * activity might not have been created.
+	 * The {@link TabHost} for this {@link TabActivity}. Before used, check for null since the activity might not have
+	 * been created.
 	 * 
 	 * @return the unique {@link TabHost}
 	 */
@@ -65,34 +72,6 @@ public class CwNavigationMainTabActivity extends RoboTabActivity {
 
 		usedTabHost = getTabHost();
 		setTabs();
-
-		RadioGroup tabs = (RadioGroup) findViewById(R.id.custom_tabs);
-
-		tabs.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			@Override
-			public void onCheckedChanged(RadioGroup group, int checkedId) {
-				switch (checkedId) {
-				case R.id.tab_overview:
-					getTabHost().setCurrentTab(0);
-					break;
-				case R.id.tab_news:
-					getTabHost().setCurrentTab(1);
-					break;
-				case R.id.tab_blogs:
-					getTabHost().setCurrentTab(2);
-					break;
-				case R.id.tab_msgs:
-					getTabHost().setCurrentTab(3);
-					break;
-				case R.id.tab_board:
-					getTabHost().setCurrentTab(4);
-					break;
-				case R.id.tab_shout:
-					getTabHost().setCurrentTab(5);
-					break;
-				}
-			}
-		});
 	}
 
 	/**
@@ -101,8 +80,8 @@ public class CwNavigationMainTabActivity extends RoboTabActivity {
 	private void setTabs() {
 		// add the necessary tabs
 		addTab(R.string.tab_overv_tag, R.drawable.def_tab_overview, OverviewActivityGroup.class);
-		addTab(R.string.tab_news_tag, R.drawable.def_tab_news, NewsActivityGroup.class);
-		addTab(R.string.tab_blogs_tag, R.drawable.def_tab_blogs, BlogsActivityGroup.class);
+		addTab(R.string.tab_news_tag, R.drawable.def_tab_news, CwNewsFragmentActivity.class);
+		addTab(R.string.tab_blogs_tag, R.drawable.def_tab_blogs, CwBlogsFragmentActivity.class);
 		addTab(R.string.tab_msgs_tag, R.drawable.def_tab_msgs, MessagesActivityGroup.class);
 		addTab(R.string.tab_board_tag, R.drawable.def_tab_board, BoardActivityGroup.class);
 		addTab(R.string.tab_shout_tag, R.drawable.def_tab_shout, ShoutboxActivityGroup.class);
@@ -120,7 +99,7 @@ public class CwNavigationMainTabActivity extends RoboTabActivity {
 	 * @param activity
 	 *            the activity to be added
 	 */
-	private void addTab(int tagId, int drawableId, Class<? extends ICwActivityGroup> activity) {
+	private void addTab(int tagId, int drawableId, Class<?> activity) {
 		// create an Intent to launch an Activity for the tab (to be reused)
 		Intent intent = new Intent().setClass(this, activity);
 		// initialize a TabSpec for each tab and add it to the TabHost
@@ -135,5 +114,42 @@ public class CwNavigationMainTabActivity extends RoboTabActivity {
 		spec.setIndicator(tabIndicator);
 		spec.setContent(intent);
 		usedTabHost.addTab(spec);
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
+
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.main_tab_menu, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		super.onOptionsItemSelected(item);
+		// Find which menu item has been selected
+		switch (item.getItemId()) {
+		// Check for each known menu item
+		case (R.id.menu_overview):
+			getTabHost().setCurrentTab(OVERVIEW_TAB);
+			break;
+		case (R.id.menu_news):
+			getTabHost().setCurrentTab(NEWS_TAB);
+			break;
+		case (R.id.menu_blogs):
+			getTabHost().setCurrentTab(BLOGS_TAB);
+			break;
+		case (R.id.menu_msgs):
+			getTabHost().setCurrentTab(MESSAGES_TAB);
+			break;
+		case (R.id.menu_board):
+			getTabHost().setCurrentTab(BOARD_TAB);
+			break;
+		case (R.id.menu_shoutbox):
+			getTabHost().setCurrentTab(SHOUTBOX_TAB);
+			break;
+		}
+		return true;
 	}
 }
