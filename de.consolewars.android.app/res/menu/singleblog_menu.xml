@@ -2,43 +2,36 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:name="Blog">
 	<item
-		android:id="@+id/singleblog_operations"
-		android:title="Blog-Funktionen"
-		android:icon="@drawable/tab_blogs">
-		<menu>
-			<item
-				android:id="@+id/blog_refresh"
-				android:title="Refresh">
-			</item>
-			<item
-				android:id="@+id/blog_save"
-				android:title="Speichere den angezeigten Blog">
-			</item>
-		</menu>
+		android:id="@+id/menu_blog_save"
+		android:title="Speichere den angezeigten Blog">
+	</item>
+	<item
+		android:id="@+id/menu_blog_refresh"
+		android:title="Refresh (Netzwerk)">
+	</item>
+	<item
+		android:id="@+id/menu_news"
+		android:title="@string/tab_news_head"
+		android:icon="@drawable/tab_news">
+	</item>
+	<item
+		android:id="@+id/menu_board"
+		android:title="@string/tab_board_head"
+		android:icon="@drawable/tab_board">
+	</item>
+	<item
+		android:id="@+id/menu_msgs"
+		android:title="@string/tab_msgs_head"
+		android:icon="@drawable/tab_msgs">
 	</item>
 	<item
 		android:id="@+id/navigation"
-		android:title="Navigation">
+		android:title="Weiteres">
 		<menu>
 			<item
 				android:id="@+id/menu_overview"
 				android:title="@string/tab_overv_head"
 				android:icon="@drawable/tab_overview">
-			</item>
-			<item
-				android:id="@+id/menu_news"
-				android:title="@string/tab_news_head"
-				android:icon="@drawable/tab_news">
-			</item>
-			<item
-				android:id="@+id/menu_msgs"
-				android:title="@string/tab_msgs_head"
-				android:icon="@drawable/tab_msgs">
-			</item>
-			<item
-				android:id="@+id/menu_board"
-				android:title="@string/tab_board_head"
-				android:icon="@drawable/tab_board">
 			</item>
 			<item
 				android:id="@+id/menu_shoutbox"

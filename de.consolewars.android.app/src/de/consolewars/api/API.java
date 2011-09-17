@@ -12,10 +12,10 @@ import com.google.inject.Singleton;
 
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.db.domain.CwBlog;
+import de.consolewars.android.app.db.domain.CwComment;
 import de.consolewars.android.app.db.domain.CwNews;
 import de.consolewars.api.data.AuthStatus;
 import de.consolewars.api.data.AuthenticatedUser;
-import de.consolewars.api.data.Comment;
 import de.consolewars.api.data.Message;
 import de.consolewars.api.event.CwBlogUpdateListener;
 import de.consolewars.api.event.CwNewsUpdateListener;
@@ -136,7 +136,7 @@ public class API {
 	 *            what kind of blogs should be returned: 0 normal, 1 newsblogs, 2 other
 	 * @return list of blogs
 	 */
-	public ArrayList<CwBlog> getCwBlogsList(int uid, int count, int filter) throws ConsolewarsAPIException {
+	public ArrayList<CwBlog> getBlogsList(int uid, int count, int filter) throws ConsolewarsAPIException {
 
 		ArrayList<CwBlog> blogs = new ArrayList<CwBlog>();
 
@@ -174,11 +174,11 @@ public class API {
 	 *            returns only blogs since this date/time
 	 * @return list of blogs which are not older than <i>since</i>
 	 */
-	public ArrayList<CwBlog> getCwBlogsList(int uid, int count, int filter, Date since) throws ConsolewarsAPIException {
+	public ArrayList<CwBlog> getBlogsList(int uid, int count, int filter, Date since) throws ConsolewarsAPIException {
 		if (since == null)
-			return getCwBlogsList(uid, count, filter);
+			return getBlogsList(uid, count, filter);
 		else {
-			return (ArrayList<CwBlog>) filterCwBlogsListByDate(getCwBlogsList(uid, count, filter), since);
+			return (ArrayList<CwBlog>) filterBlogsListByDate(getBlogsList(uid, count, filter), since);
 		}
 	}
 
@@ -189,8 +189,8 @@ public class API {
 	 *            blog ide
 	 * @return one single blog; null if no blog is available
 	 */
-	public CwBlog getCwBlog(int id) throws ConsolewarsAPIException {
-		ArrayList<CwBlog> blogs = this.getCwBlogs(new int[] { id });
+	public CwBlog getBlog(int id) throws ConsolewarsAPIException {
+		ArrayList<CwBlog> blogs = this.getBlogs(new int[] { id });
 		return (blogs.isEmpty()) ? (null) : (blogs.get(0));
 	}
 
@@ -201,7 +201,7 @@ public class API {
 	 *            ids of the blogs
 	 * @return several blogs as requested by their ids
 	 */
-	public ArrayList<CwBlog> getCwBlogs(int[] id) throws ConsolewarsAPIException {
+	public ArrayList<CwBlog> getBlogs(int[] id) throws ConsolewarsAPIException {
 		ArrayList<CwBlog> blogs = new ArrayList<CwBlog>();
 
 		// name of the api-php file
@@ -230,10 +230,10 @@ public class API {
 	 * @param talkback_lastpage
 	 * @return list of comments
 	 */
-	public ArrayList<Comment> getComments(int id, int area, int count, int talkback_viewpage, int talkback_lastpage)
+	public ArrayList<CwComment> getComments(int id, int area, int count, int talkback_viewpage, int talkback_lastpage)
 			throws ConsolewarsAPIException {
 
-		ArrayList<Comment> comments = new ArrayList<Comment>();
+		ArrayList<CwComment> comments = new ArrayList<CwComment>();
 
 		// name of the api-php file
 		String apiname = "getcomments";
@@ -296,7 +296,7 @@ public class API {
 	 * @return
 	 * @throws ConsolewarsAPIException
 	 */
-	public ArrayList<CwNews> getCwNewsList(int count, int filter) throws ConsolewarsAPIException {
+	public ArrayList<CwNews> getNewsList(int count, int filter) throws ConsolewarsAPIException {
 		ArrayList<CwNews> news = new ArrayList<CwNews>();
 
 		// name of the api-php file
@@ -315,14 +315,14 @@ public class API {
 
 		parser = null;
 
-		return removeCwNewsTeaser(news);
+		return removeNewsTeaser(news);
 	}
 
-	public ArrayList<CwNews> getCwNewsList(int count, int filter, Date since) throws ConsolewarsAPIException {
+	public ArrayList<CwNews> getNewsList(int count, int filter, Date since) throws ConsolewarsAPIException {
 		if (since == null)
-			return getCwNewsList(count, filter);
+			return getNewsList(count, filter);
 		else {
-			return (ArrayList<CwNews>) filterCwNewsListByDate(getCwNewsList(count, filter), since);
+			return (ArrayList<CwNews>) filterNewsListByDate(getNewsList(count, filter), since);
 		}
 	}
 
@@ -332,7 +332,7 @@ public class API {
 	 * @param id
 	 * @return a list of news
 	 */
-	public ArrayList<CwNews> getCwNews(int[] id) throws ConsolewarsAPIException {
+	public ArrayList<CwNews> getNews(int[] id) throws ConsolewarsAPIException {
 		ArrayList<CwNews> news = new ArrayList<CwNews>();
 
 		// name of the api-php file
@@ -358,8 +358,8 @@ public class API {
 	 *            news-id
 	 * @return a single news; null if no news is available
 	 */
-	public CwNews getCwNews(int id) throws ConsolewarsAPIException {
-		ArrayList<CwNews> news = getCwNews(new int[] { id });
+	public CwNews getNews(int id) throws ConsolewarsAPIException {
+		ArrayList<CwNews> news = getNews(new int[] { id });
 		return (news.isEmpty()) ? (null) : (news.get(0));
 	}
 
@@ -432,7 +432,7 @@ public class API {
 	 * @param news
 	 * @return
 	 */
-	private ArrayList<CwNews> removeCwNewsTeaser(ArrayList<CwNews> news) {
+	private ArrayList<CwNews> removeNewsTeaser(ArrayList<CwNews> news) {
 		// usually the teaser is the first item in the list
 		if (news.size() > 0) {
 			if (news.get(0).getMode().equals("TEASER")) {
@@ -481,7 +481,7 @@ public class API {
 	 *            list items should not be older than this time
 	 * @return filtered list by date
 	 */
-	private ArrayList<CwNews> filterCwNewsListByDate(ArrayList<CwNews> list, Date since) {
+	private ArrayList<CwNews> filterNewsListByDate(ArrayList<CwNews> list, Date since) {
 		ArrayList<CwNews> filteredList = new ArrayList<CwNews>();
 		for (CwNews news : list) {
 			long sinceTime = since.getTime() / DateUtil.SECOND;
@@ -503,7 +503,7 @@ public class API {
 	 *            list items should not be older than this time
 	 * @return filtered list by date
 	 */
-	private ArrayList<CwBlog> filterCwBlogsListByDate(ArrayList<CwBlog> list, Date since) {
+	private ArrayList<CwBlog> filterBlogsListByDate(ArrayList<CwBlog> list, Date since) {
 		ArrayList<CwBlog> filteredList = new ArrayList<CwBlog>();
 		for (CwBlog item : list) {
 			long sinceTime = since.getTime() / DateUtil.SECOND;
@@ -524,7 +524,7 @@ public class API {
 		}
 	}
 
-	private void fireCwNewsReceivedEvent(ListEventObject<CwNews> event) {
+	private void fireNewsReceivedEvent(ListEventObject<CwNews> event) {
 		for (Object listener : listeners) {
 			if (listener instanceof CwNewsUpdateListener) {
 				((CwNewsUpdateListener) listener).newsReceived(event);
@@ -622,7 +622,7 @@ public class API {
 		 */
 		@SuppressWarnings("unused")
 		private ArrayList<CwBlog> checkUpdateByDate() throws ConsolewarsAPIException {
-			return getCwBlogsList(BLANK_ARGUMENT, getItemCount(), BLANK_ARGUMENT, getLastUpdate());
+			return getBlogsList(BLANK_ARGUMENT, getItemCount(), BLANK_ARGUMENT, getLastUpdate());
 		}
 
 		@Override
@@ -639,7 +639,7 @@ public class API {
 
 		@Override
 		protected ArrayList<CwBlog> getItemList() throws ConsolewarsAPIException {
-			return getCwBlogsList(BLANK_ARGUMENT, getItemCount(), BLANK_ARGUMENT);
+			return getBlogsList(BLANK_ARGUMENT, getItemCount(), BLANK_ARGUMENT);
 		}
 
 		@Override
@@ -669,9 +669,9 @@ public class API {
 		 */
 		@SuppressWarnings("unused")
 		private void checkUpdateByDate() throws ConsolewarsAPIException {
-			ArrayList<CwNews> news = getCwNewsList(getItemCount(), BLANK_ARGUMENT, getLastUpdate());
+			ArrayList<CwNews> news = getNewsList(getItemCount(), BLANK_ARGUMENT, getLastUpdate());
 			if (news.size() > 0)
-				fireCwNewsReceivedEvent(new ListEventObject<CwNews>(this, news));
+				fireNewsReceivedEvent(new ListEventObject<CwNews>(this, news));
 		}
 
 		@Override
@@ -683,13 +683,13 @@ public class API {
 
 			// ArrayList<News> news = checkUpdateByDate();
 			if (news.size() > 0)
-				fireCwNewsReceivedEvent(new ListEventObject<CwNews>(this, news));
+				fireNewsReceivedEvent(new ListEventObject<CwNews>(this, news));
 
 		}
 
 		@Override
 		protected ArrayList<CwNews> getItemList() throws ConsolewarsAPIException {
-			return getCwNewsList(getItemCount(), BLANK_ARGUMENT);
+			return getNewsList(getItemCount(), BLANK_ARGUMENT);
 		}
 
 		@Override

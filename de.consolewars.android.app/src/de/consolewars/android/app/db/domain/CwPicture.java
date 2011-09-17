@@ -12,6 +12,8 @@ public class CwPicture extends CwEntity {
 	private String picId;
 	@DatabaseField(columnName = "saved")
 	private boolean saved;
+	@DatabaseField(columnName = "storageUrl")
+	private String storageUrl;
 	@DatabaseField(columnName = "url", canBeNull = false)
 	private String url;
 
@@ -24,9 +26,10 @@ public class CwPicture extends CwEntity {
 	public CwPicture() {
 	}
 
-	public CwPicture(String picId, boolean saved, String url) {
+	public CwPicture(String picId, boolean saved, String storageUrl, String url) {
 		this.picId = picId;
 		this.saved = saved;
+		this.setStorageUrl(storageUrl);
 		this.url = url;
 	}
 
@@ -61,6 +64,21 @@ public class CwPicture extends CwEntity {
 	}
 
 	/**
+	 * @return the storageUrl
+	 */
+	public String getStorageUrl() {
+		return storageUrl;
+	}
+
+	/**
+	 * @param storageUrl
+	 *            the storageUrl to set
+	 */
+	public void setStorageUrl(String storageUrl) {
+		this.storageUrl = storageUrl;
+	}
+
+	/**
 	 * @return the url
 	 */
 	public String getUrl() {
@@ -83,7 +101,8 @@ public class CwPicture extends CwEntity {
 	}
 
 	/**
-	 * @param cwNews the cwNews to set
+	 * @param cwNews
+	 *            the cwNews to set
 	 */
 	public void setCwNews(CwNews cwNews) {
 		this.cwNews = cwNews;

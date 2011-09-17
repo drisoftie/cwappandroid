@@ -18,24 +18,14 @@
 	<string name="tab_overv_head">Übersicht</string>
 	<string name="tab_board_tag">messageboard</string>
 	<string name="tab_board_head">Forum</string>
-
-
+	<string name="tab_singlenews_tag">singlenews</string>
+	<string name="tab_singleblog_tag">singleblog</string>
 	<string name="loading">Lade %1$s im Hintergrund</string>
-	<string name="overview_logged_as">Eingeloggt als:</string>
-	<string name="overview_confirm">Bestätigen</string>
-	<string name="overview_banner_details">%1$d neue %2$s</string>
-	<string name="overview_banner_news_title">News</string>
-	<string name="overview_banner_blogs_title">Blogs</string>
-	<string name="overview_banner_msgs_title">Nachrichten</string>
-	<string name="news">News</string>
-	<string name="blog">Blog</string>
-	<string name="singlenews">Einzelnews</string>
-	<string name="singleblog">Einzelblog</string>
+
 	<string name="comments">Kommentare</string>
 	<string name="shoutbox">Shoutbox</string>
 	<string name="board">Forum</string>
-	<string name="news_author_by">von</string>
-	<string name="singlenews_info">%1$s von %2$s</string>
+
 	<string name="singleblogs_author">%1$s\'S BLOG</string>
 	<string name="news_author_unknown">[Newseditor]</string>
 	<string name="news_filter">Filterfunktion</string>
@@ -69,7 +59,45 @@
 	<string name="comment_edited">Der Kommentar wurde erfolgreich editiert.</string>
 	<string name="not_logged_in">Sie sind nicht eingeloggt.</string>
 
+	<!-- overview -->
+	<string name="overview">Übersicht</string>
+	<string name="overview_logged_as">Eingeloggt als:</string>
+	<string name="overview_confirm">Bestätigen</string>
+	<string name="overview_banner_details">%1$d neue %2$s</string>
+	<string name="overview_banner_news_title">News</string>
+	<string name="overview_banner_blogs_title">Blogs</string>
+	<string name="overview_banner_msgs_title">Nachrichten</string>
+
+	<!-- news -->
+	<string name="news">News</string>
+
+	<string name="news_filter_all">Alle News</string>
+	<string name="news_filter_only_ms">Nur Microsoft</string>
+	<string name="news_filter_only_nin">Nur Nintendo</string>
+	<string name="news_filter_only_sony">Nur Sony</string>
+
+	<string name="singlenews">Einzelnews</string>
+	<string name="news_author_by">von</string>
+	<string name="singlenews_info">%1$s von %2$s</string>
+
+	<string name="news_saving">Beginne mit dem Speichern aller angezeigten News...
+	</string>
+	<string name="news_half_saved">Die Hälfte (%1$d / %2$d) ist durch.</string>
+	<string name="news_saved">%1$d News gespeichert.</string>
+
 	<!-- blogs -->
+	<string name="blog">Blog</string>
+	<string name="singleblog">Einzelblog</string>
+
+	<string name="blogs_filter_all">Alle Blogs</string>
+	<string name="blogs_filter_own">Eigene Blogs</string>
+	<string name="blogs_filter_news">Newsblogs</string>
+
+	<string name="blogs_saving">Beginne mit dem Speichern aller angezeigten Blogs...
+	</string>
+	<string name="blogs_half_saved">Die Hälfte (%1$d / %2$d) ist durch.</string>
+	<string name="blogs_saved">%1$d Blogs gespeichert.</string>
+
 	<string name="blog_delete_question">Wollen Sie wirklich diesen Blog löschen?</string>
 	<string name="blog_deleting">Ihr Blog wird gelöscht...</string>
 	<string name="blog_deleted">Der Blog wurde erfolgreich gelöscht.</string>
@@ -102,23 +130,8 @@
 
 	<string name="ok">OK</string>
 	<string name="dateformat_detailed">EEEE, dd. MMMMM yyyy \'um\' HH:mm \'Uhr\'</string>
-	<string-array name="news_filter_options">
-		<item>Alle News</item>
-		<item>Nur Microsoft</item>
-		<item>Nur Nintendo</item>
-		<item>Nur Sony</item>
-	</string-array>
-	<string-array name="blogs_filter_options">
-		<item>Blogs</item>
-		<item>Newsblogs</item>
-		<item>Eigene Blogs</item>
-	</string-array>
 	<string-array name="msgs_filter_options">
 		<item>Posteingang</item>
 		<item>Postausgang</item>
-	</string-array>
-	<string-array name="singlenews_paging">
-		<item>News</item>
-		<item>Kommentare</item>
 	</string-array>
 </resources>

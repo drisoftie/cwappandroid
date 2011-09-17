@@ -1,6 +1,6 @@
 package de.consolewars.api.parser;
 
-import de.consolewars.api.data.Comment;
+import de.consolewars.android.app.db.domain.CwComment;
 
 /*
  * Copyright [2009] Dimitrios Kapanikis
@@ -24,7 +24,7 @@ import de.consolewars.api.data.Comment;
  * @author cerpin (arrewk@gmail.com)
  * 
  */
-public class SAXCommentParser extends AbstractSAXParser<Comment> {
+public class SAXCommentParser extends AbstractSAXParser<CwComment> {
 
 	private boolean isComment = true;
 
@@ -36,8 +36,8 @@ public class SAXCommentParser extends AbstractSAXParser<Comment> {
 	}
 
 	@Override
-	protected Comment createTempItem() {
-		return new Comment();
+	protected CwComment createTempItem() {
+		return new CwComment();
 	}
 
 	@Override

@@ -1,9 +1,9 @@
 package de.consolewars.android.app;
 
 import java.security.GeneralSecurityException;
+import java.sql.SQLException;
 import java.util.GregorianCalendar;
 
-import roboguice.util.Ln;
 import android.content.Context;
 
 import com.google.inject.Inject;
@@ -14,7 +14,6 @@ import de.consolewars.android.app.db.AppDataHandler;
 import de.consolewars.android.app.db.domain.CwUser;
 import de.consolewars.android.app.util.HashEncrypter;
 import de.consolewars.api.data.AuthenticatedUser;
-import de.consolewars.api.exception.ConsolewarsAPIException;
 
 /*
  * Copyright [2011] [Alexander Dridiger]
@@ -30,7 +29,10 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+/**
+ * @author Alexander Dridiger
+ *
+ */
 @Singleton
 public class CwLoginManager {
 
@@ -47,26 +49,27 @@ public class CwLoginManager {
 	private AuthenticatedUser user;
 
 	public boolean saveAndLoginUser(String userName, String passw, int lastNewsId, int lastBlogId) {
-		try {
-			CwUser cwUser;
-			if (appDataHandler.getCwUser() != null) {
-				cwUser = appDataHandler.getCwUser();
-			} else {
-				cwUser = new CwUser();
-			}
-
-			cwUser.setName(userName);
-			cwUser.setHashPassword(HashEncrypter.encrypt(context.getString(R.string.db_cry), passw));
-			cwUser.setDate(GregorianCalendar.getInstance().getTime());
-			cwUser.setLastBlogId(lastBlogId);
-			cwUser.setLastNewsId(lastNewsId);
-
-			cwUserDao.createOrUpdate(cwUser);
-			return checkSavedUserAndLogin();
-		} catch (Exception e) {
-			Ln.e(e);
+		CwUser cwUser;
+		if (appDataHandler.getCwUser() != null) {
+			cwUser = appDataHandler.getCwUser();
+		} else {
+			cwUser = new CwUser();
 		}
-		return false;
+		cwUser.setName(userName);
+		try {
+			cwUser.setHashPassword(HashEncrypter.encrypt(context.getString(R.string.db_cry), passw));
+		} catch (GeneralSecurityException e1) {
+			e1.printStackTrace();
+		}
+		cwUser.setDate(GregorianCalendar.getInstance().getTime());
+		cwUser.setLastBlogId(lastBlogId);
+		cwUser.setLastNewsId(lastNewsId);
+		try {
+			cwUserDao.createOrUpdate(cwUser);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return checkSavedUserAndLogin();
 	}
 
 	/**
@@ -78,9 +81,6 @@ public class CwLoginManager {
 			try {
 				user = cwManager.getAuthUser(appDataHandler.getCwUser().getName(), HashEncrypter.decrypt(
 						context.getString(R.string.db_cry), appDataHandler.getCwUser().getHashPassword()));
-			} catch (ConsolewarsAPIException e) {
-				isLoggedIn = false;
-				e.printStackTrace();
 			} catch (GeneralSecurityException e) {
 				isLoggedIn = false;
 				e.printStackTrace();

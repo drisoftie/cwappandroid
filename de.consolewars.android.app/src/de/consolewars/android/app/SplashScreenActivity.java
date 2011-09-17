@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.view.Window;
 import android.widget.ProgressBar;
 
-import com.bugsense.trace.BugSenseHandler;
 import com.google.inject.Inject;
 
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
@@ -20,8 +19,6 @@ import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
 public class SplashScreenActivity extends RoboActivity {
 
 	@Inject
-	private CwManager cwManager;
-	@Inject
 	private CwLoginManager cwLoginManager;
 
 	@Override
@@ -31,7 +28,7 @@ public class SplashScreenActivity extends RoboActivity {
 		setContentView(R.layout.splash_layout);
 		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.titlebar_layout);
 
-		BugSenseHandler.setup(this, getString(R.string.bug_key));
+		// BugSenseHandler.setup(this, getString(R.string.bug_key));
 
 		new SplashAsyncTask().execute();
 	}
@@ -55,7 +52,6 @@ public class SplashScreenActivity extends RoboActivity {
 		@Override
 		protected Void doInBackground(Void... params) {
 			cwLoginManager.checkSavedUserAndLogin();
-			cwManager.setupEntities();
 			return null;
 		}
 

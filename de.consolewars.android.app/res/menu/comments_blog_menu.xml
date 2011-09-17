@@ -1,18 +1,18 @@
 <menu
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:name="Einzelnews">
+	android:name="Kommentare">
 	<item
-		android:id="@+id/menu_singlenews_refresh"
+		android:id="@+id/menu_cmts_write"
+		android:title="Schreibe einen Kommentar">
+	</item>
+	<item
+		android:id="@+id/menu_cmts_refresh"
 		android:title="Refresh (Netzwerk)">
 	</item>
 	<item
-		android:id="@+id/menu_singlenews_save"
-		android:title="Speichere die angezeigte News">
-	</item>
-	<item
-		android:id="@+id/menu_blogs"
-		android:title="@string/tab_blogs_head"
-		android:icon="@drawable/tab_blogs">
+		android:id="@+id/menu_news"
+		android:title="@string/tab_news_head"
+		android:icon="@drawable/tab_news">
 	</item>
 	<item
 		android:id="@+id/menu_board"
@@ -25,12 +25,12 @@
 		android:icon="@drawable/tab_msgs">
 	</item>
 	<item
-		android:id="@+id/navigation"
+		android:id="@+id/menu_navigation"
 		android:title="Weiteres">
 		<menu>
 			<item
 				android:id="@+id/menu_overview"
-				android:title="@string/tab_overv_head"
+				android:title="@string/overview"
 				android:icon="@drawable/tab_overview">
 			</item>
 			<item

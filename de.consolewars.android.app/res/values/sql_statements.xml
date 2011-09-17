@@ -7,7 +7,7 @@
 	<string
 		name="db_table_userdata_name">Userdata</string>
 	<string
-		name="db_table_newsdata_name">Newsdata</string>
+		name="db_table_news_name">News</string>
 	<string
 		name="db_table_blogdata_name">Blogdata</string>
 	<string
@@ -78,4 +78,6 @@
 		name="db_drop_table">DROP TABLE IF EXISTS %1$s</string>
 	<string
 		name="db_id_desc">id desc</string>
+	<string
+		name="db_newest_subjectId">select max(subjectId) from %1$s</string>	
 </resources>

@@ -1,6 +1,6 @@
 package de.consolewars.api.event;
 
-import de.consolewars.api.data.Comment;
+import de.consolewars.android.app.db.domain.CwComment;
 
 /*
  * Copyright [2009] Dimitrios Kapanikis
@@ -21,6 +21,6 @@ import de.consolewars.api.data.Comment;
 
 public interface CommentUpdateListener {
 
-	public void commentsReceived(ListEventObject<Comment> event);
+	public void commentsReceived(ListEventObject<CwComment> event);
 
 }

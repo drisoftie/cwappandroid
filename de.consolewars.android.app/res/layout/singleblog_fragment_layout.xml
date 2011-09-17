@@ -1,51 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<RelativeLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:id="@+id/singleblog_scroll_view"
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent"
 	android:background="@color/blog_article_bg">
-	<LinearLayout
-		android:id="@+id/singleblog_content"
+	<ScrollView
+		android:id="@+id/singleblog_scroll_view"
 		android:layout_width="fill_parent"
-		android:layout_height="fill_parent"
-		android:orientation="vertical">
-		<include
-			android:id="@+id/singleblog_header"
-			layout="@layout/singleblog_header_layout"
-			android:layout_width="fill_parent"
-			android:layout_height="fill_parent"/>
-		<include
-			android:id="@+id/singleblog_descr_header"
-			layout="@layout/singleblog_header_descr_layout"
-			android:layout_width="fill_parent"
-			android:layout_height="fill_parent"/>
-		<TextView
-			android:id="@+id/singleblog_text_content"
-			android:layout_width="fill_parent"
-			android:layout_height="fill_parent"
-			android:textColor="@color/blogs_table_text_title"/>
+		android:layout_height="fill_parent">
 		<LinearLayout
+			android:id="@+id/singleblog_content"
 			android:layout_width="fill_parent"
 			android:layout_height="fill_parent"
-			android:orientation="horizontal">
-			<Button
-				android:id="@+id/singleblog_comments_bttn"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:background="@drawable/def_bttn_comments"/>
-			<Button
-				android:id="@+id/singleblog_edit_bttn"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:visibility="gone"
-				android:background="@drawable/def_bttn_edit"/>
-			<Button
-				android:id="@+id/singleblog_delete_bttn"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:visibility="gone"
-				android:background="@drawable/def_bttn_del"/>
+			android:orientation="vertical">
+			<include
+				android:id="@+id/singleblog_header"
+				layout="@layout/singleblog_header_layout"
+				android:layout_width="fill_parent"
+				android:layout_height="fill_parent"/>
+			<include
+				android:id="@+id/singleblog_descr_header"
+				layout="@layout/singleblog_header_descr_layout"
+				android:layout_width="fill_parent"
+				android:layout_height="fill_parent"/>
+			<TextView
+				android:id="@+id/singleblog_text_content"
+				android:layout_width="fill_parent"
+				android:layout_height="fill_parent"
+				android:textColor="@color/blogs_table_text_title"/>
+			<LinearLayout
+				android:layout_width="fill_parent"
+				android:layout_height="fill_parent"
+				android:orientation="horizontal">
+				<Button
+					android:id="@+id/singleblog_edit_bttn"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:visibility="gone"
+					android:background="@drawable/def_bttn_edit"/>
+				<Button
+					android:id="@+id/singleblog_delete_bttn"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:visibility="gone"
+					android:background="@drawable/def_bttn_del"/>
+			</LinearLayout>
 		</LinearLayout>
-	</LinearLayout>
-</ScrollView>
+	</ScrollView>
+</RelativeLayout>

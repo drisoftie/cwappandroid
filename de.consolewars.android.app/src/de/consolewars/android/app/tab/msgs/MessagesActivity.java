@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.style.ForegroundColorSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -34,7 +33,6 @@ import de.consolewars.android.app.util.DateUtility;
 import de.consolewars.android.app.util.StyleSpannableStringBuilder;
 import de.consolewars.android.app.util.ViewUtility;
 import de.consolewars.api.data.Message;
-import de.consolewars.api.exception.ConsolewarsAPIException;
 
 /*
  * Copyright [2010] [Alexander Dridiger]
@@ -90,13 +88,7 @@ public class MessagesActivity extends RoboActivity {
 
 		@Override
 		protected List<Message> doInBackground(Void... params) {
-			try {
-				msgs = cwManager.getMessages(currentFilter, 10);
-			} catch (ConsolewarsAPIException e) {
-				e.printStackTrace();
-				Log.e(getString(R.string.exc_auth_tag), e.getMessage(), e);
-				return new ArrayList<Message>();
-			}
+			msgs = cwManager.getMessages(currentFilter, 10);
 			return msgs;
 		}
 
@@ -179,7 +171,7 @@ public class MessagesActivity extends RoboActivity {
 	public class MessageRowAdapter extends ArrayAdapter<Message> {
 
 		private LayoutInflater mInflater;
-		
+
 		public MessageRowAdapter(Context context, List<Message> rows) {
 			super(context, R.layout.msgs_row_layout, rows);
 			mInflater = LayoutInflater.from(context);
@@ -227,8 +219,7 @@ public class MessagesActivity extends RoboActivity {
 		}
 
 		/**
-		 * Changes the current activity to a {@link SingleMessageActivity} with
-		 * the selected news.
+		 * Changes the current activity to a {@link SingleMessageActivity} with the selected news.
 		 * 
 		 * @param text
 		 */

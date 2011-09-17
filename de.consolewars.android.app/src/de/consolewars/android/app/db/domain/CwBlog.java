@@ -1,7 +1,5 @@
 package de.consolewars.android.app.db.domain;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
-
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
@@ -107,10 +105,5 @@ public class CwBlog extends CwSubject {
 	 */
 	public void setVisible(boolean visible) {
 		this.visible = visible;
-	}
-
-	@Override
-	public String toString() {
-		return new ToStringBuilder(this).append(getId()).append(getTitle()).toString();
 	}
 }

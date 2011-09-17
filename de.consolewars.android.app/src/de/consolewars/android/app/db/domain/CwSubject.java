@@ -1,5 +1,7 @@
 package de.consolewars.android.app.db.domain;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 import com.j256.ormlite.field.DatabaseField;
@@ -29,8 +31,8 @@ public abstract class CwSubject extends CwEntity {
 	private String article;
 	@DatabaseField(columnName = "author")
 	private String author;
-	@DatabaseField(columnName = "comments")
-	private int comments;
+	@DatabaseField(columnName = "commentsAmount")
+	private int commentsAmount;
 	@DatabaseField(columnName = "description")
 	private String description;
 	@DatabaseField(columnName = "mode")
@@ -55,7 +57,7 @@ public abstract class CwSubject extends CwEntity {
 	 * 
 	 * @param article
 	 * @param author
-	 * @param comments
+	 * @param commentsAmount
 	 * @param description
 	 * @param mode
 	 * @param subjectId
@@ -63,12 +65,12 @@ public abstract class CwSubject extends CwEntity {
 	 * @param unixtime
 	 * @param url
 	 */
-	public CwSubject(String article, String author, int comments, String description, String mode, int subjectId,
+	public CwSubject(String article, String author, int commentsAmount, String description, String mode, int subjectId,
 			String title, int unixtime, String url) {
 		super();
 		this.article = article;
 		this.author = author;
-		this.comments = comments;
+		this.commentsAmount = commentsAmount;
 		this.description = description;
 		this.mode = mode;
 		this.subjectId = subjectId;
@@ -108,18 +110,18 @@ public abstract class CwSubject extends CwEntity {
 	}
 
 	/**
-	 * @return the comments
+	 * @return the commentsAmount
 	 */
-	public int getComments() {
-		return comments;
+	public int getCommentsAmount() {
+		return commentsAmount;
 	}
 
 	/**
-	 * @param comments
-	 *            the comments to set
+	 * @param commentsAmount
+	 *            the commentsAmount to set
 	 */
-	public void setComments(int comments) {
-		this.comments = comments;
+	public void setCommentsAmount(int commentsAmount) {
+		this.commentsAmount = commentsAmount;
 	}
 
 	/**
@@ -213,7 +215,22 @@ public abstract class CwSubject extends CwEntity {
 	}
 
 	@Override
+	public int hashCode() {
+		return new HashCodeBuilder().append(subjectId).append(unixtime).toHashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (!this.getClass().isInstance(obj)) {
+			return false;
+		}
+		CwSubject other = (CwSubject) obj;
+		return new EqualsBuilder().append(getSubjectId(), other.getSubjectId())
+				.append(getUnixtime(), other.getUnixtime()).isEquals();
+	}
+
+	@Override
 	public String toString() {
-		return new ToStringBuilder(this).append(getId()).append(getTitle()).toString();
+		return new ToStringBuilder(this).append(getSubjectId()).append(getUnixtime()).toString();
 	}
 }
