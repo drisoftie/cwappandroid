@@ -3,14 +3,15 @@ package de.consolewars.android.app.tab.blogs;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.app.Activity;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -19,17 +20,43 @@ import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TableLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import de.consolewars.android.app.CwApplication;
+import de.consolewars.android.app.CwEntityManager.EntityRefinement;
 import de.consolewars.android.app.Filter;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.db.domain.CwBlog;
+import de.consolewars.android.app.tab.CwAbstractFragment;
+import de.consolewars.android.app.tab.OnSubjectSelectedListener;
 import de.consolewars.android.app.util.DateUtility;
 import de.consolewars.android.app.util.StyleSpannableStringBuilder;
 import de.consolewars.android.app.view.IScrollListener;
 import de.consolewars.android.app.view.ScrollDetectorScrollView;
-import de.consolewars.api.exception.ConsolewarsAPIException;
 
-public final class BlogsFragment extends Fragment {
+/*
+ * Copyright [2011] [Alexander Dridiger]
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
+ * Fragment to handle the ui for blogs.
+ * 
+ * @author Alexander Dridiger
+ */
+public final class BlogsFragment extends CwAbstractFragment {
+
+	private Context context;
+
+	private OnSubjectSelectedListener listener;
 
 	private LayoutInflater inflater;
 	private ViewGroup blogs_layout;
@@ -40,6 +67,8 @@ public final class BlogsFragment extends Fragment {
 	// remember last selected table row to draw the background for that row
 	private View selectedRow;
 
+	private BuildBlogsAsyncTask task;
+
 	private List<CwBlog> tempList = new ArrayList<CwBlog>();
 
 	private Filter currentFilter = Filter.BLOGS_NORMAL;
@@ -49,13 +78,25 @@ public final class BlogsFragment extends Fragment {
 	private StyleSpannableStringBuilder styleStringBuilder;
 
 	public BlogsFragment() {
-		super();
+		
 	}
-
-	public BlogsFragment(Filter filter) {
-		super();
+	
+	public BlogsFragment(Filter filter, String titel) {
+		super(titel);
 		setHasOptionsMenu(true);
 		this.currentFilter = filter;
+		task = new BuildBlogsAsyncTask();
+	}
+
+	@Override
+	public void onAttach(Activity activity) {
+		super.onAttach(activity);
+		context = activity;
+		try {
+			listener = (OnSubjectSelectedListener) activity;
+		} catch (ClassCastException e) {
+			throw new ClassCastException(activity.toString() + " must implement OnArticleSelectedListener");
+		}
 	}
 
 	@Override
@@ -75,7 +116,12 @@ public final class BlogsFragment extends Fragment {
 	public void onResume() {
 		super.onResume();
 		if (blogsTable.getChildCount() == 0) {
-			new BuildBlogsAsyncTask().execute();
+			if (task.getStatus().equals(AsyncTask.Status.PENDING)) {
+				task.execute(true);
+			} else if (task.getStatus().equals(AsyncTask.Status.FINISHED)) {
+				task = new BuildBlogsAsyncTask();
+				task.execute();
+			}
 		}
 	}
 
@@ -108,20 +154,11 @@ public final class BlogsFragment extends Fragment {
 		@Override
 		protected Void doInBackground(Boolean... params) {
 			if (params.length > 0 && params[0]) {
-				if (!CwApplication.cwManager().getCwBlogs(currentFilter).isEmpty()) {
-					if (currentFilter.equals(Filter.BLOGS_USER)) {
-						CwApplication.cwManager().getUserCwBlogsAndStore(
-								CwApplication.cwLoginManager().getAuthenticatedUser().getUid(), 50, null);
-					} else {
-						try {
-							CwApplication.cwManager().getCwBlogsByIDAndStore(
-									CwApplication.cwManager().getCwBlogs(currentFilter)
-											.get(CwApplication.cwManager().getCwBlogs(Filter.BLOGS_NORMAL).size() - 1)
-											.getSubjectId() - 1, true);
-						} catch (ConsolewarsAPIException e) {
-							e.printStackTrace();
-						}
-					}
+				if (currentFilter.equals(Filter.BLOGS_USER)) {
+					CwApplication.cwEntityManager().getUserBlogsAndCache(
+							CwApplication.cwLoginManager().getAuthenticatedUser().getUid(), 50, null);
+				} else {
+					CwApplication.cwEntityManager().getNextBlogs(EntityRefinement.MIXED, currentFilter);
 				}
 			}
 			refreshList();
@@ -169,16 +206,15 @@ public final class BlogsFragment extends Fragment {
 						tableRow.setOnClickListener(new View.OnClickListener() {
 							@Override
 							public void onClick(View v) {
-								// set the correct background when a table row was
-								// selected by the user
+								// set the correct background when a table row was selected by the user
 								if (selectedRow != null) {
-									selectedRow.setBackgroundDrawable(getResources().getDrawable(
+									selectedRow.setBackgroundDrawable(context.getResources().getDrawable(
 											R.drawable.table_cell_bg));
 								}
-								tableRow.setBackgroundDrawable(getResources().getDrawable(
+								tableRow.setBackgroundDrawable(context.getResources().getDrawable(
 										R.drawable.table_cell_bg_selected));
 								selectedRow = tableRow;
-								getSingleBlog(blog);
+								listener.onSubjectSelected(blog);
 							}
 						});
 						// set each table row with the given information from the
@@ -189,7 +225,7 @@ public final class BlogsFragment extends Fragment {
 						((TextView) tableRow.findViewById(R.id.blogs_row_date)).setText(createDate(
 								blog.getUnixtime() * 1000L, "'um' HH:mm'Uhr'"));
 						TextView amount = (TextView) tableRow.findViewById(R.id.blogs_row_cmmts_amount);
-						amount.setText(createCommentsAmount(blog.getComments()));
+						amount.setText(createCommentsAmount(blog.getCommentsAmount()));
 
 						TextView author = (TextView) tableRow.findViewById(R.id.blogs_row_author);
 						author.setText(createAuthor(blog.getAuthor()));
@@ -217,7 +253,7 @@ public final class BlogsFragment extends Fragment {
 
 		private void refreshList() {
 			tempList.clear();
-			for (CwBlog blog : CwApplication.cwManager().getCwBlogs(currentFilter)) {
+			for (CwBlog blog : CwApplication.cwEntityManager().getCachedBlogs(currentFilter)) {
 				if (matchesFilter(blog.getUid(), blog.getMode())) {
 					tempList.add(blog);
 				}
@@ -226,9 +262,10 @@ public final class BlogsFragment extends Fragment {
 
 		private boolean matchesFilter(int uid, String mode) {
 			boolean matches = false;
-			if (currentFilter.equals(Filter.BLOGS_NEWS) && !mode.equals(getString(R.string.blogmode_normal))) {
+			if (currentFilter.equals(Filter.BLOGS_NEWS) && !mode.equals(context.getString(R.string.blogmode_normal))) {
 				matches = true;
-			} else if (currentFilter.equals(Filter.BLOGS_NORMAL) && mode.equals(getString(R.string.blogmode_normal))) {
+			} else if (currentFilter.equals(Filter.BLOGS_NORMAL)
+					&& mode.equals(context.getString(R.string.blogmode_normal))) {
 				matches = true;
 			} else if (currentFilter.equals(Filter.BLOGS_USER)
 					&& uid == CwApplication.cwLoginManager().getAuthenticatedUser().getUid()) {
@@ -244,7 +281,8 @@ public final class BlogsFragment extends Fragment {
 					cancel(true);
 					blogsTable.removeAllViews();
 					oldestBlogsID = -1;
-					new BuildBlogsAsyncTask().execute();
+					task = new BuildBlogsAsyncTask();
+					task.execute();
 				}
 			});
 		}
@@ -262,7 +300,8 @@ public final class BlogsFragment extends Fragment {
 
 						// if diff is zero, then the bottom has been reached
 						if (scrollView.getChildCount() == 0 || diff == 0) {
-							new BuildBlogsAsyncTask().execute(true);
+							task = new BuildBlogsAsyncTask();
+							task.execute(true);
 						}
 					}
 				}
@@ -275,26 +314,6 @@ public final class BlogsFragment extends Fragment {
 		 */
 		private CharSequence createDate(long unixtime, String format) {
 			return DateUtility.createDate(unixtime, format);
-		}
-
-		/**
-		 * Changes the current activity to a {@link SingleBlogActivity} with the selected blog.
-		 * 
-		 * @param id
-		 *            the blog id to find the selected blog
-		 */
-		private void getSingleBlog(CwBlog blog) {
-			// Create new fragment and transaction
-			Fragment singleBlogFragment = new SingleBlogFragment(blog);
-			FragmentTransaction transaction = getFragmentManager().beginTransaction();
-
-			// Replace whatever is in the fragment_container view with this fragment,
-			// and add the transaction to the back stack
-			transaction.add(R.id.blogs_root, singleBlogFragment);
-			transaction.addToBackStack(null);
-
-			// Commit the transaction
-			transaction.commit();
 		}
 
 		/**
@@ -319,10 +338,11 @@ public final class BlogsFragment extends Fragment {
 			// TODO more text formatting
 			// an empty author string means that the blog was not written by a
 			if (author.matches("")) {
-				author = getString(R.string.news_author_unknown);
+				author = context.getString(R.string.news_author_unknown);
 			}
 			styleStringBuilder = new StyleSpannableStringBuilder();
-			styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF007711), getString(R.string.news_author_by));
+			styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF007711),
+					context.getString(R.string.news_author_by));
 			styleStringBuilder.append(" ");
 			styleStringBuilder.appendWithStyle(new ForegroundColorSpan(0xFF009933), author);
 
@@ -346,11 +366,79 @@ public final class BlogsFragment extends Fragment {
 		}
 	}
 
+	/**
+	 * Asynchronous task to save blogs.
+	 * 
+	 * @author Alexander Dridiger
+	 */
+	private class SaveAllBlogsTask extends AsyncTask<Boolean, Void, Integer> {
+
+		@Override
+		protected void onPreExecute() {
+			Toast.makeText(context, context.getString(R.string.blogs_saving), Toast.LENGTH_SHORT).show();
+		}
+
+		@Override
+		protected Integer doInBackground(Boolean... params) {
+			return CwApplication.cwEntityManager().saveAllBlogs();
+		}
+
+		@Override
+		protected void onPostExecute(Integer result) {
+			Toast.makeText(context, context.getString(R.string.blogs_saved, result), Toast.LENGTH_SHORT).show();
+		}
+	}
+
+	private MenuInflater menuInflater;
+
 	@Override
 	public void onPrepareOptionsMenu(Menu menu) {
-		super.onPrepareOptionsMenu(menu);
-		menu.clear();
-		MenuInflater inflater = getActivity().getMenuInflater();
-		inflater.inflate(R.menu.blogs_menu, menu);
+		if (menuInflater == null) {
+			menuInflater = getActivity().getMenuInflater();
+		}
+		if (isSelected()) {
+			super.onPrepareOptionsMenu(menu);
+			menu.clear();
+			if (currentFilter.equals(Filter.BLOGS_USER) && CwApplication.cwLoginManager().isLoggedIn()) {
+				menuInflater.inflate(R.menu.ownblogs_menu, menu);
+			} else {
+				menuInflater.inflate(R.menu.blogs_menu, menu);
+			}
+		}
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (isSelected()) {
+			super.onOptionsItemSelected(item);
+			// Find which menu item has been selected
+			switch (item.getItemId()) {
+			// Check for each known menu item
+			case (R.id.menu_blogs_discard):
+				CwApplication.cwEntityManager().discardAllBlogs();
+				break;
+			case (R.id.menu_blogs_load_next):
+				if (task.getStatus().equals(AsyncTask.Status.RUNNING)) {
+					task.cancel(true);
+				}
+				task = new BuildBlogsAsyncTask();
+				task.execute(true);
+				break;
+			case (R.id.menu_blogs_load_saved):
+
+				break;
+			case (R.id.menu_blogs_refresh):
+
+				break;
+			case (R.id.menu_blogs_save_all):
+				new SaveAllBlogsTask().execute();
+				break;
+			}
+		}
+		return true;
+	}
+
+	@Override
+	public void backPressed() {
 	}
 }

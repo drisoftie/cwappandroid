@@ -24,12 +24,12 @@ import android.widget.Toast;
 
 import com.google.inject.Inject;
 
+import de.consolewars.android.app.CwEntityManager;
 import de.consolewars.android.app.CwManager;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.db.domain.CwBlog;
 import de.consolewars.android.app.tab.CwBasicActivityGroup;
 import de.consolewars.android.app.util.DateUtility;
-import de.consolewars.api.exception.ConsolewarsAPIException;
 
 /*
  * Copyright [2010] [Alexander Dridiger]
@@ -54,7 +54,9 @@ public class BlogsWriterActivity extends RoboActivity {
 
 	@Inject
 	private CwManager cwManager;
-
+	@Inject
+	private CwEntityManager cwEntityManager;
+	
 	private View blogswriter_layout;
 
 	private int id = -1;
@@ -187,12 +189,7 @@ public class BlogsWriterActivity extends RoboActivity {
 					&& BlogsWriterActivity.this.getIntent().getExtras().getInt(getString(R.string.id), -1) != -1) {
 				id = BlogsWriterActivity.this.getIntent().getExtras().getInt(getString(R.string.id));
 				CwBlog blog = null;
-				try {
-					blog = cwManager.getCwBlogById(id);
-				} catch (ConsolewarsAPIException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				blog = cwEntityManager.getSingleBlog(id, false);
 				EditText title = (EditText) blogswriter_layout.findViewById(R.id.blogswriter_edttxt_title);
 				title.setText(blog.getTitle());
 

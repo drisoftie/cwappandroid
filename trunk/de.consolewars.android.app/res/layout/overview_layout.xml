@@ -85,7 +85,6 @@
 					android:layout_height="wrap_content"
 					android:height="2dp"
 					android:singleLine="true"
-					android:ellipsize="start"
 					android:textSize="15dp"/>
 				<EditText
 					android:id="@+id/overview_edttxt_passw"

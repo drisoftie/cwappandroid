@@ -18,15 +18,6 @@
 			android:name=".tab.CwNavigationMainTabActivity"
 			android:screenOrientation="portrait" android:theme="@style/CheckTheme" />
 		<activity android:configChanges="keyboardHidden|orientation"
-			android:name=".tab.news.NewsActivityGroup" android:screenOrientation="portrait" />
-		<activity android:configChanges="keyboardHidden|orientation"
-			android:name=".tab.news.NewsActivity" android:screenOrientation="portrait" />
-		<activity android:configChanges="keyboardHidden|orientation"
-			android:name=".tab.blogs.BlogsActivityGroup"
-			android:screenOrientation="portrait" />
-		<activity android:configChanges="keyboardHidden|orientation"
-			android:name=".tab.blogs.BlogsActivity" android:screenOrientation="portrait" />
-		<activity android:configChanges="keyboardHidden|orientation"
 			android:name=".tab.msgs.MessagesActivityGroup"
 			android:screenOrientation="portrait" />
 		<activity android:configChanges="keyboardHidden|orientation"
@@ -37,19 +28,10 @@
 			android:name=".tab.shout.ShoutboxActivityGroup"
 			android:screenOrientation="portrait" />
 		<activity android:alwaysRetainTaskState="false"
-			android:configChanges="keyboardHidden|orientation" android:name=".tab.blogs.SingleBlogActivity"
-			android:screenOrientation="portrait" />
-		<activity android:alwaysRetainTaskState="false"
 			android:configChanges="keyboardHidden|orientation" android:name=".tab.msgs.SingleMessageActivity"
 			android:screenOrientation="portrait" />
 		<activity android:configChanges="keyboardHidden|orientation"
-			android:name=".tab.overview.OverviewActivity"
-			android:screenOrientation="portrait" />
-		<activity android:configChanges="keyboardHidden|orientation"
 			android:name=".tab.shout.ShoutboxActivityGroup"
-			android:screenOrientation="portrait" />
-		<activity android:alwaysRetainTaskState="false"
-			android:configChanges="keyboardHidden|orientation" android:name=".tab.overview.OverviewActivityGroup"
 			android:screenOrientation="portrait" />
 		<activity android:configChanges="keyboardHidden|orientation"
 			android:name=".tab.news.NewsPicViewerActivity"
@@ -59,8 +41,11 @@
 		<activity android:name=".tab.board.BoardActivity" android:screenOrientation="portrait" android:configChanges="keyboardHidden|orientation"></activity>
 		<activity android:name=".tab.blogs.BlogsWriterActivity" android:screenOrientation="portrait" android:configChanges="keyboardHidden|orientation"></activity>
 		<activity android:name=".tab.overview.ProfileActivity" android:screenOrientation="portrait" android:configChanges="keyboardHidden|orientation"></activity>
-		<activity android:name=".tab.news.CwNewsFragmentActivity" android:screenOrientation="portrait" android:configChanges="keyboardHidden|orientation"></activity>
-		<activity android:name=".tab.blogs.CwBlogsFragmentActivity" android:screenOrientation="portrait" android:configChanges="keyboardHidden|orientation"></activity>
+		<activity android:name=".tab.news.NewsFragmentActivity" android:screenOrientation="portrait" android:configChanges="keyboardHidden|orientation"></activity>
+		<activity android:name=".tab.blogs.BlogsFragmentActivity" android:screenOrientation="portrait" android:configChanges="keyboardHidden|orientation"></activity>
+		<activity android:name=".tab.news.SingleNewsFragmentActivity" android:screenOrientation="portrait" android:configChanges="keyboardHidden|orientation"></activity>
+		<activity android:name=".tab.blogs.SingleBlogFragmentActivity" android:screenOrientation="portrait" android:configChanges="keyboardHidden|orientation"></activity>
+		<activity android:name=".tab.overview.OverviewFragmentActivity" android:screenOrientation="portrait" android:configChanges="keyboardHidden|orientation"></activity>
 
 
 

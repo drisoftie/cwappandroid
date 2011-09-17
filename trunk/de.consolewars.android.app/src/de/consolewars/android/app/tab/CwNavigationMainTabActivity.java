@@ -5,6 +5,7 @@ import android.app.ActivityGroup;
 import android.app.TabActivity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -13,11 +14,13 @@ import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TabHost;
 import de.consolewars.android.app.R;
-import de.consolewars.android.app.tab.blogs.CwBlogsFragmentActivity;
+import de.consolewars.android.app.tab.blogs.BlogsFragmentActivity;
+import de.consolewars.android.app.tab.blogs.SingleBlogFragmentActivity;
 import de.consolewars.android.app.tab.board.BoardActivityGroup;
 import de.consolewars.android.app.tab.msgs.MessagesActivityGroup;
-import de.consolewars.android.app.tab.news.CwNewsFragmentActivity;
-import de.consolewars.android.app.tab.overview.OverviewActivityGroup;
+import de.consolewars.android.app.tab.news.NewsFragmentActivity;
+import de.consolewars.android.app.tab.news.SingleNewsFragmentActivity;
+import de.consolewars.android.app.tab.overview.OverviewFragmentActivity;
 import de.consolewars.android.app.tab.shout.ShoutboxActivityGroup;
 
 /*
@@ -36,8 +39,8 @@ import de.consolewars.android.app.tab.shout.ShoutboxActivityGroup;
  */
 /**
  * Activity to manage the main navigation of the app, i.e. its tabs. Initializes the tabs and their corresponding
- * {@link ActivityGroup}s and exposes the {@link TabHost} for tab management. The {@link TabHost} is managed by the
- * Android activity lifecycle. No switching or further application logic is provided here.
+ * {@link ActivityGroup}s or {@link FragmentActivity} and exposes the {@link TabHost} for tab management. The
+ * {@link TabHost} is managed by the Android activity lifecycle.
  * 
  * @author Alexander Dridiger
  */
@@ -52,6 +55,10 @@ public class CwNavigationMainTabActivity extends RoboTabActivity {
 	public static final int MESSAGES_TAB = 3;
 	public static final int BOARD_TAB = 4;
 	public static final int SHOUTBOX_TAB = 5;
+	public static final int SINGLENEWS_TAB = 6;
+	public static final int SINGLEBLOG_TAB = 7;
+
+	public static int selectedSubjectTab = OVERVIEW_TAB;
 
 	/**
 	 * The {@link TabHost} for this {@link TabActivity}. Before used, check for null since the activity might not have
@@ -79,12 +86,15 @@ public class CwNavigationMainTabActivity extends RoboTabActivity {
 	 */
 	private void setTabs() {
 		// add the necessary tabs
-		addTab(R.string.tab_overv_tag, R.drawable.def_tab_overview, OverviewActivityGroup.class);
-		addTab(R.string.tab_news_tag, R.drawable.def_tab_news, CwNewsFragmentActivity.class);
-		addTab(R.string.tab_blogs_tag, R.drawable.def_tab_blogs, CwBlogsFragmentActivity.class);
+		addTab(R.string.tab_overv_tag, R.drawable.def_tab_overview, OverviewFragmentActivity.class);
+		addTab(R.string.tab_news_tag, R.drawable.def_tab_news, NewsFragmentActivity.class);
+		addTab(R.string.tab_blogs_tag, R.drawable.def_tab_blogs, BlogsFragmentActivity.class);
 		addTab(R.string.tab_msgs_tag, R.drawable.def_tab_msgs, MessagesActivityGroup.class);
 		addTab(R.string.tab_board_tag, R.drawable.def_tab_board, BoardActivityGroup.class);
 		addTab(R.string.tab_shout_tag, R.drawable.def_tab_shout, ShoutboxActivityGroup.class);
+		// invisible tabs
+		addTab(R.string.tab_singlenews_tag, R.drawable.def_tab_news, SingleNewsFragmentActivity.class);
+		addTab(R.string.tab_singleblog_tag, R.drawable.def_tab_blogs, SingleBlogFragmentActivity.class);
 	}
 
 	/**
@@ -135,10 +145,22 @@ public class CwNavigationMainTabActivity extends RoboTabActivity {
 			getTabHost().setCurrentTab(OVERVIEW_TAB);
 			break;
 		case (R.id.menu_news):
-			getTabHost().setCurrentTab(NEWS_TAB);
+			if (selectedSubjectTab == SINGLENEWS_TAB) {
+				getTabHost().setCurrentTab(SINGLENEWS_TAB);
+				selectedSubjectTab = SINGLENEWS_TAB;
+			} else {
+				getTabHost().setCurrentTab(NEWS_TAB);
+				selectedSubjectTab = NEWS_TAB;
+			}
 			break;
 		case (R.id.menu_blogs):
-			getTabHost().setCurrentTab(BLOGS_TAB);
+			if (selectedSubjectTab == SINGLEBLOG_TAB) {
+				getTabHost().setCurrentTab(SINGLEBLOG_TAB);
+				selectedSubjectTab = SINGLEBLOG_TAB;
+			} else {
+				getTabHost().setCurrentTab(BLOGS_TAB);
+				selectedSubjectTab = BLOGS_TAB;
+			}
 			break;
 		case (R.id.menu_msgs):
 			getTabHost().setCurrentTab(MESSAGES_TAB);

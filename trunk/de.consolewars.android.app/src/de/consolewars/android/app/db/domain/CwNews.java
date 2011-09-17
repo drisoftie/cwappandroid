@@ -39,6 +39,8 @@ public class CwNews extends CwSubject {
 	private int picId;
 
 	@ForeignCollectionField(eager = true)
+	private ForeignCollection<CwPicture> comments;
+	@ForeignCollectionField(eager = true)
 	private ForeignCollection<CwPicture> pictures;
 
 	/**
@@ -118,6 +120,20 @@ public class CwNews extends CwSubject {
 	}
 
 	/**
+	 * @return the comments
+	 */
+	public ForeignCollection<CwPicture> getComments() {
+		return comments;
+	}
+
+	/**
+	 * @param comments the comments to set
+	 */
+	public void setComments(ForeignCollection<CwPicture> comments) {
+		this.comments = comments;
+	}
+
+	/**
 	 * @return the pictures
 	 */
 	public ForeignCollection<CwPicture> getPictures() {
@@ -134,6 +150,6 @@ public class CwNews extends CwSubject {
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this).append(getId()).append(getTitle()).toString();
+		return new ToStringBuilder(this).append(getSubjectId()).append(getUnixtime()).toString();
 	}
 }

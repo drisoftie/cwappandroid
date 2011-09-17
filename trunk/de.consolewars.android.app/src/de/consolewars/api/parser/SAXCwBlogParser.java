@@ -62,7 +62,7 @@ public class SAXCwBlogParser extends AbstractSAXParser<CwBlog> {
 		} else if (qName.equals("uid")) {
 			getTempItem().setUid(Integer.parseInt(tempValue));
 		} else if (qName.equals("comments")) {
-			getTempItem().setComments(Integer.parseInt(tempValue));
+			getTempItem().setCommentsAmount(Integer.parseInt(tempValue));
 		} else if (qName.equals("url")) {
 			getTempItem().setUrl(tempValue);
 		} else if (qName.equals("article")) {

@@ -6,25 +6,21 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.webkit.WebSettings.PluginState;
 import android.webkit.WebView;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import de.consolewars.android.app.CwApplication;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.db.domain.CwNews;
-import de.consolewars.android.app.tab.cmts.CommentsFragment;
+import de.consolewars.android.app.tab.CwAbstractFragment;
 import de.consolewars.android.app.util.DateUtility;
 import de.consolewars.android.app.util.MediaSnapper;
 import de.consolewars.android.app.util.TextViewHandler;
@@ -48,57 +44,81 @@ import de.consolewars.android.app.util.TextViewHandler;
  * 
  * @author Alexander Dridiger
  */
-public class SingleNewsFragment extends Fragment {
+public class SingleNewsFragment extends CwAbstractFragment {
 
 	private Context context;
 
 	private LayoutInflater inflater;
 
 	private ViewGroup singlenews_layout;
-	private ViewGroup singlenews_fragment_layout;
+	private ViewGroup content;
+	private ViewGroup singlenews_fragment;
 	private ViewGroup progress_layout;
 
 	private CwNews news;
 
+	private BuildSingleNewsAsyncTask task;
+
 	private String vidURL = "";
 
 	public SingleNewsFragment() {
-		super();
+
 	}
 
-	public SingleNewsFragment(CwNews news) {
-		super();
+	public SingleNewsFragment(String title) {
+		super(title);
 		setHasOptionsMenu(true);
-		this.news = news;
+		task = new BuildSingleNewsAsyncTask();
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		context = getActivity().getApplicationContext();
+		// see this issue http://code.google.com/p/android/issues/detail?id=5067
+		context = getActivity();
 		this.inflater = LayoutInflater.from(context);
-		singlenews_layout = (ViewGroup) inflater.inflate(R.layout.singlenews_layout, null);
-		singlenews_fragment_layout = (ViewGroup) inflater.inflate(R.layout.singlenews_fragment_layout, null);
+		singlenews_layout = (ViewGroup) inflater.inflate(R.layout.fragment_progress_layout, null);
+		singlenews_layout.setBackgroundColor(context.getResources().getColor(R.color.singlenews_bg));
 		progress_layout = CwApplication.cwViewUtil().getCenteredProgressBarLayout(inflater, R.string.singlenews);
-		ViewGroup progress = (ViewGroup) singlenews_layout.findViewById(R.id.singlenews_progressbar);
+		ViewGroup progress = (ViewGroup) singlenews_layout.findViewById(R.id.progressbar);
 		progress.addView(progress_layout);
 		progress_layout.setVisibility(View.GONE);
-		new BuildSingleNewsAsyncTask().execute();
 		return singlenews_layout;
 	}
 
 	@Override
 	public void onPause() {
-		if (singlenews_fragment_layout != null
-				&& singlenews_fragment_layout.findViewById(R.id.singlenews_video) != null) {
-			WebView localWebView = (WebView) singlenews_fragment_layout.findViewById(R.id.singlenews_video);
+		super.onPause();
+		if (getActivity().findViewById(R.id.singlenews_video) != null) {
+			WebView localWebView = (WebView) getActivity().findViewById(R.id.singlenews_video);
 			localWebView.loadUrl("about:blank");
 		}
-		super.onPause();
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
+		news = CwApplication.cwEntityManager().getSelectedNews();
+		singlenews_layout = (ViewGroup) getView();
+		content = (ViewGroup) singlenews_layout.findViewById(R.id.content);
+		content.removeAllViews();
+		singlenews_fragment = (ViewGroup) inflater.inflate(R.layout.singlenews_fragment_layout, null);
+		progress_layout.setVisibility(View.GONE);
+
+		if (task.getStatus().equals(AsyncTask.Status.PENDING)) {
+			task.execute();
+		} else if (task.getStatus().equals(AsyncTask.Status.FINISHED)) {
+			task = new BuildSingleNewsAsyncTask();
+			task.execute();
+		} else if (task.getStatus().equals(AsyncTask.Status.RUNNING)) {
+			task.cancel(true);
+		}
+	}
+
+	@Override
+	public void backPressed() {
+		if (task.getStatus().equals(AsyncTask.Status.RUNNING)) {
+			task.cancel(true);
+		}
 	}
 
 	/**
@@ -106,68 +126,69 @@ public class SingleNewsFragment extends Fragment {
 	 * 
 	 * @author Alexander Dridiger
 	 */
-	private class BuildSingleNewsAsyncTask extends AsyncTask<Void, Integer, View> {
+	private class BuildSingleNewsAsyncTask extends AsyncTask<Void, Integer, Void> {
 
 		@Override
 		protected void onPreExecute() {
 			progress_layout.setVisibility(View.VISIBLE);
+			singlenews_fragment.setVisibility(View.GONE);
 		}
 
 		@Override
-		protected View doInBackground(Void... params) {
-			return createNewsView();
+		protected Void doInBackground(Void... params) {
+			if (!isCancelled()) {
+				createNewsView();
+			}
+			return null;
 		}
 
 		@Override
-		protected void onPostExecute(View result) {
+		protected void onPostExecute(Void param) {
 			progress_layout.setVisibility(View.GONE);
-			ViewGroup content = (ViewGroup) singlenews_layout.findViewById(R.id.singlenews_content);
-			content.addView(result);
+			singlenews_fragment.setVisibility(View.VISIBLE);
+			content.removeView(singlenews_fragment);
+			content.addView(singlenews_fragment);
 		}
 
-		private View createNewsView() {
-			if (news.getArticle() == null) {
-				news = CwApplication.cwManager().getSingleCwNews(news.getSubjectId(), true);
-			}
-			TextView text = (TextView) singlenews_fragment_layout.findViewById(R.id.singlenews_newstext);
-			CwApplication.cwViewUtil().setClickableTextView(text);
-			if (news != null && news.getArticle() != null) {
-				try {
-					text.setText(Html.fromHtml(news.getArticle(), new TextViewHandler(context), null));
-				} catch (IllegalFormatException ife) {
-					// FIXME Wrong format handling
-					text.setText(news.getArticle());
+		private void createNewsView() {
+			if (!isCancelled()) {
+				if (news.getArticle() == null) {
+					CwApplication.cwEntityManager().setSelectedNews(
+							CwApplication.cwEntityManager().getSingleNews(news.getSubjectId(), true));
+					news = CwApplication.cwEntityManager().getSelectedNews();
 				}
-				createHeader(singlenews_fragment_layout, news);
-				createCommentBttn();
-				vidURL = MediaSnapper.snapFromCleanedHTMLWithXPath(
-						context.getString(R.string.cw_url_append, news.getUrl()),
-						context.getString(R.string.xpath_get_video), context.getString(R.string.value));
-				initVideos(news.getUrl());
-			} else if (news == null || news.getArticle() == null) {
-				text.setText(context.getString(R.string.failure));
+				TextView text = (TextView) singlenews_fragment.findViewById(R.id.singlenews_newstext);
+				CwApplication.cwViewUtil().setClickableTextView(text);
+				if (news != null && news.getArticle() != null) {
+					try {
+						text.setText(Html.fromHtml(news.getArticle(), new TextViewHandler(context), null));
+					} catch (IllegalFormatException ife) {
+						// FIXME Wrong format handling
+						text.setText(news.getArticle());
+					}
+					createHeader(singlenews_fragment, news);
+					vidURL = MediaSnapper.snapFromCleanedHTMLWithXPath(
+							context.getString(R.string.cw_url_append, news.getUrl()),
+							context.getString(R.string.xpath_get_video), context.getString(R.string.value));
+					initVideos(news.getUrl());
+				} else if (news == null || news.getArticle() == null) {
+					text.setText(context.getString(R.string.failure));
+				}
+			} else {
+				cancel(true);
 			}
-			return singlenews_fragment_layout;
 		}
 
-		private void createCommentBttn() {
-			Button bttn = (Button) singlenews_fragment_layout.findViewById(R.id.singlenews_comments_bttn);
-			bttn.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					// Create new fragment and transaction
-					Fragment commentsFragment = new CommentsFragment(news);
-					FragmentTransaction transaction = getFragmentManager().beginTransaction();
-
-					transaction.add(R.id.news_root, commentsFragment);
-					transaction.addToBackStack(null);
-
-					// Commit the transaction
-					transaction.commit();
-					WebView localWebView = (WebView) singlenews_fragment_layout.findViewById(R.id.singlenews_video);
-					localWebView.loadUrl("about:blank");
-				}
-			});
+		@Override
+		protected void onCancelled() {
+			super.onCancelled();
+			singlenews_layout = (ViewGroup) getView();
+			content = (ViewGroup) singlenews_layout.findViewById(R.id.content);
+			content.removeAllViews();
+			singlenews_fragment = (ViewGroup) inflater.inflate(R.layout.singlenews_fragment_layout, null);
+			progress_layout.setVisibility(View.GONE);
+			task = new BuildSingleNewsAsyncTask();
+			task.execute();
 		}
 
 		/**
@@ -178,7 +199,7 @@ public class SingleNewsFragment extends Fragment {
 		 */
 		private void initVideos(String url) {
 			if (vidURL != "") {
-				WebView localWebView = (WebView) singlenews_fragment_layout.findViewById(R.id.singlenews_video);
+				WebView localWebView = (WebView) singlenews_fragment.findViewById(R.id.singlenews_video);
 
 				localWebView.getSettings().setUseWideViewPort(false);
 				localWebView.getSettings().setPluginState(PluginState.ON);
@@ -241,10 +262,24 @@ public class SingleNewsFragment extends Fragment {
 		}
 	}
 
+	private MenuInflater menuInflater;
+
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		super.onCreateOptionsMenu(menu, inflater);
-		menu.clear();
-		inflater.inflate(R.menu.singlenews_menu, menu);
+		if (isSelected()) {
+			super.onCreateOptionsMenu(menu, inflater);
+			menu.clear();
+			inflater.inflate(R.menu.singlenews_menu, menu);
+		}
+		menuInflater = inflater;
+	}
+
+	@Override
+	public void onPrepareOptionsMenu(Menu menu) {
+		if (isSelected()) {
+			super.onPrepareOptionsMenu(menu);
+			menu.clear();
+			menuInflater.inflate(R.menu.singlenews_menu, menu);
+		}
 	}
 }

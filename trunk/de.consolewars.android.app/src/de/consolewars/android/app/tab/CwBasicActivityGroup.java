@@ -17,7 +17,7 @@ import android.view.View;
 import com.google.inject.Inject;
 import com.j256.ormlite.dao.Dao;
 
-import de.consolewars.android.app.CwManager;
+import de.consolewars.android.app.CwEntityManager;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.db.AppDataHandler;
 import de.consolewars.android.app.db.domain.CwUser;
@@ -37,15 +37,14 @@ import de.consolewars.android.app.db.domain.CwUser;
  * limitations under the License.
  */
 /**
- * Basic implementation of an {@link ActivityGroup} supporting {@link Activity}
- * switching and {@link View} caching.
+ * Basic implementation of an {@link ActivityGroup} supporting {@link Activity} switching and {@link View} caching.
  * 
  * @author Alexander Dridiger
  */
 public abstract class CwBasicActivityGroup extends RoboActivityGroup implements ICwActivityGroup {
 
 	@Inject
-	private CwManager cwManager;
+	private CwEntityManager cwEntityManager;
 	@Inject
 	private AppDataHandler appDataHandler;
 	@Inject
@@ -74,8 +73,8 @@ public abstract class CwBasicActivityGroup extends RoboActivityGroup implements 
 								if (appDataHandler.loadCurrentUser()) {
 									CwUser cwUser = appDataHandler.getCwUser();
 									cwUser.setDate(new Date());
-									cwUser.setLastBlogId(cwManager.getNewestBlog());
-									cwUser.setLastNewsId(cwManager.getNewestNews());
+									cwUser.setLastBlogId(cwEntityManager.getNewestBlog());
+									cwUser.setLastNewsId(cwEntityManager.getNewestNews());
 									try {
 										cwUserDao.update(cwUser);
 									} catch (SQLException e) {

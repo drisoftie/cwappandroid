@@ -1,18 +1,18 @@
 <menu
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:name="Einzelnews">
+	android:name="Blogs">
 	<item
-		android:id="@+id/menu_singlenews_refresh"
-		android:title="Refresh (Netzwerk)">
+		android:id="@+id/menu_blogs_load_next"
+		android:title="Lade Blogs (Netzwerk)">
 	</item>
 	<item
-		android:id="@+id/menu_singlenews_save"
-		android:title="Speichere die angezeigte News">
+		android:id="@+id/menu_blogs_new_blog"
+		android:title="Neuer Blog">
 	</item>
 	<item
-		android:id="@+id/menu_blogs"
-		android:title="@string/tab_blogs_head"
-		android:icon="@drawable/tab_blogs">
+		android:id="@+id/menu_news"
+		android:title="@string/tab_news_head"
+		android:icon="@drawable/tab_news">
 	</item>
 	<item
 		android:id="@+id/menu_board"
@@ -28,6 +28,22 @@
 		android:id="@+id/navigation"
 		android:title="Weiteres">
 		<menu>
+			<item
+				android:id="@+id/menu_blogs_save_all"
+				android:title="Speichere alle Blogs">
+			</item>
+			<item
+				android:id="@+id/menu_blogs_load_saved"
+				android:title="Lade nur gespeicherte Blogs">
+			</item>
+			<item
+				android:id="@+id/menu_blogs_refresh"
+				android:title="Refresh alle Blogs (Netzwerk)">
+			</item>
+			<item
+				android:id="@+id/menu_blogs_discard"
+				android:title="Verwerfe angezeigte Blogs">
+			</item>
 			<item
 				android:id="@+id/menu_overview"
 				android:title="@string/tab_overv_head"

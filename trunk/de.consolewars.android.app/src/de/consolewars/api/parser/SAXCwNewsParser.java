@@ -68,7 +68,7 @@ public class SAXCwNewsParser extends AbstractSAXParser<CwNews> {
 		} else if (qName.equals("piclist")) {
 			// getTempItem().setPiclist(fetchPicList(tempValue));
 		} else if (qName.equals("comments")) {
-			getTempItem().setComments(Integer.parseInt(tempValue));
+			getTempItem().setCommentsAmount(Integer.parseInt(tempValue));
 		} else if (qName.equals("url")) {
 			getTempItem().setUrl(tempValue);
 		} else if (qName.equals("picid")) {

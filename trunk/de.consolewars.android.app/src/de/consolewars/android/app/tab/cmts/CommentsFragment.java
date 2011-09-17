@@ -10,18 +10,18 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.text.Html;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,12 +29,12 @@ import de.consolewars.android.app.CwApplication;
 import de.consolewars.android.app.CwManager.CommentArea;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.db.domain.CwBlog;
+import de.consolewars.android.app.db.domain.CwComment;
 import de.consolewars.android.app.db.domain.CwNews;
 import de.consolewars.android.app.db.domain.CwSubject;
+import de.consolewars.android.app.tab.CwAbstractFragment;
 import de.consolewars.android.app.util.DateUtility;
 import de.consolewars.android.app.util.TextViewHandler;
-import de.consolewars.api.data.Comment;
-import de.consolewars.api.exception.ConsolewarsAPIException;
 
 /*
  * Copyright [2010] [Alexander Dridiger]
@@ -54,13 +54,14 @@ import de.consolewars.api.exception.ConsolewarsAPIException;
  * @author Alexander Dridiger
  * 
  */
-public class CommentsFragment extends Fragment {
+public class CommentsFragment extends CwAbstractFragment {
 
 	private LayoutInflater inflater;
 	private Context context;
 
-	private List<Comment> comments = new ArrayList<Comment>();
+	private List<CwComment> comments = new ArrayList<CwComment>();
 	private ViewGroup cmmts_layout;
+	private TableLayout cmmtsTable;
 	private View rowToDelete;
 	private int area;
 	private int currpage = 1;
@@ -68,21 +69,21 @@ public class CommentsFragment extends Fragment {
 
 	private CwSubject subject;
 
-	public CommentsFragment() {
-		super();
-	}
+	private BuildCommentsAsyncTask task;
 
-	public CommentsFragment(CwSubject subject) {
-		super();
+	public CommentsFragment(CwSubject subject, String title) {
+		super(title);
 		setHasOptionsMenu(true);
 		this.subject = subject;
+		task = new BuildCommentsAsyncTask();
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		this.inflater = inflater;
-		context = getActivity().getApplicationContext();
+		context = getActivity();
 		cmmts_layout = (ViewGroup) inflater.inflate(R.layout.comments_layout, null);
+		cmmtsTable = (TableLayout) cmmts_layout.findViewById(R.id.comments_table);
 		resolveBundle();
 		return cmmts_layout;
 	}
@@ -90,7 +91,22 @@ public class CommentsFragment extends Fragment {
 	@Override
 	public void onResume() {
 		super.onResume();
-		new BuildCommentsAsyncTask().execute();
+		if (subject instanceof CwNews) {
+			subject = CwApplication.cwEntityManager().getSelectedNews();
+		} else if (subject instanceof CwBlog) {
+			subject = CwApplication.cwEntityManager().getSelectedBlog();
+		}
+
+		cmmts_layout = (ViewGroup) getView();
+
+		if (task.getStatus().equals(AsyncTask.Status.PENDING)) {
+			task.execute();
+		} else if (task.getStatus().equals(AsyncTask.Status.FINISHED)) {
+			task = new BuildCommentsAsyncTask();
+			task.execute();
+		} else if (task.getStatus().equals(AsyncTask.Status.RUNNING)) {
+			task.cancel(true);
+		}
 	}
 
 	private void resolveBundle() {
@@ -98,6 +114,13 @@ public class CommentsFragment extends Fragment {
 			area = CommentArea.NEWS.getValue();
 		} else if (subject instanceof CwBlog) {
 			area = CommentArea.BLOGS.getValue();
+		}
+	}
+
+	@Override
+	public void backPressed() {
+		if (task.getStatus().equals(AsyncTask.Status.RUNNING)) {
+			task.cancel(true);
 		}
 	}
 
@@ -121,9 +144,8 @@ public class CommentsFragment extends Fragment {
 			// first set progressbar
 			ViewGroup progress_layout = CwApplication.cwViewUtil().getCenteredProgressBarLayout(inflater,
 					R.string.comments);
-			TableLayout comtsTable = (TableLayout) cmmts_layout.findViewById(R.id.comments_table);
-			comtsTable.removeAllViews();
-			comtsTable.addView(progress_layout);
+			cmmtsTable.removeAllViews();
+			cmmtsTable.addView(progress_layout);
 			initButtonsAndCheck();
 			checkButtons();
 		}
@@ -131,12 +153,7 @@ public class CommentsFragment extends Fragment {
 		@Override
 		protected Void doInBackground(Void... params) {
 			if (!isCancelled()) {
-				try {
-					comments = CwApplication.cwManager().getComments(subject.getSubjectId(), area, 20, currpage);
-				} catch (ConsolewarsAPIException e) {
-					e.printStackTrace();
-					Log.e(getString(R.string.exc_auth_tag), e.getMessage(), e);
-				}
+				comments = CwApplication.cwEntityManager().getComments(subject.getSubjectId(), area, 20, currpage);
 				createCommentsRows();
 			}
 			return null;
@@ -149,17 +166,22 @@ public class CommentsFragment extends Fragment {
 					Button delete_bttn = (Button) rowToDelete.findViewById(R.id.cmts_bttn_delete);
 					delete_bttn.setVisibility(View.VISIBLE);
 				}
-				TableLayout cmtsTable = (TableLayout) cmmts_layout.findViewById(R.id.comments_table);
-				cmtsTable.addView(rows[0], cmtsTable.getChildCount() - 1);
+				cmmtsTable.addView(rows[0], cmmtsTable.getChildCount() - 1);
 			}
 		}
 
 		@Override
 		protected void onPostExecute(Void result) {
 			// sets the comments view for this Activity
-			TableLayout cmtsTable = (TableLayout) cmmts_layout.findViewById(R.id.comments_table);
-			cmtsTable.removeViewAt(cmtsTable.getChildCount() - 1);
+			cmmtsTable.removeViewAt(cmmtsTable.getChildCount() - 1);
 			checkButtons();
+		}
+
+		@Override
+		protected void onCancelled() {
+			super.onCancelled();
+			task = new BuildCommentsAsyncTask();
+			task.execute();
 		}
 
 		/**
@@ -167,14 +189,12 @@ public class CommentsFragment extends Fragment {
 		 */
 		private void createCommentsRows() {
 			// create table based on current comment
-			TableLayout comtsTable = (TableLayout) cmmts_layout.findViewById(R.id.comments_table);
-
-			for (final Comment comment : comments) {
+			for (final CwComment comment : comments) {
 				if (!isCancelled()) {
 					maxpage = comment.getPagecount();
 					// get the table row by an inflater and set the needed
 					// information
-					final ViewGroup tableRow = (ViewGroup) inflater.inflate(R.layout.comments_row_layout, comtsTable,
+					final ViewGroup tableRow = (ViewGroup) inflater.inflate(R.layout.comments_row_layout, cmmtsTable,
 							false);
 
 					TextView usernameTxt = (TextView) tableRow.findViewById(R.id.cmts_username);
@@ -190,7 +210,7 @@ public class CommentsFragment extends Fragment {
 					content.setText(Html.fromHtml(comment.getStatement(), new TextViewHandler(context), null));
 
 					if (CwApplication.cwLoginManager().getAuthenticatedUser().getUid() == comment.getUid()) {
-						View delete_edit_bttn_layout = inflater.inflate(R.layout.delete_edit_bttn_layout, comtsTable,
+						View delete_edit_bttn_layout = inflater.inflate(R.layout.delete_edit_bttn_layout, cmmtsTable,
 								false);
 						ViewGroup parent_layout = (ViewGroup) tableRow.findViewById(R.id.cmts_bttn_delete_edit_layout);
 						parent_layout.addView(delete_edit_bttn_layout);
@@ -202,16 +222,16 @@ public class CommentsFragment extends Fragment {
 							@Override
 							public void onClick(View v) {
 								AlertDialog.Builder dialog = new AlertDialog.Builder(context)
-										.setMessage(getString(R.string.comment_delete_question))
+										.setMessage(context.getString(R.string.comment_delete_question))
 										.setCancelable(false)
-										.setPositiveButton(getString(R.string.yes),
+										.setPositiveButton(context.getString(R.string.yes),
 												new DialogInterface.OnClickListener() {
 													public void onClick(DialogInterface dialog, int which) {
 														rowToDelete = tableRow;
 														new DeleteCommentAsyncTask().execute(comment.getCid());
 													}
 												})
-										.setNegativeButton(getString(R.string.no),
+										.setNegativeButton(context.getString(R.string.no),
 												new DialogInterface.OnClickListener() {
 													public void onClick(DialogInterface dialog, int which) {
 														dialog.cancel();
@@ -318,13 +338,13 @@ public class CommentsFragment extends Fragment {
 			EditText commenttxt = (EditText) cmmts_layout.findViewById(R.id.comments_edttxt_input);
 			if (StringUtils.isBlank(commenttxt.getText().toString())) {
 				commenttxt.requestFocus();
-				commenttxt.setError(getString(R.string.no_text_entered));
+				commenttxt.setError(context.getString(R.string.no_text_entered));
 			} else if (StringUtils.isBlank(CwApplication.cwLoginManager().getAuthenticatedUser().getUsername())) {
 				commenttxt.requestFocus();
-				commenttxt.setError(getString(R.string.not_logged_in));
+				commenttxt.setError(context.getString(R.string.not_logged_in));
 			} else {
 				commenttxt.setError(null);
-				Toast.makeText(context, getResources().getString(R.string.comment_sending), Toast.LENGTH_SHORT).show();
+				Toast.makeText(context, context.getString(R.string.comment_sending), Toast.LENGTH_SHORT).show();
 				doWork = true;
 			}
 		}
@@ -341,7 +361,8 @@ public class CommentsFragment extends Fragment {
 		@Override
 		protected void onPostExecute(Void result) {
 			if (doWork) {
-				Toast.makeText(context, getResources().getString(R.string.comment_sent), Toast.LENGTH_SHORT).show();
+				Toast.makeText(context, context.getString(R.string.comment_sent), Toast.LENGTH_SHORT).show();
+				cmmts_layout.findViewById(R.id.comments_write_layout).setVisibility(View.GONE);
 			}
 		}
 	}
@@ -355,7 +376,7 @@ public class CommentsFragment extends Fragment {
 
 		@Override
 		protected void onPreExecute() {
-			Toast.makeText(context, getResources().getString(R.string.comment_deleting), Toast.LENGTH_SHORT).show();
+			Toast.makeText(context, context.getString(R.string.comment_deleting), Toast.LENGTH_SHORT).show();
 		}
 
 		@Override
@@ -367,10 +388,9 @@ public class CommentsFragment extends Fragment {
 		@Override
 		protected void onPostExecute(Void result) {
 			if (rowToDelete.getParent() instanceof TableLayout) {
-				TableLayout comtsTable = (TableLayout) rowToDelete.getParent();
-				comtsTable.removeView(rowToDelete);
+				cmmtsTable.removeView(rowToDelete);
 			}
-			Toast.makeText(context, getResources().getString(R.string.comment_deleted), Toast.LENGTH_SHORT).show();
+			Toast.makeText(context, context.getString(R.string.comment_deleted), Toast.LENGTH_SHORT).show();
 		}
 	}
 
@@ -383,7 +403,7 @@ public class CommentsFragment extends Fragment {
 
 		@Override
 		protected void onPreExecute() {
-			Toast.makeText(context, getResources().getString(R.string.comment_editing), Toast.LENGTH_SHORT).show();
+			Toast.makeText(context, context.getString(R.string.comment_editing), Toast.LENGTH_SHORT).show();
 		}
 
 		@Override
@@ -402,14 +422,62 @@ public class CommentsFragment extends Fragment {
 			TextView content = (TextView) row.findViewById(R.id.comment_content);
 			content.setText(Html.fromHtml(textToEdit.getText().toString(), new TextViewHandler(context), null));
 			parent_layout.removeViewAt(1);
-			Toast.makeText(context, getResources().getString(R.string.comment_edited), Toast.LENGTH_SHORT).show();
+			Toast.makeText(context, context.getString(R.string.comment_edited), Toast.LENGTH_SHORT).show();
+		}
+	}
+
+	private MenuInflater menuInflater;
+
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		if (subject instanceof CwNews && isSelected()) {
+			super.onCreateOptionsMenu(menu, inflater);
+			menu.clear();
+			inflater.inflate(R.menu.comments_menu, menu);
+		} else if (subject instanceof CwBlog && isSelected()) {
+			super.onCreateOptionsMenu(menu, inflater);
+			menu.clear();
+			inflater.inflate(R.menu.comments_blog_menu, menu);
+		}
+		menuInflater = inflater;
+	}
+
+	@Override
+	public void onPrepareOptionsMenu(Menu menu) {
+		if (menuInflater == null) {
+			menuInflater = getActivity().getMenuInflater();
+		}
+		if (subject instanceof CwNews && isSelected()) {
+			super.onPrepareOptionsMenu(menu);
+			menu.clear();
+			menuInflater.inflate(R.menu.comments_menu, menu);
+		} else if (subject instanceof CwBlog && isSelected()) {
+			super.onPrepareOptionsMenu(menu);
+			menu.clear();
+			menuInflater.inflate(R.menu.comments_blog_menu, menu);
 		}
 	}
 
 	@Override
-	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		super.onCreateOptionsMenu(menu, inflater);
-		menu.clear();
-		inflater.inflate(R.menu.comments_menu, menu);
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (isSelected()) {
+			super.onOptionsItemSelected(item);
+			// Find which menu item has been selected
+			switch (item.getItemId()) {
+			// Check for each known menu item
+			case (R.id.menu_cmts_write):
+				cmmts_layout.findViewById(R.id.comments_write_layout).setVisibility(View.VISIBLE);
+				((ScrollView) cmmts_layout.findViewById(R.id.comments_scroll_view)).fullScroll(ScrollView.FOCUS_UP);
+				break;
+			case (R.id.menu_cmts_refresh):
+				if (task.getStatus().equals(AsyncTask.Status.RUNNING)) {
+					task.cancel(true);
+				}
+				task = new BuildCommentsAsyncTask();
+				task.execute();
+				break;
+			}
+		}
+		return true;
 	}
 }

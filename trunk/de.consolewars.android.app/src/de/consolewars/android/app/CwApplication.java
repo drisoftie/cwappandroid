@@ -43,17 +43,20 @@ public class CwApplication extends RoboApplication {
 	public static RoboApplication instance;
 
 	@Inject
-	public CwManager cwManager;
+	private CwManager cwManager;
 	@Inject
-	public CwLoginManager cwLoginManager;
+	private CwEntityManager cwEntityManager;
 	@Inject
-	public ViewUtility viewUtility;
+	private CwLoginManager cwLoginManager;
+	@Inject
+	private ViewUtility viewUtility;
 	@Inject
 	private AppDataHandler appDataHandler;
 	@Inject
 	private Dao<CwUser, Integer> cwUserDao;
 
 	private static CwManager cwm;
+	private static CwEntityManager cwem;
 	private static CwLoginManager cwlm;
 	private static AppDataHandler adh;
 	private static Dao<CwUser, Integer> udao;
@@ -61,6 +64,10 @@ public class CwApplication extends RoboApplication {
 
 	public static CwManager cwManager() {
 		return cwm;
+	}
+
+	public static CwEntityManager cwEntityManager() {
+		return cwem;
 	}
 
 	public static CwLoginManager cwLoginManager() {
@@ -86,6 +93,7 @@ public class CwApplication extends RoboApplication {
 		getInjector().injectMembers(ormLiteSqliteOpenHelper);
 		instance = this;
 		cwm = cwManager;
+		cwem = cwEntityManager;
 		cwlm = cwLoginManager;
 		adh = appDataHandler;
 		udao = cwUserDao;
