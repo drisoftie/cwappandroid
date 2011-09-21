@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 
+import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -57,7 +57,7 @@ import de.consolewars.android.app.util.TextViewHandler;
 public class CommentsFragment extends CwAbstractFragment {
 
 	private LayoutInflater inflater;
-	private Context context;
+	private Activity context;
 
 	private List<CwComment> comments = new ArrayList<CwComment>();
 	private ViewGroup cmmts_layout;
@@ -70,6 +70,10 @@ public class CommentsFragment extends CwAbstractFragment {
 	private CwSubject subject;
 
 	private BuildCommentsAsyncTask task;
+
+	public CommentsFragment() {
+
+	}
 
 	public CommentsFragment(CwSubject subject, String title) {
 		super(title);
@@ -200,8 +204,11 @@ public class CommentsFragment extends CwAbstractFragment {
 					TextView usernameTxt = (TextView) tableRow.findViewById(R.id.cmts_username);
 					usernameTxt.setText(comment.getUsername());
 					usernameTxt.setSelected(true);
-					CwApplication.cwViewUtil().setUserIcon(((ImageView) tableRow.findViewById(R.id.cmts_usericon)),
-							comment.getUid(), 50);
+
+					CwApplication.cwImageLoader().displayImage(
+							context.getString(R.string.userpic_url, comment.getUid(), 50), context,
+							(ImageView) tableRow.findViewById(R.id.cmts_usericon), false, R.drawable.user_stub);
+
 					((TextView) tableRow.findViewById(R.id.cmts_date))
 							.setText(createDate(comment.getUnixtime() * 1000L));
 					((TextView) tableRow.findViewById(R.id.cmts_date)).setSelected(true);
@@ -271,15 +278,6 @@ public class CommentsFragment extends CwAbstractFragment {
 		}
 
 		private void initButtonsAndCheck() {
-			Button refresh_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_refresh);
-			refresh_bttn.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					cancel(true);
-					new BuildCommentsAsyncTask().execute();
-				}
-			});
-
 			Button next_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_next);
 			Button prev_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_prev);
 			next_bttn.setOnClickListener(new OnClickListener() {

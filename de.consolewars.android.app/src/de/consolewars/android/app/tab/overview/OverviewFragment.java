@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 
-import android.content.Context;
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -51,7 +51,7 @@ import de.consolewars.api.data.Message;
  */
 public class OverviewFragment extends CwAbstractFragment {
 
-	private Context context;
+	private Activity context;
 
 	CwEntityManager cwEntityManager = CwApplication.cwEntityManager();
 	CwManager cwManager = CwApplication.cwManager();
@@ -118,7 +118,8 @@ public class OverviewFragment extends CwAbstractFragment {
 	 *            user id is needed to get the appropriate picture
 	 */
 	private void loadPicture(ImageView view, int uid) {
-		viewUtility.setUserIcon(view, uid, 60);
+		CwApplication.cwImageLoader().displayImage(context.getString(R.string.userpic_url, uid, 60), context,
+				(ImageView) view, false, R.drawable.user_stub);
 	}
 
 	/**

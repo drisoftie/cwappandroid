@@ -19,6 +19,12 @@
 	<string
 		name="xpath_get_video">//param[@name=\'movie\']</string>
 	<string
+		name="xpath_get_pictures">//script[@type=\'text/javascript\'][text()]</string>
+	<string
+		name="xpath_pictures_filter">liste = new Array(</string>
+	<string
+		name="xpath_pictures_separator">bigliste = new Array(</string>			
+	<string
 		name="href">href</string>
 	<string
 		name="value">value</string>

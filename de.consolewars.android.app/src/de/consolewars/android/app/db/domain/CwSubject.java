@@ -225,12 +225,11 @@ public abstract class CwSubject extends CwEntity {
 			return false;
 		}
 		CwSubject other = (CwSubject) obj;
-		return new EqualsBuilder().append(getSubjectId(), other.getSubjectId())
-				.append(getUnixtime(), other.getUnixtime()).isEquals();
+		return new EqualsBuilder().append(getSubjectId(), other.getSubjectId()).isEquals();
 	}
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this).append(getSubjectId()).append(getUnixtime()).toString();
+		return new ToStringBuilder(this).append(getSubjectId()).toString();
 	}
 }

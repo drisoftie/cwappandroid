@@ -18,12 +18,22 @@
 		android:layout_height="wrap_content"
 		android:layout_toRightOf="@id/news_row_category_icon"
 		android:padding="@dimen/news_row_title_padding"
+		android:textSize="@dimen/news_row_title_size"
 		android:textColor="@color/news_table_text_title"/>
+	<TextView
+		android:id="@+id/news_row_descr"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_toRightOf="@id/news_row_category_icon"
+		android:layout_below="@id/news_row_title"
+		android:padding="@dimen/news_row_title_padding"
+		android:textSize="@dimen/news_row_descr_size"
+		android:textColor="@color/news_table_text_descr"/>
 	<TextView
 		android:id="@+id/news_row_date"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_below="@id/news_row_title"
+		android:layout_below="@id/news_row_descr"
 		android:layout_toRightOf="@id/news_row_category_icon"
 		android:paddingLeft="@dimen/news_row_date_padding_left"
 		android:textColor="@color/news_table_text_date"/>
@@ -31,7 +41,7 @@
 		android:id="@+id/news_row_cmmts_icon"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_below="@id/news_row_title"
+		android:layout_below="@id/news_row_descr"
 		android:layout_toRightOf="@id/news_row_date"
 		android:layout_margin="@dimen/news_row_cmmts_icon_margin"
 		android:src="@drawable/comments"/>
@@ -39,30 +49,15 @@
 		android:id="@+id/news_row_cmmts_amount"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_below="@id/news_row_title"
+		android:layout_below="@id/news_row_descr"
 		android:layout_toRightOf="@id/news_row_cmmts_icon"
 		android:layout_margin="@dimen/news_row_author_margin"/>
-	<ImageView
-		android:id="@+id/news_row_pics_icon"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_below="@id/news_row_title"
-		android:layout_toRightOf="@id/news_row_cmmts_amount"
-		android:layout_margin="@dimen/news_row_cmmts_icon_margin"
-		android:src="@drawable/pics"/>
-	<TextView
-		android:id="@+id/news_row_pics_amount"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_below="@id/news_row_title"
-		android:layout_toRightOf="@id/news_row_pics_icon"
-		android:layout_margin="@dimen/news_row_author_margin"/>	
 	<TextView
 		android:id="@+id/news_row_author"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_below="@id/news_row_title"
-		android:layout_toRightOf="@id/news_row_pics_amount"
+		android:layout_below="@id/news_row_descr"
+		android:layout_toRightOf="@id/news_row_cmmts_amount"
 		android:marqueeRepeatLimit="marquee_forever"
 		android:singleLine="true"
 		android:ellipsize="marquee"

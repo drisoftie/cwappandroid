@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import de.consolewars.android.app.CwApplication;
 import de.consolewars.android.app.R;
+import de.consolewars.android.app.pics.PicsFragment;
 import de.consolewars.android.app.tab.CwAbstractFragment;
 import de.consolewars.android.app.tab.CwAbstractFragmentActivity;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
@@ -43,6 +44,7 @@ public class SingleNewsFragmentActivity extends CwAbstractFragmentActivity {
 		setContentView(R.layout.fragment_pager_layout);
 
 		List<CwAbstractFragment> fragments = new ArrayList<CwAbstractFragment>();
+		fragments.add(new PicsFragment(getString(R.string.gallery)));
 		fragments.add(new SingleNewsFragment(getString(R.string.news)));
 		fragments.add(new CommentsFragment(CwApplication.cwEntityManager().getSelectedNews(),
 				getString(R.string.comments)));
@@ -58,8 +60,8 @@ public class SingleNewsFragmentActivity extends CwAbstractFragmentActivity {
 
 		// We set this on the indicator, NOT the pager
 		indicator.setOnPageChangeListener(this);
-
-		((CwAbstractFragment) adapter.getItem(0)).setSelected(true);
+		indicator.setCurrentItem(1);
+		((CwAbstractFragment) adapter.getItem(1)).setSelected(true);
 	}
 
 	@Override

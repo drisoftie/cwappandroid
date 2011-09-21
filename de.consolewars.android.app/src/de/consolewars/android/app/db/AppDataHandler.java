@@ -113,6 +113,17 @@ public class AppDataHandler {
 	}
 
 	/**
+	 * Return null if no news were found.
+	 * 
+	 * @param subjectId
+	 * @return
+	 * @throws SQLException
+	 */
+	public CwNews loadNewsById(CwNews news) throws SQLException {
+		return cwNewsDao.queryForId(news.getId());
+	}
+
+	/**
 	 * Gets amount of news starting from the given id. News corresponding to the given id will be included into the
 	 * result.
 	 * 

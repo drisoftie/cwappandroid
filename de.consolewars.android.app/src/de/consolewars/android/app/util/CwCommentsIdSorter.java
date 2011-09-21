@@ -1,10 +1,11 @@
-package de.consolewars.android.app.tab.overview;
+package de.consolewars.android.app.util;
 
-import roboguice.activity.RoboActivity;
-import android.os.Bundle;
+import java.util.Comparator;
+
+import de.consolewars.android.app.db.domain.CwComment;
 
 /*
- * Copyright [2010] [Alexander Dridiger]
+ * Copyright [2011] [Alexander Dridiger]
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,13 +19,14 @@ import android.os.Bundle;
  * limitations under the License.
  */
 /**
- * Central Activity to handle the ui for the overview.
+ * Compares two {@link CwComment} entities by their id.
  * 
  * @author Alexander Dridiger
  */
-public class ProfileActivity extends RoboActivity {
+public class CwCommentsIdSorter implements Comparator<CwComment> {
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	public int compare(CwComment sub1, CwComment sub2) {
+		return sub1.getCid() - sub2.getCid();
 	}
 }

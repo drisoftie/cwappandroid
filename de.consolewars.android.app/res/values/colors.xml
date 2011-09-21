@@ -26,6 +26,7 @@
 	<color name="overview_banner_bg_up">#00baff</color>
 	<color name="overview_text">#514a4a</color>
 	<color name="news_table_text_title">#514a4a</color>
+	<color name="news_table_text_descr">#716a6a</color>
 	<color name="news_table_text_date">#8b8b8b</color>
 	<color name="news_table_text_author">#009933</color>
 	<color name="singlenews_bg">#077fb8</color>

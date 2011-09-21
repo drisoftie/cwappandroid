@@ -62,10 +62,9 @@ public class TextViewHandler implements ImageGetter, TagHandler {
 		if (source.startsWith("/")) {
 			source = "http://www.consolewars.de" + source;
 		}
-		Bitmap bmp = null;
-		if (viewUtility.getCachedBitmap(source) != null) {
-			bmp = viewUtility.getCachedBitmap(source);
-		} else {
+		Bitmap bmp = CwApplication.cwImageLoader().getBitmap(source, false);
+
+		if (bmp == null) {
 			try {
 				URL newurl = new URL(source);
 				URLConnection con = newurl.openConnection();

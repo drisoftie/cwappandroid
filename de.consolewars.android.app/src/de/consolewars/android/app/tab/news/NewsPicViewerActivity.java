@@ -40,12 +40,12 @@ public class NewsPicViewerActivity extends RoboActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.news_pic_viewer);
+		setContentView(R.layout.pic_fragment_layout);
 
-		imgView = (ImageView) findViewById(R.id.ImageView01);
+		imgView = (ImageView) findViewById(R.id.pic_view);
 		imgView.setImageResource(imgIds[0]);
 
-		gallery = (Gallery) findViewById(R.id.examplegallery);
+		gallery = (Gallery) findViewById(R.id.gallery);
 		gallery.setAdapter(new AddImageAdapter(this));
 
 		gallery.setOnItemClickListener(new OnItemClickListener() {

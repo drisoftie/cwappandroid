@@ -274,7 +274,7 @@ public class CwComment extends CwEntity {
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder().append(cid).append(unixtime).toHashCode();
+		return new HashCodeBuilder().append(cid).toHashCode();
 	}
 
 	@Override
@@ -283,11 +283,11 @@ public class CwComment extends CwEntity {
 			return false;
 		}
 		CwComment other = (CwComment) obj;
-		return new EqualsBuilder().append(cid, other.getCid()).append(getUnixtime(), other.getUnixtime()).isEquals();
+		return new EqualsBuilder().append(cid, other.getCid()).isEquals();
 	}
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this).append(getCid()).append(getUnixtime()).toString();
+		return new ToStringBuilder(this).append(getCid()).toString();
 	}
 }
