@@ -6,7 +6,6 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.style.ForegroundColorSpan;
@@ -36,7 +35,7 @@ import de.consolewars.android.app.view.ScrollDetectorScrollView;
 
 public final class NewsFragment extends CwAbstractFragment {
 
-	private Context context;
+	private Activity context;
 
 	private OnSubjectSelectedListener listener;
 
@@ -59,9 +58,9 @@ public final class NewsFragment extends CwAbstractFragment {
 	private StyleSpannableStringBuilder styleStringBuilder;
 
 	public NewsFragment() {
-		
+
 	}
-	
+
 	public NewsFragment(Filter filter, String title) {
 		super(title);
 		setHasOptionsMenu(true);
@@ -191,18 +190,17 @@ public final class NewsFragment extends CwAbstractFragment {
 								listener.onSubjectSelected(newsToAdd);
 							}
 						});
-						CwApplication.cwViewUtil().setCategoryIcon(
-								((ImageView) tableRow.findViewById(R.id.news_row_category_icon)),
-								newsToAdd.getCategoryShort());
+						CwApplication.cwImageLoader().displayImage(
+								context.getString(R.string.catpic_url, newsToAdd.getCategoryShort()), context,
+								(ImageView) tableRow.findViewById(R.id.news_row_category_icon), false,
+								R.drawable.cat_stub);
 						((TextView) tableRow.findViewById(R.id.news_row_title)).setText(createTitle(newsToAdd
 								.getTitle()));
+						((TextView) tableRow.findViewById(R.id.news_row_descr)).setText(newsToAdd.getDescription());
 						((TextView) tableRow.findViewById(R.id.news_row_date)).setText(createDate(
 								newsToAdd.getUnixtime() * 1000L, "'um' HH:mm'Uhr'"));
 						TextView cmtAmount = (TextView) tableRow.findViewById(R.id.news_row_cmmts_amount);
 						cmtAmount.setText(createAmount(newsToAdd.getCommentsAmount()));
-						TextView picAmount = (TextView) tableRow.findViewById(R.id.news_row_pics_amount);
-						picAmount.setText(createAmount((newsToAdd.getPictures() != null) ? newsToAdd.getPictures()
-								.size() : 0));
 						TextView author = (TextView) tableRow.findViewById(R.id.news_row_author);
 						author.setText(createAuthor(newsToAdd.getAuthor()));
 						author.setSelected(true);

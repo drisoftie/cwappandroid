@@ -8,12 +8,16 @@ import com.j256.ormlite.table.DatabaseTable;
 @DatabaseTable(tableName = "Picture")
 public class CwPicture extends CwEntity {
 
+	@DatabaseField(columnName = "isGallery")
+	private boolean isGallery;
 	@DatabaseField(columnName = "picId")
 	private String picId;
 	@DatabaseField(columnName = "saved")
 	private boolean saved;
 	@DatabaseField(columnName = "storageUrl")
 	private String storageUrl;
+	@DatabaseField(columnName = "thumbUrl")
+	private String thumbUrl;
 	@DatabaseField(columnName = "url", canBeNull = false)
 	private String url;
 
@@ -26,11 +30,28 @@ public class CwPicture extends CwEntity {
 	public CwPicture() {
 	}
 
-	public CwPicture(String picId, boolean saved, String storageUrl, String url) {
+	public CwPicture(boolean isGallery, String picId, boolean saved, String storageUrl, String thumbUrl, String url) {
+		this.setGallery(isGallery);
 		this.picId = picId;
 		this.saved = saved;
-		this.setStorageUrl(storageUrl);
+		this.storageUrl = storageUrl;
+		this.thumbUrl = thumbUrl;
 		this.url = url;
+	}
+
+	/**
+	 * @return the isGallery
+	 */
+	public boolean isGallery() {
+		return isGallery;
+	}
+
+	/**
+	 * @param isGallery
+	 *            the isGallery to set
+	 */
+	public void setGallery(boolean isGallery) {
+		this.isGallery = isGallery;
 	}
 
 	/**
@@ -76,6 +97,21 @@ public class CwPicture extends CwEntity {
 	 */
 	public void setStorageUrl(String storageUrl) {
 		this.storageUrl = storageUrl;
+	}
+
+	/**
+	 * @return the thumbUrl
+	 */
+	public String getThumbUrl() {
+		return thumbUrl;
+	}
+
+	/**
+	 * @param thumbUrl
+	 *            the thumbUrl to set
+	 */
+	public void setThumbUrl(String thumbUrl) {
+		this.thumbUrl = thumbUrl;
 	}
 
 	/**

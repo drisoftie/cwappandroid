@@ -2,8 +2,8 @@ package de.consolewars.android.app.tab.blogs;
 
 import java.util.IllegalFormatException;
 
+import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -46,7 +46,7 @@ import de.consolewars.android.app.util.TextViewHandler;
  */
 public class SingleBlogFragment extends CwAbstractFragment {
 
-	private Context context;
+	private Activity context;
 
 	private LayoutInflater inflater;
 
@@ -224,7 +224,8 @@ public class SingleBlogFragment extends CwAbstractFragment {
 
 		private void createHeader(CwBlog blog) {
 			ImageView icon = (ImageView) singleblog_fragment_layout.findViewById(R.id.singleblog_header_usericon);
-			CwApplication.cwViewUtil().setUserIcon(icon, blog.getUid(), 60);
+			CwApplication.cwImageLoader().displayImage(context.getString(R.string.userpic_url, blog.getUid(), 60),
+					context, (ImageView) icon, false, R.drawable.user_stub);
 
 			TextView text = (TextView) singleblog_fragment_layout.findViewById(R.id.singleblog_header_title);
 			text.setText(context.getString(R.string.singleblogs_author, blog.getAuthor().toUpperCase()));

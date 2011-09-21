@@ -23,6 +23,8 @@
 	<dimen name="overview_banner_icon_margin">2dp</dimen>
 	<dimen name="overview_banner_descr_margin">2dp</dimen>
 	<dimen name="news_row_day_separator_margin">4dp</dimen>
+	<dimen name="news_row_title_size">15dp</dimen>
+	<dimen name="news_row_descr_size">10dp</dimen>
 	<dimen name="news_row_title_padding">2dp</dimen>
 	<dimen name="news_row_icon_padding_top">2dp</dimen>
 	<dimen name="news_row_icon_padding_left">1dp</dimen>

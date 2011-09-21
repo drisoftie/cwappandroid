@@ -14,6 +14,7 @@ import com.j256.ormlite.dao.Dao;
 import de.consolewars.android.app.db.AppDataHandler;
 import de.consolewars.android.app.db.CwSqliteOpenHelper;
 import de.consolewars.android.app.db.domain.CwUser;
+import de.consolewars.android.app.pics.ImageLoader;
 import de.consolewars.android.app.util.ViewUtility;
 
 /*
@@ -61,6 +62,7 @@ public class CwApplication extends RoboApplication {
 	private static AppDataHandler adh;
 	private static Dao<CwUser, Integer> udao;
 	private static ViewUtility vu;
+	private static ImageLoader il;
 
 	public static CwManager cwManager() {
 		return cwm;
@@ -86,6 +88,10 @@ public class CwApplication extends RoboApplication {
 		return vu;
 	}
 
+	public static ImageLoader cwImageLoader() {
+		return il;
+	}
+
 	@Override
 	public void onCreate() {
 		OpenHelperManager.setOpenHelperClass(CwSqliteOpenHelper.class);
@@ -98,11 +104,13 @@ public class CwApplication extends RoboApplication {
 		adh = appDataHandler;
 		udao = cwUserDao;
 		vu = viewUtility;
+		il = new ImageLoader(this);
 	}
 
 	@Override
 	public void onTerminate() {
 		OpenHelperManager.releaseHelper();
+		il.stopThread();
 	}
 
 	@Override

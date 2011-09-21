@@ -127,7 +127,8 @@ public class CwNews extends CwSubject {
 	}
 
 	/**
-	 * @param comments the comments to set
+	 * @param comments
+	 *            the comments to set
 	 */
 	public void setComments(ForeignCollection<CwPicture> comments) {
 		this.comments = comments;
@@ -150,6 +151,6 @@ public class CwNews extends CwSubject {
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this).append(getSubjectId()).append(getUnixtime()).toString();
+		return new ToStringBuilder(this).append(getSubjectId()).toString();
 	}
 }

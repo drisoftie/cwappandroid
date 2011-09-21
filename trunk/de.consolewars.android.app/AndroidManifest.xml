@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 	android:versionCode="2" android:versionName="1.5-SNAPSHOT"
 	package="de.consolewars.android.app">
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
 	<application android:debuggable="true" android:icon="@drawable/cw_logo"
 		android:label="@string/app_name" android:name="de.consolewars.android.app.CwApplication"
 		android:persistent="false" android:theme="@style/CheckTheme">
@@ -40,7 +41,7 @@
 		<activity android:name=".tab.board.BoardActivityGroup" android:screenOrientation="portrait" android:configChanges="keyboardHidden|orientation"></activity>
 		<activity android:name=".tab.board.BoardActivity" android:screenOrientation="portrait" android:configChanges="keyboardHidden|orientation"></activity>
 		<activity android:name=".tab.blogs.BlogsWriterActivity" android:screenOrientation="portrait" android:configChanges="keyboardHidden|orientation"></activity>
-		<activity android:name=".tab.overview.ProfileActivity" android:screenOrientation="portrait" android:configChanges="keyboardHidden|orientation"></activity>
+		<activity android:name=".tab.overview.ProfileFragment" android:screenOrientation="portrait" android:configChanges="keyboardHidden|orientation"></activity>
 		<activity android:name=".tab.news.NewsFragmentActivity" android:screenOrientation="portrait" android:configChanges="keyboardHidden|orientation"></activity>
 		<activity android:name=".tab.blogs.BlogsFragmentActivity" android:screenOrientation="portrait" android:configChanges="keyboardHidden|orientation"></activity>
 		<activity android:name=".tab.news.SingleNewsFragmentActivity" android:screenOrientation="portrait" android:configChanges="keyboardHidden|orientation"></activity>

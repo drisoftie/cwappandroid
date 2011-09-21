@@ -1,5 +1,6 @@
 package de.consolewars.android.app;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,6 +10,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
+import org.htmlcleaner.XPatherException;
+
+import android.content.Context;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -16,9 +22,12 @@ import de.consolewars.android.app.db.AppDataHandler;
 import de.consolewars.android.app.db.domain.CwBlog;
 import de.consolewars.android.app.db.domain.CwComment;
 import de.consolewars.android.app.db.domain.CwNews;
+import de.consolewars.android.app.db.domain.CwPicture;
 import de.consolewars.android.app.db.domain.CwUser;
 import de.consolewars.android.app.util.CwBlogsIdSorter;
+import de.consolewars.android.app.util.CwCommentsIdSorter;
 import de.consolewars.android.app.util.CwNewsIdSorter;
+import de.consolewars.android.app.util.MediaSnapper;
 import de.consolewars.api.data.Message;
 
 /*
@@ -45,6 +54,8 @@ import de.consolewars.api.data.Message;
 public class CwEntityManager {
 
 	@Inject
+	private Context context;
+	@Inject
 	private CwManager cwManager;
 	@Inject
 	private CwLoginManager cwLoginManager;
@@ -63,6 +74,7 @@ public class CwEntityManager {
 
 	private CwNewsIdSorter cwNewsIdSorter = new CwNewsIdSorter();
 	private CwBlogsIdSorter cwBlogsIdSorter = new CwBlogsIdSorter();
+	private CwCommentsIdSorter cwCommentsIdSorter = new CwCommentsIdSorter();
 
 	/**
 	 * Determines how retaining of entities is handled.
@@ -186,6 +198,19 @@ public class CwEntityManager {
 	}
 
 	/**
+	 * @return the blogs
+	 */
+	public List<CwBlog> setCachedBlogs(List<CwBlog> setList, Filter filter) {
+		if (filter.equals(Filter.BLOGS_USER)) {
+			userBlogs = setList;
+			return userBlogs;
+		} else {
+			blogs = setList;
+			return blogs;
+		}
+	}
+
+	/**
 	 * @return the news
 	 */
 	public List<CwNews> getCachedNews() {
@@ -216,17 +241,22 @@ public class CwEntityManager {
 				getCachedBlogs(filter).size() - 1).getSubjectId();
 		if (oldestBlog > -1) {
 			// first the download
-			mergeBlogsLists(getCachedBlogs(filter), getBlogsByIDAndCache(oldestBlog, true, amount));
+			setCachedBlogs(mergeBlogsLists(getCachedBlogs(filter), getBlogsByIDAndCache(oldestBlog, true, amount)),
+					filter);
 			// then the database
 			if (appDataHandler.hasBlogsData()) {
 				try {
-					mergeBlogsLists(getCachedBlogs(filter), appDataHandler.loadSavedBlogs(oldestBlog, true, 10));
+					setCachedBlogs(
+							mergeBlogsLists(getCachedBlogs(filter), appDataHandler.loadSavedBlogs(oldestBlog, true, 10)),
+							filter);
 				} catch (SQLException e) {
 					e.printStackTrace();
 				}
 			}
 		} else {
-			mergeBlogsLists(getCachedBlogs(filter), getBlogsByIDAndCache(calculateNewestBlogId(), true, amount));
+			setCachedBlogs(
+					mergeBlogsLists(getCachedBlogs(filter), getBlogsByIDAndCache(calculateNewestBlogId(), true, amount)),
+					filter);
 			List<CwBlog> loadedBlogs = null;
 			try {
 				loadedBlogs = appDataHandler.loadSavedBlogs(amount);
@@ -234,7 +264,7 @@ public class CwEntityManager {
 				e.printStackTrace();
 			}
 			if (loadedBlogs != null) {
-				mergeBlogsLists(getCachedBlogs(filter), loadedBlogs);
+				setCachedBlogs(mergeBlogsLists(getCachedBlogs(filter), loadedBlogs), filter);
 			}
 		}
 		Collections.sort(getCachedBlogs(filter), Collections.reverseOrder(cwBlogsIdSorter));
@@ -303,6 +333,7 @@ public class CwEntityManager {
 				news = mergeNewsLists(Arrays.asList(news.toArray(new CwNews[0])), loadedNews);
 			}
 		}
+		news = mergeNewsLists(Arrays.asList(news.toArray(new CwNews[0])), news);
 		Collections.sort(news, Collections.reverseOrder(cwNewsIdSorter));
 		return news;
 	}
@@ -442,6 +473,20 @@ public class CwEntityManager {
 		return savecounter;
 	}
 
+	public CwNews saveLoadNews(CwNews news) {
+		try {
+			appDataHandler.createOrUpdateNews(news);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		try {
+			return appDataHandler.loadSingleSavedNews(news.getSubjectId());
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return news;
+	}
+
 	/**
 	 * @param objectId
 	 * @param area
@@ -452,7 +497,9 @@ public class CwEntityManager {
 	public List<CwComment> getComments(int objectId, int area, int count, int viewPage) {
 		List<CwComment> list1 = cwManager.getComments(objectId, area, count, viewPage);
 		List<CwComment> list2 = Arrays.asList(list1.toArray(new CwComment[0]));
-		return mergeCommentsLists(list1, list2);
+		list1 = mergeCommentsLists(list1, list2);
+		Collections.sort(list1, cwCommentsIdSorter);
+		return list1;
 	}
 
 	public void discardAllNews() {
@@ -462,6 +509,34 @@ public class CwEntityManager {
 	public void discardAllBlogs() {
 		blogs = new ArrayList<CwBlog>();
 		userBlogs = new ArrayList<CwBlog>();
+	}
+
+	public List<CwPicture> getPictures(String url) {
+		List<CwPicture> pictures = new ArrayList<CwPicture>();
+		String pictureUrls = "";
+		try {
+			pictureUrls = MediaSnapper.snapPicsUrl(url, context.getString(R.string.xpath_get_pictures),
+					context.getString(R.string.xpath_pictures_filter));
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (XPatherException e) {
+			e.printStackTrace();
+		}
+		if (!pictureUrls.equals("")) {
+			// first get the string between both seperators, trim it, remove all "'"
+			String stringUrls = StringUtils.remove(StringUtils.trim(StringUtils.substringBefore(
+					StringUtils.substringAfter(pictureUrls, context.getString(R.string.xpath_pictures_filter)), ");")),
+					"'");
+			String[] urls = StringUtils.split(stringUrls, ",");
+			for (String urlpart : urls) {
+				CwPicture picture = new CwPicture();
+				picture.setThumbUrl(context.getString(R.string.cw_url_append, urlpart));
+				picture.setUrl(context.getString(R.string.cw_url_append,
+						StringUtils.substringBefore(urlpart, "&database")));
+				pictures.add(picture);
+			}
+		}
+		return pictures;
 	}
 
 	/**

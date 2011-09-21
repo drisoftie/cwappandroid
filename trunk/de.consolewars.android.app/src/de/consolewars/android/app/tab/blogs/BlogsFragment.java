@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.style.ForegroundColorSpan;
@@ -54,7 +53,7 @@ import de.consolewars.android.app.view.ScrollDetectorScrollView;
  */
 public final class BlogsFragment extends CwAbstractFragment {
 
-	private Context context;
+	private Activity context;
 
 	private OnSubjectSelectedListener listener;
 
@@ -78,9 +77,9 @@ public final class BlogsFragment extends CwAbstractFragment {
 	private StyleSpannableStringBuilder styleStringBuilder;
 
 	public BlogsFragment() {
-		
+
 	}
-	
+
 	public BlogsFragment(Filter filter, String titel) {
 		super(titel);
 		setHasOptionsMenu(true);
@@ -219,8 +218,10 @@ public final class BlogsFragment extends CwAbstractFragment {
 						});
 						// set each table row with the given information from the
 						// returned blogs
-						CwApplication.cwViewUtil().setUserIcon(
-								((ImageView) tableRow.findViewById(R.id.blogs_row_user_icon)), blog.getUid(), 40);
+						CwApplication.cwImageLoader().displayImage(
+								context.getString(R.string.userpic_url, blog.getUid(), 40), context,
+								(ImageView) tableRow.findViewById(R.id.blogs_row_user_icon), false,
+								R.drawable.user_stub);
 						((TextView) tableRow.findViewById(R.id.blogs_row_title)).setText(createTitle(blog.getTitle()));
 						((TextView) tableRow.findViewById(R.id.blogs_row_date)).setText(createDate(
 								blog.getUnixtime() * 1000L, "'um' HH:mm'Uhr'"));

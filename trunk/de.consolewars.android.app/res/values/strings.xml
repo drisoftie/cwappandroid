@@ -68,6 +68,10 @@
 	<string name="overview_banner_blogs_title">Blogs</string>
 	<string name="overview_banner_msgs_title">Nachrichten</string>
 
+
+	<!-- subjects -->
+	<string name="gallery">Galerie</string>
+
 	<!-- news -->
 	<string name="news">News</string>
 

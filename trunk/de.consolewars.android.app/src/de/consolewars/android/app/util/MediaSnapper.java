@@ -8,6 +8,7 @@ import java.net.URL;
 import java.net.URLConnection;
 
 import org.htmlcleaner.CleanerProperties;
+import org.htmlcleaner.ContentNode;
 import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.TagNode;
 import org.htmlcleaner.XPatherException;
@@ -117,5 +118,46 @@ public class MediaSnapper {
 		// Log.i("**********RESPONSEURLCONN!!!!!!!!********", getData);
 
 		return snap;
+	}
+
+	public static String snapPicsUrl(String stringURL, String xPath, String filter) throws IOException,
+			XPatherException {
+		// create an instance of HtmlCleaner
+		HtmlCleaner cleaner = new HtmlCleaner();
+
+		// take default cleaner properties
+		CleanerProperties props = cleaner.getProperties();
+
+		props.setAllowHtmlInsideAttributes(true);
+		props.setAllowMultiWordAttributes(true);
+		props.setRecognizeUnicodeChars(true);
+		props.setOmitComments(true);
+
+		URL url = new URL(stringURL);
+
+		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+		connection.setDoOutput(true);
+
+		connection.connect();
+
+		// use the cleaner to "clean" the HTML and return it as a TagNode object
+		TagNode root = cleaner.clean(new InputStreamReader(connection.getInputStream()));
+
+		Object[] foundNodes = root.evaluateXPath(xPath);
+
+		if (foundNodes != null) {
+			for (Object object : foundNodes) {
+				TagNode foundNode = (TagNode) object;
+				for (Object child : foundNode.getChildren()) {
+					if (child instanceof ContentNode) {
+						ContentNode content = (ContentNode) child;
+						if (content.getContent().toString().contains(filter)) {
+							return content.getContent().toString();
+						}
+					}
+				}
+			}
+		}
+		return "";
 	}
 }

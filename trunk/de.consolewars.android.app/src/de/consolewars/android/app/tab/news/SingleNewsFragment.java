@@ -2,7 +2,7 @@ package de.consolewars.android.app.tab.news;
 
 import java.util.IllegalFormatException;
 
-import android.content.Context;
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -46,7 +46,7 @@ import de.consolewars.android.app.util.TextViewHandler;
  */
 public class SingleNewsFragment extends CwAbstractFragment {
 
-	private Context context;
+	private Activity context;
 
 	private LayoutInflater inflater;
 
@@ -216,7 +216,8 @@ public class SingleNewsFragment extends CwAbstractFragment {
 
 		private void createHeader(View parent, CwNews news) {
 			ImageView icon = (ImageView) parent.findViewById(R.id.header_icon);
-			CwApplication.cwViewUtil().setCategoryIcon(icon, news.getCategoryShort());
+			CwApplication.cwImageLoader().displayImage(context.getString(R.string.catpic_url, news.getCategoryShort()),
+					context, (ImageView) icon, false, R.drawable.cat_stub);
 
 			ImageView usericon = (ImageView) parent.findViewById(R.id.header_descr_usericon);
 			loadPicture(usericon, news);
@@ -249,7 +250,9 @@ public class SingleNewsFragment extends CwAbstractFragment {
 			if (!picURL.matches("")) {
 				userID = Integer.valueOf(picURL.subSequence(context.getString(R.string.prefix_userpic).length(),
 						picURL.length()).toString());
-				CwApplication.cwViewUtil().setUserIcon(view, userID, 50);
+
+				CwApplication.cwImageLoader().displayImage(context.getString(R.string.userpic_url, userID, 50),
+						context, (ImageView) view, false, R.drawable.user_stub);
 			}
 		}
 
