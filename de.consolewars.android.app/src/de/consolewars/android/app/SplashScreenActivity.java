@@ -4,7 +4,6 @@ import roboguice.activity.RoboActivity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.Window;
 import android.widget.ProgressBar;
 
 import com.google.inject.Inject;
@@ -24,10 +23,7 @@ public class SplashScreenActivity extends RoboActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		setContentView(R.layout.splash_layout);
-		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.titlebar_layout);
-
 		// BugSenseHandler.setup(this, getString(R.string.bug_key));
 
 		new SplashAsyncTask().execute();

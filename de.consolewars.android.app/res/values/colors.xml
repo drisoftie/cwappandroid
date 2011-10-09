@@ -9,8 +9,8 @@
 	<color name="splash_bg_down">#4db0e7</color>
 	<color name="text_tab_selected">#eff3f7</color>
 	<color name="text_tab_unselected">#a8b8c2</color>
-	<color name="table_cell_unselected_up">#e1e1e1</color>
-	<color name="table_cell_unselected_down">#efefef</color>
+	<color name="table_cell_unselected_up">#FFB0B0B0</color>
+	<color name="table_cell_unselected_down">#FFFFFFFF</color>
 	<color name="progressbar_text">#FFeeeeee</color>
 	<color name="table_cell_selected_up">#ffffffff</color>
 	<color name="table_cell_selected_center">#ff68b5da</color>
@@ -26,6 +26,7 @@
 	<color name="overview_banner_bg_up">#00baff</color>
 	<color name="overview_text">#514a4a</color>
 	<color name="news_table_text_title">#514a4a</color>
+	<color name="news_table_text_category">#716a6a</color>
 	<color name="news_table_text_descr">#716a6a</color>
 	<color name="news_table_text_date">#8b8b8b</color>
 	<color name="news_table_text_author">#009933</color>
@@ -46,9 +47,23 @@
 	<color name="header_descr_title">#198dde</color>
 	<color name="header_descr_info">#9e9999</color>
 	<color name="header_descr">#666666</color>
-	<color name="comments_cell_bg">#eff3ef</color>
+	<color name="comments_cell_bg_up">#eff3ef</color>
+	<color name="comments_cell_bg_down">#cfd3cf</color>
+	<color name="comments_cell_inner_bg_up">#ffffffff</color>
+	<color name="comments_cell_inner_bg_center">#cfd3cf</color>
+	<color name="comments_cell_inner_bg_down">#ff68b5da</color>
+	<color name="comments_cell_inner_user_bg_up">#ffffffff</color>
+	<color name="comments_cell_inner_user_bg_center">#ff68b5da</color>
+	<color name="comments_cell_inner_user_bg_down">#35e01e</color>
 	<color name="comments_bg_up">#bed4e6</color>
 	<color name="comments_bg_down">#def4f6</color>
 	<color name="comments_author_bg_up">#def4f6</color>
 	<color name="comments_author_bg_down">#cee4f6</color>
+	
+	<color name="actionbar_separator">#8B1A1A</color>
+    <color name="actionbar_title">#FFFFFF</color>
+    <color name="actionbar_background_start">#d6edfa</color>
+    <color name="actionbar_background_end">#1687bf</color>
+    <color name="actionbar_background_item_pressed_start">#FF7F00</color>
+    <color name="actionbar_background_item_pressed_end">#EE7600</color>
 </resources>

@@ -10,15 +10,14 @@
 		android:layout_height="wrap_content"
 		android:layout_alignParentTop="true"
 		android:layout_alignParentLeft="true"
-		android:paddingTop="@dimen/news_row_icon_padding_top"
-		android:paddingLeft="@dimen/news_row_icon_padding_left" />
+		android:layout_margin="@dimen/news_row_icon_margin"/>
 	<TextView
 		android:id="@+id/msgs_row_title"
 		android:layout_toRightOf="@id/msgs_row_read_icon"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:padding="@dimen/news_row_title_padding"
-		android:textColor="@color/news_table_text_title" />
+		android:textColor="@color/news_table_text_title"/>
 	<TextView
 		android:id="@+id/msgs_row_date"
 		android:layout_below="@id/msgs_row_title"
@@ -26,7 +25,7 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:paddingLeft="@dimen/news_row_date_padding_left"
-		android:textColor="@color/news_table_text_date" />
+		android:textColor="@color/news_table_text_date"/>
 	<TextView
 		android:id="@+id/msgs_row_author"
 		android:layout_below="@id/msgs_row_title"
@@ -34,5 +33,5 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:paddingLeft="@dimen/news_row_author_margin"
-		android:textColor="@color/news_table_text_date" />
+		android:textColor="@color/news_table_text_date"/>
 </RelativeLayout>

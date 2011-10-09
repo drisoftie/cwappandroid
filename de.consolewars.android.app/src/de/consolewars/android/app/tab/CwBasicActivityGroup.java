@@ -73,8 +73,8 @@ public abstract class CwBasicActivityGroup extends RoboActivityGroup implements 
 								if (appDataHandler.loadCurrentUser()) {
 									CwUser cwUser = appDataHandler.getCwUser();
 									cwUser.setDate(new Date());
-									cwUser.setLastBlogId(cwEntityManager.getNewestBlog());
-									cwUser.setLastNewsId(cwEntityManager.getNewestNews());
+									cwUser.setLastBlogId(cwEntityManager.getNewestBlogId());
+									cwUser.setLastNewsId(cwEntityManager.getNewestNewsId());
 									try {
 										cwUserDao.update(cwUser);
 									} catch (SQLException e) {

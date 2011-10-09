@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+	<item>
+		<shape>
+			<padding
+				android:left="1dp"
+				android:top="1dp"
+				android:right="1dp"
+				android:bottom="1dp"/>
+			<solid android:color="#FF000000"/>
+		</shape>
+	</item>
+	<item>
+		<shape>
+			<padding
+				android:left="3dp"
+				android:top="3dp"
+				android:right="3dp"
+				android:bottom="3dp"/>
+			<gradient
+				android:startColor="@color/comments_cell_bg_down"
+				android:endColor="@color/comments_cell_bg_up"/>
+		</shape>
+	</item>
+</layer-list>

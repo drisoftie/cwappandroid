@@ -9,8 +9,8 @@
 		android:id="@+id/blogs_row_user_icon"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_alignParentTop="true"
 		android:layout_alignParentLeft="true"
+		android:layout_centerVertical="true"
 		android:paddingTop="@dimen/blogs_row_icon_padding_top"
 		android:paddingLeft="@dimen/blogs_row_icon_padding_left"/>
 	<TextView

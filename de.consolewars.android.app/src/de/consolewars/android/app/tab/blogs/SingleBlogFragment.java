@@ -7,6 +7,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -22,8 +23,11 @@ import de.consolewars.android.app.CwApplication;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.db.domain.CwBlog;
 import de.consolewars.android.app.tab.CwAbstractFragment;
+import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
 import de.consolewars.android.app.util.DateUtility;
 import de.consolewars.android.app.util.TextViewHandler;
+import de.consolewars.android.app.view.ActionBar;
+import de.consolewars.android.app.view.ActionBar.Action;
 
 /*
  * Copyright [2010] [Alexander Dridiger]
@@ -59,8 +63,10 @@ public class SingleBlogFragment extends CwAbstractFragment {
 
 	private BuildSingleBlogAsyncTask task;
 
+	/**
+	 * Mandatory constructor for creating a {@link Fragment}
+	 */
 	public SingleBlogFragment() {
-
 	}
 
 	public SingleBlogFragment(String title) {
@@ -87,15 +93,22 @@ public class SingleBlogFragment extends CwAbstractFragment {
 	public void onResume() {
 		super.onResume();
 		blog = CwApplication.cwEntityManager().getSelectedBlog();
+		refreshView();
+		if (isSelected()) {
+			initActionBar();
+		}
+	}
+	
+	private void refreshView(){
 		singleblog_layout = (ViewGroup) getView();
 		content = (ViewGroup) singleblog_layout.findViewById(R.id.content);
 		content.removeAllViews();
 		singleblog_fragment_layout = (ViewGroup) inflater.inflate(R.layout.singleblog_fragment_layout, null);
 		progress_layout.setVisibility(View.GONE);
 
-		if (task.getStatus().equals(AsyncTask.Status.PENDING)) {
+		if (task != null && task.getStatus().equals(AsyncTask.Status.PENDING)) {
 			task.execute();
-		} else if (task.getStatus().equals(AsyncTask.Status.FINISHED)) {
+		} else if (task == null || task.getStatus().equals(AsyncTask.Status.FINISHED)) {
 			task = new BuildSingleBlogAsyncTask();
 			task.execute();
 		} else if (task.getStatus().equals(AsyncTask.Status.RUNNING)) {
@@ -104,12 +117,48 @@ public class SingleBlogFragment extends CwAbstractFragment {
 	}
 
 	@Override
-	public void backPressed() {
-		if (task.getStatus().equals(AsyncTask.Status.RUNNING)) {
+	public void onDetach() {
+		super.onDetach();
+		if (task != null) {
 			task.cancel(true);
+			task = null;
 		}
 	}
 
+	
+	private void initActionBar() {
+		if (context != null) {
+			if (context.getParent() instanceof CwNavigationMainTabActivity) {
+				ActionBar actionBar = getActionBar();
+				actionBar.removeAllActions();
+				setHomeAction();
+				actionBar.setTitle(context.getString(R.string.singleblog_area));
+				actionBar.addAction(new Action() {
+					@Override
+					public void performAction(View view) {
+					}
+
+					@Override
+					public int getDrawable() {
+						return R.drawable.download_bttn;
+					}
+				});
+				actionBar.addAction(new Action() {
+					@Override
+					public void performAction(View view) {
+						refreshView();
+					}
+
+					@Override
+					public int getDrawable() {
+						return R.drawable.refresh_bttn;
+					}
+				});
+			}
+		}
+	}
+	
+	
 	/**
 	 * Asynchronous task to receive a single blog and build up the ui.
 	 * 
@@ -292,4 +341,12 @@ public class SingleBlogFragment extends CwAbstractFragment {
 			menuInflater.inflate(R.menu.singleblog_menu, menu);
 		}
 	}
+	
+	@Override
+	public void backPressed() {
+		if (task != null && task.getStatus().equals(AsyncTask.Status.RUNNING)) {
+			task.cancel(true);
+		}
+	}
+
 }

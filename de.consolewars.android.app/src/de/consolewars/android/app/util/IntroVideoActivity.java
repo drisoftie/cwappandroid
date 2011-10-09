@@ -60,12 +60,12 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.MediaController;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.VideoView;
-import android.widget.LinearLayout.LayoutParams;
 import de.consolewars.android.app.R;
 
 /**

@@ -12,14 +12,14 @@ import de.consolewars.android.app.CwApplication;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.db.domain.CwPicture;
 
-public class LazyAdapter extends BaseAdapter {
+public class LoaderAdapter extends BaseAdapter {
 
 	private Activity activity;
 	private List<CwPicture> pictures;
 
 	int galItemBg;
 
-	public LazyAdapter(Activity a, List<CwPicture> pictures) {
+	public LoaderAdapter(Activity a, List<CwPicture> pictures) {
 		activity = a;
 		this.pictures = pictures;
 
@@ -29,7 +29,7 @@ public class LazyAdapter extends BaseAdapter {
 	}
 
 	public int getCount() {
-		return pictures.size();
+		return pictures != null ? pictures.size() : 0;
 	}
 
 	public Object getItem(int position) {

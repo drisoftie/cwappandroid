@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,9 +22,12 @@ import de.consolewars.android.app.CwApplication;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.db.domain.CwNews;
 import de.consolewars.android.app.tab.CwAbstractFragment;
+import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
 import de.consolewars.android.app.util.DateUtility;
 import de.consolewars.android.app.util.MediaSnapper;
 import de.consolewars.android.app.util.TextViewHandler;
+import de.consolewars.android.app.view.ActionBar;
+import de.consolewars.android.app.view.ActionBar.Action;
 
 /*
  * Copyright [2010] [Alexander Dridiger]
@@ -40,7 +44,7 @@ import de.consolewars.android.app.util.TextViewHandler;
  * limitations under the License.
  */
 /**
- * Activity showing and handling a single news.
+ * A {@link CwAbstractFragment} showing and handling a single news.
  * 
  * @author Alexander Dridiger
  */
@@ -61,8 +65,10 @@ public class SingleNewsFragment extends CwAbstractFragment {
 
 	private String vidURL = "";
 
+	/**
+	 * Mandatory constructor for creating a {@link Fragment}
+	 */
 	public SingleNewsFragment() {
-
 	}
 
 	public SingleNewsFragment(String title) {
@@ -98,19 +104,18 @@ public class SingleNewsFragment extends CwAbstractFragment {
 	public void onResume() {
 		super.onResume();
 		news = CwApplication.cwEntityManager().getSelectedNews();
-		singlenews_layout = (ViewGroup) getView();
-		content = (ViewGroup) singlenews_layout.findViewById(R.id.content);
-		content.removeAllViews();
-		singlenews_fragment = (ViewGroup) inflater.inflate(R.layout.singlenews_fragment_layout, null);
-		progress_layout.setVisibility(View.GONE);
+		refreshView();
+		if (isSelected()) {
+			initActionBar();
+		}
+	}
 
-		if (task.getStatus().equals(AsyncTask.Status.PENDING)) {
-			task.execute();
-		} else if (task.getStatus().equals(AsyncTask.Status.FINISHED)) {
-			task = new BuildSingleNewsAsyncTask();
-			task.execute();
-		} else if (task.getStatus().equals(AsyncTask.Status.RUNNING)) {
+	@Override
+	public void onDetach() {
+		super.onDetach();
+		if (task != null) {
 			task.cancel(true);
+			task = null;
 		}
 	}
 
@@ -121,8 +126,57 @@ public class SingleNewsFragment extends CwAbstractFragment {
 		}
 	}
 
+	private void refreshView() {
+		singlenews_layout = (ViewGroup) getView();
+		content = (ViewGroup) singlenews_layout.findViewById(R.id.content);
+		content.removeAllViews();
+		singlenews_fragment = (ViewGroup) inflater.inflate(R.layout.singlenews_fragment_layout, null);
+		progress_layout.setVisibility(View.GONE);
+
+		if (task != null && task.getStatus().equals(AsyncTask.Status.PENDING)) {
+			task.execute();
+		} else if (task == null || task.getStatus().equals(AsyncTask.Status.FINISHED)) {
+			task = new BuildSingleNewsAsyncTask();
+			task.execute();
+		} else if (task != null && task.getStatus().equals(AsyncTask.Status.RUNNING)) {
+			task.cancel(true);
+		}
+	}
+
+	private void initActionBar() {
+		if (context != null) {
+			if (context.getParent() instanceof CwNavigationMainTabActivity) {
+				ActionBar actionBar = getActionBar();
+				actionBar.removeAllActions();
+				setHomeAction();
+				actionBar.setTitle(context.getString(R.string.singlenews_area));
+				actionBar.addAction(new Action() {
+					@Override
+					public void performAction(View view) {
+					}
+
+					@Override
+					public int getDrawable() {
+						return R.drawable.download_bttn;
+					}
+				});
+				actionBar.addAction(new Action() {
+					@Override
+					public void performAction(View view) {
+						refreshView();
+					}
+
+					@Override
+					public int getDrawable() {
+						return R.drawable.refresh_bttn;
+					}
+				});
+			}
+		}
+	}
+
 	/**
-	 * Asynchronous task to receive a single news from the API and build up the ui.
+	 * Asynchronous task to receive a single news and build up the ui.
 	 * 
 	 * @author Alexander Dridiger
 	 */
@@ -151,7 +205,7 @@ public class SingleNewsFragment extends CwAbstractFragment {
 		}
 
 		private void createNewsView() {
-			if (!isCancelled()) {
+			if (!isCancelled() && news != null) {
 				if (news.getArticle() == null) {
 					CwApplication.cwEntityManager().setSelectedNews(
 							CwApplication.cwEntityManager().getSingleNews(news.getSubjectId(), true));
@@ -183,8 +237,10 @@ public class SingleNewsFragment extends CwAbstractFragment {
 		protected void onCancelled() {
 			super.onCancelled();
 			singlenews_layout = (ViewGroup) getView();
-			content = (ViewGroup) singlenews_layout.findViewById(R.id.content);
-			content.removeAllViews();
+			if (singlenews_layout != null) {
+				content = (ViewGroup) singlenews_layout.findViewById(R.id.content);
+				content.removeAllViews();
+			}
 			singlenews_fragment = (ViewGroup) inflater.inflate(R.layout.singlenews_fragment_layout, null);
 			progress_layout.setVisibility(View.GONE);
 			task = new BuildSingleNewsAsyncTask();
@@ -250,10 +306,10 @@ public class SingleNewsFragment extends CwAbstractFragment {
 			if (!picURL.matches("")) {
 				userID = Integer.valueOf(picURL.subSequence(context.getString(R.string.prefix_userpic).length(),
 						picURL.length()).toString());
-
-				CwApplication.cwImageLoader().displayImage(context.getString(R.string.userpic_url, userID, 50),
-						context, (ImageView) view, false, R.drawable.user_stub);
+				news.setAuthorId(userID);
 			}
+			CwApplication.cwImageLoader().displayImage(context.getString(R.string.userpic_url, news.getAuthorId(), 50),
+					context, (ImageView) view, false, R.drawable.user_stub);
 		}
 
 		/**
@@ -283,6 +339,14 @@ public class SingleNewsFragment extends CwAbstractFragment {
 			super.onPrepareOptionsMenu(menu);
 			menu.clear();
 			menuInflater.inflate(R.menu.singlenews_menu, menu);
+		}
+	}
+
+	@Override
+	public void setForeground(boolean isSelected) {
+		super.setForeground(isSelected);
+		if (isSelected) {
+			initActionBar();
 		}
 	}
 }

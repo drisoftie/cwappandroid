@@ -4,18 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.os.Bundle;
-import android.support.v4.view.ViewPager;
-import de.consolewars.android.app.CwApplication;
 import de.consolewars.android.app.R;
-import de.consolewars.android.app.db.domain.CwNews;
-import de.consolewars.android.app.db.domain.CwSubject;
 import de.consolewars.android.app.tab.CwAbstractFragment;
 import de.consolewars.android.app.tab.CwAbstractFragmentActivity;
-import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
-import de.consolewars.android.app.tab.OnSubjectSelectedListener;
-import de.consolewars.android.app.view.CwPagerAdapter;
-import de.consolewars.android.app.view.TitlePageIndicator;
-import de.consolewars.android.app.view.TitlePageIndicator.IndicatorStyle;
+import de.consolewars.android.app.view.CwPagerAdapter.FragmentProvider;
 
 /*
  * Copyright [2011] [Alexander Dridiger]
@@ -36,41 +28,45 @@ import de.consolewars.android.app.view.TitlePageIndicator.IndicatorStyle;
  * 
  * @author Alexander Dridiger
  */
-public class OverviewFragmentActivity extends CwAbstractFragmentActivity implements OnSubjectSelectedListener {
+public class OverviewFragmentActivity extends CwAbstractFragmentActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		setContentView(R.layout.fragment_pager_layout);
-
-		List<CwAbstractFragment> fragments = new ArrayList<CwAbstractFragment>();
-		fragments.add(new OverviewFragment(getString(R.string.overview)));
-		// fragments.add(new NewsFragment(Filter.NEWS_MS, getString(R.string.news_filter_only_ms)));
-		// fragments.add(new NewsFragment(Filter.NEWS_NIN, getString(R.string.news_filter_only_nin)));
-		// fragments.add(new NewsFragment(Filter.NEWS_SONY, getString(R.string.news_filter_only_sony)));
-
-		adapter = new CwPagerAdapter(getSupportFragmentManager(), getApplicationContext(), fragments);
-
-		ViewPager newsPager = (ViewPager) findViewById(R.id.pager);
-		newsPager.setAdapter(adapter);
-
-		TitlePageIndicator indicator = (TitlePageIndicator) findViewById(R.id.indicator);
-		indicator.setViewPager(newsPager);
-		indicator.setFooterIndicatorStyle(IndicatorStyle.Underline);
-
-		// We set this on the indicator, NOT the pager
-		indicator.setOnPageChangeListener(this);
-
-		((CwAbstractFragment) adapter.getItem(0)).setSelected(true);
 	}
 
 	@Override
-	public void onSubjectSelected(CwSubject subject) {
-		CwApplication.cwEntityManager().setSelectedNews((CwNews) subject);
-		if (getParent() instanceof CwNavigationMainTabActivity) {
-			((CwNavigationMainTabActivity) getParent()).getTabHost().setCurrentTab(
-					CwNavigationMainTabActivity.SINGLENEWS_TAB);
-		}
+	protected void onResume() {
+		super.onResume();
+	}
+
+	@Override
+	protected int getInitialFragmentSelection() {
+		return 0;
+	}
+
+	@Override
+	protected FragmentProvider getFragmentProvider() {
+		fragmentProvider = new FragmentProvider() {
+			@Override
+			public CwAbstractFragment requestFragment(int index) {
+				List<CwAbstractFragment> fragments = adapter.getFragments();
+				switch (index) {
+				case 0:
+					return adapter.switchFragmentsInfo(
+							fragments.set(index, new OverviewFragment(getString(R.string.overview))),
+							fragments.get(index));
+				}
+				throw new IllegalStateException("Not more than one fragment supported.");
+			}
+
+			@Override
+			public void initFragments() {
+				List<CwAbstractFragment> fragments = new ArrayList<CwAbstractFragment>();
+				fragments.add(new OverviewFragment(getString(R.string.overview)));
+				adapter.setFragments(fragments);
+			}
+		};
+		return fragmentProvider;
 	}
 }

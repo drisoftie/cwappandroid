@@ -4,10 +4,12 @@ import java.sql.SQLException;
 import java.util.Date;
 
 import roboguice.util.Ln;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.view.MenuItem;
@@ -20,6 +22,9 @@ import de.consolewars.android.app.R;
 import de.consolewars.android.app.db.AppDataHandler;
 import de.consolewars.android.app.db.domain.CwUser;
 import de.consolewars.android.app.view.CwPagerAdapter;
+import de.consolewars.android.app.view.CwPagerAdapter.FragmentProvider;
+import de.consolewars.android.app.view.TitlePageIndicator;
+import de.consolewars.android.app.view.TitlePageIndicator.IndicatorStyle;
 
 /*
  * Copyright [2011] [Alexander Dridiger]
@@ -36,6 +41,8 @@ import de.consolewars.android.app.view.CwPagerAdapter;
  * limitations under the License.
  */
 /**
+ * Basic implementation of an {@link Activity} used to handle {@link Fragment}s within a {@link ViewPager}.
+ * 
  * @author Alexander Dridiger
  */
 public abstract class CwAbstractFragmentActivity extends FragmentActivity implements ViewPager.OnPageChangeListener {
@@ -45,6 +52,7 @@ public abstract class CwAbstractFragmentActivity extends FragmentActivity implem
 	protected Dao<CwUser, Integer> cwUserDao;
 
 	protected CwPagerAdapter adapter;
+	protected FragmentProvider fragmentProvider;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +61,50 @@ public abstract class CwAbstractFragmentActivity extends FragmentActivity implem
 		cwEntityManager = CwApplication.cwEntityManager();
 		cwAppDataHandler = CwApplication.cwAppDataHandler();
 		cwUserDao = CwApplication.cwUserDao();
+
+		setContentView(R.layout.fragment_pager_layout);
+
+		// View layout = LayoutInflater.from(this).inflate(R.layout.fragment_pager_layout, null);
+
+		adapter = new CwPagerAdapter(getSupportFragmentManager());
+		adapter.setFragmentProvider(getFragmentProvider());
+
+		ViewPager pager = (ViewPager) findViewById(R.id.pager);
+		pager.setAdapter(adapter);
+
+		TitlePageIndicator indicator = (TitlePageIndicator) findViewById(R.id.indicator);
+		indicator.setViewPager(pager);
+		indicator.setFooterIndicatorStyle(IndicatorStyle.Underline);
+
+		// We set this on the indicator, NOT the pager
+		indicator.setOnPageChangeListener(this);
+		indicator.setCurrentItem(getInitialFragmentSelection());
+
+		// setContentView(layout);
+
+		((CwAbstractFragment) adapter.getFragments().get(getInitialFragmentSelection())).setStartFragment(true);
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		// ViewPager pager = (ViewPager) findViewById(R.id.pager);
+		// pager.invalidate();
+		adapter.notifyDataSetChanged();
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		// FIXME: Save state!
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		cwEntityManager = null;
+		cwAppDataHandler = null;
+		cwUserDao = null;
 	}
 
 	@Override
@@ -66,8 +118,8 @@ public abstract class CwAbstractFragmentActivity extends FragmentActivity implem
 								if (cwAppDataHandler.loadCurrentUser()) {
 									CwUser cwUser = cwAppDataHandler.getCwUser();
 									cwUser.setDate(new Date());
-									cwUser.setLastBlogId(cwEntityManager.getNewestBlog());
-									cwUser.setLastNewsId(cwEntityManager.getNewestNews());
+									cwUser.setLastBlogId(cwEntityManager.getNewestBlogId());
+									cwUser.setLastNewsId(cwEntityManager.getNewestNewsId());
 									try {
 										cwUserDao.update(cwUser);
 									} catch (SQLException e) {
@@ -91,17 +143,17 @@ public abstract class CwAbstractFragmentActivity extends FragmentActivity implem
 
 	@Override
 	public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-		for (int i = 0; i < adapter.getCount(); i++) {
-			if (i == position) {
-				((CwAbstractFragment) adapter.getItem(i)).setSelected(true);
-			} else {
-				((CwAbstractFragment) adapter.getItem(i)).setSelected(false);
-			}
-		}
 	}
 
 	@Override
 	public void onPageSelected(int position) {
+		for (int i = 0; i < adapter.getCount(); i++) {
+			if (i == position) {
+				((CwAbstractFragment) adapter.getFragments().get(i)).setForeground(true);
+			} else {
+				((CwAbstractFragment) adapter.getFragments().get(i)).setForeground(false);
+			}
+		}
 	}
 
 	@Override
@@ -111,10 +163,20 @@ public abstract class CwAbstractFragmentActivity extends FragmentActivity implem
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		for (int i = 0; i < adapter.getCount(); i++) {
-			if (((CwAbstractFragment) adapter.getItem(i)).isSelected()) {
-				adapter.getItem(i).onOptionsItemSelected(item);
+			if (((CwAbstractFragment) adapter.getFragments().get(i)).isSelected()) {
+				adapter.getFragments().get(i).onOptionsItemSelected(item);
 			}
 		}
 		return super.onOptionsItemSelected(item);
 	}
+
+	/**
+	 * @return
+	 */
+	protected abstract FragmentProvider getFragmentProvider();
+
+	/**
+	 * @return
+	 */
+	protected abstract int getInitialFragmentSelection();
 }

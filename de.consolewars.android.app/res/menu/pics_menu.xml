@@ -10,11 +10,6 @@
 		android:title="Lösche Bildercache">
 	</item>
 	<item
-		android:id="@+id/menu_news"
-		android:title="@string/tab_news_head"
-		android:icon="@drawable/tab_news">
-	</item>
-	<item
 		android:id="@+id/menu_blogs"
 		android:title="@string/tab_blogs_head"
 		android:icon="@drawable/tab_blogs">

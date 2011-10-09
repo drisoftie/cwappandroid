@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.os.Bundle;
-import android.support.v4.view.ViewPager;
 import de.consolewars.android.app.CwApplication;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.pics.PicsFragment;
@@ -12,9 +11,7 @@ import de.consolewars.android.app.tab.CwAbstractFragment;
 import de.consolewars.android.app.tab.CwAbstractFragmentActivity;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
 import de.consolewars.android.app.tab.cmts.CommentsFragment;
-import de.consolewars.android.app.view.CwPagerAdapter;
-import de.consolewars.android.app.view.TitlePageIndicator;
-import de.consolewars.android.app.view.TitlePageIndicator.IndicatorStyle;
+import de.consolewars.android.app.view.CwPagerAdapter.FragmentProvider;
 
 /*
  * Copyright [2011] [Alexander Dridiger]
@@ -40,43 +37,56 @@ public class SingleNewsFragmentActivity extends CwAbstractFragmentActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+	}
 
-		setContentView(R.layout.fragment_pager_layout);
+	@Override
+	protected int getInitialFragmentSelection() {
+		return 1;
+	}
 
-		List<CwAbstractFragment> fragments = new ArrayList<CwAbstractFragment>();
-		fragments.add(new PicsFragment(getString(R.string.gallery)));
-		fragments.add(new SingleNewsFragment(getString(R.string.news)));
-		fragments.add(new CommentsFragment(CwApplication.cwEntityManager().getSelectedNews(),
-				getString(R.string.comments)));
+	@Override
+	protected FragmentProvider getFragmentProvider() {
+		fragmentProvider = new FragmentProvider() {
+			@Override
+			public CwAbstractFragment requestFragment(int index) {
+				List<CwAbstractFragment> fragments = adapter.getFragments();
+				switch (index) {
+				case 0:
+					return adapter.switchFragmentsInfo(
+							fragments.set(index, new PicsFragment(getString(R.string.gallery))), fragments.get(index));
+				case 1:
+					return adapter.switchFragmentsInfo(
+							fragments.set(index, new SingleNewsFragment(getString(R.string.news))),
+							fragments.get(index));
+				case 2:
+					return adapter.switchFragmentsInfo(fragments.set(index, new CommentsFragment(CwApplication
+							.cwEntityManager().getSelectedNews(), getString(R.string.comments))), fragments.get(index));
+				}
+				throw new IllegalStateException("Not more than two fragments supported.");
+			}
 
-		adapter = new CwPagerAdapter(getSupportFragmentManager(), getApplicationContext(), fragments);
-
-		ViewPager newsPager = (ViewPager) findViewById(R.id.pager);
-		newsPager.setAdapter(adapter);
-
-		TitlePageIndicator indicator = (TitlePageIndicator) findViewById(R.id.indicator);
-		indicator.setViewPager(newsPager);
-		indicator.setFooterIndicatorStyle(IndicatorStyle.Underline);
-
-		// We set this on the indicator, NOT the pager
-		indicator.setOnPageChangeListener(this);
-		indicator.setCurrentItem(1);
-		((CwAbstractFragment) adapter.getItem(1)).setSelected(true);
+			@Override
+			public void initFragments() {
+				List<CwAbstractFragment> fragments = new ArrayList<CwAbstractFragment>();
+				fragments.add(new PicsFragment(getString(R.string.gallery)));
+				fragments.add(new SingleNewsFragment(getString(R.string.news)));
+				fragments.add(new CommentsFragment(CwApplication.cwEntityManager().getSelectedNews(),
+						getString(R.string.comments)));
+				adapter.setFragments(fragments);
+			}
+		};
+		return fragmentProvider;
 	}
 
 	@Override
 	public void onBackPressed() {
 		for (int i = 0; i < adapter.getCount(); i++) {
-			if (adapter.getItem(i) instanceof SingleNewsFragment) {
-				((SingleNewsFragment) adapter.getItem(i)).backPressed();
-			} else if (adapter.getItem(i) instanceof CommentsFragment) {
-				((CommentsFragment) adapter.getItem(i)).backPressed();
-			}
+			adapter.getFragments().get(i).backPressed();
 		}
 		if (getParent() instanceof CwNavigationMainTabActivity) {
 			((CwNavigationMainTabActivity) getParent()).getTabHost()
 					.setCurrentTab(CwNavigationMainTabActivity.NEWS_TAB);
-			CwNavigationMainTabActivity.selectedSubjectTab = CwNavigationMainTabActivity.NEWS_TAB;
+			CwNavigationMainTabActivity.selectedNewsTab = CwNavigationMainTabActivity.NEWS_TAB;
 		}
 	}
 }

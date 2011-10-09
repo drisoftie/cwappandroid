@@ -9,67 +9,104 @@
 		<item name="android:background">@android:color/transparent</item>
 	</style>
 
+	<!-- imported styles from com.markupartist.android.widget.actionbar -->
+	<style name="ActionBar">
+		<item name="android:layout_width">fill_parent</item>
+		<item name="android:layout_height">@dimen/actionbar_height</item>
+		<item name="android:orientation">horizontal</item>
+		<item name="android:background">@drawable/actionbar_background</item>
+	</style>
+	<style name="ActionBarItem">
+		<item name="android:layout_width">@dimen/actionbar_item_width</item>
+		<item name="android:layout_height">@dimen/actionbar_height</item>
+		<item name="android:padding">5dp</item>
+		<item name="android:layout_marginLeft">1px</item>
+	</style>
+	<style
+		name="ActionBarHomeItem"
+		parent="ActionBarItem">
+		<item name="android:layout_marginRight">1px</item>
+		<item name="android:layout_marginLeft">0px</item>
+	</style>
+	<style name="ActionBarHomeLogo">
+		<item name="android:layout_marginRight">1px</item>
+		<item name="android:layout_marginLeft">0px</item>
+	</style>
+	<style
+		name="ActionBarProgressBar"
+		parent="@android:style/Widget.ProgressBar.Small">
+	</style>
+
+
+	<!-- imported styles from net.londatiga.android.NewQuickAction -->
+	<style name="Animations"/>
+
+	<!-- PopDownMenu -->
+	<style name="Animations.PopDownMenu"/>
+
+	<style name="Animations.PopDownMenu.Left">
+		<item name="@android:windowEnterAnimation">@anim/grow_from_topleft_to_bottomright</item>
+		<item name="@android:windowExitAnimation">@anim/shrink_from_bottomright_to_topleft</item>
+	</style>
+
+	<style name="Animations.PopDownMenu.Right">
+		<item name="@android:windowEnterAnimation">@anim/grow_from_topright_to_bottomleft</item>
+		<item name="@android:windowExitAnimation">@anim/shrink_from_bottomleft_to_topright</item>
+	</style>
+
+	<style name="Animations.PopDownMenu.Center">
+		<item name="@android:windowEnterAnimation">@anim/grow_from_top</item>
+		<item name="@android:windowExitAnimation">@anim/shrink_from_bottom</item>
+	</style>
+
+	<!-- PopUpMenu -->
+	<style name="Animations.PopUpMenu"/>
+
+	<style name="Animations.PopUpMenu.Left">
+		<item name="@android:windowEnterAnimation">@anim/grow_from_bottomleft_to_topright</item>
+		<item name="@android:windowExitAnimation">@anim/shrink_from_topright_to_bottomleft</item>
+	</style>
+
+	<style name="Animations.PopUpMenu.Right">
+		<item name="@android:windowEnterAnimation">@anim/grow_from_bottomright_to_topleft</item>
+		<item name="@android:windowExitAnimation">@anim/shrink_from_topleft_to_bottomright</item>
+	</style>
+
+	<style name="Animations.PopUpMenu.Center">
+		<item name="@android:windowEnterAnimation">@anim/grow_from_bottom</item>
+		<item name="@android:windowExitAnimation">@anim/shrink_from_top</item>
+	</style>
+
 
 	<!-- imported styles from com.jakewharton.android.viewpagerindicator.sample -->
-	<style
-		name="Theme.PageIndicatorDefaults"
-		parent="@android:style/Theme">
-		<item name="circlePageIndicatorStyle">@style/Widget.CirclePageIndicator</item>
-		<item name="titlePageIndicatorStyle">@style/Widget.TitlePageIndicator</item>
-	</style>
+	 <style name="Theme.PageIndicatorDefaults" parent="@android:style/Theme">
+        <item name="circlePageIndicatorStyle">@style/Widget.CirclePageIndicator</item>
+        <item name="titlePageIndicatorStyle">@style/Widget.TitlePageIndicator</item>
+    </style>
 
-	<style
-		name="Widget.CirclePageIndicator"
-		parent="@android:style/Widget">
-		<item name="centered">@bool/default_circle_indicator_centered</item>
-		<item name="fillColor">@color/default_circle_indicator_fill_color</item>
-		<item name="radius">@dimen/default_circle_indicator_radius</item>
-		<item name="snap">@bool/default_circle_indicator_snap</item>
-		<item name="strokeColor">@color/default_circle_indicator_stroke_color</item>
-		<item name="strokeWidth">@dimen/default_circle_indicator_stroke_width</item>
-	</style>
+    <style name="Widget.CirclePageIndicator" parent="@android:style/Widget">
+        <item name="centered">@bool/default_circle_indicator_centered</item>
+        <item name="fillColor">@color/default_circle_indicator_fill_color</item>
+        <item name="orientation">@integer/default_circle_indicator_orientation</item>
+        <item name="radius">@dimen/default_circle_indicator_radius</item>
+        <item name="snap">@bool/default_circle_indicator_snap</item>
+        <item name="strokeColor">@color/default_circle_indicator_stroke_color</item>
+        <item name="strokeWidth">@dimen/default_circle_indicator_stroke_width</item>
+    </style>
 
-	<style
-		name="Widget.TitlePageIndicator"
-		parent="@android:style/Widget">
-		<item name="clipPadding">@dimen/default_title_indicator_clip_padding</item>
-		<item name="footerColor">@color/default_title_indicator_footer_color</item>
-		<item name="footerLineHeight">@dimen/default_title_indicator_footer_line_height</item>
-		<item name="footerIndicatorStyle">@integer/default_title_indicator_footer_indicator_style</item>
-		<item name="footerIndicatorHeight">@dimen/default_title_indicator_footer_indicator_height</item>
-		<item name="footerIndicatorUnderlinePadding">@dimen/default_title_indicator_footer_indicator_underline_padding
-		</item>
-		<item name="footerPadding">@dimen/default_title_indicator_footer_padding</item>
-		<item name="selectedColor">@color/default_title_indicator_selected_color</item>
-		<item name="selectedBold">@bool/default_title_indicator_selected_bold</item>
-		<item name="textColor">@color/default_title_indicator_text_color</item>
-		<item name="textSize">@dimen/default_title_indicator_text_size</item>
-		<item name="titlePadding">@dimen/default_title_indicator_title_padding</item>
-	</style> 
-
-	<style
-		name="StyledIndicators"
-		parent="@android:style/Theme.Light">
-		<item name="circlePageIndicatorStyle">@style/CustomCirclePageIndicator</item>
-		<item name="titlePageIndicatorStyle">@style/CustomTitlePageIndicator</item>
-	</style>
-
-	<style name="CustomTitlePageIndicator">
-		<item name="android:background">#FFDDDDDD</item>
-		<item name="footerColor">#FFEE3333</item>
-		<item name="footerLineHeight">2dp</item>
-		<item name="footerIndicatorStyle">none</item>
-		<item name="textColor">#FF999999</item>
-		<item name="selectedColor">#FF000000</item>
-		<item name="selectedBold">false</item>
-	</style>
-
-	<style name="CustomCirclePageIndicator">
-		<item name="android:background">#FFCCCCCC</item>
-		<item name="fillColor">#FF888888</item>
-		<item name="strokeColor">#FF000000</item>
-		<item name="strokeWidth">2dp</item>
-		<item name="radius">10dp</item>
-		<item name="centered">true</item>
-	</style>
+    <style name="Widget.TitlePageIndicator" parent="@android:style/Widget">
+        <item name="clipPadding">@dimen/default_title_indicator_clip_padding</item>
+        <item name="footerColor">@color/default_title_indicator_footer_color</item>
+        <item name="footerLineHeight">@dimen/default_title_indicator_footer_line_height</item>
+        <item name="footerIndicatorStyle">@integer/default_title_indicator_footer_indicator_style</item>
+        <item name="footerIndicatorHeight">@dimen/default_title_indicator_footer_indicator_height</item>
+        <item name="footerIndicatorUnderlinePadding">@dimen/default_title_indicator_footer_indicator_underline_padding</item>
+        <item name="footerPadding">@dimen/default_title_indicator_footer_padding</item>
+        <item name="selectedColor">@color/default_title_indicator_selected_color</item>
+        <item name="selectedBold">@bool/default_title_indicator_selected_bold</item>
+        <item name="textColor">@color/default_title_indicator_text_color</item>
+        <item name="textSize">@dimen/default_title_indicator_text_size</item>
+        <item name="titlePadding">@dimen/default_title_indicator_title_padding</item>
+        <item name="topPadding">@dimen/default_title_indicator_top_padding</item>
+    </style>
 </resources>
