@@ -63,11 +63,14 @@ public class CwEntityManager {
 	private AppDataHandler appDataHandler;
 
 	private List<CwNews> news;
+	private List<CwNews> downloadedNews;
+	private List<CwNews> savedNews;
 	private List<CwBlog> blogs;
 	private List<CwBlog> userBlogs;
 	private List<Message> msgs;
-	private int newestNews = -1;
-	private int newestBlog = -1;
+	private int newestNewsId = -1;
+	private int newestBlogId = -1;
+	private int defaultCount = 10;
 
 	private CwNews selectedNews;
 	private CwBlog selectedBlog;
@@ -220,13 +223,33 @@ public class CwEntityManager {
 		return news;
 	}
 
+	/**
+	 * @return the downloadedNews
+	 */
+	public List<CwNews> getDownloadedNews() {
+		if (downloadedNews == null) {
+			downloadedNews = new ArrayList<CwNews>();
+		}
+		return downloadedNews;
+	}
+
+	/**
+	 * @return the savedNews
+	 */
+	public List<CwNews> getSavedNews() {
+		if (savedNews == null) {
+			savedNews = new ArrayList<CwNews>();
+		}
+		return savedNews;
+	}
+
 	public List<CwBlog> getNextBlogs(EntityRefinement refinement, Filter filter) {
 		if (refinement == EntityRefinement.CACHE_ONLY) {
 			// TODO: Paging
 		} else if (refinement.equals(EntityRefinement.MIXED)) {
-			getBlogsMixed(10, filter);
+			getBlogsMixed(defaultCount, filter);
 		} else if (refinement.equals(EntityRefinement.SAVED_ONLY)) {
-			getBlogsSaved(10, filter);
+			getBlogsSaved(defaultCount, filter);
 		}
 		return getCachedBlogs(filter);
 	}
@@ -247,8 +270,8 @@ public class CwEntityManager {
 			if (appDataHandler.hasBlogsData()) {
 				try {
 					setCachedBlogs(
-							mergeBlogsLists(getCachedBlogs(filter), appDataHandler.loadSavedBlogs(oldestBlog, true, 10)),
-							filter);
+							mergeBlogsLists(getCachedBlogs(filter),
+									appDataHandler.loadSavedBlogs(oldestBlog, true, defaultCount)), filter);
 				} catch (SQLException e) {
 					e.printStackTrace();
 				}
@@ -276,7 +299,7 @@ public class CwEntityManager {
 		if (appDataHandler.hasNewsData()) {
 			if (oldestNews > -1) {
 				try {
-					return appDataHandler.loadSavedNews(oldestNews, true, 10);
+					return appDataHandler.loadSavedNews(oldestNews, true, defaultCount);
 				} catch (SQLException e) {
 					e.printStackTrace();
 				}
@@ -291,13 +314,41 @@ public class CwEntityManager {
 		return null;
 	}
 
+	public List<CwNews> getNewestNews() {
+		if (getDownloadedNews().isEmpty()) {
+			return getNextNews(EntityRefinement.MIXED);
+		}
+		int newestNewst = calculateNewestNewsId();
+		int currentNews = getDownloadedNews().get(0).getSubjectId();
+		if (newestNewst > currentNews) {
+			int amount = newestNewst - currentNews;
+			int runs;
+			if (amount % 50 == 0) {
+				runs = amount / 50;
+			} else {
+				runs = (amount / 50) + 1;
+			}
+			for (int i = 0; i < runs; i++) {
+				if (i == runs - 1) {
+					int lastAmount = amount - (i * 50);
+					getNewsByIDAndCache((currentNews + 1) + i * 50, true, lastAmount);
+				} else {
+					getNewsByIDAndCache((currentNews + 1) + i * 50, true, 50);
+				}
+			}
+		}
+		news = mergeNewsLists(Arrays.asList(getDownloadedNews().toArray(new CwNews[0])), news);
+		Collections.sort(news, Collections.reverseOrder(cwNewsIdSorter));
+		return news;
+	}
+
 	public List<CwNews> getNextNews(EntityRefinement refinement) {
 		if (refinement.equals(EntityRefinement.CACHE_ONLY)) {
 			// TODO: Paging
 		} else if (refinement.equals(EntityRefinement.MIXED)) {
-			getNewsMixed(10);
+			getNewsMixed(defaultCount);
 		} else if (refinement.equals(EntityRefinement.SAVED_ONLY)) {
-			return getNewsSaved(10);
+			return getNewsSaved(defaultCount);
 		}
 		return getCachedNews();
 	}
@@ -308,19 +359,23 @@ public class CwEntityManager {
 	 * @return
 	 */
 	public List<CwNews> getNewsMixed(int amount) {
-		int oldestNews = news.isEmpty() ? -1 : news.get(news.size() - 1).getSubjectId();
+		// FIXME: Current implementation only looks for oldest downloaded news
+		int oldestNews = getDownloadedNews().isEmpty() ? -1 : getDownloadedNews().get(getDownloadedNews().size() - 1)
+				.getSubjectId();
 		if (oldestNews > -1) {
 			// first the download
 			getNewsByIDAndCache(oldestNews, true, amount);
 			// then the database
 			if (appDataHandler.hasNewsData()) {
 				try {
-					news = mergeNewsLists(Arrays.asList(news.toArray(new CwNews[0])),
-							appDataHandler.loadSavedNews(oldestNews, true, 10));
+					savedNews = mergeNewsLists(Arrays.asList(getSavedNews().toArray(new CwNews[0])),
+							appDataHandler.loadSavedNews(oldestNews, true, defaultCount));
 				} catch (SQLException e) {
 					e.printStackTrace();
 				}
 			}
+			news = mergeNewsLists(Arrays.asList(getDownloadedNews().toArray(new CwNews[0])),
+					Arrays.asList(getSavedNews().toArray(new CwNews[0])));
 		} else {
 			getNewsByIDAndCache(calculateNewestNewsId(), true, amount);
 			List<CwNews> loadedNews = null;
@@ -330,7 +385,7 @@ public class CwEntityManager {
 				e.printStackTrace();
 			}
 			if (loadedNews != null) {
-				news = mergeNewsLists(Arrays.asList(news.toArray(new CwNews[0])), loadedNews);
+				news = mergeNewsLists(Arrays.asList(getDownloadedNews().toArray(new CwNews[0])), loadedNews);
 			}
 		}
 		news = mergeNewsLists(Arrays.asList(news.toArray(new CwNews[0])), news);
@@ -339,17 +394,24 @@ public class CwEntityManager {
 	}
 
 	public List<CwNews> getNewsSaved(int amount) {
-		int oldestNews = news.isEmpty() ? -1 : news.get(news.size() - 1).getSubjectId();
+		int oldestNews = getSavedNews().isEmpty() ? -1 : getSavedNews().get(getSavedNews().size() - 1).getSubjectId();
 		if (appDataHandler.hasNewsData()) {
 			if (oldestNews > -1) {
 				try {
-					return appDataHandler.loadSavedNews(oldestNews, true, 10);
+					savedNews = mergeNewsLists(Arrays.asList(getSavedNews().toArray(new CwNews[0])),
+							appDataHandler.loadSavedNews(oldestNews, true, defaultCount));
+					Collections.sort(savedNews, Collections.reverseOrder(cwNewsIdSorter));
+					return getSavedNews();
 				} catch (SQLException e) {
 					e.printStackTrace();
 				}
 			} else {
 				try {
-					return appDataHandler.loadSavedNews(amount);
+
+					savedNews = mergeNewsLists(Arrays.asList(getSavedNews().toArray(new CwNews[0])),
+							appDataHandler.loadSavedNews(amount));
+					Collections.sort(savedNews, Collections.reverseOrder(cwNewsIdSorter));
+					return getSavedNews();
 				} catch (SQLException e) {
 					e.printStackTrace();
 				}
@@ -397,9 +459,9 @@ public class CwEntityManager {
 		}
 		int[] ids = computeIds(amount, startId, desc);
 		if (desc) {
-			getCachedNews().addAll(cwManager.getNewsByIds(ids));
+			getDownloadedNews().addAll(cwManager.getNewsByIds(ids));
 		} else {
-			getCachedNews().addAll(0, cwManager.getNewsByIds(ids));
+			getDownloadedNews().addAll(0, cwManager.getNewsByIds(ids));
 		}
 	}
 
@@ -435,11 +497,9 @@ public class CwEntityManager {
 		return savecounter;
 	}
 
-	public int saveAllBlogs() {
+	public int saveAllBlogs(Filter filter) {
 		int savecounter = 0;
-		List<CwBlog> blogsToSave = blogs;
-		blogsToSave = mergeBlogsLists(blogsToSave, userBlogs);
-		for (CwBlog blog : blogsToSave) {
+		for (CwBlog blog : getCachedBlogs(filter)) {
 			try {
 				appDataHandler.createOrUpdateBlog(blog);
 				savecounter++;
@@ -504,6 +564,8 @@ public class CwEntityManager {
 
 	public void discardAllNews() {
 		news = new ArrayList<CwNews>();
+		downloadedNews = new ArrayList<CwNews>();
+		savedNews = new ArrayList<CwNews>();
 	}
 
 	public void discardAllBlogs() {
@@ -540,6 +602,16 @@ public class CwEntityManager {
 	}
 
 	/**
+	 * Replaces or sets new news into the cache.
+	 * 
+	 * @param news
+	 */
+	public void replaceOrSetNews(CwNews... news) {
+		this.news = mergeNewsLists(Arrays.asList(news), this.news);
+		Collections.sort(this.news, Collections.reverseOrder(cwNewsIdSorter));
+	}
+
+	/**
 	 * @return the selectedNews
 	 */
 	public CwNews getSelectedNews() {
@@ -570,17 +642,17 @@ public class CwEntityManager {
 	}
 
 	/**
-	 * @return the newestNews
+	 * @return the newestNewsId
 	 */
-	public int getNewestNews() {
-		return newestNews;
+	public int getNewestNewsId() {
+		return newestNewsId;
 	}
 
 	/**
-	 * @return the newestBlog
+	 * @return the newestBlogId
 	 */
-	public int getNewestBlog() {
-		return newestBlog;
+	public int getNewestBlogId() {
+		return newestBlogId;
 	}
 
 	/**

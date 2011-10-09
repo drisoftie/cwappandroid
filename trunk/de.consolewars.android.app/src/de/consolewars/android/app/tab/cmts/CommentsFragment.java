@@ -6,10 +6,10 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.text.ClipboardManager;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -17,6 +17,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
@@ -33,8 +34,13 @@ import de.consolewars.android.app.db.domain.CwComment;
 import de.consolewars.android.app.db.domain.CwNews;
 import de.consolewars.android.app.db.domain.CwSubject;
 import de.consolewars.android.app.tab.CwAbstractFragment;
+import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
 import de.consolewars.android.app.util.DateUtility;
 import de.consolewars.android.app.util.TextViewHandler;
+import de.consolewars.android.app.view.ActionBar;
+import de.consolewars.android.app.view.ActionBar.Action;
+import de.consolewars.android.app.view.ActionItem;
+import de.consolewars.android.app.view.QuickAction;
 
 /*
  * Copyright [2010] [Alexander Dridiger]
@@ -66,20 +72,23 @@ public class CommentsFragment extends CwAbstractFragment {
 	private int area;
 	private int currpage = 1;
 	private int maxpage = 1;
+	private final int results = 20;
 
 	private CwSubject subject;
 
-	private BuildCommentsAsyncTask task;
+	private BuildCommentsTask task;
 
+	/**
+	 * Mandatory constructor for creating a {@link Fragment}
+	 */
 	public CommentsFragment() {
-
 	}
 
 	public CommentsFragment(CwSubject subject, String title) {
 		super(title);
 		setHasOptionsMenu(true);
 		this.subject = subject;
-		task = new BuildCommentsAsyncTask();
+		task = new BuildCommentsTask();
 	}
 
 	@Override
@@ -88,7 +97,7 @@ public class CommentsFragment extends CwAbstractFragment {
 		context = getActivity();
 		cmmts_layout = (ViewGroup) inflater.inflate(R.layout.comments_layout, null);
 		cmmtsTable = (TableLayout) cmmts_layout.findViewById(R.id.comments_table);
-		resolveBundle();
+		checkBundle();
 		return cmmts_layout;
 	}
 
@@ -103,17 +112,20 @@ public class CommentsFragment extends CwAbstractFragment {
 
 		cmmts_layout = (ViewGroup) getView();
 
-		if (task.getStatus().equals(AsyncTask.Status.PENDING)) {
+		if (task != null && task.getStatus().equals(AsyncTask.Status.PENDING)) {
 			task.execute();
-		} else if (task.getStatus().equals(AsyncTask.Status.FINISHED)) {
-			task = new BuildCommentsAsyncTask();
+		} else if (task != null && task.getStatus().equals(AsyncTask.Status.FINISHED)) {
+			task = new BuildCommentsTask();
 			task.execute();
-		} else if (task.getStatus().equals(AsyncTask.Status.RUNNING)) {
+		} else if (task != null && task.getStatus().equals(AsyncTask.Status.RUNNING)) {
 			task.cancel(true);
+		}
+		if (isSelected()) {
+			initActionBar();
 		}
 	}
 
-	private void resolveBundle() {
+	private void checkBundle() {
 		if (subject instanceof CwNews) {
 			area = CommentArea.NEWS.getValue();
 		} else if (subject instanceof CwBlog) {
@@ -122,10 +134,21 @@ public class CommentsFragment extends CwAbstractFragment {
 	}
 
 	@Override
+	public void onDetach() {
+		super.onDetach();
+		if (task != null) {
+			task.cancel(true);
+			task = null;
+		}
+	}
+
+	@Override
 	public void backPressed() {
-		if (task.getStatus().equals(AsyncTask.Status.RUNNING)) {
+		if (task != null && task.getStatus().equals(AsyncTask.Status.RUNNING)) {
 			task.cancel(true);
 		}
+		currpage = 1;
+		maxpage = 1;
 	}
 
 	/**
@@ -136,188 +159,329 @@ public class CommentsFragment extends CwAbstractFragment {
 		return DateUtility.createDate(unixtime, "dd.MM.yyyy, HH:mm 'Uhr'");
 	}
 
-	/**
-	 * Asynchronous task to receive comments from the API and build up the ui.
-	 * 
-	 * @author Alexander Dridiger
-	 */
-	private class BuildCommentsAsyncTask extends AsyncTask<Void, View, Void> {
+	private void initActionBar() {
+		if (context != null) {
+			if (context.getParent() instanceof CwNavigationMainTabActivity) {
+				ActionBar actionBar = getActionBar();
+				actionBar.removeAllActions();
+				setHomeAction();
+				if (subject instanceof CwNews) {
+					actionBar.setTitle(context.getString(R.string.singlenews_area));
+				} else if (subject instanceof CwBlog) {
+					actionBar.setTitle(context.getString(R.string.singleblog_area));
+				}
+				actionBar.setDisplayHomeAsUpEnabled(true);
+				actionBar.addAction(new Action() {
+					@Override
+					public void performAction(View view) {
+						if (task.getStatus().equals(AsyncTask.Status.RUNNING)) {
+							task.cancel(true);
+						}
+						task = new BuildCommentsTask();
+						task.execute();
+					}
 
-		@Override
-		protected void onPreExecute() {
-			// first set progressbar
-			ViewGroup progress_layout = CwApplication.cwViewUtil().getCenteredProgressBarLayout(inflater,
-					R.string.comments);
-			cmmtsTable.removeAllViews();
-			cmmtsTable.addView(progress_layout);
-			initButtonsAndCheck();
-			checkButtons();
+					@Override
+					public int getDrawable() {
+						return R.drawable.refresh_bttn;
+					}
+				});
+			}
 		}
+	}
+
+	private class BuildCommentsTask extends AsyncTask<Void, CwComment, Void> {
+
+		List<ViewGroup> inflatedRows;
 
 		@Override
 		protected Void doInBackground(Void... params) {
 			if (!isCancelled()) {
-				comments = CwApplication.cwEntityManager().getComments(subject.getSubjectId(), area, 20, currpage);
-				createCommentsRows();
+				inflatedRows = new ArrayList<ViewGroup>();
+				if (subject instanceof CwNews && !((CwNews) subject).getCachedComments().isEmpty()) {
+					CwNews news = (CwNews) subject;
+					if (news.getCachedComments().size() % results == 0) {
+						maxpage = news.getCachedComments().size() / results;
+					} else {
+						maxpage = (news.getCachedComments().size() / results) + 1;
+					}
+					if (currpage == 1) {
+						comments = news.getCachedComments().subList(0,
+								news.getCachedComments().size() > results ? results : news.getCachedComments().size());
+					} else {
+						if (news.getCachedComments().size() - ((currpage - 1) * results) >= 0) {
+							int start = (currpage - 1) * results;
+							int end;
+							if (news.getCachedComments().size() - ((currpage - 1) * results) > results) {
+								end = currpage * results;
+							} else {
+								end = news.getCachedComments().size();
+							}
+							comments = news.getCachedComments().subList(start, end);
+						}
+					}
+				} else {
+					comments = CwApplication.cwEntityManager().getComments(subject.getSubjectId(), area, results,
+							currpage);
+					maxpage = !comments.isEmpty() ? comments.get(0).getPagecount() : 1;
+				}
+			}
+			if (!isCancelled()) {
+				for (CwComment comment : comments) {
+					publishProgress(comment);
+				}
 			}
 			return null;
 		}
 
 		@Override
-		protected void onProgressUpdate(View... rows) {
-			if (!isCancelled()) {
-				if (rowToDelete != null) {
-					Button delete_bttn = (Button) rowToDelete.findViewById(R.id.cmts_bttn_delete);
-					delete_bttn.setVisibility(View.VISIBLE);
-				}
-				cmmtsTable.addView(rows[0], cmmtsTable.getChildCount() - 1);
-			}
+		protected void onProgressUpdate(CwComment... values) {
+			ViewGroup tableRow = (ViewGroup) inflater.inflate(R.layout.comments_row_layout, cmmtsTable, false);
+			inflatedRows.add(tableRow);
 		}
 
 		@Override
 		protected void onPostExecute(Void result) {
-			// sets the comments view for this Activity
-			cmmtsTable.removeViewAt(cmmtsTable.getChildCount() - 1);
-			checkButtons();
-		}
-
-		@Override
-		protected void onCancelled() {
-			super.onCancelled();
-			task = new BuildCommentsAsyncTask();
-			task.execute();
+			new BuildCommentsAsyncTask().execute();
 		}
 
 		/**
-		 * Create rows displaying single comments to be displayed in a table.
+		 * Asynchronous task to receive comments from the API and build up the ui.
+		 * 
+		 * @author Alexander Dridiger
 		 */
-		private void createCommentsRows() {
-			// create table based on current comment
-			for (final CwComment comment : comments) {
+		private class BuildCommentsAsyncTask extends AsyncTask<Void, View, Void> {
+
+			@Override
+			protected void onPreExecute() {
+				// first set progressbar
+				ViewGroup progress_layout = CwApplication.cwViewUtil().getCenteredProgressBarLayout(inflater,
+						R.string.comments);
+				cmmtsTable.removeAllViews();
+				cmmtsTable.addView(progress_layout);
+				initButtonsAndCheck();
+				checkButtons();
+			}
+
+			@Override
+			protected Void doInBackground(Void... params) {
 				if (!isCancelled()) {
-					maxpage = comment.getPagecount();
-					// get the table row by an inflater and set the needed
-					// information
-					final ViewGroup tableRow = (ViewGroup) inflater.inflate(R.layout.comments_row_layout, cmmtsTable,
-							false);
+					createCommentsRows();
+				}
+				return null;
+			}
 
-					TextView usernameTxt = (TextView) tableRow.findViewById(R.id.cmts_username);
-					usernameTxt.setText(comment.getUsername());
-					usernameTxt.setSelected(true);
+			@Override
+			protected void onProgressUpdate(View... rows) {
+				if (!isCancelled()) {
+					cmmtsTable.addView(rows[0], cmmtsTable.getChildCount() - 1);
+				}
+			}
 
-					CwApplication.cwImageLoader().displayImage(
-							context.getString(R.string.userpic_url, comment.getUid(), 50), context,
-							(ImageView) tableRow.findViewById(R.id.cmts_usericon), false, R.drawable.user_stub);
+			@Override
+			protected void onPostExecute(Void result) {
+				// sets the comments view for this Activity
+				cmmtsTable.removeViewAt(cmmtsTable.getChildCount() - 1);
+				checkButtons();
+			}
 
-					((TextView) tableRow.findViewById(R.id.cmts_date))
-							.setText(createDate(comment.getUnixtime() * 1000L));
-					((TextView) tableRow.findViewById(R.id.cmts_date)).setSelected(true);
-					TextView content = (TextView) tableRow.findViewById(R.id.comment_content);
-					CwApplication.cwViewUtil().setClickableTextView(content);
-					content.setText(Html.fromHtml(comment.getStatement(), new TextViewHandler(context), null));
+			@Override
+			protected void onCancelled() {
+				super.onCancelled();
+				task = new BuildCommentsTask();
+				task.execute();
+			}
 
-					if (CwApplication.cwLoginManager().getAuthenticatedUser().getUid() == comment.getUid()) {
-						View delete_edit_bttn_layout = inflater.inflate(R.layout.delete_edit_bttn_layout, cmmtsTable,
-								false);
-						ViewGroup parent_layout = (ViewGroup) tableRow.findViewById(R.id.cmts_bttn_delete_edit_layout);
-						parent_layout.addView(delete_edit_bttn_layout);
-
-						Button delete_bttn = (Button) delete_edit_bttn_layout.findViewById(R.id.cmts_bttn_delete);
-
-						// first ask the user, if he wants to delete a comment
-						delete_bttn.setOnClickListener(new OnClickListener() {
-							@Override
-							public void onClick(View v) {
-								AlertDialog.Builder dialog = new AlertDialog.Builder(context)
-										.setMessage(context.getString(R.string.comment_delete_question))
-										.setCancelable(false)
-										.setPositiveButton(context.getString(R.string.yes),
-												new DialogInterface.OnClickListener() {
-													public void onClick(DialogInterface dialog, int which) {
-														rowToDelete = tableRow;
-														new DeleteCommentAsyncTask().execute(comment.getCid());
-													}
-												})
-										.setNegativeButton(context.getString(R.string.no),
-												new DialogInterface.OnClickListener() {
-													public void onClick(DialogInterface dialog, int which) {
-														dialog.cancel();
-													}
-												});
-								dialog.create().show();
-							}
-						});
-
-						Button edit_bttn = (Button) delete_edit_bttn_layout.findViewById(R.id.cmts_bttn_edit);
-						edit_bttn.setOnClickListener(new OnClickListener() {
-							@Override
-							public void onClick(View v) {
-								View edit_layout = inflater.inflate(R.layout.edit_layout, tableRow, false);
-								EditText textToEdit = (EditText) edit_layout.findViewById(R.id.cmts_edtxt_edit);
-								textToEdit.setText(comment.getStatement());
-								ViewGroup parent_layout = (ViewGroup) tableRow
-										.findViewById(R.id.comment_content_layout);
-								parent_layout.addView(edit_layout);
-								createEditSubmitBttn(edit_layout, tableRow, comment.getCid());
-							}
-						});
+			/**
+			 * Create rows displaying single comments to be displayed in a table.
+			 */
+			private void createCommentsRows() {
+				Button close_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_close);
+				close_bttn.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						cmmts_layout.findViewById(R.id.comments_write_layout).setVisibility(View.GONE);
 					}
-					publishProgress(tableRow);
+				});
+				// create table based on current comment
+				for (int i = 0; i < comments.size(); i++) {
+					if (!isCancelled()) {
+						final CwComment comment = comments.get(i);
+						final ViewGroup tableRow = inflatedRows.get(i);
+						TextView usernameTxt = (TextView) tableRow.findViewById(R.id.cmts_username);
+						usernameTxt.setText(comment.getUsername());
+						usernameTxt.setSelected(true);
+
+						CwApplication.cwImageLoader().displayImage(
+								context.getString(R.string.userpic_url, comment.getUid(), 50), context,
+								(ImageView) tableRow.findViewById(R.id.cmts_usericon), false, R.drawable.user_stub);
+
+						((TextView) tableRow.findViewById(R.id.cmts_date))
+								.setText(createDate(comment.getUnixtime() * 1000L));
+						((TextView) tableRow.findViewById(R.id.cmts_date)).setSelected(true);
+						TextView content = (TextView) tableRow.findViewById(R.id.comment_content);
+						CwApplication.cwViewUtil().setClickableTextView(content);
+						content.setText(Html.fromHtml(comment.getStatement(), new TextViewHandler(context), null));
+
+						if (CwApplication.cwLoginManager().getAuthenticatedUser().getUid() == comment.getUid()) {
+							final QuickAction quickActionHeader = initUserQuickAction();
+							// setup the action item click listener
+							quickActionHeader.setOnActionItemClickListener(new QuickAction.OnActionItemClickListener() {
+								@Override
+								public void onItemClick(int pos) {
+									if (pos == 0) {
+										cmmts_layout.findViewById(R.id.comments_write_layout).setVisibility(
+												View.VISIBLE);
+										((ScrollView) cmmts_layout.findViewById(R.id.comments_scroll_view))
+												.fullScroll(ScrollView.FOCUS_UP);
+										((EditText) cmmts_layout.findViewById(R.id.comments_edttxt_input))
+												.setText(comment.getQuote());
+									} else if (pos == 1) {
+										View edit_layout = inflater.inflate(R.layout.edit_layout, tableRow, false);
+										EditText textToEdit = (EditText) edit_layout.findViewById(R.id.cmts_edtxt_edit);
+										textToEdit.setText(comment.getStatement());
+										ViewGroup parent_layout = (ViewGroup) tableRow
+												.findViewById(R.id.comment_content_layout);
+										parent_layout.addView(edit_layout);
+										createEditSubmitBttn(edit_layout, tableRow, comment.getCid());
+									} else if (pos == 2) {
+										rowToDelete = tableRow;
+										new DeleteCommentAsyncTask().execute(comment.getCid());
+									} else if (pos == 3) {
+										ClipboardManager clipboardManager = (ClipboardManager) getActivity()
+												.getSystemService(Activity.CLIPBOARD_SERVICE);
+										clipboardManager.setText(comment.getStatement());
+										Toast.makeText(getActivity(), context.getString(R.string.copying_text),
+												Toast.LENGTH_LONG).show();
+									} else if (pos == 4) {
+										Toast.makeText(getActivity(), "Noch nicht möglich", Toast.LENGTH_SHORT).show();
+									}
+								}
+							});
+							View cell = tableRow.findViewById(R.id.cmts_cell_layout);
+							cell.setBackgroundResource(R.drawable.def_cmnt_body_user_selector);
+							cell.setOnLongClickListener(new OnLongClickListener() {
+								@Override
+								public boolean onLongClick(View v) {
+									quickActionHeader.show(v);
+									return false;
+								}
+							});
+						} else {
+							final QuickAction quickActionHeader = initQuickAction();
+							// setup the action item click listener
+							quickActionHeader.setOnActionItemClickListener(new QuickAction.OnActionItemClickListener() {
+								@Override
+								public void onItemClick(int pos) {
+									if (pos == 0) {
+										cmmts_layout.findViewById(R.id.comments_write_layout).setVisibility(
+												View.VISIBLE);
+										((ScrollView) cmmts_layout.findViewById(R.id.comments_scroll_view))
+												.fullScroll(ScrollView.FOCUS_UP);
+										((EditText) cmmts_layout.findViewById(R.id.comments_edttxt_input))
+												.setText(comment.getQuote());
+									} else if (pos == 1) {
+										Toast.makeText(getActivity(), "Noch nicht möglich", Toast.LENGTH_SHORT).show();
+									} else if (pos == 2) {
+										ClipboardManager clipboardManager = (ClipboardManager) getActivity()
+												.getSystemService(Activity.CLIPBOARD_SERVICE);
+										clipboardManager.setText(comment.getStatement());
+										Toast.makeText(getActivity(), context.getString(R.string.copying_text),
+												Toast.LENGTH_LONG).show();
+									}
+								}
+							});
+							View cell = tableRow.findViewById(R.id.cmts_cell_layout);
+							cell.setOnLongClickListener(new OnLongClickListener() {
+								@Override
+								public boolean onLongClick(View v) {
+									quickActionHeader.show(v);
+									return false;
+								}
+							});
+						}
+						publishProgress(tableRow);
+					}
 				}
 			}
-		}
 
-		private void createEditSubmitBttn(View parent, final View row, final int commentId) {
-			Button edit_submit_bttn = (Button) parent.findViewById(R.id.cmts_bttn_edit_submit);
-			edit_submit_bttn.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					new EditCommentAsyncTask().execute(commentId, row);
-				}
-			});
-		}
-
-		private void initButtonsAndCheck() {
-			Button next_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_next);
-			Button prev_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_prev);
-			next_bttn.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					cancel(true);
-					currpage++;
-					new BuildCommentsAsyncTask().execute();
-				}
-			});
-			prev_bttn.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					cancel(true);
-					currpage--;
-					new BuildCommentsAsyncTask().execute();
-				}
-			});
-
-			Button submit_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_submit);
-			submit_bttn.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					new SubmitCommentAsyncTask().execute();
-				}
-			});
-		}
-
-		private void checkButtons() {
-			Button next_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_next);
-			Button prev_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_prev);
-			if (currpage <= 1) {
-				prev_bttn.setEnabled(false);
-			} else {
-				prev_bttn.setEnabled(true);
+			private void createEditSubmitBttn(View parent, final View row, final int commentId) {
+				Button edit_submit_bttn = (Button) parent.findViewById(R.id.cmts_bttn_edit_submit);
+				edit_submit_bttn.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						new EditCommentAsyncTask().execute(commentId, row);
+					}
+				});
 			}
-			if (currpage == maxpage) {
-				next_bttn.setEnabled(false);
-			} else {
-				next_bttn.setEnabled(true);
+
+			private QuickAction initQuickAction() {
+				final QuickAction mQuickAction = new QuickAction(getActivity());
+				mQuickAction.addActionItem(createAction(R.string.quote, R.drawable.ic_add));
+				mQuickAction.addActionItem(createAction(R.string.comment_fav, R.drawable.ic_accept));
+				mQuickAction.addActionItem(createAction(R.string.copy, R.drawable.ic_accept));
+				return mQuickAction;
+			}
+
+			private QuickAction initUserQuickAction() {
+				final QuickAction mQuickAction = new QuickAction(getActivity());
+				mQuickAction.addActionItem(createAction(R.string.quote, R.drawable.ic_add));
+				mQuickAction.addActionItem(createAction(R.string.edit, R.drawable.def_bttn_edit));
+				mQuickAction.addActionItem(createAction(R.string.delete, R.drawable.def_bttn_del));
+				mQuickAction.addActionItem(createAction(R.string.copy, R.drawable.ic_accept));
+				mQuickAction.addActionItem(createAction(R.string.comment_fav, R.drawable.ic_accept));
+				return mQuickAction;
+			}
+
+			private ActionItem createAction(int titleId, int iconId) {
+				ActionItem addAction = new ActionItem();
+				addAction.setTitle(getString(titleId));
+				addAction.setIcon(getResources().getDrawable(iconId));
+				return addAction;
+			}
+
+			private void initButtonsAndCheck() {
+				Button next_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_next);
+				Button prev_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_prev);
+				next_bttn.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						cancel(true);
+						currpage++;
+						new BuildCommentsAsyncTask().execute();
+					}
+				});
+				prev_bttn.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						cancel(true);
+						currpage--;
+						new BuildCommentsAsyncTask().execute();
+					}
+				});
+
+				Button submit_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_submit);
+				submit_bttn.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						new SubmitCommentAsyncTask().execute();
+					}
+				});
+			}
+
+			private void checkButtons() {
+				Button next_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_next);
+				Button prev_bttn = (Button) cmmts_layout.findViewById(R.id.comments_bttn_prev);
+				if (currpage <= 1) {
+					prev_bttn.setEnabled(false);
+				} else {
+					prev_bttn.setEnabled(true);
+				}
+				if (currpage == maxpage) {
+					next_bttn.setEnabled(false);
+				} else {
+					next_bttn.setEnabled(true);
+				}
 			}
 		}
 	}
@@ -431,7 +595,7 @@ public class CommentsFragment extends CwAbstractFragment {
 		if (subject instanceof CwNews && isSelected()) {
 			super.onCreateOptionsMenu(menu, inflater);
 			menu.clear();
-			inflater.inflate(R.menu.comments_menu, menu);
+			inflater.inflate(R.menu.comments_news_menu, menu);
 		} else if (subject instanceof CwBlog && isSelected()) {
 			super.onCreateOptionsMenu(menu, inflater);
 			menu.clear();
@@ -448,7 +612,7 @@ public class CommentsFragment extends CwAbstractFragment {
 		if (subject instanceof CwNews && isSelected()) {
 			super.onPrepareOptionsMenu(menu);
 			menu.clear();
-			menuInflater.inflate(R.menu.comments_menu, menu);
+			menuInflater.inflate(R.menu.comments_news_menu, menu);
 		} else if (subject instanceof CwBlog && isSelected()) {
 			super.onPrepareOptionsMenu(menu);
 			menu.clear();
@@ -471,11 +635,19 @@ public class CommentsFragment extends CwAbstractFragment {
 				if (task.getStatus().equals(AsyncTask.Status.RUNNING)) {
 					task.cancel(true);
 				}
-				task = new BuildCommentsAsyncTask();
+				task = new BuildCommentsTask();
 				task.execute();
 				break;
 			}
 		}
 		return true;
+	}
+
+	@Override
+	public void setForeground(boolean isSelected) {
+		super.setForeground(isSelected);
+		if (isSelected) {
+			initActionBar();
+		}
 	}
 }

@@ -5,10 +5,10 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
 	<application android:debuggable="true" android:icon="@drawable/cw_logo"
 		android:label="@string/app_name" android:name="de.consolewars.android.app.CwApplication"
-		android:persistent="false" android:theme="@style/CheckTheme">
+		android:persistent="false">
 		<activity android:configChanges="keyboardHidden|orientation"
 			android:icon="@drawable/cw_logo" android:name=".SplashScreenActivity"
-			android:screenOrientation="portrait" android:theme="@style/CheckTheme">
+			android:screenOrientation="portrait" android:theme="@android:style/Theme.NoTitleBar" android:label="@string/app_name">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
 				<category android:name="android.intent.category.LAUNCHER" />
@@ -17,7 +17,7 @@
 
 		<activity android:configChanges="keyboardHidden|orientation"
 			android:name=".tab.CwNavigationMainTabActivity"
-			android:screenOrientation="portrait" android:theme="@style/CheckTheme" />
+			android:screenOrientation="portrait" android:theme="@android:style/Theme.NoTitleBar"/>
 		<activity android:configChanges="keyboardHidden|orientation"
 			android:name=".tab.msgs.MessagesActivityGroup"
 			android:screenOrientation="portrait" />
@@ -34,14 +34,10 @@
 		<activity android:configChanges="keyboardHidden|orientation"
 			android:name=".tab.shout.ShoutboxActivityGroup"
 			android:screenOrientation="portrait" />
-		<activity android:configChanges="keyboardHidden|orientation"
-			android:name=".tab.news.NewsPicViewerActivity"
-			android:screenOrientation="portrait" />
 		<activity android:name=".tab.msgs.MessageWriterActivity" android:screenOrientation="portrait" android:configChanges="keyboardHidden|orientation"></activity>
 		<activity android:name=".tab.board.BoardActivityGroup" android:screenOrientation="portrait" android:configChanges="keyboardHidden|orientation"></activity>
 		<activity android:name=".tab.board.BoardActivity" android:screenOrientation="portrait" android:configChanges="keyboardHidden|orientation"></activity>
 		<activity android:name=".tab.blogs.BlogsWriterActivity" android:screenOrientation="portrait" android:configChanges="keyboardHidden|orientation"></activity>
-		<activity android:name=".tab.overview.ProfileFragment" android:screenOrientation="portrait" android:configChanges="keyboardHidden|orientation"></activity>
 		<activity android:name=".tab.news.NewsFragmentActivity" android:screenOrientation="portrait" android:configChanges="keyboardHidden|orientation"></activity>
 		<activity android:name=".tab.blogs.BlogsFragmentActivity" android:screenOrientation="portrait" android:configChanges="keyboardHidden|orientation"></activity>
 		<activity android:name=".tab.news.SingleNewsFragmentActivity" android:screenOrientation="portrait" android:configChanges="keyboardHidden|orientation"></activity>

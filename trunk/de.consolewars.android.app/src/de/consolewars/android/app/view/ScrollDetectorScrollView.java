@@ -20,7 +20,6 @@ import android.widget.ScrollView;
  */
 /**
  * @author Alexander Dridiger
- * 
  */
 public class ScrollDetectorScrollView extends ScrollView {
 
@@ -48,6 +47,10 @@ public class ScrollDetectorScrollView extends ScrollView {
 		if (scrollListener != null) {
 			scrollListener.onScrollChanged(this, x, y, oldx, oldy);
 		}
+	}
+
+	public boolean isScrollPossible() {
+		return computeVerticalScrollRange() > getHeight();
 	}
 
 	public void removeScrollListener() {

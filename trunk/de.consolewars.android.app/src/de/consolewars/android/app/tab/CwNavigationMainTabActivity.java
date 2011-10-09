@@ -10,7 +10,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TabHost;
 import de.consolewars.android.app.R;
@@ -58,7 +57,8 @@ public class CwNavigationMainTabActivity extends RoboTabActivity {
 	public static final int SINGLENEWS_TAB = 6;
 	public static final int SINGLEBLOG_TAB = 7;
 
-	public static int selectedSubjectTab = OVERVIEW_TAB;
+	public static int selectedNewsTab = NEWS_TAB;
+	public static int selectedBlogTab = BLOGS_TAB;
 
 	/**
 	 * The {@link TabHost} for this {@link TabActivity}. Before used, check for null since the activity might not have
@@ -73,9 +73,9 @@ public class CwNavigationMainTabActivity extends RoboTabActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+		// requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		setContentView(R.layout.main_tab_layout);
-		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.titlebar_layout);
+		// getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.titlebar_layout);
 
 		usedTabHost = getTabHost();
 		setTabs();
@@ -145,21 +145,18 @@ public class CwNavigationMainTabActivity extends RoboTabActivity {
 			getTabHost().setCurrentTab(OVERVIEW_TAB);
 			break;
 		case (R.id.menu_news):
-			if (selectedSubjectTab == SINGLENEWS_TAB) {
+			if (selectedNewsTab == SINGLENEWS_TAB) {
 				getTabHost().setCurrentTab(SINGLENEWS_TAB);
-				selectedSubjectTab = SINGLENEWS_TAB;
 			} else {
 				getTabHost().setCurrentTab(NEWS_TAB);
-				selectedSubjectTab = NEWS_TAB;
+				selectedNewsTab = NEWS_TAB;
 			}
 			break;
 		case (R.id.menu_blogs):
-			if (selectedSubjectTab == SINGLEBLOG_TAB) {
+			if (selectedBlogTab == SINGLEBLOG_TAB) {
 				getTabHost().setCurrentTab(SINGLEBLOG_TAB);
-				selectedSubjectTab = SINGLEBLOG_TAB;
 			} else {
 				getTabHost().setCurrentTab(BLOGS_TAB);
-				selectedSubjectTab = BLOGS_TAB;
 			}
 			break;
 		case (R.id.menu_msgs):

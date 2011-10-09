@@ -3,20 +3,29 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent"
-	android:background="@drawable/table_cell_bg">
+	android:background="@drawable/table_cell_selector">
 	<ImageView
 		android:id="@+id/news_row_category_icon"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_alignParentTop="true"
 		android:layout_alignParentLeft="true"
-		android:paddingTop="@dimen/news_row_icon_padding_top"
-		android:paddingLeft="@dimen/news_row_icon_padding_left"/>
+		android:layout_margin="@dimen/news_row_icon_margin"/>
+	<TextView
+		android:id="@+id/news_row_category"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_toRightOf="@id/news_row_category_icon"
+		android:layout_alignBaseline="@id/news_row_category_icon"
+		android:layout_marginBottom="@dimen/news_row_category_margin"
+		android:textSize="@dimen/news_row_category_size"
+		android:textColor="@color/news_table_text_category"/>	
 	<TextView
 		android:id="@+id/news_row_title"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_toRightOf="@id/news_row_category_icon"
+		android:layout_alignParentLeft="true"
+		android:layout_below="@id/news_row_category_icon"
 		android:padding="@dimen/news_row_title_padding"
 		android:textSize="@dimen/news_row_title_size"
 		android:textColor="@color/news_table_text_title"/>
@@ -24,9 +33,8 @@
 		android:id="@+id/news_row_descr"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_toRightOf="@id/news_row_category_icon"
 		android:layout_below="@id/news_row_title"
-		android:padding="@dimen/news_row_title_padding"
+		android:padding="@dimen/news_row_descr_padding"
 		android:textSize="@dimen/news_row_descr_size"
 		android:textColor="@color/news_table_text_descr"/>
 	<TextView
@@ -34,7 +42,6 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_below="@id/news_row_descr"
-		android:layout_toRightOf="@id/news_row_category_icon"
 		android:paddingLeft="@dimen/news_row_date_padding_left"
 		android:textColor="@color/news_table_text_date"/>
 	<ImageView

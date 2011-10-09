@@ -6,15 +6,15 @@ import java.util.List;
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TableLayout;
@@ -26,10 +26,15 @@ import de.consolewars.android.app.Filter;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.db.domain.CwBlog;
 import de.consolewars.android.app.tab.CwAbstractFragment;
+import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
 import de.consolewars.android.app.tab.OnSubjectSelectedListener;
 import de.consolewars.android.app.util.DateUtility;
 import de.consolewars.android.app.util.StyleSpannableStringBuilder;
+import de.consolewars.android.app.view.ActionBar;
+import de.consolewars.android.app.view.ActionBar.Action;
+import de.consolewars.android.app.view.ActionItem;
 import de.consolewars.android.app.view.IScrollListener;
+import de.consolewars.android.app.view.QuickAction;
 import de.consolewars.android.app.view.ScrollDetectorScrollView;
 
 /*
@@ -60,11 +65,11 @@ public final class BlogsFragment extends CwAbstractFragment {
 	private LayoutInflater inflater;
 	private ViewGroup blogs_layout;
 	private TableLayout blogsTable;
-	private Button refresh;
 	private ScrollDetectorScrollView scroll;
 
 	// remember last selected table row to draw the background for that row
 	private View selectedRow;
+	private CwBlog clickedBlog;
 
 	private BuildBlogsAsyncTask task;
 
@@ -76,8 +81,10 @@ public final class BlogsFragment extends CwAbstractFragment {
 	// text styling
 	private StyleSpannableStringBuilder styleStringBuilder;
 
+	/**
+	 * Mandatory constructor for creating a {@link Fragment}
+	 */
 	public BlogsFragment() {
-
 	}
 
 	public BlogsFragment(Filter filter, String titel) {
@@ -94,7 +101,7 @@ public final class BlogsFragment extends CwAbstractFragment {
 		try {
 			listener = (OnSubjectSelectedListener) activity;
 		} catch (ClassCastException e) {
-			throw new ClassCastException(activity.toString() + " must implement OnArticleSelectedListener");
+			throw new ClassCastException(activity.toString() + " must implement OnSubjectSelectedListener");
 		}
 	}
 
@@ -106,7 +113,6 @@ public final class BlogsFragment extends CwAbstractFragment {
 		this.inflater = inflater;
 		blogs_layout = (ViewGroup) inflater.inflate(R.layout.blogs_fragment_layout, null);
 		blogsTable = (TableLayout) blogs_layout.findViewById(R.id.blogs_table);
-		refresh = (Button) blogs_layout.findViewById(R.id.blogs_bttn_refresh);
 		scroll = (ScrollDetectorScrollView) blogs_layout.findViewById(R.id.blogs_scroll_view);
 		return blogs_layout;
 	}
@@ -115,12 +121,24 @@ public final class BlogsFragment extends CwAbstractFragment {
 	public void onResume() {
 		super.onResume();
 		if (blogsTable.getChildCount() == 0) {
-			if (task.getStatus().equals(AsyncTask.Status.PENDING)) {
+			if (task != null && task.getStatus().equals(AsyncTask.Status.PENDING)) {
 				task.execute(true);
-			} else if (task.getStatus().equals(AsyncTask.Status.FINISHED)) {
+			} else if (task == null || task.getStatus().equals(AsyncTask.Status.FINISHED)) {
 				task = new BuildBlogsAsyncTask();
 				task.execute();
 			}
+		}
+		if (isSelected()) {
+			initActionBar();
+		}
+	}
+
+	@Override
+	public void onDetach() {
+		super.onDetach();
+		if (task != null) {
+			task.cancel(true);
+			task = null;
 		}
 	}
 
@@ -128,6 +146,50 @@ public final class BlogsFragment extends CwAbstractFragment {
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		// outState.putString(KEY_CONTENT, mContent);
+	}
+
+	private void initActionBar() {
+		if (context != null) {
+			if (context.getParent() instanceof CwNavigationMainTabActivity) {
+				ActionBar actionBar = getActionBar();
+				actionBar.removeAllActions();
+				setHomeAction();
+				actionBar.setTitle(context.getString(R.string.blogs_area));
+				actionBar.setDisplayHomeAsUpEnabled(true);
+				actionBar.addAction(new Action() {
+					@Override
+					public void performAction(View view) {
+						if (task.getStatus().equals(AsyncTask.Status.RUNNING)) {
+							task.cancel(true);
+						}
+						task = new BuildBlogsAsyncTask();
+						task.execute(true);
+					}
+
+					@Override
+					public int getDrawable() {
+						return R.drawable.download_bttn;
+					}
+				});
+				actionBar.addAction(new Action() {
+					@Override
+					public void performAction(View view) {
+						if (task != null) {
+							task.cancel(true);
+						}
+						blogsTable.removeAllViews();
+						oldestBlogsID = -1;
+						task = new BuildBlogsAsyncTask();
+						task.execute();
+					}
+
+					@Override
+					public int getDrawable() {
+						return R.drawable.refresh_bttn;
+					}
+				});
+			}
+		}
 	}
 
 	/**
@@ -147,7 +209,6 @@ public final class BlogsFragment extends CwAbstractFragment {
 					R.string.tab_blogs_head);
 			blogsTable.addView(progress_layout);
 			scroll.removeScrollListener();
-			refresh.setClickable(false);
 		}
 
 		@Override
@@ -176,8 +237,6 @@ public final class BlogsFragment extends CwAbstractFragment {
 		@Override
 		protected void onPostExecute(Void result) {
 			blogsTable.removeViewAt(blogsTable.getChildCount() - 1);
-			initRefreshBttn();
-			refresh.setClickable(true);
 			initScroll();
 			if (blogsTable.getChildCount() == 0) {
 				oldestBlogsID = -1;
@@ -246,6 +305,43 @@ public final class BlogsFragment extends CwAbstractFragment {
 											.getTimeInMillis(), "EEEE, dd. MMMMM yyyy"));
 							publishProgress(separator);
 						}
+						if (currentFilter.equals(Filter.BLOGS_USER)) {
+							final QuickAction quickAction = initUserQuickAction();
+							// setup the action item click listener
+							quickAction.setOnActionItemClickListener(new QuickAction.OnActionItemClickListener() {
+								@Override
+								public void onItemClick(int pos) {
+									if (pos == 0) {
+									}
+								}
+							});
+							tableRow.setOnLongClickListener(new OnLongClickListener() {
+								@Override
+								public boolean onLongClick(View v) {
+									clickedBlog = blog;
+									quickAction.show(v);
+									return false;
+								}
+							});
+						} else {
+							final QuickAction quickAction = initUserQuickAction();
+							// setup the action item click listener
+							quickAction.setOnActionItemClickListener(new QuickAction.OnActionItemClickListener() {
+								@Override
+								public void onItemClick(int pos) {
+									if (pos == 0) {
+									}
+								}
+							});
+							tableRow.setOnLongClickListener(new OnLongClickListener() {
+								@Override
+								public boolean onLongClick(View v) {
+									clickedBlog = blog;
+									quickAction.show(v);
+									return false;
+								}
+							});
+						}
 						publishProgress(tableRow);
 					}
 				}
@@ -274,19 +370,23 @@ public final class BlogsFragment extends CwAbstractFragment {
 			}
 			return matches;
 		}
-
-		private void initRefreshBttn() {
-			refresh.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View arg0) {
-					cancel(true);
-					blogsTable.removeAllViews();
-					oldestBlogsID = -1;
-					task = new BuildBlogsAsyncTask();
-					task.execute();
-				}
-			});
+		
+		private QuickAction initUserQuickAction() {
+			final QuickAction mQuickAction = new QuickAction(getActivity());
+			mQuickAction.addActionItem(createAction(R.string.news_sync, R.drawable.ic_add));
+			// mQuickAction.addActionItem(createAction(R.string.news_fav, R.drawable.ic_accept));
+			mQuickAction.addActionItem(createAction(R.string.news_save, R.drawable.ic_up));
+			return mQuickAction;
 		}
+
+		private ActionItem createAction(int titleId, int iconId) {
+			ActionItem addAction = new ActionItem();
+			addAction.setTitle(getString(titleId));
+			addAction.setIcon(getResources().getDrawable(iconId));
+			return addAction;
+		}
+		
+		
 
 		private void initScroll() {
 			scroll.setOnScrollListener(new IScrollListener() {
@@ -381,7 +481,7 @@ public final class BlogsFragment extends CwAbstractFragment {
 
 		@Override
 		protected Integer doInBackground(Boolean... params) {
-			return CwApplication.cwEntityManager().saveAllBlogs();
+			return CwApplication.cwEntityManager().saveAllBlogs(currentFilter);
 		}
 
 		@Override
@@ -419,7 +519,7 @@ public final class BlogsFragment extends CwAbstractFragment {
 				CwApplication.cwEntityManager().discardAllBlogs();
 				break;
 			case (R.id.menu_blogs_load_next):
-				if (task.getStatus().equals(AsyncTask.Status.RUNNING)) {
+				if (task != null && task.getStatus().equals(AsyncTask.Status.RUNNING)) {
 					task.cancel(true);
 				}
 				task = new BuildBlogsAsyncTask();
@@ -437,6 +537,14 @@ public final class BlogsFragment extends CwAbstractFragment {
 			}
 		}
 		return true;
+	}
+
+	@Override
+	public void setForeground(boolean isSelected) {
+		super.setForeground(isSelected);
+		if (isSelected) {
+			initActionBar();
+		}
 	}
 
 	@Override

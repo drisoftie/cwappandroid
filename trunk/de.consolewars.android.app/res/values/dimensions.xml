@@ -24,10 +24,12 @@
 	<dimen name="overview_banner_descr_margin">2dp</dimen>
 	<dimen name="news_row_day_separator_margin">4dp</dimen>
 	<dimen name="news_row_title_size">15dp</dimen>
-	<dimen name="news_row_descr_size">10dp</dimen>
+	<dimen name="news_row_category_size">11dp</dimen>
+	<dimen name="news_row_descr_size">11dp</dimen>
 	<dimen name="news_row_title_padding">2dp</dimen>
-	<dimen name="news_row_icon_padding_top">2dp</dimen>
-	<dimen name="news_row_icon_padding_left">1dp</dimen>
+	<dimen name="news_row_category_margin">2dp</dimen>
+	<dimen name="news_row_descr_padding">1dp</dimen>
+	<dimen name="news_row_icon_margin">2dp</dimen>
 	<dimen name="news_row_date_padding_left">2dp</dimen>
 	<dimen name="news_row_cmmts_icon_margin">2dp</dimen>
 	<dimen name="news_row_author_margin">2dp</dimen>
@@ -40,5 +42,9 @@
 	<dimen name="overview_logged_as_padding">2dp</dimen>
 	<dimen name="overview_usericon_margin_left">25dp</dimen>
 	<dimen name="writer_text_margin">2dp</dimen>
-	<dimen name="comments_cell_margin">2dp</dimen>
+	<dimen name="comments_cell_margin">1dp</dimen>
+	
+	<dimen name="actionbar_height">45dip</dimen>
+    <dimen name="actionbar_item_height">45dip</dimen>
+    <dimen name="actionbar_item_width">45dip</dimen>
 </resources>

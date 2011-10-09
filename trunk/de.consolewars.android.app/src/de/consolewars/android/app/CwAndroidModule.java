@@ -10,6 +10,7 @@ import com.j256.ormlite.dao.Dao;
 import de.consolewars.android.app.db.AppDataHandler;
 import de.consolewars.android.app.db.DaoProvider;
 import de.consolewars.android.app.db.domain.CwBlog;
+import de.consolewars.android.app.db.domain.CwComment;
 import de.consolewars.android.app.db.domain.CwNews;
 import de.consolewars.android.app.db.domain.CwPicture;
 import de.consolewars.android.app.db.domain.CwUser;
@@ -38,6 +39,10 @@ public class CwAndroidModule extends AbstractAndroidModule {
 				.in(Singleton.class);
 		bind(new TypeLiteral<Dao<CwBlog, Integer>>() {
 		}).toProvider(new DaoProvider<CwBlog, Integer>(ormLiteSqliteOpenHelper.getConnectionSource(), CwBlog.class))
+				.in(Singleton.class);
+		bind(new TypeLiteral<Dao<CwComment, Integer>>() {
+		}).toProvider(
+				new DaoProvider<CwComment, Integer>(ormLiteSqliteOpenHelper.getConnectionSource(), CwComment.class))
 				.in(Singleton.class);
 		bind(new TypeLiteral<Dao<CwPicture, Integer>>() {
 		}).toProvider(

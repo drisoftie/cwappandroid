@@ -13,11 +13,4 @@
 			android:layout_height="fill_parent"
 			android:layout_margin="3dip"/>
 	</de.consolewars.android.app.view.ScrollDetectorScrollView>
-	<Button
-		android:id="@+id/blogs_bttn_refresh"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_alignParentRight="true"
-		android:layout_alignParentTop="true"
-		android:background="@drawable/refresh_bump"/>
 </RelativeLayout>

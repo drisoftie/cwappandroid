@@ -8,6 +8,7 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -28,6 +29,7 @@ import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwAbstractFragment;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
 import de.consolewars.android.app.util.ViewUtility;
+import de.consolewars.android.app.view.ActionBar;
 import de.consolewars.api.data.Message;
 
 /*
@@ -67,6 +69,9 @@ public class OverviewFragment extends CwAbstractFragment {
 
 	private BuildOverviewAsyncTask task;
 
+	/**
+	 * Mandatory constructor for creating a {@link Fragment}
+	 */
 	public OverviewFragment() {
 	}
 
@@ -91,22 +96,32 @@ public class OverviewFragment extends CwAbstractFragment {
 	}
 
 	@Override
-	public void onResume() {
-		super.onResume();
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
 		overview_layout = (ViewGroup) getView();
 		content = (ViewGroup) overview_layout.findViewById(R.id.content);
 		content.removeAllViews();
 		overview_fragment = (ViewGroup) inflater.inflate(R.layout.overview_fragment_layout, null);
 		progress_layout.setVisibility(View.GONE);
 
-		if (task.getStatus().equals(AsyncTask.Status.PENDING)) {
-			task.execute();
-		} else if (task.getStatus().equals(AsyncTask.Status.FINISHED)) {
-			task = new BuildOverviewAsyncTask();
-			task.execute();
-		} else if (task.getStatus().equals(AsyncTask.Status.RUNNING)) {
-			task.cancel(true);
+		if (!isDetached()) {
+			if (task != null && task.getStatus().equals(AsyncTask.Status.PENDING)) {
+				task.execute();
+			} else if (task == null || task.getStatus().equals(AsyncTask.Status.FINISHED)) {
+				task = new BuildOverviewAsyncTask();
+				task.execute();
+			} else if (task != null && task.getStatus().equals(AsyncTask.Status.RUNNING)) {
+				task.cancel(true);
+			}
+			if (isSelected()) {
+				initActionBar();
+			}
 		}
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
 	}
 
 	/**
@@ -120,6 +135,16 @@ public class OverviewFragment extends CwAbstractFragment {
 	private void loadPicture(ImageView view, int uid) {
 		CwApplication.cwImageLoader().displayImage(context.getString(R.string.userpic_url, uid, 60), context,
 				(ImageView) view, false, R.drawable.user_stub);
+	}
+
+	private void initActionBar() {
+		if (context != null) {
+			if (context.getParent() instanceof CwNavigationMainTabActivity) {
+				ActionBar actionBar = getActionBar();
+				actionBar.removeAllActions();
+				actionBar.setTitle(context.getString(R.string.home));
+			}
+		}
 	}
 
 	/**
@@ -364,6 +389,14 @@ public class OverviewFragment extends CwAbstractFragment {
 	private void setVisibility(int visibility, View... views) {
 		for (View view : views) {
 			view.setVisibility(visibility);
+		}
+	}
+	
+	@Override
+	public void setForeground(boolean isSelected) {
+		super.setForeground(isSelected);
+		if (isSelected) {
+			initActionBar();
 		}
 	}
 

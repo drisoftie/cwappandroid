@@ -15,8 +15,8 @@
 		android:id="@+id/comments_bttn_next"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_toRightOf="@id/comments_bttn_prev"
 		android:layout_alignParentBottom="true"
+		android:layout_toRightOf="@id/comments_bttn_prev"
 		android:background="@drawable/def_transparent_next_bttn"/>
 	<ScrollView
 		android:id="@+id/comments_scroll_view"
@@ -38,7 +38,7 @@
 					android:layout_height="wrap_content"
 					android:scrollbars="vertical"
 					android:gravity="top"
-					android:lines="3"
+					android:lines="6"
 					android:textSize="15dp"/>
 				<Button
 					android:id="@+id/comments_bttn_submit"
@@ -48,13 +48,19 @@
 					android:layout_below="@id/comments_edttxt_input"
 					android:textSize="15dp"
 					android:text="OK"/>
+				<Button
+					android:id="@+id/comments_bttn_close"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_toRightOf="@id/comments_bttn_submit"
+					android:layout_below="@id/comments_edttxt_input"
+					android:background="@drawable/def_bttn_del"/>	
 			</RelativeLayout>
 			<TableLayout
 				android:id="@+id/comments_table"
 				android:layout_width="fill_parent"
 				android:layout_height="fill_parent"
-				android:layout_below="@id/comments_write_layout"
-				android:layout_marginTop="3dip">
+				android:layout_below="@id/comments_write_layout">
 			</TableLayout>
 		</RelativeLayout>
 	</ScrollView>

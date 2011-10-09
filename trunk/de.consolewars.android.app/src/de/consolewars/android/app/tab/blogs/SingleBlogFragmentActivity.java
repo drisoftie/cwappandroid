@@ -4,16 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.os.Bundle;
-import android.support.v4.view.ViewPager;
 import de.consolewars.android.app.CwApplication;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwAbstractFragment;
 import de.consolewars.android.app.tab.CwAbstractFragmentActivity;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
 import de.consolewars.android.app.tab.cmts.CommentsFragment;
-import de.consolewars.android.app.view.CwPagerAdapter;
-import de.consolewars.android.app.view.TitlePageIndicator;
-import de.consolewars.android.app.view.TitlePageIndicator.IndicatorStyle;
+import de.consolewars.android.app.view.CwPagerAdapter.FragmentProvider;
 
 /*
  * Copyright [2011] [Alexander Dridiger]
@@ -39,42 +36,61 @@ public class SingleBlogFragmentActivity extends CwAbstractFragmentActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+	}
 
-		setContentView(R.layout.fragment_pager_layout);
+	@Override
+	protected void onResume() {
+		super.onResume();
+	}
 
-		List<CwAbstractFragment> fragments = new ArrayList<CwAbstractFragment>();
-		fragments.add(new SingleBlogFragment(getString(R.string.blog)));
-		fragments.add(new CommentsFragment(CwApplication.cwEntityManager().getSelectedBlog(),
-				getString(R.string.comments)));
+	@Override
+	protected int getInitialFragmentSelection() {
+		return 0;
+	}
 
-		adapter = new CwPagerAdapter(getSupportFragmentManager(), getApplicationContext(), fragments);
+	@Override
+	protected FragmentProvider getFragmentProvider() {
+		fragmentProvider = new FragmentProvider() {
+			@Override
+			public CwAbstractFragment requestFragment(int index) {
+				List<CwAbstractFragment> fragments = adapter.getFragments();
+				switch (index) {
+				case 0:
+					return adapter.switchFragmentsInfo(
+							fragments.set(index, new SingleBlogFragment(getString(R.string.blog))),
+							fragments.get(index));
+				case 1:
+					return adapter.switchFragmentsInfo(fragments.set(index, new CommentsFragment(CwApplication
+							.cwEntityManager().getSelectedBlog(), getString(R.string.comments))), fragments.get(index));
+				}
+				throw new IllegalStateException("Not more than two fragments supported.");
+			}
 
-		ViewPager blogPager = (ViewPager) findViewById(R.id.pager);
-		blogPager.setAdapter(adapter);
-
-		TitlePageIndicator indicator = (TitlePageIndicator) findViewById(R.id.indicator);
-		indicator.setViewPager(blogPager);
-		indicator.setFooterIndicatorStyle(IndicatorStyle.Underline);
-
-		// We set this on the indicator, NOT the pager
-		indicator.setOnPageChangeListener(this);
-
-		((CwAbstractFragment) adapter.getItem(0)).setSelected(true);
+			@Override
+			public void initFragments() {
+				List<CwAbstractFragment> fragments = new ArrayList<CwAbstractFragment>();
+				fragments.add(new SingleBlogFragment(getString(R.string.blog)));
+				fragments.add(new CommentsFragment(CwApplication.cwEntityManager().getSelectedBlog(),
+						getString(R.string.comments)));
+				adapter.setFragments(fragments);
+			}
+		};
+		return fragmentProvider;
 	}
 
 	@Override
 	public void onBackPressed() {
 		for (int i = 0; i < adapter.getCount(); i++) {
-			if (adapter.getItem(i) instanceof SingleBlogFragment) {
-				((SingleBlogFragment) adapter.getItem(i)).backPressed();
-			} else if (adapter.getItem(i) instanceof CommentsFragment) {
-				((CommentsFragment) adapter.getItem(i)).backPressed();
+			if (adapter.getFragments().get(i) instanceof SingleBlogFragment) {
+				((SingleBlogFragment) adapter.getFragments().get(i)).backPressed();
+			} else if (adapter.getFragments().get(i) instanceof CommentsFragment) {
+				((CommentsFragment) adapter.getFragments().get(i)).backPressed();
 			}
 		}
 		if (getParent() instanceof CwNavigationMainTabActivity) {
 			((CwNavigationMainTabActivity) getParent()).getTabHost().setCurrentTab(
 					CwNavigationMainTabActivity.BLOGS_TAB);
-			CwNavigationMainTabActivity.selectedSubjectTab = CwNavigationMainTabActivity.BLOGS_TAB;
+			CwNavigationMainTabActivity.selectedBlogTab = CwNavigationMainTabActivity.BLOGS_TAB;
 		}
 	}
 }
