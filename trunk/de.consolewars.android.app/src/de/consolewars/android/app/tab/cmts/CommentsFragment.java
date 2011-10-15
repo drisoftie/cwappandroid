@@ -195,6 +195,11 @@ public class CommentsFragment extends CwAbstractFragment {
 		List<ViewGroup> inflatedRows;
 
 		@Override
+		protected void onPreExecute() {
+			getActionBar().setProgressBarVisibility(View.VISIBLE);
+		}
+
+		@Override
 		protected Void doInBackground(Void... params) {
 			if (!isCancelled()) {
 				inflatedRows = new ArrayList<ViewGroup>();
@@ -242,6 +247,7 @@ public class CommentsFragment extends CwAbstractFragment {
 
 		@Override
 		protected void onPostExecute(Void result) {
+			getActionBar().setProgressBarVisibility(View.GONE);
 			new BuildCommentsAsyncTask().execute();
 		}
 
@@ -255,6 +261,7 @@ public class CommentsFragment extends CwAbstractFragment {
 			@Override
 			protected void onPreExecute() {
 				// first set progressbar
+				getActionBar().setProgressBarVisibility(View.VISIBLE);
 				ViewGroup progress_layout = CwApplication.cwViewUtil().getCenteredProgressBarLayout(inflater,
 						R.string.comments);
 				cmmtsTable.removeAllViews();
@@ -283,10 +290,12 @@ public class CommentsFragment extends CwAbstractFragment {
 				// sets the comments view for this Activity
 				cmmtsTable.removeViewAt(cmmtsTable.getChildCount() - 1);
 				checkButtons();
+				getActionBar().setProgressBarVisibility(View.GONE);
 			}
 
 			@Override
 			protected void onCancelled() {
+				getActionBar().setProgressBarVisibility(View.GONE);
 				super.onCancelled();
 				task = new BuildCommentsTask();
 				task.execute();
@@ -446,17 +455,24 @@ public class CommentsFragment extends CwAbstractFragment {
 				next_bttn.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View v) {
-						cancel(true);
 						currpage++;
-						new BuildCommentsAsyncTask().execute();
+						if (task.getStatus().equals(AsyncTask.Status.RUNNING)) {
+							task.cancel(true);
+						}
+						task = new BuildCommentsTask();
+						task.execute();
 					}
 				});
 				prev_bttn.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View v) {
-						cancel(true);
 						currpage--;
-						new BuildCommentsAsyncTask().execute();
+						cancel(true);
+						if (task.getStatus().equals(AsyncTask.Status.RUNNING)) {
+							task.cancel(true);
+						}
+						task = new BuildCommentsTask();
+						task.execute();
 					}
 				});
 
@@ -497,6 +513,7 @@ public class CommentsFragment extends CwAbstractFragment {
 
 		@Override
 		protected void onPreExecute() {
+			getActionBar().setProgressBarVisibility(View.VISIBLE);
 			EditText commenttxt = (EditText) cmmts_layout.findViewById(R.id.comments_edttxt_input);
 			if (StringUtils.isBlank(commenttxt.getText().toString())) {
 				commenttxt.requestFocus();
@@ -526,6 +543,7 @@ public class CommentsFragment extends CwAbstractFragment {
 				Toast.makeText(context, context.getString(R.string.comment_sent), Toast.LENGTH_SHORT).show();
 				cmmts_layout.findViewById(R.id.comments_write_layout).setVisibility(View.GONE);
 			}
+			getActionBar().setProgressBarVisibility(View.GONE);
 		}
 	}
 
@@ -538,6 +556,7 @@ public class CommentsFragment extends CwAbstractFragment {
 
 		@Override
 		protected void onPreExecute() {
+			getActionBar().setProgressBarVisibility(View.VISIBLE);
 			Toast.makeText(context, context.getString(R.string.comment_deleting), Toast.LENGTH_SHORT).show();
 		}
 
@@ -553,6 +572,7 @@ public class CommentsFragment extends CwAbstractFragment {
 				cmmtsTable.removeView(rowToDelete);
 			}
 			Toast.makeText(context, context.getString(R.string.comment_deleted), Toast.LENGTH_SHORT).show();
+			getActionBar().setProgressBarVisibility(View.GONE);
 		}
 	}
 
@@ -565,6 +585,7 @@ public class CommentsFragment extends CwAbstractFragment {
 
 		@Override
 		protected void onPreExecute() {
+			getActionBar().setProgressBarVisibility(View.VISIBLE);
 			Toast.makeText(context, context.getString(R.string.comment_editing), Toast.LENGTH_SHORT).show();
 		}
 
@@ -585,6 +606,7 @@ public class CommentsFragment extends CwAbstractFragment {
 			content.setText(Html.fromHtml(textToEdit.getText().toString(), new TextViewHandler(context), null));
 			parent_layout.removeViewAt(1);
 			Toast.makeText(context, context.getString(R.string.comment_edited), Toast.LENGTH_SHORT).show();
+			getActionBar().setProgressBarVisibility(View.GONE);
 		}
 	}
 

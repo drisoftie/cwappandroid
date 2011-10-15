@@ -184,6 +184,7 @@ public class SingleNewsFragment extends CwAbstractFragment {
 
 		@Override
 		protected void onPreExecute() {
+			getActionBar().setProgressBarVisibility(View.VISIBLE);
 			progress_layout.setVisibility(View.VISIBLE);
 			singlenews_fragment.setVisibility(View.GONE);
 		}
@@ -202,13 +203,14 @@ public class SingleNewsFragment extends CwAbstractFragment {
 			singlenews_fragment.setVisibility(View.VISIBLE);
 			content.removeView(singlenews_fragment);
 			content.addView(singlenews_fragment);
+			getActionBar().setProgressBarVisibility(View.GONE);
 		}
 
 		private void createNewsView() {
 			if (!isCancelled() && news != null) {
 				if (news.getArticle() == null) {
 					CwApplication.cwEntityManager().setSelectedNews(
-							CwApplication.cwEntityManager().getSingleNews(news.getSubjectId(), true));
+							CwApplication.cwEntityManager().getNewsSingle(news.getSubjectId(), true));
 					news = CwApplication.cwEntityManager().getSelectedNews();
 				}
 				TextView text = (TextView) singlenews_fragment.findViewById(R.id.singlenews_newstext);

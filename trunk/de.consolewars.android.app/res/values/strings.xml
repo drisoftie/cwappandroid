@@ -19,6 +19,9 @@
 	<string name="edit">Bearbeiten</string>
 	<string name="copy">Kopieren</string>
 	<string name="copying_text">Text wurde in die Zwischenablage kopiert</string>
+	
+	<string name="pull_to_load">Ziehen zum Refreshen...</string>
+	<string name="release_to_load">Jetzt loslassen...</string>
 
 	<!-- Tab specific -->
 	<string name="tab_news_tag">news</string>
@@ -78,6 +81,7 @@
 	<string name="comment_edited">Der Kommentar wurde erfolgreich editiert.</string>
 	<string name="quote">Zitat</string>
 	<string name="comment_fav">Favorit</string>
+	
 
 
 	<!-- news -->
@@ -113,6 +117,7 @@
 	<string name="gallery_discarded">Bildercache wurde gelöscht.</string>
 
 	<!-- blogs -->
+	<string name="blogs">Blogs</string>
 	<string name="blog">Blog</string>
 	<string name="blogs_area">Blogsbereich</string>
 	<string name="singleblog">Einzelblog</string>

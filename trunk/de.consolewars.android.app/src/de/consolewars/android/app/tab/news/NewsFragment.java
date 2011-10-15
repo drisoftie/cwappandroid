@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.style.ForegroundColorSpan;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,8 +18,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
-import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import de.consolewars.android.app.CwApplication;
@@ -36,6 +37,9 @@ import de.consolewars.android.app.view.ActionBar;
 import de.consolewars.android.app.view.ActionBar.Action;
 import de.consolewars.android.app.view.ActionItem;
 import de.consolewars.android.app.view.IScrollListener;
+import de.consolewars.android.app.view.PullRefreshContainerView;
+import de.consolewars.android.app.view.PullRefreshContainerView.MyTable;
+import de.consolewars.android.app.view.PullRefreshContainerView.OnChangeStateListener;
 import de.consolewars.android.app.view.QuickAction;
 import de.consolewars.android.app.view.ScrollDetectorScrollView;
 
@@ -62,8 +66,10 @@ public final class NewsFragment extends CwAbstractFragment {
 
 	private LayoutInflater inflater;
 	private ViewGroup news_layout;
-	private TableLayout newsTable;
+	private PullRefreshContainerView pullRefreshContainer;
+	private MyTable newsTable;
 	private ScrollDetectorScrollView scroll;
+	private TextView mRefreshHeader;
 
 	// remember last selected table row to draw the background for that row
 	private View selectedRow;
@@ -108,8 +114,36 @@ public final class NewsFragment extends CwAbstractFragment {
 		// }
 		this.inflater = inflater;
 		news_layout = (ViewGroup) inflater.inflate(R.layout.news_fragment_layout, null);
-		newsTable = (TableLayout) news_layout.findViewById(R.id.news_table);
-		scroll = (ScrollDetectorScrollView) news_layout.findViewById(R.id.news_scroll_view);
+		pullRefreshContainer = (PullRefreshContainerView) news_layout.findViewById(R.id.container);
+		scroll = pullRefreshContainer.getList();
+		newsTable = (MyTable) scroll.getChildAt(0);
+
+		mRefreshHeader = new TextView(getActivity());
+		mRefreshHeader.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+		mRefreshHeader.setGravity(Gravity.CENTER);
+		mRefreshHeader.setText(getString(R.string.pull_to_load));
+
+		pullRefreshContainer.setRefreshHeader(mRefreshHeader);
+
+		pullRefreshContainer.setOnChangeStateListener(new OnChangeStateListener() {
+			@Override
+			public void onChangeState(PullRefreshContainerView container, int state) {
+				switch (state) {
+				case PullRefreshContainerView.STATE_IDLE:
+				case PullRefreshContainerView.STATE_PULL:
+					mRefreshHeader.setText(getString(R.string.pull_to_load));
+					break;
+				case PullRefreshContainerView.STATE_RELEASE:
+					mRefreshHeader.setText(getString(R.string.release_to_load));
+					break;
+				case PullRefreshContainerView.STATE_LOADING:
+					mRefreshHeader.setText(getString(R.string.loading, getString(R.string.news)));
+					new NewsNewestTask().execute();
+					break;
+				}
+			}
+		});
+
 		return news_layout;
 	}
 
@@ -152,17 +186,6 @@ public final class NewsFragment extends CwAbstractFragment {
 				setHomeAction();
 				actionBar.setTitle(getActivity().getString(R.string.news_area));
 				actionBar.setDisplayHomeAsUpEnabled(true);
-				actionBar.addAction(new Action() {
-					@Override
-					public void performAction(View view) {
-						new NewestNewsTask().execute();
-					}
-
-					@Override
-					public int getDrawable() {
-						return R.drawable.download_newest_bttn;
-					}
-				});
 				actionBar.addAction(new Action() {
 					@Override
 					public void performAction(View view) {
@@ -222,7 +245,7 @@ public final class NewsFragment extends CwAbstractFragment {
 		@Override
 		protected Void doInBackground(Boolean... params) {
 			if (params.length > 0 && params[0]) {
-				CwApplication.cwEntityManager().getNextNews(EntityRefinement.MIXED);
+				CwApplication.cwEntityManager().getNewsNext(EntityRefinement.MIXED);
 			}
 			refreshList();
 			createNewsRows();
@@ -464,7 +487,7 @@ public final class NewsFragment extends CwAbstractFragment {
 	 * 
 	 * @author Alexander Dridiger
 	 */
-	private class NewestNewsTask extends AsyncTask<Void, Void, Void> {
+	private class NewsNewestTask extends AsyncTask<Void, Void, Void> {
 
 		@Override
 		protected void onPreExecute() {
@@ -474,7 +497,7 @@ public final class NewsFragment extends CwAbstractFragment {
 		@Override
 		protected Void doInBackground(Void... newsParams) {
 			if (!isCancelled()) {
-				CwApplication.cwEntityManager().getNewestNews();
+				CwApplication.cwEntityManager().getNewsNewest();
 			}
 			return null;
 		}
@@ -485,6 +508,7 @@ public final class NewsFragment extends CwAbstractFragment {
 			if (task != null) {
 				task.cancel(true);
 			}
+			pullRefreshContainer.completeRefresh();
 			newsTable.removeAllViews();
 			oldestNewsID = -1;
 			task = new BuildNewsTask();
@@ -509,7 +533,7 @@ public final class NewsFragment extends CwAbstractFragment {
 		protected Void doInBackground(CwNews... newsParams) {
 			CwNews news = newsParams[0];
 			if (news.getArticle() == null) {
-				news = CwApplication.cwEntityManager().getSingleNews(news.getSubjectId());
+				news = CwApplication.cwEntityManager().getNewsSingle(news.getSubjectId());
 			}
 			news.setCachedPictures(CwApplication.cwEntityManager().getPictures(
 					getString(R.string.cw_url_append, news.getUrl())));

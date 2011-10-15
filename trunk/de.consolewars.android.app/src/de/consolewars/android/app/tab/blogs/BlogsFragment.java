@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.style.ForegroundColorSpan;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -15,9 +16,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
 import android.widget.RatingBar;
-import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import de.consolewars.android.app.CwApplication;
@@ -34,6 +35,9 @@ import de.consolewars.android.app.view.ActionBar;
 import de.consolewars.android.app.view.ActionBar.Action;
 import de.consolewars.android.app.view.ActionItem;
 import de.consolewars.android.app.view.IScrollListener;
+import de.consolewars.android.app.view.PullRefreshContainerView;
+import de.consolewars.android.app.view.PullRefreshContainerView.MyTable;
+import de.consolewars.android.app.view.PullRefreshContainerView.OnChangeStateListener;
 import de.consolewars.android.app.view.QuickAction;
 import de.consolewars.android.app.view.ScrollDetectorScrollView;
 
@@ -64,14 +68,16 @@ public final class BlogsFragment extends CwAbstractFragment {
 
 	private LayoutInflater inflater;
 	private ViewGroup blogs_layout;
-	private TableLayout blogsTable;
+	private PullRefreshContainerView pullRefreshContainer;
+	private MyTable blogsTable;
 	private ScrollDetectorScrollView scroll;
+	private TextView mRefreshHeader;
 
 	// remember last selected table row to draw the background for that row
 	private View selectedRow;
 	private CwBlog clickedBlog;
 
-	private BuildBlogsAsyncTask task;
+	private BuildBlogsTask task;
 
 	private List<CwBlog> tempList = new ArrayList<CwBlog>();
 
@@ -91,7 +97,7 @@ public final class BlogsFragment extends CwAbstractFragment {
 		super(titel);
 		setHasOptionsMenu(true);
 		this.currentFilter = filter;
-		task = new BuildBlogsAsyncTask();
+		task = new BuildBlogsTask();
 	}
 
 	@Override
@@ -112,8 +118,36 @@ public final class BlogsFragment extends CwAbstractFragment {
 		// }
 		this.inflater = inflater;
 		blogs_layout = (ViewGroup) inflater.inflate(R.layout.blogs_fragment_layout, null);
-		blogsTable = (TableLayout) blogs_layout.findViewById(R.id.blogs_table);
-		scroll = (ScrollDetectorScrollView) blogs_layout.findViewById(R.id.blogs_scroll_view);
+		pullRefreshContainer = (PullRefreshContainerView) blogs_layout.findViewById(R.id.container);
+		scroll = pullRefreshContainer.getList();
+		blogsTable = (MyTable) scroll.getChildAt(0);
+
+		mRefreshHeader = new TextView(getActivity());
+		mRefreshHeader.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+		mRefreshHeader.setGravity(Gravity.CENTER);
+		mRefreshHeader.setText(getString(R.string.pull_to_load));
+
+		pullRefreshContainer.setRefreshHeader(mRefreshHeader);
+
+		pullRefreshContainer.setOnChangeStateListener(new OnChangeStateListener() {
+			@Override
+			public void onChangeState(PullRefreshContainerView container, int state) {
+				switch (state) {
+				case PullRefreshContainerView.STATE_IDLE:
+				case PullRefreshContainerView.STATE_PULL:
+					mRefreshHeader.setText(getString(R.string.pull_to_load));
+					break;
+				case PullRefreshContainerView.STATE_RELEASE:
+					mRefreshHeader.setText(getString(R.string.release_to_load));
+					break;
+				case PullRefreshContainerView.STATE_LOADING:
+					mRefreshHeader.setText(getString(R.string.loading, getString(R.string.blogs)));
+					new BlogsNewestTask().execute();
+					break;
+				}
+			}
+		});
+
 		return blogs_layout;
 	}
 
@@ -124,7 +158,7 @@ public final class BlogsFragment extends CwAbstractFragment {
 			if (task != null && task.getStatus().equals(AsyncTask.Status.PENDING)) {
 				task.execute(true);
 			} else if (task == null || task.getStatus().equals(AsyncTask.Status.FINISHED)) {
-				task = new BuildBlogsAsyncTask();
+				task = new BuildBlogsTask();
 				task.execute();
 			}
 		}
@@ -162,7 +196,7 @@ public final class BlogsFragment extends CwAbstractFragment {
 						if (task.getStatus().equals(AsyncTask.Status.RUNNING)) {
 							task.cancel(true);
 						}
-						task = new BuildBlogsAsyncTask();
+						task = new BuildBlogsTask();
 						task.execute(true);
 					}
 
@@ -179,7 +213,7 @@ public final class BlogsFragment extends CwAbstractFragment {
 						}
 						blogsTable.removeAllViews();
 						oldestBlogsID = -1;
-						task = new BuildBlogsAsyncTask();
+						task = new BuildBlogsTask();
 						task.execute();
 					}
 
@@ -197,12 +231,13 @@ public final class BlogsFragment extends CwAbstractFragment {
 	 * 
 	 * @author Alexander Dridiger
 	 */
-	private class BuildBlogsAsyncTask extends AsyncTask<Boolean, View, Void> {
+	private class BuildBlogsTask extends AsyncTask<Boolean, View, Void> {
 
 		boolean doesWork = false;
 
 		@Override
 		protected void onPreExecute() {
+			getActionBar().setProgressBarVisibility(View.VISIBLE);
 			doesWork = true;
 			// first set progressbar
 			ViewGroup progress_layout = CwApplication.cwViewUtil().getCenteredProgressBarLayout(inflater,
@@ -218,7 +253,7 @@ public final class BlogsFragment extends CwAbstractFragment {
 					CwApplication.cwEntityManager().getUserBlogsAndCache(
 							CwApplication.cwLoginManager().getAuthenticatedUser().getUid(), 50, null);
 				} else {
-					CwApplication.cwEntityManager().getNextBlogs(EntityRefinement.MIXED, currentFilter);
+					CwApplication.cwEntityManager().getBlogsNext(EntityRefinement.MIXED, currentFilter);
 				}
 			}
 			refreshList();
@@ -243,6 +278,7 @@ public final class BlogsFragment extends CwAbstractFragment {
 			}
 			doesWork = false;
 			blogs_layout.invalidate();
+			getActionBar().setProgressBarVisibility(View.GONE);
 		}
 
 		/**
@@ -370,7 +406,7 @@ public final class BlogsFragment extends CwAbstractFragment {
 			}
 			return matches;
 		}
-		
+
 		private QuickAction initUserQuickAction() {
 			final QuickAction mQuickAction = new QuickAction(getActivity());
 			mQuickAction.addActionItem(createAction(R.string.news_sync, R.drawable.ic_add));
@@ -385,8 +421,6 @@ public final class BlogsFragment extends CwAbstractFragment {
 			addAction.setIcon(getResources().getDrawable(iconId));
 			return addAction;
 		}
-		
-		
 
 		private void initScroll() {
 			scroll.setOnScrollListener(new IScrollListener() {
@@ -401,7 +435,7 @@ public final class BlogsFragment extends CwAbstractFragment {
 
 						// if diff is zero, then the bottom has been reached
 						if (scrollView.getChildCount() == 0 || diff == 0) {
-							task = new BuildBlogsAsyncTask();
+							task = new BuildBlogsTask();
 							task.execute(true);
 						}
 					}
@@ -468,6 +502,40 @@ public final class BlogsFragment extends CwAbstractFragment {
 	}
 
 	/**
+	 * Asynchronous task to bump up the newest blogs.
+	 * 
+	 * @author Alexander Dridiger
+	 */
+	private class BlogsNewestTask extends AsyncTask<Void, Void, Void> {
+
+		@Override
+		protected void onPreExecute() {
+			getActionBar().setProgressBarVisibility(View.VISIBLE);
+		}
+
+		@Override
+		protected Void doInBackground(Void... newsParams) {
+			if (!isCancelled()) {
+				CwApplication.cwEntityManager().getBlogsNewest(currentFilter);
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			getActionBar().setProgressBarVisibility(View.GONE);
+			if (task != null) {
+				task.cancel(true);
+			}
+			pullRefreshContainer.completeRefresh();
+			blogsTable.removeAllViews();
+			oldestBlogsID = -1;
+			task = new BuildBlogsTask();
+			task.execute();
+		}
+	}
+
+	/**
 	 * Asynchronous task to save blogs.
 	 * 
 	 * @author Alexander Dridiger
@@ -476,6 +544,7 @@ public final class BlogsFragment extends CwAbstractFragment {
 
 		@Override
 		protected void onPreExecute() {
+			getActionBar().setProgressBarVisibility(View.VISIBLE);
 			Toast.makeText(context, context.getString(R.string.blogs_saving), Toast.LENGTH_SHORT).show();
 		}
 
@@ -487,6 +556,7 @@ public final class BlogsFragment extends CwAbstractFragment {
 		@Override
 		protected void onPostExecute(Integer result) {
 			Toast.makeText(context, context.getString(R.string.blogs_saved, result), Toast.LENGTH_SHORT).show();
+			getActionBar().setProgressBarVisibility(View.GONE);
 		}
 	}
 
@@ -522,7 +592,7 @@ public final class BlogsFragment extends CwAbstractFragment {
 				if (task != null && task.getStatus().equals(AsyncTask.Status.RUNNING)) {
 					task.cancel(true);
 				}
-				task = new BuildBlogsAsyncTask();
+				task = new BuildBlogsTask();
 				task.execute(true);
 				break;
 			case (R.id.menu_blogs_load_saved):
