@@ -1,7 +1,6 @@
 package de.consolewars.android.app.view;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -71,7 +70,7 @@ public class PullRefreshContainerView extends LinearLayout {
 
 	private LinearLayout mHeaderContainer;
 	private View mHeaderView;
-	private MyTable mList;
+	private ScrollDetectorScrollView mList;
 	private int mState;
 	private OnChangeStateListener mOnChangeStateListener;
 
@@ -137,10 +136,12 @@ public class PullRefreshContainerView extends LinearLayout {
 		headerView.setText("Default refresh header.");
 		setRefreshHeader(headerView);
 
+		ScrollDetectorScrollView scroll = new ScrollDetectorScrollView(context);
 		MyTable list = new MyTable(context);
-		list.setBackgroundColor(Color.BLUE);
+		list.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 		list.setOrientation(LinearLayout.VERTICAL);
-		setList(list);
+		scroll.addView(list);
+		setList(scroll);
 	}
 
 	public class MyTable extends LinearLayout {
@@ -160,6 +161,8 @@ public class PullRefreshContainerView extends LinearLayout {
 		public boolean dispatchTouchEvent(MotionEvent ev) {
 			switch (ev.getAction()) {
 			case MotionEvent.ACTION_DOWN:
+				return super.dispatchTouchEvent(ev);
+			case MotionEvent.ACTION_MOVE:
 				return true;
 			}
 			return super.dispatchTouchEvent(ev);
@@ -187,9 +190,13 @@ public class PullRefreshContainerView extends LinearLayout {
 
 		case MotionEvent.ACTION_MOVE:
 			boolean isFirstChildVisible = false;
-			if (mList.getChildCount() > 0) {
+			// boolean isLastChildVisible = false;
+			MyTable myTable = (MyTable) mList.getChildAt(0);
+			if (myTable.getChildCount() > 0) {
+				View firstChild = myTable.getChildAt(0);
+
 				Rect bounds = new Rect();
-				mList.getDrawingRect(bounds);
+				firstChild.getHitRect(bounds);
 
 				Rect scrollBounds = new Rect(mList.getScrollX(), mList.getScrollY(), mList.getScrollX()
 						+ mList.getWidth(), mList.getScrollY() + mList.getHeight());
@@ -207,6 +214,15 @@ public class PullRefreshContainerView extends LinearLayout {
 					mScrollingList = true;
 					return super.dispatchTouchEvent(ev);
 				}
+				// } else if (isLastChildVisible && (mList.getChildAt(mList.getChildCount() - 1).getBottom() == 0)) {
+				// if ((mInterceptY - oldLastY > 5) || (mState == STATE_PULL) || (mState == STATE_RELEASE)) {
+				// mScrollingList = false;
+				// applyHeaderHeight(ev);
+				// return true;
+				// } else {
+				// mScrollingList = true;
+				// return super.dispatchTouchEvent(ev);
+				// }
 			} else if (mScrollingList) {
 				return super.dispatchTouchEvent(ev);
 			} else {
@@ -233,6 +249,20 @@ public class PullRefreshContainerView extends LinearLayout {
 	}
 
 	private void applyHeaderHeight(MotionEvent ev) {
+		final int historySize = ev.getHistorySize();
+
+		if (historySize > 0) {
+			for (int h = 0; h < historySize; h++) {
+				int historicalY = (int) (ev.getHistoricalY(h));
+				updateRefreshView(historicalY - mLastMotionY);
+			}
+		} else {
+			int historicalY = (int) ev.getY();
+			updateRefreshView(historicalY - mLastMotionY);
+		}
+	}
+
+	private void applyFooterHeight(MotionEvent ev) {
 		final int historySize = ev.getHistorySize();
 
 		if (historySize > 0) {
@@ -307,7 +337,7 @@ public class PullRefreshContainerView extends LinearLayout {
 	 * @param list
 	 *            the list to use
 	 */
-	public void setList(MyTable list) {
+	public void setList(ScrollDetectorScrollView list) {
 		if (mList != null) {
 			removeView(mList);
 		}
@@ -324,7 +354,7 @@ public class PullRefreshContainerView extends LinearLayout {
 	/**
 	 * @return the list inside this pull to refresh container
 	 */
-	public MyTable getList() {
+	public ScrollDetectorScrollView getList() {
 		return mList;
 	}
 

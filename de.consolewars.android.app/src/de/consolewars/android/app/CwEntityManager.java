@@ -66,6 +66,8 @@ public class CwEntityManager {
 	private List<CwNews> downloadedNews;
 	private List<CwNews> savedNews;
 	private List<CwBlog> blogs;
+	private List<CwNews> downloadedBlogs;
+	private List<CwNews> savedBlogs;
 	private List<CwBlog> userBlogs;
 	private List<Message> msgs;
 	private int newestNewsId = -1;
@@ -102,7 +104,7 @@ public class CwEntityManager {
 	 * @param fromSavedBlogs
 	 * @return
 	 */
-	public CwBlog getSingleBlog(int id, boolean fromSavedBlogs) {
+	public CwBlog getBlogSingle(int id, boolean fromSavedBlogs) {
 		CwBlog blog = null;
 		if (fromSavedBlogs) {
 			for (CwBlog n : getCachedBlogs(Filter.BLOGS_NEWS)) {
@@ -135,7 +137,7 @@ public class CwEntityManager {
 		return blog;
 	}
 
-	public CwNews getSingleNews(int id, boolean fromSavedNews) {
+	public CwNews getNewsSingle(int id, boolean fromSavedNews) {
 		CwNews news = null;
 		if (fromSavedNews) {
 			for (CwNews n : getCachedNews()) {
@@ -152,7 +154,7 @@ public class CwEntityManager {
 				e.printStackTrace();
 			}
 		}
-		news = getSingleNews(id);
+		news = getNewsSingle(id);
 		if (news != null) {
 			try {
 				appDataHandler.createOrUpdateNews(news);
@@ -163,7 +165,7 @@ public class CwEntityManager {
 		return news;
 	}
 
-	public CwNews getSingleNews(int id) {
+	public CwNews getNewsSingle(int id) {
 		CwNews news = null;
 		news = cwManager.getNewsById(id);
 		return news;
@@ -243,7 +245,38 @@ public class CwEntityManager {
 		return savedNews;
 	}
 
-	public List<CwBlog> getNextBlogs(EntityRefinement refinement, Filter filter) {
+	public List<CwBlog> getBlogsNewest(Filter filter) {
+		if (getCachedBlogs(filter).isEmpty()) {
+			return getBlogsNext(EntityRefinement.MIXED, filter);
+		}
+		int newestBlog = calculateNewestBlogId();
+		int currentBlog = getCachedBlogs(filter).get(0).getSubjectId();
+		if (newestBlog > currentBlog) {
+			int amount = newestBlog - currentBlog;
+			int runs;
+			if (amount % 50 == 0) {
+				runs = amount / 50;
+			} else {
+				runs = (amount / 50) + 1;
+			}
+			for (int i = 0; i < runs; i++) {
+				if (i == runs - 1) {
+					int lastAmount = amount - (i * 50);
+					setCachedBlogs(
+							mergeBlogsLists(getCachedBlogs(filter),
+									getBlogsByIDAndCache((currentBlog + 1) + i * 50, true, lastAmount)), filter);
+				} else {
+					setCachedBlogs(
+							mergeBlogsLists(getCachedBlogs(filter),
+									getBlogsByIDAndCache((currentBlog + 1) + i * 50, true, 50)), filter);
+				}
+			}
+		}
+		Collections.sort(getCachedBlogs(filter), Collections.reverseOrder(cwBlogsIdSorter));
+		return getCachedBlogs(filter);
+	}
+
+	public List<CwBlog> getBlogsNext(EntityRefinement refinement, Filter filter) {
 		if (refinement == EntityRefinement.CACHE_ONLY) {
 			// TODO: Paging
 		} else if (refinement.equals(EntityRefinement.MIXED)) {
@@ -314,9 +347,9 @@ public class CwEntityManager {
 		return null;
 	}
 
-	public List<CwNews> getNewestNews() {
+	public List<CwNews> getNewsNewest() {
 		if (getDownloadedNews().isEmpty()) {
-			return getNextNews(EntityRefinement.MIXED);
+			return getNewsNext(EntityRefinement.MIXED);
 		}
 		int newestNewst = calculateNewestNewsId();
 		int currentNews = getDownloadedNews().get(0).getSubjectId();
@@ -342,7 +375,7 @@ public class CwEntityManager {
 		return news;
 	}
 
-	public List<CwNews> getNextNews(EntityRefinement refinement) {
+	public List<CwNews> getNewsNext(EntityRefinement refinement) {
 		if (refinement.equals(EntityRefinement.CACHE_ONLY)) {
 			// TODO: Paging
 		} else if (refinement.equals(EntityRefinement.MIXED)) {

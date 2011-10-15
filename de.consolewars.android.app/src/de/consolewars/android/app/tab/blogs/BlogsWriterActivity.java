@@ -189,7 +189,7 @@ public class BlogsWriterActivity extends RoboActivity {
 					&& BlogsWriterActivity.this.getIntent().getExtras().getInt(getString(R.string.id), -1) != -1) {
 				id = BlogsWriterActivity.this.getIntent().getExtras().getInt(getString(R.string.id));
 				CwBlog blog = null;
-				blog = cwEntityManager.getSingleBlog(id, false);
+				blog = cwEntityManager.getBlogSingle(id, false);
 				EditText title = (EditText) blogswriter_layout.findViewById(R.id.blogswriter_edttxt_title);
 				title.setText(blog.getTitle());
 

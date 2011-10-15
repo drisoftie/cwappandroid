@@ -98,8 +98,8 @@ public class SingleBlogFragment extends CwAbstractFragment {
 			initActionBar();
 		}
 	}
-	
-	private void refreshView(){
+
+	private void refreshView() {
 		singleblog_layout = (ViewGroup) getView();
 		content = (ViewGroup) singleblog_layout.findViewById(R.id.content);
 		content.removeAllViews();
@@ -125,7 +125,6 @@ public class SingleBlogFragment extends CwAbstractFragment {
 		}
 	}
 
-	
 	private void initActionBar() {
 		if (context != null) {
 			if (context.getParent() instanceof CwNavigationMainTabActivity) {
@@ -157,8 +156,7 @@ public class SingleBlogFragment extends CwAbstractFragment {
 			}
 		}
 	}
-	
-	
+
 	/**
 	 * Asynchronous task to receive a single blog and build up the ui.
 	 * 
@@ -168,6 +166,7 @@ public class SingleBlogFragment extends CwAbstractFragment {
 
 		@Override
 		protected void onPreExecute() {
+			getActionBar().setProgressBarVisibility(View.VISIBLE);
 			progress_layout.setVisibility(View.VISIBLE);
 			singleblog_fragment_layout.setVisibility(View.GONE);
 		}
@@ -186,13 +185,14 @@ public class SingleBlogFragment extends CwAbstractFragment {
 			singleblog_fragment_layout.setVisibility(View.VISIBLE);
 			content.removeView(singleblog_fragment_layout);
 			content.addView(singleblog_fragment_layout);
+			getActionBar().setProgressBarVisibility(View.GONE);
 		}
 
 		private void createBlogView() {
 			if (!isCancelled()) {
 				if (blog.getArticle() == null) {
 					CwApplication.cwEntityManager().setSelectedBlog(
-							CwApplication.cwEntityManager().getSingleBlog(blog.getSubjectId(), true));
+							CwApplication.cwEntityManager().getBlogSingle(blog.getSubjectId(), true));
 					blog = CwApplication.cwEntityManager().getSelectedBlog();
 				}
 
@@ -219,9 +219,11 @@ public class SingleBlogFragment extends CwAbstractFragment {
 		@Override
 		protected void onCancelled() {
 			super.onCancelled();
-			singleblog_layout = (ViewGroup) getView();
-			content = (ViewGroup) singleblog_layout.findViewById(R.id.content);
-			content.removeAllViews();
+			if (getView() != null) {
+				singleblog_layout = (ViewGroup) getView();
+				content = (ViewGroup) singleblog_layout.findViewById(R.id.content);
+				content.removeAllViews();
+			}
 			singleblog_fragment_layout = (ViewGroup) inflater.inflate(R.layout.singleblog_fragment_layout, null);
 			progress_layout.setVisibility(View.GONE);
 			task = new BuildSingleBlogAsyncTask();
@@ -303,6 +305,7 @@ public class SingleBlogFragment extends CwAbstractFragment {
 
 		@Override
 		protected void onPreExecute() {
+			getActionBar().setProgressBarVisibility(View.VISIBLE);
 			Toast.makeText(SingleBlogFragment.this.getActivity(), context.getString(R.string.blog_deleting),
 					Toast.LENGTH_SHORT).show();
 		}
@@ -317,6 +320,7 @@ public class SingleBlogFragment extends CwAbstractFragment {
 		protected void onPostExecute(Void result) {
 			Toast.makeText(SingleBlogFragment.this.getActivity(), context.getString(R.string.blog_deleted),
 					Toast.LENGTH_SHORT).show();
+			getActionBar().setProgressBarVisibility(View.GONE);
 			getFragmentManager().popBackStack();
 		}
 	}
@@ -341,7 +345,7 @@ public class SingleBlogFragment extends CwAbstractFragment {
 			menuInflater.inflate(R.menu.singleblog_menu, menu);
 		}
 	}
-	
+
 	@Override
 	public void backPressed() {
 		if (task != null && task.getStatus().equals(AsyncTask.Status.RUNNING)) {
