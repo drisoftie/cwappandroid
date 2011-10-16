@@ -3,7 +3,7 @@
 	<declare-styleable name="GalleryTheme">
 		<attr name="android:galleryItemBackground"/>
 	</declare-styleable>
-	<declare-styleable name="ActionBar">
+	<declare-styleable name="ActionBarStylable">
 		<attr
 			name="title"
 			format="string"
