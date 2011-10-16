@@ -9,8 +9,6 @@ import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ImageView;
 import android.widget.TabHost;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.blogs.BlogsFragmentActivity;
@@ -86,42 +84,32 @@ public class CwNavigationMainTabActivity extends RoboTabActivity {
 	 */
 	private void setTabs() {
 		// add the necessary tabs
-		addTab(R.string.tab_overv_tag, R.drawable.def_tab_overview, OverviewFragmentActivity.class);
-		addTab(R.string.tab_news_tag, R.drawable.def_tab_news, NewsFragmentActivity.class);
-		addTab(R.string.tab_blogs_tag, R.drawable.def_tab_blogs, BlogsFragmentActivity.class);
-		addTab(R.string.tab_msgs_tag, R.drawable.def_tab_msgs, MessagesActivityGroup.class);
-		addTab(R.string.tab_board_tag, R.drawable.def_tab_board, BoardActivityGroup.class);
-		addTab(R.string.tab_shout_tag, R.drawable.def_tab_shout, ShoutboxActivityGroup.class);
+		addTab(R.string.tab_overv_tag, OverviewFragmentActivity.class);
+		addTab(R.string.tab_news_tag, NewsFragmentActivity.class);
+		addTab(R.string.tab_blogs_tag, BlogsFragmentActivity.class);
+		addTab(R.string.tab_msgs_tag, MessagesActivityGroup.class);
+		addTab(R.string.tab_board_tag, BoardActivityGroup.class);
+		addTab(R.string.tab_shout_tag, ShoutboxActivityGroup.class);
 		// invisible tabs
-		addTab(R.string.tab_singlenews_tag, R.drawable.def_tab_news, SingleNewsFragmentActivity.class);
-		addTab(R.string.tab_singleblog_tag, R.drawable.def_tab_blogs, SingleBlogFragmentActivity.class);
+		addTab(R.string.tab_singlenews_tag, SingleNewsFragmentActivity.class);
+		addTab(R.string.tab_singleblog_tag, SingleBlogFragmentActivity.class);
 	}
 
 	/**
 	 * Create a tab with an Activity and add it to the TabHost
 	 * 
-	 * @param labelId
-	 *            resource id of the string representing the tab label
 	 * @param tagId
 	 *            resource id of the string representing the tag for finding the tab
-	 * @param drawableId
-	 *            resource id of the icon for this tab
 	 * @param activity
 	 *            the activity to be added
 	 */
-	private void addTab(int tagId, int drawableId, Class<?> activity) {
+	private void addTab(int tagId, Class<?> activity) {
 		// create an Intent to launch an Activity for the tab (to be reused)
 		Intent intent = new Intent().setClass(this, activity);
 		// initialize a TabSpec for each tab and add it to the TabHost
 		TabHost.TabSpec spec = usedTabHost.newTabSpec(getString(tagId));
-		// use layout inflater to get a view of the tab to be added
-		View tabIndicator = getLayoutInflater().inflate(R.layout.tab_indicator, getTabWidget(), false);
 
-		// add given information to view elements of the tab
-		ImageView icon = (ImageView) tabIndicator.findViewById(R.id.icon);
-		icon.setImageResource(drawableId);
-
-		spec.setIndicator(tabIndicator);
+		spec.setIndicator(getString(tagId));
 		spec.setContent(intent);
 		usedTabHost.addTab(spec);
 	}

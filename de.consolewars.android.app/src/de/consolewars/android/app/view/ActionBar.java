@@ -66,8 +66,8 @@ public class ActionBar extends RelativeLayout implements OnClickListener {
 
 		mProgress = (ProgressBar) mBarView.findViewById(R.id.actionbar_progress);
 
-		TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ActionBar);
-		CharSequence title = a.getString(R.styleable.ActionBar_title);
+		TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ActionBarStylable);
+		CharSequence title = a.getString(R.styleable.ActionBarStylable_title);
 		if (title != null) {
 			setTitle(title);
 		}
