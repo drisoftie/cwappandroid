@@ -3,7 +3,7 @@ package de.consolewars.android.app.tab.news;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import android.app.Activity;
 import android.os.AsyncTask;
@@ -537,8 +537,8 @@ public final class NewsFragment extends CwAbstractFragment {
 			}
 			news.setCachedPictures(CwApplication.cwEntityManager().getPictures(
 					getString(R.string.cw_url_append, news.getUrl())));
-			news.setCachedComments(CwApplication.cwEntityManager().getComments(news.getSubjectId(),
-					CommentArea.AREA_NEWS, news.getCommentsAmount(), 0));
+			news.setCachedComments(CwApplication.cwEntityManager()
+					.getComments(news.getSubjectId(), CommentArea.AREA_NEWS, news.getCommentsAmount(), 0).getComments());
 			CwApplication.cwEntityManager().replaceOrSetNews(news);
 			return null;
 		}

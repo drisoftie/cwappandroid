@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.htmlcleaner.XPatherException;
 
 import android.content.Context;
@@ -16,13 +16,17 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.consolewars.android.app.db.domain.CwBlog;
-import de.consolewars.android.app.db.domain.CwComment;
+import de.consolewars.android.app.db.domain.CwMessage;
 import de.consolewars.android.app.db.domain.CwNews;
+import de.consolewars.android.app.parser.BlogsParser;
+import de.consolewars.android.app.parser.CommentsParser;
+import de.consolewars.android.app.parser.CommentsRoot;
+import de.consolewars.android.app.parser.MessagesParser;
+import de.consolewars.android.app.parser.NewsParser;
 import de.consolewars.android.app.util.HttpPoster;
 import de.consolewars.android.app.util.MediaSnapper;
 import de.consolewars.api.API;
 import de.consolewars.api.data.AuthenticatedUser;
-import de.consolewars.api.data.Message;
 import de.consolewars.api.exception.ConsolewarsAPIException;
 
 /*
@@ -49,6 +53,14 @@ public class CwManager {
 
 	@Inject
 	private API api;
+	@Inject
+	private NewsParser newsParser;
+	@Inject
+	private BlogsParser blogsParser;
+	@Inject
+	private CommentsParser commentsParser;
+	@Inject
+	private MessagesParser messagesParser;
 	@Inject
 	private CwLoginManager cwLoginManager;
 	@Inject
@@ -98,8 +110,10 @@ public class CwManager {
 	 */
 	public List<CwBlog> getBlogsByIds(int[] id) {
 		try {
-			return api.getBlogs(id);
+			return blogsParser.parse(id);
 		} catch (ConsolewarsAPIException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return new ArrayList<CwBlog>();
@@ -162,13 +176,15 @@ public class CwManager {
 	 * @param viewPage
 	 * @return
 	 */
-	public List<CwComment> getComments(int objectId, int area, int count, int viewPage) {
+	public CommentsRoot getComments(int objectId, int area, int count, int viewPage) {
 		try {
-			return api.getComments(objectId, area, count, viewPage, -1);
+			return commentsParser.parse(objectId, area, count, viewPage, -1);
+		} catch (IOException e) {
+			e.printStackTrace();
 		} catch (ConsolewarsAPIException e) {
 			e.printStackTrace();
 		}
-		return new ArrayList<CwComment>();
+		return null;
 	}
 
 	/**
@@ -211,33 +227,36 @@ public class CwManager {
 	 * @return
 	 * @see de.consolewars.api.API#getNews(int[])
 	 */
-	public ArrayList<CwNews> getNewsByIds(int[] id) {
+	public List<CwNews> getNewsByIds(int[] id) {
 		try {
-			return api.getNews(id);
+			return newsParser.parse(id);
 		} catch (ConsolewarsAPIException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return new ArrayList<CwNews>();
 	}
 
 	/**
-	 * Method wrapper for {@link API.getMessages()}.
 	 * 
 	 * @param authenticatedUser
 	 * @param filter
 	 * @param count
 	 * @return
 	 */
-	public List<Message> getMessages(Filter filter, int count) {
+	public List<CwMessage> getMessages(Filter filter, int count) {
 		if (cwLoginManager.isLoggedIn()) {
 			try {
-				return api.getMessages(cwLoginManager.getAuthenticatedUser().getUid(), cwLoginManager
+				return messagesParser.parse(cwLoginManager.getAuthenticatedUser().getUid(), cwLoginManager
 						.getAuthenticatedUser().getPasswordHash(), filter.getFilter(), count);
 			} catch (ConsolewarsAPIException e) {
 				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		} else {
-			return new ArrayList<Message>();
+			return new ArrayList<CwMessage>();
 		}
 		return null;
 	}

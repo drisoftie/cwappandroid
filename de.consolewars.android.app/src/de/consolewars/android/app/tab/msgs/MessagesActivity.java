@@ -28,11 +28,11 @@ import com.google.inject.Inject;
 import de.consolewars.android.app.CwManager;
 import de.consolewars.android.app.Filter;
 import de.consolewars.android.app.R;
+import de.consolewars.android.app.db.domain.CwMessage;
 import de.consolewars.android.app.tab.CwBasicActivityGroup;
 import de.consolewars.android.app.util.DateUtility;
 import de.consolewars.android.app.util.StyleSpannableStringBuilder;
 import de.consolewars.android.app.util.ViewUtility;
-import de.consolewars.api.data.Message;
 
 /*
  * Copyright [2010] [Alexander Dridiger]
@@ -60,7 +60,7 @@ public class MessagesActivity extends RoboActivity {
 	@Inject
 	private ViewUtility viewUtility;
 
-	private List<Message> msgs = new ArrayList<Message>();
+	private List<CwMessage> msgs = new ArrayList<CwMessage>();
 
 	private Filter currentFilter = Filter.MSGS_INBOX;
 
@@ -76,7 +76,7 @@ public class MessagesActivity extends RoboActivity {
 	 * 
 	 * @author Alexander Dridiger
 	 */
-	public class BuildMessagesAsyncTask extends AsyncTask<Void, Integer, List<Message>> {
+	public class BuildMessagesAsyncTask extends AsyncTask<Void, Integer, List<CwMessage>> {
 
 		@Override
 		protected void onPreExecute() {
@@ -87,13 +87,13 @@ public class MessagesActivity extends RoboActivity {
 		}
 
 		@Override
-		protected List<Message> doInBackground(Void... params) {
+		protected List<CwMessage> doInBackground(Void... params) {
 			msgs = cwManager.getMessages(currentFilter, 10);
 			return msgs;
 		}
 
 		@Override
-		protected void onPostExecute(List<Message> result) {
+		protected void onPostExecute(List<CwMessage> result) {
 			// sets the messages view for this Activity
 			ViewGroup msgs_layout = (ViewGroup) LayoutInflater.from(MessagesActivity.this.getParent()).inflate(
 					R.layout.msgs_layout, null);
@@ -168,11 +168,11 @@ public class MessagesActivity extends RoboActivity {
 		}
 	}
 
-	public class MessageRowAdapter extends ArrayAdapter<Message> {
+	public class MessageRowAdapter extends ArrayAdapter<CwMessage> {
 
 		private LayoutInflater mInflater;
 
-		public MessageRowAdapter(Context context, List<Message> rows) {
+		public MessageRowAdapter(Context context, List<CwMessage> rows) {
 			super(context, R.layout.msgs_row_layout, rows);
 			mInflater = LayoutInflater.from(context);
 		}
@@ -180,7 +180,7 @@ public class MessagesActivity extends RoboActivity {
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 
-			final Message row = getItem(position);
+			final CwMessage row = getItem(position);
 
 			ViewHolder holder;
 			if (convertView == null) {
@@ -195,10 +195,10 @@ public class MessagesActivity extends RoboActivity {
 				holder = (ViewHolder) convertView.getTag();
 			}
 
-			holder.icon.setImageResource(createMessageIcon(row.isMessageread()));
+			holder.icon.setImageResource(createMessageIcon(row.isMessageRead()));
 			holder.title.setText(createTitle(row.getTitle()));
 			holder.date.setText(createDate(row.getUnixtime() * 1000L));
-			holder.author.setText(createFromUser(row.getFromusername()));
+			holder.author.setText(createFromUser(row.getFromUsername()));
 
 			convertView.setOnClickListener(new OnClickListener() {
 

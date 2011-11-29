@@ -1,8 +1,10 @@
 package de.consolewars.android.app.db.domain;
 
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.simpleframework.xml.Element;
+import org.simpleframework.xml.Root;
 
 import com.j256.ormlite.field.DatabaseField;
 
@@ -25,25 +27,35 @@ import com.j256.ormlite.field.DatabaseField;
  * 
  * @author Alexander Dridiger
  */
+@Root(name = "item", strict = false)
 public abstract class CwSubject extends CwEntity {
 
 	@DatabaseField(columnName = "article")
+	@Element(name = "article", required = false)
 	private String article;
 	@DatabaseField(columnName = "author")
+	@Element(name = "author", required = false)
 	private String author;
 	@DatabaseField(columnName = "commentsAmount")
+	@Element(name = "comments", required = false)
 	private int commentsAmount;
 	@DatabaseField(columnName = "description")
+	@Element(name = "description", required = false)
 	private String description;
 	@DatabaseField(columnName = "mode")
+	@Element(name = "mode", required = false)
 	private String mode;
 	@DatabaseField(columnName = "subjectId")
+	@Element(name = "id", required = false)
 	private int subjectId;
 	@DatabaseField(columnName = "title")
+	@Element(name = "title", required = false)
 	private String title;
 	@DatabaseField(columnName = "unixtime")
+	@Element(name = "unixtime", required = false)
 	private int unixtime;
 	@DatabaseField(columnName = "url")
+	@Element(name = "url", required = false)
 	private String url;
 
 	/**
@@ -98,6 +110,9 @@ public abstract class CwSubject extends CwEntity {
 	 * @return the author
 	 */
 	public String getAuthor() {
+		if (author == null) {
+			author = "";
+		}
 		return author;
 	}
 

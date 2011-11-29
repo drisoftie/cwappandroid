@@ -2,7 +2,7 @@ package de.consolewars.android.app.tab.overview;
 
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
@@ -26,11 +26,11 @@ import de.consolewars.android.app.CwLoginManager;
 import de.consolewars.android.app.CwManager;
 import de.consolewars.android.app.Filter;
 import de.consolewars.android.app.R;
+import de.consolewars.android.app.db.domain.CwMessage;
 import de.consolewars.android.app.tab.CwAbstractFragment;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
 import de.consolewars.android.app.util.ViewUtility;
 import de.consolewars.android.app.view.ActionBar;
-import de.consolewars.api.data.Message;
 
 /*
  * Copyright [2010] [Alexander Dridiger]
@@ -241,9 +241,9 @@ public class OverviewFragment extends CwAbstractFragment {
 								- cwEntityManager.getCwUser().getLastBlogId();
 					}
 				}
-				List<Message> msgs = cwManager.getMessages(Filter.MSGS_INBOX, 5);
+				List<CwMessage> msgs = cwManager.getMessages(Filter.MSGS_INBOX, 5);
 				msgs.addAll(cwManager.getMessages(Filter.MSGS_OUTBOX, 5));
-				for (Message msg : msgs) {
+				for (CwMessage msg : msgs) {
 					if (msg.getUnixtime() > cwEntityManager.getCwUser().getDate().getTime()) {
 						msgsAmount++;
 					}
@@ -391,7 +391,7 @@ public class OverviewFragment extends CwAbstractFragment {
 			view.setVisibility(visibility);
 		}
 	}
-	
+
 	@Override
 	public void setForeground(boolean isSelected) {
 		super.setForeground(isSelected);

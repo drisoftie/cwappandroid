@@ -3,7 +3,9 @@ package de.consolewars.android.app.db.domain;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.simpleframework.xml.Element;
+import org.simpleframework.xml.Transient;
 
 import com.j256.ormlite.dao.ForeignCollection;
 import com.j256.ormlite.field.DatabaseField;
@@ -35,22 +37,30 @@ import de.consolewars.api.API;
 public class CwNews extends CwSubject {
 
 	@DatabaseField(columnName = "authorId")
+	@Transient
 	private int authorId;
 	@DatabaseField(columnName = "category")
+	@Element(name = "category", required = false)
 	private String category;
 	@DatabaseField(columnName = "categoryshort")
+	@Element(name = "categoryshort", required = false)
 	private String categoryShort;
 	@DatabaseField(columnName = "picId")
+	@Element(name = "picid", required = false)
 	private int picId;
 
 	@ForeignCollectionField()
+	@org.simpleframework.xml.Transient
 	private ForeignCollection<CwComment> comments;
 	@ForeignCollectionField()
+	@org.simpleframework.xml.Transient
 	private ForeignCollection<CwPicture> pictures;
 
 	@DatabaseField(persisted = false)
+	@org.simpleframework.xml.Transient
 	private List<CwPicture> cachedPictures;
 	@DatabaseField(persisted = false)
+	@org.simpleframework.xml.Transient
 	private List<CwComment> cachedComments;
 
 	/**
@@ -74,8 +84,8 @@ public class CwNews extends CwSubject {
 	 * @param picId
 	 * @param pictures
 	 */
-	public CwNews(int authorId, String article, String author, int comments, String description, String mode, int subjectId,
-			String title, int unixtime, String url, String category, String categoryShort, int picId,
+	public CwNews(int authorId, String article, String author, int comments, String description, String mode,
+			int subjectId, String title, int unixtime, String url, String category, String categoryShort, int picId,
 			ForeignCollection<CwPicture> pictures) {
 		super(article, author, comments, description, mode, subjectId, title, unixtime, url);
 		this.setAuthorId(authorId);
@@ -93,7 +103,8 @@ public class CwNews extends CwSubject {
 	}
 
 	/**
-	 * @param authorId the authorId to set
+	 * @param authorId
+	 *            the authorId to set
 	 */
 	public void setAuthorId(int authorId) {
 		this.authorId = authorId;
