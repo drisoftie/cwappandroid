@@ -1,5 +1,8 @@
 package de.consolewars.android.app.db.domain;
 
+import org.simpleframework.xml.Element;
+import org.simpleframework.xml.Transient;
+
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
@@ -28,11 +31,16 @@ import de.consolewars.api.API;
 public class CwBlog extends CwSubject {
 
 	@DatabaseField(columnName = "rating")
+	@Element(name = "rating", required = false)
 	private float rating;
 	@DatabaseField(columnName = "uid")
+	@Element(name = "uid", required = false)
 	private int uid;
 	@DatabaseField(columnName = "visible")
+	@Transient
 	private boolean visible;
+	@Element(name = "visible", required = false)
+	private int visibleTemp;
 
 	/**
 	 * Mandatory
@@ -53,6 +61,7 @@ public class CwBlog extends CwSubject {
 	 * @param rating
 	 * @param uid
 	 * @param visible
+	 * @param visibleTemp
 	 */
 	public CwBlog(String article, String author, int comments, String description, String mode, int subjectId,
 			String title, int unixtime, String url, float rating, int uid, boolean visible) {
@@ -96,6 +105,11 @@ public class CwBlog extends CwSubject {
 	 * @return the visible
 	 */
 	public boolean isVisible() {
+		if (visibleTemp == 1) {
+			visible = true;
+		} else if (visibleTemp == 0) {
+			visible = false;
+		}
 		return visible;
 	}
 
@@ -105,5 +119,20 @@ public class CwBlog extends CwSubject {
 	 */
 	public void setVisible(boolean visible) {
 		this.visible = visible;
+	}
+
+	/**
+	 * @return the visibleTemp
+	 */
+	public int getVisibleTemp() {
+		return visibleTemp;
+	}
+
+	/**
+	 * @param visibleTemp
+	 *            the visibleTemp to set
+	 */
+	public void setVisibleTemp(int visibleTemp) {
+		this.visibleTemp = visibleTemp;
 	}
 }

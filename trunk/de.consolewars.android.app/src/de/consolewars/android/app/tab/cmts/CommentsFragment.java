@@ -3,13 +3,14 @@ package de.consolewars.android.app.tab.cmts;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.text.ClipboardManager;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -33,6 +34,7 @@ import de.consolewars.android.app.db.domain.CwBlog;
 import de.consolewars.android.app.db.domain.CwComment;
 import de.consolewars.android.app.db.domain.CwNews;
 import de.consolewars.android.app.db.domain.CwSubject;
+import de.consolewars.android.app.parser.CommentsRoot;
 import de.consolewars.android.app.tab.CwAbstractFragment;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
 import de.consolewars.android.app.util.DateUtility;
@@ -66,6 +68,7 @@ public class CommentsFragment extends CwAbstractFragment {
 	private Activity context;
 
 	private List<CwComment> comments = new ArrayList<CwComment>();
+	private CommentsRoot root;
 	private ViewGroup cmmts_layout;
 	private TableLayout cmmtsTable;
 	private View rowToDelete;
@@ -226,9 +229,9 @@ public class CommentsFragment extends CwAbstractFragment {
 						}
 					}
 				} else {
-					comments = CwApplication.cwEntityManager().getComments(subject.getSubjectId(), area, results,
-							currpage);
-					maxpage = !comments.isEmpty() ? comments.get(0).getPagecount() : 1;
+					root = CwApplication.cwEntityManager().getComments(subject.getSubjectId(), area, results, currpage);
+					comments = root.getComments();
+					maxpage = root.getMaxPage() != 1 ? root.getMaxPage() : 1;
 				}
 			}
 			if (!isCancelled()) {
@@ -359,7 +362,7 @@ public class CommentsFragment extends CwAbstractFragment {
 									} else if (pos == 3) {
 										ClipboardManager clipboardManager = (ClipboardManager) getActivity()
 												.getSystemService(Activity.CLIPBOARD_SERVICE);
-										clipboardManager.setText(comment.getStatement());
+										clipboardManager.setPrimaryClip(ClipData.newPlainText("Comment", comment.getStatement()));
 										Toast.makeText(getActivity(), context.getString(R.string.copying_text),
 												Toast.LENGTH_LONG).show();
 									} else if (pos == 4) {
@@ -394,7 +397,7 @@ public class CommentsFragment extends CwAbstractFragment {
 									} else if (pos == 2) {
 										ClipboardManager clipboardManager = (ClipboardManager) getActivity()
 												.getSystemService(Activity.CLIPBOARD_SERVICE);
-										clipboardManager.setText(comment.getStatement());
+										clipboardManager.setPrimaryClip(ClipData.newPlainText("Comment", comment.getStatement()));
 										Toast.makeText(getActivity(), context.getString(R.string.copying_text),
 												Toast.LENGTH_LONG).show();
 									}

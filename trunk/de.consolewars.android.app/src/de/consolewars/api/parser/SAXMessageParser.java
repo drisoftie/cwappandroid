@@ -70,6 +70,10 @@ public class SAXMessageParser extends AbstractSAXParser<Message> {
 		try {
 			URLConnection localURLConnection = new URL(getAPIURL()).openConnection();
 			localURLConnection.setRequestProperty("Cookie", cookie);
+			
+			localURLConnection.setRequestProperty("Content-type", "application/x-www-form-urlencoded;charset=windows-1251");
+			
+			localURLConnection.setRequestProperty("Accept-Charset","UTF-8");
 
 			localURLConnection.connect();
 			SAXParser localSAXParser = spf.newSAXParser();

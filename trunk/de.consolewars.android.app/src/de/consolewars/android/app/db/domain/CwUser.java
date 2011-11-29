@@ -2,7 +2,7 @@ package de.consolewars.android.app.db.domain;
 
 import java.util.Date;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;

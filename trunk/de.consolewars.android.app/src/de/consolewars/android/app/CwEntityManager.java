@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.htmlcleaner.XPatherException;
 
 import android.content.Context;
@@ -21,14 +21,15 @@ import com.google.inject.Singleton;
 import de.consolewars.android.app.db.AppDataHandler;
 import de.consolewars.android.app.db.domain.CwBlog;
 import de.consolewars.android.app.db.domain.CwComment;
+import de.consolewars.android.app.db.domain.CwMessage;
 import de.consolewars.android.app.db.domain.CwNews;
 import de.consolewars.android.app.db.domain.CwPicture;
 import de.consolewars.android.app.db.domain.CwUser;
+import de.consolewars.android.app.parser.CommentsRoot;
 import de.consolewars.android.app.util.CwBlogsIdSorter;
 import de.consolewars.android.app.util.CwCommentsIdSorter;
 import de.consolewars.android.app.util.CwNewsIdSorter;
 import de.consolewars.android.app.util.MediaSnapper;
-import de.consolewars.api.data.Message;
 
 /*
  * Copyright [2011] [Alexander Dridiger]
@@ -69,7 +70,7 @@ public class CwEntityManager {
 	private List<CwNews> downloadedBlogs;
 	private List<CwNews> savedBlogs;
 	private List<CwBlog> userBlogs;
-	private List<Message> msgs;
+	private List<CwMessage> msgs;
 	private int newestNewsId = -1;
 	private int newestBlogId = -1;
 	private int defaultCount = 10;
@@ -316,6 +317,11 @@ public class CwEntityManager {
 			List<CwBlog> loadedBlogs = null;
 			try {
 				loadedBlogs = appDataHandler.loadSavedBlogs(amount);
+				if (loadedBlogs != null) {
+
+				} else {
+
+				}
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -501,14 +507,14 @@ public class CwEntityManager {
 	/**
 	 * @return the msgs
 	 */
-	public List<Message> getMsgs() {
+	public List<CwMessage> getMsgs() {
 		if (msgs == null) {
-			msgs = new ArrayList<Message>();
+			msgs = new ArrayList<CwMessage>();
 		}
 		return msgs;
 	}
 
-	public List<Message> getMessagesAndCache(Filter filter, int count) {
+	public List<CwMessage> getMessagesAndCache(Filter filter, int count) {
 		msgs = cwManager.getMessages(filter, count);
 		return getMsgs();
 	}
@@ -587,12 +593,14 @@ public class CwEntityManager {
 	 * @param viewPage
 	 * @return
 	 */
-	public List<CwComment> getComments(int objectId, int area, int count, int viewPage) {
-		List<CwComment> list1 = cwManager.getComments(objectId, area, count, viewPage);
+	public CommentsRoot getComments(int objectId, int area, int count, int viewPage) {
+		CommentsRoot root = cwManager.getComments(objectId, area, count, viewPage);
+		List<CwComment> list1 = root.getComments();
 		List<CwComment> list2 = Arrays.asList(list1.toArray(new CwComment[0]));
 		list1 = mergeCommentsLists(list1, list2);
 		Collections.sort(list1, cwCommentsIdSorter);
-		return list1;
+		root.setComments(list1);
+		return root;
 	}
 
 	public void discardAllNews() {

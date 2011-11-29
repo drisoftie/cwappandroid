@@ -1,41 +1,58 @@
 package de.consolewars.android.app.db.domain;
 
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.simpleframework.xml.Element;
+import org.simpleframework.xml.Root;
+import org.simpleframework.xml.Transient;
 
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
 @DatabaseTable(tableName = "Comment")
+@Root(name = "item", strict = false)
 public class CwComment extends CwEntity {
 
 	@DatabaseField(columnName = "cid")
+	@Element(name = "cid", required = false)
 	private int cid;
 	@DatabaseField(columnName = "commentcount")
+	@Element(name = "commentcount", required = false)
 	private int commentcount;
 	@DatabaseField(columnName = "currpage")
+	@Element(name = "currpage", required = false)
 	private int currpage;
 	@DatabaseField(columnName = "mode")
+	@Element(name = "mode", required = false)
 	private String mode;
 	@DatabaseField(columnName = "pagecount")
+	@Element(name = "pagecount", required = false)
 	private int pagecount;
 	@DatabaseField(columnName = "postcount")
+	@Element(name = "postcount", required = false)
 	private int postcount;
 	@DatabaseField(columnName = "quote")
+	@Element(name = "quote", required = false)
 	private String quote;
 	@DatabaseField(columnName = "statement")
+	@Element(name = "statement", required = false)
 	private String statement;
 	@DatabaseField(columnName = "uid")
+	@Element(name = "uid", required = false)
 	private int uid;
 	@DatabaseField(columnName = "unixtime")
+	@Element(name = "unixtime", required = false)
 	private int unixtime;
 	@DatabaseField(columnName = "username")
+	@Element(name = "username", required = false)
 	private String username;
 	@DatabaseField(columnName = "usertitle")
+	@Element(name = "usertitle", required = false)
 	private String usertitle;
 
-	@DatabaseField(foreign = true, foreignAutoRefresh = true, columnName = "id")
+	@DatabaseField(foreign = true, foreignAutoRefresh = true, columnName = "news_id")
+	@Transient
 	private CwNews cwNews;
 
 	/**
