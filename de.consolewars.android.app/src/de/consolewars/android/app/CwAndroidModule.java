@@ -12,6 +12,7 @@ import de.consolewars.android.app.db.DaoProvider;
 import de.consolewars.android.app.db.domain.CwBlog;
 import de.consolewars.android.app.db.domain.CwComment;
 import de.consolewars.android.app.db.domain.CwNews;
+import de.consolewars.android.app.db.domain.CwOptions;
 import de.consolewars.android.app.db.domain.CwPicture;
 import de.consolewars.android.app.db.domain.CwUser;
 import de.consolewars.android.app.db.domain.CwVideo;
@@ -50,6 +51,10 @@ public class CwAndroidModule extends AbstractAndroidModule {
 				.in(Singleton.class);
 		bind(new TypeLiteral<Dao<CwVideo, Integer>>() {
 		}).toProvider(new DaoProvider<CwVideo, Integer>(ormLiteSqliteOpenHelper.getConnectionSource(), CwVideo.class))
+				.in(Singleton.class);
+		bind(new TypeLiteral<Dao<CwOptions, Integer>>() {
+		}).toProvider(
+				new DaoProvider<CwOptions, Integer>(ormLiteSqliteOpenHelper.getConnectionSource(), CwOptions.class))
 				.in(Singleton.class);
 	}
 }

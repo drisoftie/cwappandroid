@@ -138,7 +138,6 @@ public class BoardActivity extends RoboActivity {
 			} else {
 				CookieSyncManager.createInstance(BoardActivity.this);
 				CookieManager cookieManager = CookieManager.getInstance();
-				// cookieManager.removeAllCookie();
 				cookieManager.setCookie(getString(R.string.cw_domain), getString(R.string.cw_cookie_userid) + "="
 						+ cwLoginManager.getAuthenticatedUser().getUid());
 				cookieManager.setCookie(getString(R.string.cw_domain), getString(R.string.cw_cookie_pw) + "="

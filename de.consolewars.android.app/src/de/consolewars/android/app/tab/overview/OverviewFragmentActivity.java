@@ -1,8 +1,5 @@
 package de.consolewars.android.app.tab.overview;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.os.Bundle;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwAbstractFragment;
@@ -50,21 +47,29 @@ public class OverviewFragmentActivity extends CwAbstractFragmentActivity {
 		fragmentProvider = new FragmentProvider() {
 			@Override
 			public CwAbstractFragment requestFragment(int index) {
-				List<CwAbstractFragment> fragments = adapter.getFragments();
 				switch (index) {
 				case 0:
-					return adapter.switchFragmentsInfo(
-							fragments.set(index, new OverviewFragment(getString(R.string.overview))),
-							fragments.get(index));
+					return new OverviewFragment(getTitle(index), index);
+				case 1:
+					return new OptionsFragment(getTitle(index), index);
 				}
-				throw new IllegalStateException("Not more than one fragment supported.");
+				throw new IllegalStateException("Not more than two fragment supported.");
 			}
 
 			@Override
-			public void initFragments() {
-				List<CwAbstractFragment> fragments = new ArrayList<CwAbstractFragment>();
-				fragments.add(new OverviewFragment(getString(R.string.overview)));
-				adapter.setFragments(fragments);
+			public int getCount() {
+				return 2;
+			}
+
+			@Override
+			public String getTitle(int index) {
+				switch (index) {
+				case 0:
+					return getString(R.string.overview);
+				case 1:
+					return getString(R.string.options);
+				}
+				throw new IllegalStateException("Not more than two fragment supported.");
 			}
 		};
 		return fragmentProvider;

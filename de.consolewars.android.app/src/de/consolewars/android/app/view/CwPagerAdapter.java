@@ -1,7 +1,5 @@
 package de.consolewars.android.app.view;
 
-import java.util.List;
-
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -26,7 +24,6 @@ import de.consolewars.android.app.tab.CwAbstractFragment;
  */
 public class CwPagerAdapter extends FragmentPagerAdapter implements TitleProvider {
 
-	private List<CwAbstractFragment> fragments;
 	private FragmentProvider fragmentProvider;
 
 	public CwPagerAdapter(FragmentManager fm) {
@@ -40,27 +37,12 @@ public class CwPagerAdapter extends FragmentPagerAdapter implements TitleProvide
 
 	@Override
 	public int getCount() {
-		return fragments.size();
+		return fragmentProvider.getCount();
 	}
 
 	@Override
 	public String getTitle(int position) {
-		return fragments.get(position).getTitle();
-	}
-
-	/**
-	 * @return the fragments
-	 */
-	public List<CwAbstractFragment> getFragments() {
-		return fragments;
-	}
-
-	/**
-	 * @param fragments
-	 *            the fragments to set
-	 */
-	public void setFragments(List<CwAbstractFragment> fragments) {
-		this.fragments = fragments;
+		return fragmentProvider.getTitle(position);
 	}
 
 	/**
@@ -76,42 +58,6 @@ public class CwPagerAdapter extends FragmentPagerAdapter implements TitleProvide
 	 */
 	public void setFragmentProvider(FragmentProvider fragmentProvider) {
 		this.fragmentProvider = fragmentProvider;
-		fragmentProvider.initFragments();
-	}
-
-	/**
-	 * Convenience method.
-	 * 
-	 * @param oldFragment
-	 * @param newFragment
-	 * @return new Fragment with state information of the old one.
-	 */
-	public CwAbstractFragment switchFragmentsInfo(CwAbstractFragment oldFragment, CwAbstractFragment newFragment) {
-		if (oldFragment.isSelected()) {
-			newFragment.setForeground(true);
-		}
-		if (oldFragment.isStartFragment()) {
-			newFragment.setStartFragment(true);
-		}
-		newFragment.setTitle(oldFragment.getTitle());
-		return newFragment;
-	}
-
-	/**
-	 * Convenience method.
-	 * 
-	 * @param newFragment
-	 * @param index
-	 */
-	public void switchFragmentsInfo(CwAbstractFragment newFragment, int index) {
-		if (getFragments().get(index).isSelected()) {
-			newFragment.setForeground(true);
-		}
-		if (getFragments().get(index).isStartFragment()) {
-			newFragment.setStartFragment(true);
-		}
-		newFragment.setTitle(getFragments().get(index).getTitle());
-		getFragments().set(index, newFragment);
 	}
 
 	/**
@@ -125,6 +71,8 @@ public class CwPagerAdapter extends FragmentPagerAdapter implements TitleProvide
 	public interface FragmentProvider {
 		public CwAbstractFragment requestFragment(int index);
 
-		public void initFragments();
+		public int getCount();
+
+		public String getTitle(int index);
 	}
 }

@@ -6,11 +6,11 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -36,6 +36,7 @@ import de.consolewars.android.app.db.domain.CwNews;
 import de.consolewars.android.app.db.domain.CwSubject;
 import de.consolewars.android.app.parser.CommentsRoot;
 import de.consolewars.android.app.tab.CwAbstractFragment;
+import de.consolewars.android.app.tab.CwAbstractFragmentActivity;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
 import de.consolewars.android.app.util.DateUtility;
 import de.consolewars.android.app.util.TextViewHandler;
@@ -75,7 +76,6 @@ public class CommentsFragment extends CwAbstractFragment {
 	private int area;
 	private int currpage = 1;
 	private int maxpage = 1;
-	private final int results = 20;
 
 	private CwSubject subject;
 
@@ -87,8 +87,8 @@ public class CommentsFragment extends CwAbstractFragment {
 	public CommentsFragment() {
 	}
 
-	public CommentsFragment(CwSubject subject, String title) {
-		super(title);
+	public CommentsFragment(CwSubject subject, String title, int position) {
+		super(title, position);
 		setHasOptionsMenu(true);
 		this.subject = subject;
 		task = new BuildCommentsTask();
@@ -105,6 +105,14 @@ public class CommentsFragment extends CwAbstractFragment {
 	}
 
 	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		if (((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
+			initActionBar();
+		}
+	}
+
+	@Override
 	public void onResume() {
 		super.onResume();
 		if (subject instanceof CwNews) {
@@ -115,15 +123,18 @@ public class CommentsFragment extends CwAbstractFragment {
 
 		cmmts_layout = (ViewGroup) getView();
 
-		if (task != null && task.getStatus().equals(AsyncTask.Status.PENDING)) {
+		if (task != null && task.getStatus().equals(AsyncTask.Status.PENDING)
+				&& task.viewtask.getStatus().equals(AsyncTask.Status.PENDING)) {
 			task.execute();
-		} else if (task != null && task.getStatus().equals(AsyncTask.Status.FINISHED)) {
+		} else if (task != null && task.getStatus().equals(AsyncTask.Status.FINISHED)
+				&& task.viewtask.getStatus().equals(AsyncTask.Status.FINISHED)) {
 			task = new BuildCommentsTask();
 			task.execute();
-		} else if (task != null && task.getStatus().equals(AsyncTask.Status.RUNNING)) {
+		} else if (task != null && task.getStatus().equals(AsyncTask.Status.RUNNING)
+				&& task.viewtask.getStatus().equals(AsyncTask.Status.RUNNING)) {
 			task.cancel(true);
 		}
-		if (isSelected()) {
+		if (((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
 			initActionBar();
 		}
 	}
@@ -177,7 +188,8 @@ public class CommentsFragment extends CwAbstractFragment {
 				actionBar.addAction(new Action() {
 					@Override
 					public void performAction(View view) {
-						if (task.getStatus().equals(AsyncTask.Status.RUNNING)) {
+						if (task.getStatus().equals(AsyncTask.Status.RUNNING)
+								|| task.viewtask.getStatus().equals(AsyncTask.Status.RUNNING)) {
 							task.cancel(true);
 						}
 						task = new BuildCommentsTask();
@@ -196,6 +208,7 @@ public class CommentsFragment extends CwAbstractFragment {
 	private class BuildCommentsTask extends AsyncTask<Void, CwComment, Void> {
 
 		List<ViewGroup> inflatedRows;
+		BuildCommentsAsyncTask viewtask = new BuildCommentsAsyncTask();
 
 		@Override
 		protected void onPreExecute() {
@@ -205,33 +218,45 @@ public class CommentsFragment extends CwAbstractFragment {
 		@Override
 		protected Void doInBackground(Void... params) {
 			if (!isCancelled()) {
+				int results = CwApplication.cwEntityManager().getOptions().getMaxCmts();
+
 				inflatedRows = new ArrayList<ViewGroup>();
-				if (subject instanceof CwNews && !((CwNews) subject).getCachedComments().isEmpty()) {
+				if (subject instanceof CwNews && !((CwNews) subject).getComments().isEmpty()) {
 					CwNews news = (CwNews) subject;
-					if (news.getCachedComments().size() % results == 0) {
-						maxpage = news.getCachedComments().size() / results;
+					if (news.getComments().size() % results == 0) {
+						maxpage = news.getComments().size() / results;
 					} else {
-						maxpage = (news.getCachedComments().size() / results) + 1;
+						maxpage = (news.getComments().size() / results) + 1;
 					}
 					if (currpage == 1) {
-						comments = news.getCachedComments().subList(0,
-								news.getCachedComments().size() > results ? results : news.getCachedComments().size());
+						comments.clear();
+						comments.addAll(news.getComments());
+						comments = comments.subList(0, news.getComments().size() > results ? results : news
+								.getComments().size());
 					} else {
-						if (news.getCachedComments().size() - ((currpage - 1) * results) >= 0) {
+						if (news.getComments().size() - ((currpage - 1) * results) >= 0) {
 							int start = (currpage - 1) * results;
 							int end;
-							if (news.getCachedComments().size() - ((currpage - 1) * results) > results) {
+							if (news.getComments().size() - ((currpage - 1) * results) > results) {
 								end = currpage * results;
 							} else {
-								end = news.getCachedComments().size();
+								end = news.getComments().size();
 							}
-							comments = news.getCachedComments().subList(start, end);
+							comments.clear();
+							comments.addAll(news.getComments());
+							comments = comments.subList(start, end);
+						}
+					}
+					for (CwComment comment : comments) {
+						if ((comment.getId() != null && comment.getUsername() == null)) {
+							comment = CwApplication.cwEntityManager().getRefreshedComment(comment);
 						}
 					}
 				} else {
 					root = CwApplication.cwEntityManager().getComments(subject.getSubjectId(), area, results, currpage);
-					comments = root.getComments();
 					maxpage = root.getMaxPage() != 1 ? root.getMaxPage() : 1;
+					comments.clear();
+					comments.addAll(root.getComments());
 				}
 			}
 			if (!isCancelled()) {
@@ -251,7 +276,8 @@ public class CommentsFragment extends CwAbstractFragment {
 		@Override
 		protected void onPostExecute(Void result) {
 			getActionBar().setProgressBarVisibility(View.GONE);
-			new BuildCommentsAsyncTask().execute();
+			viewtask = new BuildCommentsAsyncTask();
+			viewtask.execute();
 		}
 
 		/**
@@ -362,7 +388,8 @@ public class CommentsFragment extends CwAbstractFragment {
 									} else if (pos == 3) {
 										ClipboardManager clipboardManager = (ClipboardManager) getActivity()
 												.getSystemService(Activity.CLIPBOARD_SERVICE);
-										clipboardManager.setPrimaryClip(ClipData.newPlainText("Comment", comment.getStatement()));
+										clipboardManager.setPrimaryClip(ClipData.newPlainText("Comment",
+												comment.getStatement()));
 										Toast.makeText(getActivity(), context.getString(R.string.copying_text),
 												Toast.LENGTH_LONG).show();
 									} else if (pos == 4) {
@@ -397,7 +424,8 @@ public class CommentsFragment extends CwAbstractFragment {
 									} else if (pos == 2) {
 										ClipboardManager clipboardManager = (ClipboardManager) getActivity()
 												.getSystemService(Activity.CLIPBOARD_SERVICE);
-										clipboardManager.setPrimaryClip(ClipData.newPlainText("Comment", comment.getStatement()));
+										clipboardManager.setPrimaryClip(ClipData.newPlainText("Comment",
+												comment.getStatement()));
 										Toast.makeText(getActivity(), context.getString(R.string.copying_text),
 												Toast.LENGTH_LONG).show();
 									}
@@ -459,7 +487,8 @@ public class CommentsFragment extends CwAbstractFragment {
 					@Override
 					public void onClick(View v) {
 						currpage++;
-						if (task.getStatus().equals(AsyncTask.Status.RUNNING)) {
+						if (task.getStatus().equals(AsyncTask.Status.RUNNING)
+								|| task.viewtask.getStatus().equals(AsyncTask.Status.RUNNING)) {
 							task.cancel(true);
 						}
 						task = new BuildCommentsTask();
@@ -471,7 +500,8 @@ public class CommentsFragment extends CwAbstractFragment {
 					public void onClick(View v) {
 						currpage--;
 						cancel(true);
-						if (task.getStatus().equals(AsyncTask.Status.RUNNING)) {
+						if (task.getStatus().equals(AsyncTask.Status.RUNNING)
+								|| task.viewtask.getStatus().equals(AsyncTask.Status.RUNNING)) {
 							task.cancel(true);
 						}
 						task = new BuildCommentsTask();
@@ -617,11 +647,12 @@ public class CommentsFragment extends CwAbstractFragment {
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		if (subject instanceof CwNews && isSelected()) {
+		if (subject instanceof CwNews && ((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
 			super.onCreateOptionsMenu(menu, inflater);
 			menu.clear();
 			inflater.inflate(R.menu.comments_news_menu, menu);
-		} else if (subject instanceof CwBlog && isSelected()) {
+		} else if (subject instanceof CwBlog
+				&& ((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
 			super.onCreateOptionsMenu(menu, inflater);
 			menu.clear();
 			inflater.inflate(R.menu.comments_blog_menu, menu);
@@ -634,11 +665,12 @@ public class CommentsFragment extends CwAbstractFragment {
 		if (menuInflater == null) {
 			menuInflater = getActivity().getMenuInflater();
 		}
-		if (subject instanceof CwNews && isSelected()) {
+		if (subject instanceof CwNews && ((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
 			super.onPrepareOptionsMenu(menu);
 			menu.clear();
 			menuInflater.inflate(R.menu.comments_news_menu, menu);
-		} else if (subject instanceof CwBlog && isSelected()) {
+		} else if (subject instanceof CwBlog
+				&& ((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
 			super.onPrepareOptionsMenu(menu);
 			menu.clear();
 			menuInflater.inflate(R.menu.comments_blog_menu, menu);
@@ -647,7 +679,7 @@ public class CommentsFragment extends CwAbstractFragment {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		if (isSelected()) {
+		if (((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
 			super.onOptionsItemSelected(item);
 			// Find which menu item has been selected
 			switch (item.getItemId()) {
@@ -657,7 +689,8 @@ public class CommentsFragment extends CwAbstractFragment {
 				((ScrollView) cmmts_layout.findViewById(R.id.comments_scroll_view)).fullScroll(ScrollView.FOCUS_UP);
 				break;
 			case (R.id.menu_cmts_refresh):
-				if (task.getStatus().equals(AsyncTask.Status.RUNNING)) {
+				if (task.getStatus().equals(AsyncTask.Status.RUNNING)
+						|| task.viewtask.getStatus().equals(AsyncTask.Status.RUNNING)) {
 					task.cancel(true);
 				}
 				task = new BuildCommentsTask();
@@ -669,10 +702,7 @@ public class CommentsFragment extends CwAbstractFragment {
 	}
 
 	@Override
-	public void setForeground(boolean isSelected) {
-		super.setForeground(isSelected);
-		if (isSelected) {
-			initActionBar();
-		}
+	public void refresh() {
+		initActionBar();
 	}
 }

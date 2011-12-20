@@ -16,7 +16,10 @@ import com.j256.ormlite.stmt.Where;
 
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.db.domain.CwBlog;
+import de.consolewars.android.app.db.domain.CwComment;
 import de.consolewars.android.app.db.domain.CwNews;
+import de.consolewars.android.app.db.domain.CwOptions;
+import de.consolewars.android.app.db.domain.CwPicture;
 import de.consolewars.android.app.db.domain.CwUser;
 
 /*
@@ -48,9 +51,19 @@ public class AppDataHandler {
 	@Inject
 	private Dao<CwBlog, Integer> cwBlogsDao;
 	@Inject
+	private Dao<CwComment, Integer> cwCommentsDao;
+	@Inject
+	private Dao<CwPicture, Integer> cwPicturesDao;
+	@Inject
+	private Dao<CwPicture, Integer> cwVideosDao;
+	@Inject
+	private Dao<CwOptions, Integer> cwOptionsDao;
+
+	@Inject
 	private Context context;
 
 	private CwUser cwUser;
+	private CwOptions options;
 
 	/**
 	 * @return
@@ -197,7 +210,13 @@ public class AppDataHandler {
 		} else {
 			where.gt(context.getString(R.string.db_subjectid_attribute), id);
 		}
-		return where.query();
+		List<CwNews> news = where.query();
+		for (CwNews cwNews : news) {
+			for (CwComment comment : cwNews.getComments()) {
+				cwCommentsDao.refresh(comment);
+			}
+		}
+		return news;
 	}
 
 	/**
@@ -237,26 +256,92 @@ public class AppDataHandler {
 	 * @throws SQLException
 	 */
 	public boolean createOrUpdateNews(CwNews news) throws SQLException {
+		boolean created = false;
 		List<CwNews> matches = cwNewsDao.queryForEq(context.getString(R.string.db_subjectid_attribute),
 				news.getSubjectId());
 		if (!matches.isEmpty()) {
-			CwNews savedNews = matches.get(0);
-			savedNews.setArticle(news.getArticle());
-			savedNews.setAuthor(news.getAuthor());
-			savedNews.setCategory(news.getCategory());
-			savedNews.setCategoryShort(news.getCategoryShort());
-			savedNews.setCommentsAmount(news.getCommentsAmount());
-			savedNews.setDescription(news.getDescription());
-			savedNews.setMode(news.getMode());
-			savedNews.setSubjectId(news.getSubjectId());
-			savedNews.setPicId(news.getPicId());
-			savedNews.setTitle(news.getTitle());
-			savedNews.setUnixtime(news.getUnixtime());
-			savedNews.setUrl(news.getUrl());
-			cwNewsDao.update(savedNews);
-			return false;
+			CwNews match = matches.get(0);
+			news.setId(match.getId());
+			cwNewsDao.update(match);
+			created = false;
+		} else {
+			cwNewsDao.create(news);
+			created = true;
 		}
-		return cwNewsDao.create(news) == 1;
+		for (CwComment comment : news.getComments()) {
+			createOrUpdateComment(comment);
+		}
+		// for (CwPicture pic : news.getPictures()) {
+		//
+		// }
+		// for (CwVideo video : news.getVideos()) {
+		//
+		// }
+		return created;
+	}
+
+	public boolean createOrUpdateComment(CwComment comment) throws SQLException {
+		boolean created = false;
+		List<CwComment> matches = cwCommentsDao.queryForEq(context.getString(R.string.db_commentid_attribute),
+				comment.getCid());
+		if (!matches.isEmpty()) {
+			CwComment match = matches.get(0);
+			comment.setId(match.getId());
+			created = false;
+		} else {
+			cwCommentsDao.create(comment);
+			created = true;
+		}
+		return created;
+	}
+
+	public boolean createOrUpdatePicture(CwPicture picture) throws SQLException {
+		boolean created = false;
+		cwPicturesDao.queryForEq(context.getString(R.string.db_commentid_attribute), picture.getUrl());
+
+		return created;
+	}
+
+	public boolean refreshComment(CwComment commentToRefresh) throws SQLException {
+		return cwCommentsDao.refresh(commentToRefresh) == 1;
+	}
+
+	public boolean refreshComment(CwComment commentToRefresh, CwComment comment) {
+
+		return true;
+	}
+
+	public void createOrUpdateOptions(CwOptions options) throws SQLException {
+		if (cwOptionsDao.countOf() == 0) {
+			cwOptionsDao.create(options);
+		} else {
+			options.setId(cwOptionsDao.queryForAll().get(0).getId());
+			cwOptionsDao.update(options);
+		}
+	}
+
+	public CwOptions getOptions() {
+		if (options == null) {
+			if (!hasOptionsData()) {
+				CwOptions options = new CwOptions();
+				options.setMaxBlogsAction(10);
+				options.setMaxBlogsScroll(10);
+				options.setMaxCmts(30);
+				options.setMaxNewsAction(10);
+				options.setMaxNewsScroll(10);
+				try {
+					createOrUpdateOptions(options);
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			try {
+				options = cwOptionsDao.queryForAll().get(0);
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return options;
 	}
 
 	public boolean hasNewsData() {
@@ -273,6 +358,17 @@ public class AppDataHandler {
 	public boolean hasBlogsData() {
 		try {
 			if (cwBlogsDao.countOf() > 0) {
+				return true;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	public boolean hasOptionsData() {
+		try {
+			if (cwOptionsDao.countOf() > 0) {
 				return true;
 			}
 		} catch (SQLException e) {

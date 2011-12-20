@@ -19,7 +19,7 @@
 	<string name="edit">Bearbeiten</string>
 	<string name="copy">Kopieren</string>
 	<string name="copying_text">Text wurde in die Zwischenablage kopiert</string>
-	
+
 	<string name="pull_to_load">Ziehen zum Refreshen...</string>
 	<string name="release_to_load">Jetzt loslassen...</string>
 
@@ -62,11 +62,22 @@
 	<string name="no_text_entered">Es wurde kein Text eingegeben, senden nicht möglich.
 	</string>
 	<string name="try_login">Einlogversuch gestartet...</string>
+	<string name="already_logged_in">Schon eingeloggt.</string>
 	<string name="logged_in">Sie wurden erfolgreich eingeloggt.</string>
 	<string name="login_failed">Einlogversuch gescheitert.</string>
 	<string name="logging_out">Sie werden ausgeloggt...</string>
 	<string name="logged_out">Sie wurden erfolgreich ausgeloggt.</string>
 	<string name="not_logged_in">Sie sind nicht eingeloggt.</string>
+
+	<!-- options -->
+	<string name="options">Optionen</string>
+
+	<string name="opt_max_news_scroll">Max. News pro Aufruf (Scroll):</string>
+	<string name="opt_max_news_actionbar">Max. News pro Aufruf (Actionbar):</string>
+	<string name="opt_max_blogs_scroll">Max. Blogs pro Aufruf (Scroll):</string>
+	<string name="opt_max_blogs_actionbar">Max. Blogs pro Aufruf (Actionbar):</string>
+	<string name="opt_max_cmts">Max. Kommentare pro Seite:</string>
+
 
 	<!-- subjects -->
 	<string name="gallery">Galerie</string>
@@ -81,7 +92,7 @@
 	<string name="comment_edited">Der Kommentar wurde erfolgreich editiert.</string>
 	<string name="quote">Zitat</string>
 	<string name="comment_fav">Favorit</string>
-	
+
 
 
 	<!-- news -->
@@ -104,7 +115,7 @@
 	<string name="news_saved">%1$d News gespeichert.</string>
 
 	<string name="news_sync">Sync</string>
-	<string name="news_syncing">Lade volle News (Gallerie, etc.)...</string>
+	<string name="news_syncing">Lade volle News (Galerie, etc.)...</string>
 	<string name="news_synced">Volle News geladen.</string>
 
 	<string name="news_fav">Favorit</string>

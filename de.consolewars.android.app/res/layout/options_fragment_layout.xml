@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/overview_bg" >
+
+    <Button
+        android:id="@+id/bttn_opt_save"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:text="Speichern" />
+
+    <Button
+        android:id="@+id/bttn_opt_default"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_toRightOf="@id/bttn_opt_save"
+        android:text="Default" />
+
+    <ScrollView
+        android:id="@+id/opt_scroll"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_above="@id/bttn_opt_save" >
+
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" > <!-- news -->
+
+            <TextView
+                android:id="@+id/txt_opt_news_max_scroll"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/overview_logged_as_padding"
+                android:text="@string/opt_max_news_scroll"
+                android:textColor="@color/overview_text"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txt_opt_news_max_scroll_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/overview_logged_as_padding"
+                android:layout_toRightOf="@id/txt_opt_news_max_scroll"
+                android:textColor="@color/overview_text"
+                android:textSize="15dp"
+                android:textStyle="bold" />
+
+            <SeekBar
+                android:id="@+id/seek_opt_news_scroll"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/txt_opt_news_max_scroll"
+                android:layout_margin="5dp"
+                android:max="49" />
+
+            <TextView
+                android:id="@+id/txt_opt_news_max_action"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/seek_opt_news_scroll"
+                android:layout_margin="@dimen/overview_logged_as_padding"
+                android:text="@string/opt_max_news_actionbar"
+                android:textColor="@color/overview_text"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txt_opt_news_max_action_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/seek_opt_news_scroll"
+                android:layout_margin="@dimen/overview_logged_as_padding"
+                android:layout_toRightOf="@id/txt_opt_news_max_action"
+                android:textColor="@color/overview_text"
+                android:textSize="15dp"
+                android:textStyle="bold" />
+
+            <SeekBar
+                android:id="@+id/seek_opt_news_action"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/txt_opt_news_max_action"
+                android:layout_margin="5dp"
+                android:max="49" />
+
+            <!-- blogs -->
+
+            <TextView
+                android:id="@+id/txt_opt_blogs_max_scroll"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/seek_opt_news_action"
+                android:layout_margin="@dimen/overview_logged_as_padding"
+                android:text="@string/opt_max_blogs_scroll"
+                android:textColor="@color/overview_text"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txt_opt_blogs_max_scroll_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/seek_opt_news_action"
+                android:layout_margin="@dimen/overview_logged_as_padding"
+                android:layout_toRightOf="@id/txt_opt_blogs_max_scroll"
+                android:textColor="@color/overview_text"
+                android:textSize="15dp"
+                android:textStyle="bold" />
+
+            <SeekBar
+                android:id="@+id/seek_opt_blogs_scroll"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/txt_opt_blogs_max_scroll"
+                android:layout_margin="5dp"
+                android:max="49" />
+
+            <TextView
+                android:id="@+id/txt_opt_blogs_max_action"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/seek_opt_blogs_scroll"
+                android:layout_margin="@dimen/overview_logged_as_padding"
+                android:text="@string/opt_max_blogs_actionbar"
+                android:textColor="@color/overview_text"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txt_opt_blogs_max_action_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/seek_opt_blogs_scroll"
+                android:layout_margin="@dimen/overview_logged_as_padding"
+                android:layout_toRightOf="@id/txt_opt_blogs_max_action"
+                android:textColor="@color/overview_text"
+                android:textSize="15dp"
+                android:textStyle="bold" />
+
+            <SeekBar
+                android:id="@+id/seek_opt_blogs_action"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/txt_opt_blogs_max_action"
+                android:layout_margin="5dp"
+                android:max="49" />
+
+            <!-- comments -->
+
+            <TextView
+                android:id="@+id/txt_opt_cmts_max"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/seek_opt_blogs_action"
+                android:layout_margin="@dimen/overview_logged_as_padding"
+                android:text="@string/opt_max_cmts"
+                android:textColor="@color/overview_text"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txt_opt_cmts_max_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/seek_opt_blogs_action"
+                android:layout_margin="@dimen/overview_logged_as_padding"
+                android:layout_toRightOf="@id/txt_opt_cmts_max"
+                android:textColor="@color/overview_text"
+                android:textSize="15dp"
+                android:textStyle="bold" />
+
+            <SeekBar
+                android:id="@+id/seek_opt_cmts_max"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/txt_opt_cmts_max"
+                android:layout_margin="5dp"
+                android:max="99" />
+        </RelativeLayout>
+    </ScrollView>
+
+</RelativeLayout>

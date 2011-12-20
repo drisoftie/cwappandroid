@@ -13,6 +13,9 @@ public class CwVideo extends CwEntity {
 	@DatabaseField(columnName = "url", canBeNull = false)
 	private String url;
 
+	@DatabaseField(foreign = true, foreignAutoRefresh = true)
+	private CwNews cwNews;
+
 	/**
 	 * Mandatory
 	 */
@@ -53,6 +56,21 @@ public class CwVideo extends CwEntity {
 	 */
 	public void setUrl(String url) {
 		this.url = url;
+	}
+
+	/**
+	 * @return the cwNews
+	 */
+	public CwNews getCwNews() {
+		return cwNews;
+	}
+
+	/**
+	 * @param cwNews
+	 *            the cwNews to set
+	 */
+	public void setCwNews(CwNews cwNews) {
+		this.cwNews = cwNews;
 	}
 
 	@Override

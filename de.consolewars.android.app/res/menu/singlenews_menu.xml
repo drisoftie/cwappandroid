@@ -7,7 +7,7 @@
 	</item>
 	<item
 		android:id="@+id/menu_singlenews_save"
-		android:title="Speichere die angezeigte News">
+		android:title="Speichere News">
 	</item>
 	<item
 		android:id="@+id/menu_blogs"

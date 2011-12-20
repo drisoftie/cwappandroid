@@ -1,118 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<string
-		name="cw_domain">http://www.consolewars.de</string>	
-	<string
-		name="cw_url_append">http://www.consolewars.de%1$s</string>
-	<string
-		name="cw_url_slash">http://www.consolewars.de/</string>
-	<string
-		name="cw_usercenter">http://www.%1$s.consolewars.de/settings/?page=%2$s</string>	
-	<string
-		name="cw_usercenter_personal">personal</string>
-	<string
-		name="cw_shoutbox">http://www.consolewars.de/chat</string>	
-	<string
-		name="xpath_get_author">//div[@class=\'author\']/a[@href]</string>
-	<string
-		name="xpath_get_securitytoken">//div[@class=\'blockfoot actionbuttons\']/div[@class=\'group\']/input[@name=\'securitytoken\']</string>
-	<string
-		name="xpath_get_video">//param[@name=\'movie\']</string>
-	<string
-		name="xpath_get_pictures">//script[@type=\'text/javascript\'][text()]</string>
-	<string
-		name="xpath_pictures_filter">liste = new Array(</string>
-	<string
-		name="xpath_pictures_separator">bigliste = new Array(</string>			
-	<string
-		name="href">href</string>
-	<string
-		name="value">value</string>
-	<string
-		name="utf8">UTF-8</string>	
-	<string
-		name="prefix_userpic">/userpages/?uid=</string>	
-	<string
-		name="youtube_embedding">"&lt;object width=\"%1$d\" height=\"%2$d\"&gt;&lt;param name=\"movie\" value=\"%3$s\"&gt;&lt;/param&gt;&lt;param name=\"allowFullScreen\" value=\"true\"&gt;&lt;/param&gt;&lt;param name=\"allowscriptaccess\" value=\"always\"&gt;&lt;/param&gt;&lt;embed src=\"%3$s\" type=\"application/x-shockwave-flash\" allowscriptaccess=\"always\" allowfullscreen=\"true\" width=\"%1$d\" height=\"%2$d\"&gt;&lt;/embed&gt;"</string>
-	<string
-		name="userpic_url">http://www.consolewars.de/gen/fetchavatars.php?type=profile&amp;u=%1$d&amp;sizex=%2$s
+	<string name="cw_domain">http://www.consolewars.de</string>
+	<string name="cw_url_append">http://www.consolewars.de%1$s</string>
+	<string name="cw_url_slash">http://www.consolewars.de/</string>
+	<string name="cw_usercenter">http://www.%1$s.consolewars.de/settings/?page=%2$s</string>
+	<string name="cw_usercenter_personal">personal</string>
+	<string name="cw_shoutbox">http://www.consolewars.de/chat</string>
+
+
+	<string name="cw_pic_tag">picture</string>
+	<string name="cw_video_tag">video</string>
+
+	<string name="xpath_get_author">//div[@class=\'author\']/a[@href]</string>
+	<string name="xpath_get_securitytoken">//div[@class=\'blockfoot
+		actionbuttons\']/div[@class=\'group\']/input[@name=\'securitytoken\']
 	</string>
-	<string
-        name="catpic_url">http://www.consolewars.de/images/system-icons/%1$s.png
-    </string>
-	<string
-		name="general_picture">http://www.consolewars.de/gen/fetchpics.php?aidx=%1$d&amp;database=attachments&amp;noborder=0&amp;sizex=%2$s
+	<string name="xpath_get_video">//param[@name=\'movie\']</string>
+	<string name="xpath_get_pictures">//script[@type=\'text/javascript\'][text()]</string>
+	<string name="xpath_pictures_filter">liste = new Array(</string>
+	<string name="xpath_pictures_separator">bigliste = new Array(</string>
+	<string name="href">href</string>
+	<string name="value">value</string>
+	<string name="utf8">UTF-8</string>
+	<string name="prefix_userpic">/userpages/?uid=</string>
+	<string name="youtube_embedding">&lt;embed src=\"%3$s\" type=\"application/x-shockwave-flash\" allowscriptaccess=\"always\" allowfullscreen=\"true\" width=\"%1$d\" height=\"%2$d\"&gt;&lt;/embed&gt;</string>
+	<string name="userpic_url">http://www.consolewars.de/gen/fetchavatars.php?type=profile&amp;u=%1$d&amp;sizex=%2$s
 	</string>
-	<string
-		name="post">POST
+	<string name="catpic_url">http://www.consolewars.de/images/system-icons/%1$s.png
 	</string>
-	<string
-		name="cookie">Cookie
+	<string name="general_picture">http://www.consolewars.de/gen/fetchpics.php?aidx=%1$d&amp;database=attachments&amp;noborder=0&amp;sizex=%2$s
 	</string>
-	<string
-		name="cw_cookie_full">cwbb_userid=%1$d; cwbb_password=%2$s
+	<string name="post">POST
 	</string>
-	<string
-		name="cw_cookie_userid">cwbb_userid
+	<string name="cookie">Cookie
 	</string>
-	<string
-		name="cw_cookie_pw">cwbb_password
+	<string name="cw_cookie_full">cwbb_userid=%1$d; cwbb_password=%2$s
 	</string>
-	<string
-		name="cw_messageboard_mobile_url">http://www.consolewars.de/messageboard/?styleid=14
+	<string name="cw_cookie_userid">cwbb_userid
 	</string>
-	<string
-		name="cw_posting_url">http://www.consolewars.de/gen/processtalkback.php
+	<string name="cw_cookie_pw">cwbb_password
 	</string>
-	<string
-		name="cw_blogpost_url">http://www.%1$s.consolewars.de/settings/writeeditblog.php
-	</string>			
-	<string
-		name="cw_getsecuritytoken_url">http://www.consolewars.de/messageboard/private.php?do=newpm
-	</string>			
-	<string
-		name="cw_message_url">http://www.consolewars.de/messageboard/private.php
-	</string>			
-	<string
-		name="cw_login">http://www.consolewars.de/messageboard/login.php?do=login&amp;cookieuser=1&amp;do=login&amp;s=&amp;vb_login_md5password=%1$s&amp;vb_login_md5password_utf=%1$s&amp;vb_login_password=&amp;vb_login_username=%2$s
+	<string name="cw_messageboard_mobile_url">http://www.consolewars.de/messageboard/?styleid=14
 	</string>
-	<string
-		name="cw_blog_submit_data">subject=%1$s&amp;article=%2$s&amp;date=%3$s&amp;time=%4$s&amp;allow_comments=%5$d&amp;gosubmit=ABSCHIGGE!&amp;gosubmit.x=1&amp;labels=%6$s&amp;is_visible=%7$d&amp;is_newsblog=%8$d&amp;bid=%9$d
+	<string name="cw_posting_url">http://www.consolewars.de/gen/processtalkback.php
 	</string>
-	<string
-		name="cw_blog_delete_data">bid=%1$d&amp;godelete.x=1&amp;godelete=%2$s
+	<string name="cw_blogpost_url">http://www.%1$s.consolewars.de/settings/writeeditblog.php
 	</string>
-	<string
-		name="cw_cmmt_submit_data">reference_area=%1$d&amp;reference_id=%2$d&amp;talkback_command=%3$s&amp;talkback_content=%4$s&amp;talkback_viewpage=%5$d
+	<string name="cw_getsecuritytoken_url">http://www.consolewars.de/messageboard/private.php?do=newpm
 	</string>
-	<string
-		name="cw_cmmt_delete_data">reference_area=%1$d&amp;reference_id=%2$d&amp;talkback_cid=%3$d&amp;talkback_command=%4$s&amp;talkback_content=&amp;talkback_viewpage=%5$d
-	</string>	
-	<string
-		name="cw_cmmt_edit_data">reference_area=%1$d&amp;reference_id=%2$d&amp;talkback_cid=%3$d&amp;talkback_command=%4$s&amp;talkback_content=%5$s&amp;talkback_viewpage=%6$d
-	</string>	
-	<string
-		name="cw_mssg_submit_data">do=insertpm&amp;message=%1$s&amp;recipients=%2$s&amp;savecopy=%3$d&amp;sbutton=Abschicken&amp;title=%4$s&amp;parseurl=%5$d&amp;securitytoken=%6$s&amp;signature=%7$d&amp;disablesmilies=%8$d&amp;receipt=%9$d
+	<string name="cw_message_url">http://www.consolewars.de/messageboard/private.php
 	</string>
-	<string
-	    name="cw_mssg_delete_data">do=managepm&amp;folderid=0&amp;%1$s&amp;securitytoken=%2$s&amp;dowhat=delete
+	<string name="cw_login">http://www.consolewars.de/messageboard/login.php?do=login&amp;cookieuser=1&amp;do=login&amp;s=&amp;vb_login_md5password=%1$s&amp;vb_login_md5password_utf=%1$s&amp;vb_login_password=&amp;vb_login_username=%2$s
 	</string>
-	<string
-	    name="cw_mssg_delete_param">pm[%1$d]
+	<string name="cw_blog_submit_data">subject=%1$s&amp;article=%2$s&amp;date=%3$s&amp;time=%4$s&amp;allow_comments=%5$d&amp;gosubmit=ABSCHIGGE!&amp;gosubmit.x=1&amp;labels=%6$s&amp;is_visible=%7$d&amp;is_newsblog=%8$d&amp;bid=%9$d
 	</string>
-	<string
-		name="cw_command_newentry">newentry
+	<string name="cw_blog_delete_data">bid=%1$d&amp;godelete.x=1&amp;godelete=%2$s
 	</string>
-	<string
-		name="cw_command_remove">remove
-	</string>		
-	<string
-		name="cw_command_update">update
-	</string>	
-	<string
-		name="cw_command_blogsubmit">ABSCHIGGE!
+	<string name="cw_cmmt_submit_data">reference_area=%1$d&amp;reference_id=%2$d&amp;talkback_command=%3$s&amp;talkback_content=%4$s&amp;talkback_viewpage=%5$d
 	</string>
-		<string
-		name="cw_command_blogdelete">LÖSCHE!
+	<string name="cw_cmmt_delete_data">reference_area=%1$d&amp;reference_id=%2$d&amp;talkback_cid=%3$d&amp;talkback_command=%4$s&amp;talkback_content=&amp;talkback_viewpage=%5$d
 	</string>
+	<string name="cw_cmmt_edit_data">reference_area=%1$d&amp;reference_id=%2$d&amp;talkback_cid=%3$d&amp;talkback_command=%4$s&amp;talkback_content=%5$s&amp;talkback_viewpage=%6$d
+	</string>
+	<string name="cw_mssg_submit_data">do=insertpm&amp;message=%1$s&amp;recipients=%2$s&amp;savecopy=%3$d&amp;sbutton=Abschicken&amp;title=%4$s&amp;parseurl=%5$d&amp;securitytoken=%6$s&amp;signature=%7$d&amp;disablesmilies=%8$d&amp;receipt=%9$d
+	</string>
+	<string name="cw_mssg_delete_data">do=managepm&amp;folderid=0&amp;%1$s&amp;securitytoken=%2$s&amp;dowhat=delete
+	</string>
+	<string name="cw_mssg_delete_param">pm[%1$d]
+	</string>
+	<string name="cw_command_newentry">newentry
+	</string>
+	<string name="cw_command_remove">remove
+	</string>
+	<string name="cw_command_update">update
+	</string>
+	<string name="cw_command_blogsubmit">ABSCHIGGE!
+	</string>
+	<string name="cw_command_blogdelete">LÖSCHE!
+	</string>
+	
+	
+	<!-- html specific tags -->
+	<string name="html_break">&lt;br&gt;&lt;br&gt;
+	</string>
+	
 </resources>

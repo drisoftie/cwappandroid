@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.simpleframework.xml.Serializer;
@@ -44,6 +45,8 @@ public class NewsParser {
 	private String APIKey;
 
 	public List<CwNews> parse(int[] id) throws ConsolewarsAPIException, IOException {
+		List<CwNews> news = new ArrayList<CwNews>();
+
 		// name of the api-php file
 		String apiname = "getnews";
 
@@ -78,8 +81,8 @@ public class NewsParser {
 			e.printStackTrace();
 		}
 		if (root != null && root.getNews() != null) {
-			return root.getNews();
+			news = root.getNews();
 		}
-		return null;
+		return news;
 	}
 }
