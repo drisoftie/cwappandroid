@@ -28,9 +28,11 @@ import de.consolewars.android.app.Filter;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.db.domain.CwMessage;
 import de.consolewars.android.app.tab.CwAbstractFragment;
+import de.consolewars.android.app.tab.CwAbstractFragmentActivity;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
 import de.consolewars.android.app.util.ViewUtility;
 import de.consolewars.android.app.view.ActionBar;
+import de.consolewars.android.app.view.ActionBar.Action;
 
 /*
  * Copyright [2010] [Alexander Dridiger]
@@ -75,8 +77,8 @@ public class OverviewFragment extends CwAbstractFragment {
 	public OverviewFragment() {
 	}
 
-	public OverviewFragment(String title) {
-		super(title);
+	public OverviewFragment(String title, int position) {
+		super(title, position);
 		// setHasOptionsMenu(true);
 		task = new BuildOverviewAsyncTask();
 	}
@@ -105,6 +107,9 @@ public class OverviewFragment extends CwAbstractFragment {
 		progress_layout.setVisibility(View.GONE);
 
 		if (!isDetached()) {
+			if (((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
+				initActionBar();
+			}
 			if (task != null && task.getStatus().equals(AsyncTask.Status.PENDING)) {
 				task.execute();
 			} else if (task == null || task.getStatus().equals(AsyncTask.Status.FINISHED)) {
@@ -113,15 +118,15 @@ public class OverviewFragment extends CwAbstractFragment {
 			} else if (task != null && task.getStatus().equals(AsyncTask.Status.RUNNING)) {
 				task.cancel(true);
 			}
-			if (isSelected()) {
-				initActionBar();
-			}
 		}
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
+		if (((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
+			initActionBar();
+		}
 	}
 
 	/**
@@ -143,6 +148,18 @@ public class OverviewFragment extends CwAbstractFragment {
 				ActionBar actionBar = getActionBar();
 				actionBar.removeAllActions();
 				actionBar.setTitle(context.getString(R.string.home));
+
+				actionBar.addAction(new Action() {
+					@Override
+					public void performAction(View view) {
+						new LoginSavedUserAsyncTask().execute();
+					}
+
+					@Override
+					public int getDrawable() {
+						return R.drawable.refresh_bttn;
+					}
+				});
 			}
 		}
 	}
@@ -295,6 +312,56 @@ public class OverviewFragment extends CwAbstractFragment {
 	 * 
 	 * @author Alexander Dridiger
 	 */
+	private class LoginSavedUserAsyncTask extends AsyncTask<Void, Void, Bitmap> {
+
+		boolean doWork = false;
+
+		@Override
+		protected void onPreExecute() {
+			if (cwLoginManager.isLoggedIn()) {
+				Toast.makeText(context, getResources().getString(R.string.already_logged_in), Toast.LENGTH_SHORT)
+						.show();
+			} else {
+				Toast.makeText(context, getResources().getString(R.string.try_login), Toast.LENGTH_SHORT).show();
+				doWork = true;
+			}
+		}
+
+		@Override
+		protected Bitmap doInBackground(Void... params) {
+			if (doWork) {
+				cwLoginManager.checkSavedUserAndLogin();
+			}
+			return viewUtility.getUserIcon(cwLoginManager.getAuthenticatedUser().getUid(), 60);
+		}
+
+		@Override
+		protected void onPostExecute(Bitmap result) {
+			ViewGroup userLoggedLayout = (ViewGroup) overview_fragment.findViewById(R.id.overview_logged_user_layout);
+			TextView usrnmTxt = (TextView) overview_fragment.findViewById(R.id.overview_username);
+			Button loginBttn = (Button) overview_fragment.findViewById(R.id.overview_login_user_bttn);
+			Button logoutBttn = (Button) overview_fragment.findViewById(R.id.overview_logout_user_bttn);
+			ImageView icon = (ImageView) overview_fragment.findViewById(R.id.overview_usericon);
+			if (doWork && cwLoginManager.isLoggedIn()) {
+				usrnmTxt.setText(cwLoginManager.getAuthenticatedUser().getUsername());
+				icon.setImageBitmap(result);
+				setVisibility(View.INVISIBLE, userLoggedLayout, loginBttn);
+				setVisibility(View.VISIBLE, logoutBttn);
+				Toast.makeText(context, context.getString(R.string.logged_in), Toast.LENGTH_SHORT).show();
+			} else if (doWork) {
+				icon.setImageBitmap(result);
+				setVisibility(View.VISIBLE, userLoggedLayout, loginBttn);
+				setVisibility(View.INVISIBLE, logoutBttn);
+				Toast.makeText(context, context.getString(R.string.login_failed), Toast.LENGTH_SHORT).show();
+			}
+		}
+	}
+
+	/**
+	 * Asynchronous task to login a user.
+	 * 
+	 * @author Alexander Dridiger
+	 */
 	private class LoginUserAsyncTask extends AsyncTask<Void, Void, Bitmap> {
 
 		boolean doWork = false;
@@ -393,11 +460,8 @@ public class OverviewFragment extends CwAbstractFragment {
 	}
 
 	@Override
-	public void setForeground(boolean isSelected) {
-		super.setForeground(isSelected);
-		if (isSelected) {
-			initActionBar();
-		}
+	public void refresh() {
+		initActionBar();
 	}
 
 	@Override

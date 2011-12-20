@@ -43,8 +43,8 @@
 	<dimen name="overview_usericon_margin_left">25dp</dimen>
 	<dimen name="writer_text_margin">2dp</dimen>
 	<dimen name="comments_cell_margin">1dp</dimen>
-	
+
 	<dimen name="actionbar_height">45dip</dimen>
-    <dimen name="actionbar_item_height">45dip</dimen>
-    <dimen name="actionbar_item_width">45dip</dimen>
+	<dimen name="actionbar_item_height">45dip</dimen>
+	<dimen name="actionbar_item_width">45dip</dimen>
 </resources>

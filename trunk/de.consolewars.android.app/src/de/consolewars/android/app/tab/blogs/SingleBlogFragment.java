@@ -17,12 +17,14 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import de.consolewars.android.app.CwApplication;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.db.domain.CwBlog;
 import de.consolewars.android.app.tab.CwAbstractFragment;
+import de.consolewars.android.app.tab.CwAbstractFragmentActivity;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
 import de.consolewars.android.app.util.DateUtility;
 import de.consolewars.android.app.util.TextViewHandler;
@@ -69,8 +71,8 @@ public class SingleBlogFragment extends CwAbstractFragment {
 	public SingleBlogFragment() {
 	}
 
-	public SingleBlogFragment(String title) {
-		super(title);
+	public SingleBlogFragment(String title, int position) {
+		super(title, position);
 		setHasOptionsMenu(true);
 		task = new BuildSingleBlogAsyncTask();
 	}
@@ -90,11 +92,19 @@ public class SingleBlogFragment extends CwAbstractFragment {
 	}
 
 	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		if (((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
+			initActionBar();
+		}
+	}
+
+	@Override
 	public void onResume() {
 		super.onResume();
 		blog = CwApplication.cwEntityManager().getSelectedBlog();
 		refreshView();
-		if (isSelected()) {
+		if (((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
 			initActionBar();
 		}
 	}
@@ -285,6 +295,9 @@ public class SingleBlogFragment extends CwAbstractFragment {
 			title.setText(blog.getTitle());
 			TextView info = (TextView) singleblog_fragment_layout.findViewById(R.id.header_descr_info);
 			info.setText(createDate(blog.getUnixtime() * 1000L));
+
+			RatingBar rating = (RatingBar) singleblog_fragment_layout.findViewById(R.id.singleblog_rating);
+			rating.setRating(blog.getRating());
 		}
 
 		/**
@@ -329,7 +342,7 @@ public class SingleBlogFragment extends CwAbstractFragment {
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		if (isSelected()) {
+		if (((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
 			super.onCreateOptionsMenu(menu, inflater);
 			menu.clear();
 			inflater.inflate(R.menu.singleblog_menu, menu);
@@ -339,7 +352,7 @@ public class SingleBlogFragment extends CwAbstractFragment {
 
 	@Override
 	public void onPrepareOptionsMenu(Menu menu) {
-		if (isSelected()) {
+		if (((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
 			super.onPrepareOptionsMenu(menu);
 			menu.clear();
 			menuInflater.inflate(R.menu.singleblog_menu, menu);
@@ -351,6 +364,11 @@ public class SingleBlogFragment extends CwAbstractFragment {
 		if (task != null && task.getStatus().equals(AsyncTask.Status.RUNNING)) {
 			task.cancel(true);
 		}
+	}
+
+	@Override
+	public void refresh() {
+		initActionBar();
 	}
 
 }

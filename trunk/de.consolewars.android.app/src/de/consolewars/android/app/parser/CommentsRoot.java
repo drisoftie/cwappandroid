@@ -1,7 +1,7 @@
 package de.consolewars.android.app.parser;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
@@ -30,7 +30,7 @@ import de.consolewars.android.app.db.domain.CwComment;
 public class CommentsRoot {
 
 	@ElementList(inline = true)
-	private List<CwComment> comments;
+	private Collection<CwComment> comments;
 
 	@Transient
 	private int maxPage = -1;
@@ -38,7 +38,7 @@ public class CommentsRoot {
 	/**
 	 * @return the comments
 	 */
-	public List<CwComment> getComments() {
+	public Collection<CwComment> getComments() {
 		if (comments == null) {
 			comments = new ArrayList<CwComment>();
 		}
@@ -49,7 +49,7 @@ public class CommentsRoot {
 	 * @param comments
 	 *            the comments to set
 	 */
-	public void setComments(List<CwComment> comments) {
+	public void setComments(Collection<CwComment> comments) {
 		this.comments = comments;
 	}
 
@@ -61,7 +61,8 @@ public class CommentsRoot {
 	}
 
 	/**
-	 * @param maxPage the maxPage to set
+	 * @param maxPage
+	 *            the maxPage to set
 	 */
 	public void setMaxPage(int maxPage) {
 		this.maxPage = maxPage;

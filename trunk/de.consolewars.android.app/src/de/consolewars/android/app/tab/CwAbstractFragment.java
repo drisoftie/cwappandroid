@@ -1,6 +1,5 @@
 package de.consolewars.android.app.tab;
 
-import android.app.Activity;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -32,8 +31,7 @@ import de.consolewars.android.app.view.ActionBar.Action;
 public abstract class CwAbstractFragment extends Fragment {
 
 	private String title;
-	private boolean isSelected = false;
-	private boolean isStartFragment = false;
+	private int position;
 
 	/**
 	 * Mandatory constructor for creating a {@link Fragment}
@@ -46,17 +44,10 @@ public abstract class CwAbstractFragment extends Fragment {
 	 * 
 	 * @param title
 	 */
-	public CwAbstractFragment(String title) {
+	public CwAbstractFragment(String title, int position) {
 		this.title = title;
 		setRetainInstance(true);
-	}
-
-	@Override
-	public void onAttach(Activity activity) {
-		super.onAttach(activity);
-		if (isStartFragment) {
-			isSelected = true;
-		}
+		this.position = position;
 	}
 
 	/**
@@ -81,34 +72,21 @@ public abstract class CwAbstractFragment extends Fragment {
 	public abstract void backPressed();
 
 	/**
-	 * @return the isSelected
+	 * @return the position
 	 */
-	public boolean isSelected() {
-		return isSelected;
+	public int getPosition() {
+		return position;
 	}
 
 	/**
-	 * @param isSelected
-	 *            the isSelected to set
+	 * @param position
+	 *            the position to set
 	 */
-	public void setForeground(boolean isSelected) {
-		this.isSelected = isSelected;
+	public void setPosition(int position) {
+		this.position = position;
 	}
 
-	/**
-	 * @return the isStartFragment
-	 */
-	public boolean isStartFragment() {
-		return isStartFragment;
-	}
-
-	/**
-	 * @param isStartFragment
-	 *            the isStartFragment to set
-	 */
-	public void setStartFragment(boolean isStartFragment) {
-		this.isStartFragment = isStartFragment;
-	}
+	public abstract void refresh();
 
 	/**
 	 * Sets a home action onto the {@link ActionBar}.

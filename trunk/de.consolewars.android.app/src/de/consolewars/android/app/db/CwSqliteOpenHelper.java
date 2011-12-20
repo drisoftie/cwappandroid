@@ -15,6 +15,7 @@ import de.consolewars.android.app.R;
 import de.consolewars.android.app.db.domain.CwBlog;
 import de.consolewars.android.app.db.domain.CwComment;
 import de.consolewars.android.app.db.domain.CwNews;
+import de.consolewars.android.app.db.domain.CwOptions;
 import de.consolewars.android.app.db.domain.CwPicture;
 import de.consolewars.android.app.db.domain.CwUser;
 import de.consolewars.android.app.db.domain.CwVideo;
@@ -47,6 +48,7 @@ public class CwSqliteOpenHelper extends OrmLiteSqliteOpenHelper {
 			TableUtils.createTable(connectionSource, CwComment.class);
 			TableUtils.createTable(connectionSource, CwPicture.class);
 			TableUtils.createTable(connectionSource, CwVideo.class);
+			TableUtils.createTable(connectionSource, CwOptions.class);
 		} catch (SQLException e) {
 			Ln.e(e);
 		}
@@ -61,6 +63,7 @@ public class CwSqliteOpenHelper extends OrmLiteSqliteOpenHelper {
 			TableUtils.dropTable(connectionSource, CwComment.class, true);
 			TableUtils.dropTable(connectionSource, CwPicture.class, true);
 			TableUtils.dropTable(connectionSource, CwVideo.class, true);
+			TableUtils.dropTable(connectionSource, CwOptions.class, true);
 			onCreate(db);
 		} catch (SQLException e) {
 			Ln.e(e);

@@ -82,8 +82,8 @@ public class CommentsParser {
 			e.printStackTrace();
 		}
 		if (!root.getComments().isEmpty()) {
-			root.setMaxPage(root.getComments().get(0).getPagecount());
-			root.getComments().remove(0);
+			root.setMaxPage(root.getComments().iterator().next().getPagecount());
+			root.getComments().remove(root.getComments().iterator().next());
 		}
 		return root;
 	}

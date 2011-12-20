@@ -25,6 +25,11 @@
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:textColor="@color/news_table_text_title"/>
+			<TextView
+				android:id="@+id/singlenews_morevids"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:textColor="@color/news_table_text_title"/>
 			<WebView
 				android:id="@+id/singlenews_video"
 				android:layout_width="wrap_content"

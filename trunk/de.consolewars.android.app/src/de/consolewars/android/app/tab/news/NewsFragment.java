@@ -10,13 +10,16 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
+import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnLongClickListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
@@ -27,8 +30,10 @@ import de.consolewars.android.app.CwEntityManager.EntityRefinement;
 import de.consolewars.android.app.CwManager.CommentArea;
 import de.consolewars.android.app.Filter;
 import de.consolewars.android.app.R;
+import de.consolewars.android.app.db.domain.CwComment;
 import de.consolewars.android.app.db.domain.CwNews;
 import de.consolewars.android.app.tab.CwAbstractFragment;
+import de.consolewars.android.app.tab.CwAbstractFragmentActivity;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
 import de.consolewars.android.app.tab.OnSubjectSelectedListener;
 import de.consolewars.android.app.util.DateUtility;
@@ -78,7 +83,6 @@ public final class NewsFragment extends CwAbstractFragment {
 	private BuildNewsTask task;
 
 	private List<CwNews> tempList = new ArrayList<CwNews>();
-	private Filter currentFilter = Filter.NEWS_ALL;
 	private int oldestNewsID = -1;
 
 	// text styling
@@ -90,10 +94,9 @@ public final class NewsFragment extends CwAbstractFragment {
 	public NewsFragment() {
 	}
 
-	public NewsFragment(Filter filter, String title) {
-		super(title);
+	public NewsFragment(Filter filter, String title, int position) {
+		super(title, position);
 		setHasOptionsMenu(true);
-		this.currentFilter = filter;
 		task = new BuildNewsTask();
 	}
 
@@ -148,8 +151,19 @@ public final class NewsFragment extends CwAbstractFragment {
 	}
 
 	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		if (((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
+			initActionBar();
+		}
+	}
+
+	@Override
 	public void onResume() {
 		super.onResume();
+		if (((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
+			initActionBar();
+		}
 		if (!isDetached() && newsTable.getChildCount() == 0) {
 			if (task != null && task.getStatus().equals(AsyncTask.Status.PENDING)) {
 				task.execute(true);
@@ -157,9 +171,6 @@ public final class NewsFragment extends CwAbstractFragment {
 				task = new BuildNewsTask();
 				task.execute();
 			}
-		}
-		if (isSelected()) {
-			initActionBar();
 		}
 	}
 
@@ -283,23 +294,11 @@ public final class NewsFragment extends CwAbstractFragment {
 				final CwNews newsToAdd = tempList.get(i);
 				if (!isCancelled() && (oldestNewsID == -1 || newsToAdd.getSubjectId() < oldestNewsID)) {
 					// check if the news has to be filtered
-					if (currentFilter.equals(Filter.NEWS_ALL) || matchesFilter(newsToAdd.getCategoryShort())) {
+					if (getFilter(getPosition()).equals(Filter.NEWS_ALL) || matchesFilter(newsToAdd.getCategoryShort())) {
 						// get the table row by an inflater and set the needed information
 						final View tableRow = inflater.inflate(R.layout.news_row_layout, newsTable, false);
 						tableRow.setId(newsToAdd.getSubjectId());
-						tableRow.setOnClickListener(new View.OnClickListener() {
-							@Override
-							public void onClick(View v) {
-								if (selectedRow != null) {
-									selectedRow.setBackgroundDrawable(getActivity().getResources().getDrawable(
-											R.drawable.table_cell_selector));
-								}
-								tableRow.setBackgroundDrawable(getActivity().getResources().getDrawable(
-										R.drawable.table_cell_bg_selected));
-								selectedRow = tableRow;
-								listener.onSubjectSelected(newsToAdd);
-							}
-						});
+						tableRow.setTag(newsToAdd);
 						final QuickAction quickAction = initQuickAction();
 						// setup the action item click listener
 						quickAction.setOnActionItemClickListener(new QuickAction.OnActionItemClickListener() {
@@ -314,15 +313,53 @@ public final class NewsFragment extends CwAbstractFragment {
 								}
 							}
 						});
-						tableRow.setOnLongClickListener(new OnLongClickListener() {
+						tableRow.setOnTouchListener(new OnTouchListener() {
 							@Override
-							public boolean onLongClick(View v) {
-								clickedNews = newsToAdd;
-								quickAction.show(v);
-								return false;
+							public boolean onTouch(View v, MotionEvent event) {
+								Log.i("MOTIONEVENT", String.valueOf(event.getAction()));
+								switch (event.getAction()) {
+								case MotionEvent.ACTION_DOWN:
+									if (selectedRow != null) {
+										selectedRow.setBackgroundDrawable(getActivity().getResources().getDrawable(
+												R.drawable.table_cell_bg));
+									}
+									v.setBackgroundDrawable(getActivity().getResources().getDrawable(
+											R.drawable.table_cell_bg_selected));
+									return true;
+								case MotionEvent.ACTION_CANCEL:
+									v.setBackgroundDrawable(getActivity().getResources().getDrawable(
+											R.drawable.table_cell_bg));
+								case MotionEvent.ACTION_MOVE:
+									if (Math.abs(event.getX() - event.getX(0)) > 2.0f
+											|| Math.abs(event.getY() - event.getY(0)) > 2.0f) {
+										v.setBackgroundDrawable(getActivity().getResources().getDrawable(
+												R.drawable.table_cell_bg));
+										return true;
+									}
+									v.setBackgroundDrawable(getActivity().getResources().getDrawable(
+											R.drawable.table_cell_bg));
+									return true;
+								case MotionEvent.ACTION_UP:
+									if (event.getEventTime() - event.getDownTime() < 500) {
+										tableRow.setBackgroundDrawable(getActivity().getResources().getDrawable(
+												R.drawable.table_cell_bg_selected));
+										selectedRow = tableRow;
+										listener.onSubjectSelected(newsToAdd);
+										return true;
+									}
+									if (Math.abs(event.getDownTime() - event.getEventTime()) > 1000) {
+										clickedNews = newsToAdd;
+										quickAction.show(tableRow);
+										v.setBackgroundDrawable(getActivity().getResources().getDrawable(
+												R.drawable.table_cell_bg));
+										return true;
+									}
+									v.setBackgroundDrawable(getActivity().getResources().getDrawable(
+											R.drawable.table_cell_bg));
+								}
+								return true;
 							}
 						});
-
 						CwApplication.cwImageLoader().displayImage(
 								getActivity().getString(R.string.catpic_url, newsToAdd.getCategoryShort()),
 								getActivity(), (ImageView) tableRow.findViewById(R.id.news_row_category_icon), false,
@@ -358,7 +395,7 @@ public final class NewsFragment extends CwAbstractFragment {
 		}
 
 		private void refreshList() {
-			if (!currentFilter.equals(Filter.NEWS_ALL)) {
+			if (!getFilter(getPosition()).equals(Filter.NEWS_ALL)) {
 				tempList.clear();
 				for (CwNews news : CwApplication.cwEntityManager().getCachedNews()) {
 					if (matchesFilter(news.getCategoryShort())) {
@@ -372,16 +409,16 @@ public final class NewsFragment extends CwAbstractFragment {
 
 		private boolean matchesFilter(String cat) {
 			boolean matches = false;
-			if (currentFilter.equals(Filter.NEWS_MS) && !cat.contains("ps") && !cat.contains("vita")
+			if (getFilter(getPosition()).equals(Filter.NEWS_MS) && !cat.contains("ps") && !cat.contains("vita")
 					&& !cat.contains("son") && !StringUtils.contains(cat, 'w') && !cat.contains("nin")
 					&& !cat.contains("ds") && !cat.contains("n64") && !cat.contains("ngc") && !cat.contains("gb")
 					&& !cat.contains("snes")) {
 				matches = true;
-			} else if (currentFilter.equals(Filter.NEWS_NIN) && !cat.contains("ps") && !cat.contains("vita")
+			} else if (getFilter(getPosition()).equals(Filter.NEWS_NIN) && !cat.contains("ps") && !cat.contains("vita")
 					&& !cat.contains("son") && !StringUtils.contains(cat, 'x') && !cat.contains("ms")
 					&& !cat.contains("360")) {
 				matches = true;
-			} else if (currentFilter.equals(Filter.NEWS_SONY) && !StringUtils.contains(cat, 'w')
+			} else if (getFilter(getPosition()).equals(Filter.NEWS_SONY) && !StringUtils.contains(cat, 'w')
 					&& !cat.contains("nin") && !cat.contains("ds") && !cat.contains("n64") && !cat.contains("ngc")
 					&& !cat.contains("gb") && !cat.contains("snes") && !StringUtils.contains(cat, 'x')
 					&& !cat.contains("ms") && !cat.contains("360")) {
@@ -535,9 +572,9 @@ public final class NewsFragment extends CwAbstractFragment {
 			if (news.getArticle() == null) {
 				news = CwApplication.cwEntityManager().getNewsSingle(news.getSubjectId());
 			}
-			news.setCachedPictures(CwApplication.cwEntityManager().getPictures(
-					getString(R.string.cw_url_append, news.getUrl())));
-			news.setCachedComments(CwApplication.cwEntityManager()
+			CwApplication.cwEntityManager().getFullNews(news,
+					getActivity().getString(R.string.cw_url_append, news.getUrl()));
+			news.setComments(CwApplication.cwEntityManager()
 					.getComments(news.getSubjectId(), CommentArea.AREA_NEWS, news.getCommentsAmount(), 0).getComments());
 			CwApplication.cwEntityManager().replaceOrSetNews(news);
 			return null;
@@ -566,6 +603,9 @@ public final class NewsFragment extends CwAbstractFragment {
 		@Override
 		protected Void doInBackground(CwNews... newsParams) {
 			CwNews news = newsParams[0];
+			for (CwComment comment : news.getComments()) {
+				comment.setCwNews(news);
+			}
 			CwApplication.cwEntityManager().replaceOrSetNews(news);
 			CwApplication.cwEntityManager().saveLoadNews(news);
 			return null;
@@ -611,7 +651,7 @@ public final class NewsFragment extends CwAbstractFragment {
 		if (menuInflater == null) {
 			menuInflater = inflater;
 		}
-		if (isSelected()) {
+		if (((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
 			super.onCreateOptionsMenu(menu, inflater);
 			menu.clear();
 			menuInflater.inflate(R.menu.news_menu, menu);
@@ -623,7 +663,7 @@ public final class NewsFragment extends CwAbstractFragment {
 		if (menuInflater == null) {
 			menuInflater = getActivity().getMenuInflater();
 		}
-		if (isSelected()) {
+		if (((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
 			super.onPrepareOptionsMenu(menu);
 			menu.clear();
 			menuInflater.inflate(R.menu.news_menu, menu);
@@ -632,7 +672,7 @@ public final class NewsFragment extends CwAbstractFragment {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		if (isSelected()) {
+		if (((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
 			// Find which menu item has been selected
 			switch (item.getItemId()) {
 			// Check for each known menu item
@@ -661,20 +701,39 @@ public final class NewsFragment extends CwAbstractFragment {
 	}
 
 	@Override
-	public void setStartFragment(boolean isStartFragment) {
-		super.setStartFragment(isStartFragment);
-
-	}
-
-	@Override
-	public void setForeground(boolean isSelected) {
-		super.setForeground(isSelected);
-		if (isSelected) {
-			initActionBar();
-		}
-	}
-
-	@Override
 	public void backPressed() {
+	}
+
+	@Override
+	public void refresh() {
+		initActionBar();
+	}
+
+	private static Filter getFilter(int position) {
+		switch (position) {
+		case 0:
+			return Filter.NEWS_ALL;
+		case 1:
+			return Filter.NEWS_MS;
+		case 2:
+			return Filter.NEWS_NIN;
+		case 3:
+			return Filter.NEWS_SONY;
+		}
+		return Filter.NEWS_ALL;
+	}
+
+	/**
+	 * Custom GestureDetector to handle clicks.
+	 * 
+	 * @author Alexander Dridiger
+	 */
+	class SwipeGestureDetector extends SimpleOnGestureListener {
+
+		@Override
+		public void onLongPress(MotionEvent e) {
+			// TODO Auto-generated method stub
+			super.onLongPress(e);
+		}
 	}
 }

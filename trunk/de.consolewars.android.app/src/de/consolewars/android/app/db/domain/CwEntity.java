@@ -34,6 +34,11 @@ public abstract class CwEntity {
 		return id;
 	}
 
+	public void setId(int id) {
+		this.id = id;
+		;
+	}
+
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder().append(id).toHashCode();

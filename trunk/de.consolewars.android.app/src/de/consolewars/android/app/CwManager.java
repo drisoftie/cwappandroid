@@ -177,14 +177,15 @@ public class CwManager {
 	 * @return
 	 */
 	public CommentsRoot getComments(int objectId, int area, int count, int viewPage) {
+		CommentsRoot root = new CommentsRoot();
 		try {
-			return commentsParser.parse(objectId, area, count, viewPage, -1);
+			root = commentsParser.parse(objectId, area, count, viewPage, -1);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (ConsolewarsAPIException e) {
 			e.printStackTrace();
 		}
-		return null;
+		return root;
 	}
 
 	/**

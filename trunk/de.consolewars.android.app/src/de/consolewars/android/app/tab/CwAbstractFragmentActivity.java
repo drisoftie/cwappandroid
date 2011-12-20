@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
+import android.view.Menu;
 import android.view.MenuItem;
 
 import com.j256.ormlite.dao.Dao;
@@ -54,9 +55,13 @@ public abstract class CwAbstractFragmentActivity extends FragmentActivity implem
 	protected CwPagerAdapter adapter;
 	protected FragmentProvider fragmentProvider;
 
+	public int lastPosition;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		lastPosition = getInitialFragmentSelection();
 
 		cwEntityManager = CwApplication.cwEntityManager();
 		cwAppDataHandler = CwApplication.cwAppDataHandler();
@@ -79,18 +84,16 @@ public abstract class CwAbstractFragmentActivity extends FragmentActivity implem
 		// We set this on the indicator, NOT the pager
 		indicator.setOnPageChangeListener(this);
 		indicator.setCurrentItem(getInitialFragmentSelection());
-
-		// setContentView(layout);
-
-		((CwAbstractFragment) adapter.getFragments().get(getInitialFragmentSelection())).setStartFragment(true);
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
-		// ViewPager pager = (ViewPager) findViewById(R.id.pager);
-		// pager.invalidate();
-		adapter.notifyDataSetChanged();
+		Fragment f = getSupportFragmentManager().findFragmentByTag(
+				"android:switcher:" + R.id.pager + ":" + lastPosition);
+		if (f != null && f instanceof CwAbstractFragment) {
+			((CwAbstractFragment) f).refresh();
+		}
 	}
 
 	@Override
@@ -102,9 +105,9 @@ public abstract class CwAbstractFragmentActivity extends FragmentActivity implem
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		cwEntityManager = null;
-		cwAppDataHandler = null;
-		cwUserDao = null;
+		// cwEntityManager = null;
+		// cwAppDataHandler = null;
+		// cwUserDao = null;
 	}
 
 	@Override
@@ -147,12 +150,12 @@ public abstract class CwAbstractFragmentActivity extends FragmentActivity implem
 
 	@Override
 	public void onPageSelected(int position) {
-		for (int i = 0; i < adapter.getCount(); i++) {
-			if (i == position) {
-				((CwAbstractFragment) adapter.getFragments().get(i)).setForeground(true);
-			} else {
-				((CwAbstractFragment) adapter.getFragments().get(i)).setForeground(false);
-			}
+		lastPosition = position;
+		Fragment f = getSupportFragmentManager().findFragmentByTag(
+				"android:switcher:" + R.id.pager + ":" + lastPosition);
+		if (f != null && f instanceof CwAbstractFragment) {
+			((CwAbstractFragment) f).setPosition(lastPosition);
+			((CwAbstractFragment) f).refresh();
 		}
 	}
 
@@ -161,11 +164,23 @@ public abstract class CwAbstractFragmentActivity extends FragmentActivity implem
 	}
 
 	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		Fragment f = getSupportFragmentManager().findFragmentByTag(
+				"android:switcher:" + R.id.pager + ":" + lastPosition);
+		if (f != null && f instanceof CwAbstractFragment) {
+			((CwAbstractFragment) f).setPosition(lastPosition);
+			((CwAbstractFragment) f).onCreateOptionsMenu(menu, getMenuInflater());
+		}
+		return true;
+	}
+
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		for (int i = 0; i < adapter.getCount(); i++) {
-			if (((CwAbstractFragment) adapter.getFragments().get(i)).isSelected()) {
-				adapter.getFragments().get(i).onOptionsItemSelected(item);
-			}
+		Fragment f = getSupportFragmentManager().findFragmentByTag(
+				"android:switcher:" + R.id.pager + ":" + lastPosition);
+		if (f != null && f instanceof CwAbstractFragment) {
+			((CwAbstractFragment) f).setPosition(lastPosition);
+			((CwAbstractFragment) f).onOptionsItemSelected(item);
 		}
 		return super.onOptionsItemSelected(item);
 	}

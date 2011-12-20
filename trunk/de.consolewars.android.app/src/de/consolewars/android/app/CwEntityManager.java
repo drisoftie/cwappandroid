@@ -1,17 +1,17 @@
 package de.consolewars.android.app;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.htmlcleaner.XPatherException;
 
 import android.content.Context;
 
@@ -23,8 +23,10 @@ import de.consolewars.android.app.db.domain.CwBlog;
 import de.consolewars.android.app.db.domain.CwComment;
 import de.consolewars.android.app.db.domain.CwMessage;
 import de.consolewars.android.app.db.domain.CwNews;
+import de.consolewars.android.app.db.domain.CwOptions;
 import de.consolewars.android.app.db.domain.CwPicture;
 import de.consolewars.android.app.db.domain.CwUser;
+import de.consolewars.android.app.db.domain.CwVideo;
 import de.consolewars.android.app.parser.CommentsRoot;
 import de.consolewars.android.app.util.CwBlogsIdSorter;
 import de.consolewars.android.app.util.CwCommentsIdSorter;
@@ -73,7 +75,6 @@ public class CwEntityManager {
 	private List<CwMessage> msgs;
 	private int newestNewsId = -1;
 	private int newestBlogId = -1;
-	private int defaultCount = 10;
 
 	private CwNews selectedNews;
 	private CwBlog selectedBlog;
@@ -190,7 +191,7 @@ public class CwEntityManager {
 	 * @return the blogs
 	 */
 	public List<CwBlog> getCachedBlogs(Filter filter) {
-		if (filter.equals(Filter.BLOGS_USER)) {
+		if (Filter.BLOGS_USER.equals(filter)) {
 			if (userBlogs == null) {
 				userBlogs = new ArrayList<CwBlog>();
 			}
@@ -207,7 +208,7 @@ public class CwEntityManager {
 	 * @return the blogs
 	 */
 	public List<CwBlog> setCachedBlogs(List<CwBlog> setList, Filter filter) {
-		if (filter.equals(Filter.BLOGS_USER)) {
+		if (Filter.BLOGS_USER.equals(filter)) {
 			userBlogs = setList;
 			return userBlogs;
 		} else {
@@ -281,9 +282,9 @@ public class CwEntityManager {
 		if (refinement == EntityRefinement.CACHE_ONLY) {
 			// TODO: Paging
 		} else if (refinement.equals(EntityRefinement.MIXED)) {
-			getBlogsMixed(defaultCount, filter);
+			getBlogsMixed(appDataHandler.getOptions().getMaxBlogsAction(), filter);
 		} else if (refinement.equals(EntityRefinement.SAVED_ONLY)) {
-			getBlogsSaved(defaultCount, filter);
+			getBlogsSaved(appDataHandler.getOptions().getMaxBlogsAction(), filter);
 		}
 		return getCachedBlogs(filter);
 	}
@@ -304,8 +305,8 @@ public class CwEntityManager {
 			if (appDataHandler.hasBlogsData()) {
 				try {
 					setCachedBlogs(
-							mergeBlogsLists(getCachedBlogs(filter),
-									appDataHandler.loadSavedBlogs(oldestBlog, true, defaultCount)), filter);
+							mergeBlogsLists(getCachedBlogs(filter), appDataHandler.loadSavedBlogs(oldestBlog, true,
+									appDataHandler.getOptions().getMaxBlogsAction())), filter);
 				} catch (SQLException e) {
 					e.printStackTrace();
 				}
@@ -338,7 +339,8 @@ public class CwEntityManager {
 		if (appDataHandler.hasNewsData()) {
 			if (oldestNews > -1) {
 				try {
-					return appDataHandler.loadSavedNews(oldestNews, true, defaultCount);
+					return appDataHandler.loadSavedNews(oldestNews, true, appDataHandler.getOptions()
+							.getMaxBlogsAction());
 				} catch (SQLException e) {
 					e.printStackTrace();
 				}
@@ -385,9 +387,9 @@ public class CwEntityManager {
 		if (refinement.equals(EntityRefinement.CACHE_ONLY)) {
 			// TODO: Paging
 		} else if (refinement.equals(EntityRefinement.MIXED)) {
-			getNewsMixed(defaultCount);
+			getNewsMixed(appDataHandler.getOptions().getMaxNewsAction());
 		} else if (refinement.equals(EntityRefinement.SAVED_ONLY)) {
-			return getNewsSaved(defaultCount);
+			return getNewsSaved(appDataHandler.getOptions().getMaxNewsAction());
 		}
 		return getCachedNews();
 	}
@@ -408,7 +410,8 @@ public class CwEntityManager {
 			if (appDataHandler.hasNewsData()) {
 				try {
 					savedNews = mergeNewsLists(Arrays.asList(getSavedNews().toArray(new CwNews[0])),
-							appDataHandler.loadSavedNews(oldestNews, true, defaultCount));
+							appDataHandler.loadSavedNews(oldestNews, true, appDataHandler.getOptions()
+									.getMaxNewsAction()));
 				} catch (SQLException e) {
 					e.printStackTrace();
 				}
@@ -438,7 +441,8 @@ public class CwEntityManager {
 			if (oldestNews > -1) {
 				try {
 					savedNews = mergeNewsLists(Arrays.asList(getSavedNews().toArray(new CwNews[0])),
-							appDataHandler.loadSavedNews(oldestNews, true, defaultCount));
+							appDataHandler.loadSavedNews(oldestNews, true, appDataHandler.getOptions()
+									.getMaxNewsAction()));
 					Collections.sort(savedNews, Collections.reverseOrder(cwNewsIdSorter));
 					return getSavedNews();
 				} catch (SQLException e) {
@@ -526,6 +530,9 @@ public class CwEntityManager {
 	public int saveAllNews() {
 		int savecounter = 0;
 		for (CwNews newsToSave : news) {
+			for (CwComment comment : newsToSave.getComments()) {
+				comment.setCwNews(newsToSave);
+			}
 			try {
 				appDataHandler.createOrUpdateNews(newsToSave);
 				savecounter++;
@@ -595,12 +602,22 @@ public class CwEntityManager {
 	 */
 	public CommentsRoot getComments(int objectId, int area, int count, int viewPage) {
 		CommentsRoot root = cwManager.getComments(objectId, area, count, viewPage);
-		List<CwComment> list1 = root.getComments();
+		List<CwComment> list1 = new ArrayList<CwComment>();
+		list1.addAll(root.getComments());
 		List<CwComment> list2 = Arrays.asList(list1.toArray(new CwComment[0]));
 		list1 = mergeCommentsLists(list1, list2);
 		Collections.sort(list1, cwCommentsIdSorter);
 		root.setComments(list1);
 		return root;
+	}
+
+	public CwComment getRefreshedComment(CwComment comment) {
+		try {
+			appDataHandler.refreshComment(comment);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return comment;
 	}
 
 	public void discardAllNews() {
@@ -614,32 +631,59 @@ public class CwEntityManager {
 		userBlogs = new ArrayList<CwBlog>();
 	}
 
-	public List<CwPicture> getPictures(String url) {
-		List<CwPicture> pictures = new ArrayList<CwPicture>();
-		String pictureUrls = "";
-		try {
-			pictureUrls = MediaSnapper.snapPicsUrl(url, context.getString(R.string.xpath_get_pictures),
-					context.getString(R.string.xpath_pictures_filter));
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (XPatherException e) {
-			e.printStackTrace();
+	public CwNews getFullNews(CwNews news, String url) {
+		if (!news.getVideos().isEmpty() || !news.getPictures().isEmpty() || news.getAuthorId() > 0) {
+			return news;
 		}
-		if (!pictureUrls.equals("")) {
-			// first get the string between both seperators, trim it, remove all "'"
-			String stringUrls = StringUtils.remove(StringUtils.trim(StringUtils.substringBefore(
-					StringUtils.substringAfter(pictureUrls, context.getString(R.string.xpath_pictures_filter)), ");")),
-					"'");
-			String[] urls = StringUtils.split(stringUrls, ",");
-			for (String urlpart : urls) {
-				CwPicture picture = new CwPicture();
-				picture.setThumbUrl(context.getString(R.string.cw_url_append, urlpart));
-				picture.setUrl(context.getString(R.string.cw_url_append,
-						StringUtils.substringBefore(urlpart, "&database")));
-				pictures.add(picture);
+		Map<String, String> pathAttrPairs = new HashMap<String, String>();
+		pathAttrPairs.put(context.getString(R.string.xpath_get_author), context.getString(R.string.href));
+		pathAttrPairs.put(context.getString(R.string.xpath_get_video), context.getString(R.string.value));
+
+		Map<String, String> pathPicsfilterPairs = new HashMap<String, String>();
+		pathPicsfilterPairs.put(context.getString(R.string.xpath_get_pictures),
+				context.getString(R.string.xpath_pictures_filter));
+
+		Map<String, String> results = MediaSnapper.snapAllFromHTML(context, url, pathAttrPairs, pathPicsfilterPairs);
+		boolean vidFound = false;
+		for (String key : results.keySet().toArray(new String[0])) {
+			if (key.equals(context.getString(R.string.href))) {
+				String picUrl = results.get(key);
+				int userID = Integer.valueOf(picUrl.subSequence(context.getString(R.string.prefix_userpic).length(),
+						picUrl.length()).toString());
+				news.setAuthorId(userID);
+			} else if (key.startsWith(context.getString(R.string.cw_video_tag))) {
+				if (!vidFound) {
+					news.setVideos(new ArrayList<CwVideo>());
+					vidFound = true;
+				}
+				String vidUrl = results.get(key);
+				CwVideo video = new CwVideo();
+				video.setUrl(vidUrl);
+				video.setHtmlEmbeddedSnippet(context.getString(R.string.youtube_embedding, 300, 200, vidUrl));
+				video.setCwNews(news);
+				news.getVideos().add(video);
+			} else if (key.startsWith(context.getString(R.string.cw_pic_tag))) {
+				String pictureUrls = results.get(key);
+				if (!pictureUrls.equals("")) {
+					news.setPictures(new ArrayList<CwPicture>());
+					// first get the string between both seperators, trim it, remove all "'"
+					String stringUrls = StringUtils.remove(
+							StringUtils.trim(StringUtils.substringBefore(
+									StringUtils.substringAfter(pictureUrls,
+											context.getString(R.string.xpath_pictures_filter)), ");")), "'");
+					String[] urls = StringUtils.split(stringUrls, ",");
+					for (String urlpart : urls) {
+						CwPicture picture = new CwPicture();
+						picture.setThumbUrl(context.getString(R.string.cw_url_append, urlpart));
+						picture.setUrl(context.getString(R.string.cw_url_append,
+								StringUtils.substringBefore(urlpart, "&database")));
+						news.getPictures().add(picture);
+						picture.setCwNews(news);
+					}
+				}
 			}
 		}
-		return pictures;
+		return selectedNews;
 	}
 
 	/**
@@ -694,6 +738,10 @@ public class CwEntityManager {
 	 */
 	public int getNewestBlogId() {
 		return newestBlogId;
+	}
+
+	public CwOptions getOptions() {
+		return appDataHandler.getOptions();
 	}
 
 	/**

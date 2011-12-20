@@ -1,8 +1,5 @@
 package de.consolewars.android.app.tab.blogs;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.os.Bundle;
 import de.consolewars.android.app.CwApplication;
 import de.consolewars.android.app.Filter;
@@ -65,24 +62,30 @@ public class BlogsFragmentActivity extends CwAbstractFragmentActivity implements
 		fragmentProvider = new FragmentProvider() {
 			@Override
 			public CwAbstractFragment requestFragment(int index) {
-				List<CwAbstractFragment> fragments = adapter.getFragments();
 				switch (index) {
 				case 0:
-					return adapter.switchFragmentsInfo(fragments.set(index, new BlogsFragment(Filter.BLOGS_NORMAL,
-							getString(R.string.blogs_filter_all))), fragments.get(index));
+					return new BlogsFragment(Filter.BLOGS_NORMAL, getTitle(index), index);
 				case 1:
-					return adapter.switchFragmentsInfo(fragments.set(index, new BlogsFragment(Filter.BLOGS_USER,
-							getString(R.string.blogs_filter_own))), fragments.get(index));
+					return new BlogsFragment(Filter.BLOGS_USER, getTitle(index), index);
 				}
 				throw new IllegalStateException("Not more than two fragments supported.");
 			}
 
 			@Override
-			public void initFragments() {
-				List<CwAbstractFragment> fragments = new ArrayList<CwAbstractFragment>();
-				fragments.add(new BlogsFragment(Filter.BLOGS_NORMAL, getString(R.string.blogs_filter_all)));
-				fragments.add(new BlogsFragment(Filter.BLOGS_USER, getString(R.string.blogs_filter_own)));
-				adapter.setFragments(fragments);
+			public int getCount() {
+				// TODO Auto-generated method stub
+				return 2;
+			}
+
+			@Override
+			public String getTitle(int index) {
+				switch (index) {
+				case 0:
+					return getString(R.string.blogs_filter_all);
+				case 1:
+					return getString(R.string.blogs_filter_own);
+				}
+				throw new IllegalStateException("Not more than two fragments supported.");
 			}
 		};
 		return fragmentProvider;

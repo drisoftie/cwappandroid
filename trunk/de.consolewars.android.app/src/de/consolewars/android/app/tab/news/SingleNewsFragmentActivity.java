@@ -1,9 +1,7 @@
 package de.consolewars.android.app.tab.news;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import de.consolewars.android.app.CwApplication;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.pics.PicsFragment;
@@ -49,30 +47,34 @@ public class SingleNewsFragmentActivity extends CwAbstractFragmentActivity {
 		fragmentProvider = new FragmentProvider() {
 			@Override
 			public CwAbstractFragment requestFragment(int index) {
-				List<CwAbstractFragment> fragments = adapter.getFragments();
 				switch (index) {
 				case 0:
-					return adapter.switchFragmentsInfo(
-							fragments.set(index, new PicsFragment(getString(R.string.gallery))), fragments.get(index));
+					return new PicsFragment(getTitle(index), index);
 				case 1:
-					return adapter.switchFragmentsInfo(
-							fragments.set(index, new SingleNewsFragment(getString(R.string.news))),
-							fragments.get(index));
+					return new SingleNewsFragment(getTitle(index), index);
 				case 2:
-					return adapter.switchFragmentsInfo(fragments.set(index, new CommentsFragment(CwApplication
-							.cwEntityManager().getSelectedNews(), getString(R.string.comments))), fragments.get(index));
+					return new CommentsFragment(CwApplication.cwEntityManager().getSelectedNews(), getTitle(index),
+							index);
 				}
-				throw new IllegalStateException("Not more than two fragments supported.");
+				throw new IllegalStateException("Not more than three fragments supported.");
 			}
 
 			@Override
-			public void initFragments() {
-				List<CwAbstractFragment> fragments = new ArrayList<CwAbstractFragment>();
-				fragments.add(new PicsFragment(getString(R.string.gallery)));
-				fragments.add(new SingleNewsFragment(getString(R.string.news)));
-				fragments.add(new CommentsFragment(CwApplication.cwEntityManager().getSelectedNews(),
-						getString(R.string.comments)));
-				adapter.setFragments(fragments);
+			public int getCount() {
+				return 3;
+			}
+
+			@Override
+			public String getTitle(int index) {
+				switch (index) {
+				case 0:
+					return getString(R.string.gallery);
+				case 1:
+					return getString(R.string.news);
+				case 2:
+					return getString(R.string.comments);
+				}
+				throw new IllegalStateException("Not more than three fragments supported.");
 			}
 		};
 		return fragmentProvider;
@@ -80,8 +82,11 @@ public class SingleNewsFragmentActivity extends CwAbstractFragmentActivity {
 
 	@Override
 	public void onBackPressed() {
-		for (int i = 0; i < adapter.getCount(); i++) {
-			adapter.getFragments().get(i).backPressed();
+		Fragment f = getSupportFragmentManager().findFragmentByTag(
+				"android:switcher:" + R.id.pager + ":" + lastPosition);
+		if (f != null && f instanceof CwAbstractFragment) {
+			((CwAbstractFragment) f).setPosition(lastPosition);
+			((CwAbstractFragment) f).backPressed();
 		}
 		if (getParent() instanceof CwNavigationMainTabActivity) {
 			((CwNavigationMainTabActivity) getParent()).getTabHost()

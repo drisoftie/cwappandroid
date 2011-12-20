@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebSettings.PluginState;
@@ -21,13 +22,16 @@ import android.widget.TextView;
 import de.consolewars.android.app.CwApplication;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.db.domain.CwNews;
+import de.consolewars.android.app.db.domain.CwVideo;
 import de.consolewars.android.app.tab.CwAbstractFragment;
+import de.consolewars.android.app.tab.CwAbstractFragmentActivity;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
 import de.consolewars.android.app.util.DateUtility;
-import de.consolewars.android.app.util.MediaSnapper;
 import de.consolewars.android.app.util.TextViewHandler;
 import de.consolewars.android.app.view.ActionBar;
 import de.consolewars.android.app.view.ActionBar.Action;
+import de.consolewars.android.app.view.ActionItem;
+import de.consolewars.android.app.view.QuickAction;
 
 /*
  * Copyright [2010] [Alexander Dridiger]
@@ -63,16 +67,14 @@ public class SingleNewsFragment extends CwAbstractFragment {
 
 	private BuildSingleNewsAsyncTask task;
 
-	private String vidURL = "";
-
 	/**
 	 * Mandatory constructor for creating a {@link Fragment}
 	 */
 	public SingleNewsFragment() {
 	}
 
-	public SingleNewsFragment(String title) {
-		super(title);
+	public SingleNewsFragment(String title, int position) {
+		super(title, position);
 		setHasOptionsMenu(true);
 		task = new BuildSingleNewsAsyncTask();
 	}
@@ -92,6 +94,14 @@ public class SingleNewsFragment extends CwAbstractFragment {
 	}
 
 	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		if (((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
+			initActionBar();
+		}
+	}
+
+	@Override
 	public void onPause() {
 		super.onPause();
 		if (getActivity().findViewById(R.id.singlenews_video) != null) {
@@ -105,7 +115,7 @@ public class SingleNewsFragment extends CwAbstractFragment {
 		super.onResume();
 		news = CwApplication.cwEntityManager().getSelectedNews();
 		refreshView();
-		if (isSelected()) {
+		if (((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
 			initActionBar();
 		}
 	}
@@ -222,10 +232,9 @@ public class SingleNewsFragment extends CwAbstractFragment {
 						// FIXME Wrong format handling
 						text.setText(news.getArticle());
 					}
+					CwApplication.cwEntityManager().getFullNews(news,
+							context.getString(R.string.cw_url_append, news.getUrl()));
 					createHeader(singlenews_fragment, news);
-					vidURL = MediaSnapper.snapFromCleanedHTMLWithXPath(
-							context.getString(R.string.cw_url_append, news.getUrl()),
-							context.getString(R.string.xpath_get_video), context.getString(R.string.value));
 					initVideos(news.getUrl());
 				} else if (news == null || news.getArticle() == null) {
 					text.setText(context.getString(R.string.failure));
@@ -256,20 +265,36 @@ public class SingleNewsFragment extends CwAbstractFragment {
 		 * @param url
 		 */
 		private void initVideos(String url) {
-			if (vidURL != "") {
-				WebView localWebView = (WebView) singlenews_fragment.findViewById(R.id.singlenews_video);
+			if (!news.getVideos().isEmpty()) {
 
+				WebView localWebView = (WebView) singlenews_fragment.findViewById(R.id.singlenews_video);
 				localWebView.getSettings().setUseWideViewPort(false);
 				localWebView.getSettings().setPluginState(PluginState.ON);
 				localWebView.getSettings().setPluginsEnabled(true);
 				localWebView.getSettings().setJavaScriptEnabled(true);
 				localWebView.getSettings().setBuiltInZoomControls(false);
+				for (CwVideo video : news.getVideos()) {
+					Log.i("******YOUTUBE*******", video.getHtmlEmbeddedSnippet());
+					localWebView.loadDataWithBaseURL(context.getString(R.string.cw_url_slash),
+							video.getHtmlEmbeddedSnippet(), "text/html", "utf-8", null);
+					break;
+				}
 
-				Log.i("******YOUTUBE*******", context.getString(R.string.youtube_embedding, 300, 200, vidURL));
-
-				localWebView.loadDataWithBaseURL(context.getString(R.string.cw_url_slash),
-						context.getString(R.string.youtube_embedding, 300, 200, vidURL), "text/html", "utf-8", null);
+				TextView moreVids = (TextView) singlenews_fragment.findViewById(R.id.singlenews_morevids);
+				StringBuffer moreVidsText = new StringBuffer();
+				moreVidsText.append("alle Videos:<br>");
+				for (CwVideo video : news.getVideos()) {
+					moreVidsText.append("<a href=\"").append(video.getUrl()).append("\">").append(video.getUrl())
+							.append("</a><br>");
+				}
+				try {
+					moreVids.setText(Html.fromHtml(moreVidsText.toString(), new TextViewHandler(context), null));
+				} catch (IllegalFormatException ife) {
+					moreVids.setText(moreVidsText.toString());
+				}
+				CwApplication.cwViewUtil().setClickableTextView(moreVids);
 			}
+
 		}
 
 		private void createHeader(View parent, CwNews news) {
@@ -277,8 +302,25 @@ public class SingleNewsFragment extends CwAbstractFragment {
 			CwApplication.cwImageLoader().displayImage(context.getString(R.string.catpic_url, news.getCategoryShort()),
 					context, (ImageView) icon, false, R.drawable.cat_stub);
 
-			ImageView usericon = (ImageView) parent.findViewById(R.id.header_descr_usericon);
+			final ImageView usericon = (ImageView) parent.findViewById(R.id.header_descr_usericon);
 			loadPicture(usericon, news);
+
+//			final QuickAction action = initQuickAction();
+//			action.setOnActionItemClickListener(new QuickAction.OnActionItemClickListener() {
+//				@Override
+//				public void onItemClick(int pos) {
+//					if (pos == 0) {
+//					} else if (pos == 1) {
+//					}
+//				}
+//			});
+			// usericon.setOnClickListener(new OnClickListener() {
+			// @Override
+			// public void onClick(View v) {
+			// action.show(usericon);
+			//
+			// }
+			// });
 
 			TextView cattxt = (TextView) parent.findViewById(R.id.header_title);
 			cattxt.setText(news.getCategory());
@@ -300,16 +342,6 @@ public class SingleNewsFragment extends CwAbstractFragment {
 		 *            user id is needed to get the appropriate picture
 		 */
 		private void loadPicture(ImageView view, CwNews news) {
-			int userID = -1;
-
-			String picURL = MediaSnapper.snapFromCleanedHTMLWithXPath(
-					context.getString(R.string.cw_url_append, news.getUrl()),
-					context.getString(R.string.xpath_get_author), context.getString(R.string.href));
-			if (!picURL.matches("")) {
-				userID = Integer.valueOf(picURL.subSequence(context.getString(R.string.prefix_userpic).length(),
-						picURL.length()).toString());
-				news.setAuthorId(userID);
-			}
 			CwApplication.cwImageLoader().displayImage(context.getString(R.string.userpic_url, news.getAuthorId(), 50),
 					context, (ImageView) view, false, R.drawable.user_stub);
 		}
@@ -321,13 +353,40 @@ public class SingleNewsFragment extends CwAbstractFragment {
 		private CharSequence createDate(long unixtime) {
 			return DateUtility.createDate(unixtime, context.getString(R.string.dateformat_detailed));
 		}
+
+		private QuickAction initQuickAction() {
+			final QuickAction mQuickAction = new QuickAction(getActivity());
+			mQuickAction.addActionItem(createAction(R.string.news_sync, R.drawable.ic_add));
+			// mQuickAction.addActionItem(createAction(R.string.news_fav, R.drawable.ic_accept));
+			mQuickAction.addActionItem(createAction(R.string.news_save, R.drawable.ic_up));
+			return mQuickAction;
+		}
+
+		private ActionItem createAction(int titleId, int iconId) {
+			ActionItem addAction = new ActionItem();
+			addAction.setTitle(getString(titleId));
+			addAction.setIcon(getResources().getDrawable(iconId));
+			return addAction;
+		}
+	}
+
+	private class RefreshSingleNewsTask extends AsyncTask<Void, Void, Void> {
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			getActionBar().setProgressBarVisibility(View.VISIBLE);
+			CwApplication.cwEntityManager().getFullNews(news, context.getString(R.string.cw_url_append, news.getUrl()));
+			getActionBar().setProgressBarVisibility(View.GONE);
+			return null;
+		}
+
 	}
 
 	private MenuInflater menuInflater;
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		if (isSelected()) {
+		if (((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
 			super.onCreateOptionsMenu(menu, inflater);
 			menu.clear();
 			inflater.inflate(R.menu.singlenews_menu, menu);
@@ -337,7 +396,7 @@ public class SingleNewsFragment extends CwAbstractFragment {
 
 	@Override
 	public void onPrepareOptionsMenu(Menu menu) {
-		if (isSelected()) {
+		if (((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
 			super.onPrepareOptionsMenu(menu);
 			menu.clear();
 			menuInflater.inflate(R.menu.singlenews_menu, menu);
@@ -345,10 +404,21 @@ public class SingleNewsFragment extends CwAbstractFragment {
 	}
 
 	@Override
-	public void setForeground(boolean isSelected) {
-		super.setForeground(isSelected);
-		if (isSelected) {
-			initActionBar();
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
+			// Find which menu item has been selected
+			switch (item.getItemId()) {
+			// Check for each known menu item
+			case (R.id.menu_singlenews_refresh):
+				new RefreshSingleNewsTask().execute();
+				break;
+			}
 		}
+		return super.onOptionsItemSelected(item);
+	}
+
+	@Override
+	public void refresh() {
+		initActionBar();
 	}
 }

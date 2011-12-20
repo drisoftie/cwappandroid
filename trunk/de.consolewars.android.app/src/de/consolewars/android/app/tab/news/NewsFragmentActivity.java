@@ -1,8 +1,5 @@
 package de.consolewars.android.app.tab.news;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.os.Bundle;
 import de.consolewars.android.app.CwApplication;
 import de.consolewars.android.app.Filter;
@@ -66,34 +63,37 @@ public class NewsFragmentActivity extends CwAbstractFragmentActivity implements 
 		fragmentProvider = new FragmentProvider() {
 			@Override
 			public CwAbstractFragment requestFragment(int index) {
-				List<CwAbstractFragment> fragments = adapter.getFragments();
-				// first set the new fragment with List.set() and at the same time return the old one, then get the new
-				// fragment with List.get()
 				switch (index) {
 				case 0:
-					return adapter.switchFragmentsInfo(fragments.set(index, new NewsFragment(Filter.NEWS_ALL,
-							getString(R.string.news_filter_all))), fragments.get(index));
+					return new NewsFragment(Filter.NEWS_ALL, getTitle(index), index);
 				case 1:
-					return adapter.switchFragmentsInfo(fragments.set(index, new NewsFragment(Filter.NEWS_MS,
-							getString(R.string.news_filter_only_ms))), fragments.get(index));
+					return new NewsFragment(Filter.NEWS_MS, getTitle(index), index);
 				case 2:
-					return adapter.switchFragmentsInfo(fragments.set(index, new NewsFragment(Filter.NEWS_NIN,
-							getString(R.string.news_filter_only_nin))), fragments.get(index));
+					return new NewsFragment(Filter.NEWS_NIN, getTitle(index), index);
 				case 3:
-					return adapter.switchFragmentsInfo(fragments.set(index, new NewsFragment(Filter.NEWS_SONY,
-							getString(R.string.news_filter_only_sony))), fragments.get(index));
+					return new NewsFragment(Filter.NEWS_SONY, getTitle(index), index);
 				}
-				throw new IllegalStateException("Not more than two fragments supported.");
+				throw new IllegalStateException("Not more than four fragments supported.");
 			}
 
 			@Override
-			public void initFragments() {
-				List<CwAbstractFragment> fragments = new ArrayList<CwAbstractFragment>();
-				fragments.add(new NewsFragment(Filter.NEWS_ALL, getString(R.string.news_filter_all)));
-				fragments.add(new NewsFragment(Filter.NEWS_MS, getString(R.string.news_filter_only_ms)));
-				fragments.add(new NewsFragment(Filter.NEWS_NIN, getString(R.string.news_filter_only_nin)));
-				fragments.add(new NewsFragment(Filter.NEWS_SONY, getString(R.string.news_filter_only_sony)));
-				adapter.setFragments(fragments);
+			public int getCount() {
+				return 4;
+			}
+
+			@Override
+			public String getTitle(int index) {
+				switch (index) {
+				case 0:
+					return getString(R.string.news_filter_all);
+				case 1:
+					return getString(R.string.news_filter_only_ms);
+				case 2:
+					return getString(R.string.news_filter_only_nin);
+				case 3:
+					return getString(R.string.news_filter_only_sony);
+				}
+				throw new IllegalStateException("Not more than four fragments supported.");
 			}
 		};
 		return fragmentProvider;

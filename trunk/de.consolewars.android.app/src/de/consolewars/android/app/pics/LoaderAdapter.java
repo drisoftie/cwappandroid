@@ -1,6 +1,6 @@
 package de.consolewars.android.app.pics;
 
-import java.util.List;
+import java.util.Collection;
 
 import android.app.Activity;
 import android.content.res.TypedArray;
@@ -15,11 +15,11 @@ import de.consolewars.android.app.db.domain.CwPicture;
 public class LoaderAdapter extends BaseAdapter {
 
 	private Activity activity;
-	private List<CwPicture> pictures;
+	private Collection<CwPicture> pictures;
 
 	int galItemBg;
 
-	public LoaderAdapter(Activity a, List<CwPicture> pictures) {
+	public LoaderAdapter(Activity a, Collection<CwPicture> pictures) {
 		activity = a;
 		this.pictures = pictures;
 
@@ -47,8 +47,8 @@ public class LoaderAdapter extends BaseAdapter {
 			vi.setBackgroundResource(galItemBg);
 		}
 
-		CwApplication.cwImageLoader().displayImage(pictures.get(position).getThumbUrl(), activity, vi, true,
-				R.drawable.cw_logo_thumb);
+		CwApplication.cwImageLoader().displayImage(pictures.toArray(new CwPicture[0])[position].getThumbUrl(),
+				activity, vi, true, R.drawable.cw_logo_thumb);
 		return vi;
 	}
 }

@@ -27,10 +27,26 @@ import com.j256.ormlite.table.DatabaseTable;
 @DatabaseTable(tableName = "Options")
 public class CwOptions extends CwEntity {
 
-	@DatabaseField(columnName = "savePicsOnSD")
-	private boolean savePicsOnSD;
-	@DatabaseField(columnName = "relativeSDUrl")
-	private String relativeSDUrl;
+	@DatabaseField(columnName = "savePicsOnSdCard")
+	private boolean savePicsOnSdCard;
+
+	@DatabaseField(columnName = "relativeSdCardUrl")
+	private String relativeSdCardUrl;
+
+	@DatabaseField(columnName = "maxNewsScroll")
+	private int maxNewsScroll;
+
+	@DatabaseField(columnName = "maxNewsAction")
+	private int maxNewsAction;
+
+	@DatabaseField(columnName = "maxBlogsScroll")
+	private int maxBlogsScroll;
+
+	@DatabaseField(columnName = "maxBlogsAction")
+	private int maxBlogsAction;
+
+	@DatabaseField(columnName = "maxCmts")
+	private int maxCmts;
 
 	/**
 	 * Mandatory
@@ -38,44 +54,60 @@ public class CwOptions extends CwEntity {
 	public CwOptions() {
 	}
 
-	/**
-	 * @param savePicsOnSD
-	 * @param relativeSDUrl
-	 */
-	public CwOptions(boolean savePicsOnSD, String relativeSDUrl) {
-		super();
-		this.savePicsOnSD = savePicsOnSD;
-		this.relativeSDUrl = relativeSDUrl;
+	public boolean isSavePicsOnSdCard() {
+		return savePicsOnSdCard;
 	}
 
-	/**
-	 * @return the savePicsOnSD
-	 */
-	public boolean isSavePicsOnSD() {
-		return savePicsOnSD;
+	public void setSavePicsOnSdCard(boolean savePicsOnSdCard) {
+		this.savePicsOnSdCard = savePicsOnSdCard;
 	}
 
-	/**
-	 * @param savePicsOnSD
-	 *            the savePicsOnSD to set
-	 */
-	public void setSavePicsOnSD(boolean savePicsOnSD) {
-		this.savePicsOnSD = savePicsOnSD;
+	public String getRelativeSdCardUrl() {
+		return relativeSdCardUrl;
 	}
 
-	/**
-	 * @return the relativeSDUrl
-	 */
-	public String getRelativeSDUrl() {
-		return relativeSDUrl;
+	public void setRelativeSdCardUrl(String relativeSdCardUrl) {
+		this.relativeSdCardUrl = relativeSdCardUrl;
 	}
 
-	/**
-	 * @param relativeSDUrl
-	 *            the relativeSDUrl to set
-	 */
-	public void setRelativeSDUrl(String relativeSDUrl) {
-		this.relativeSDUrl = relativeSDUrl;
+	public int getMaxNewsScroll() {
+		return maxNewsScroll;
+	}
+
+	public void setMaxNewsScroll(int maxNewsScroll) {
+		this.maxNewsScroll = maxNewsScroll;
+	}
+
+	public int getMaxNewsAction() {
+		return maxNewsAction;
+	}
+
+	public void setMaxNewsAction(int maxNewsAction) {
+		this.maxNewsAction = maxNewsAction;
+	}
+
+	public int getMaxBlogsScroll() {
+		return maxBlogsScroll;
+	}
+
+	public void setMaxBlogsScroll(int maxBlogsScroll) {
+		this.maxBlogsScroll = maxBlogsScroll;
+	}
+
+	public int getMaxBlogsAction() {
+		return maxBlogsAction;
+	}
+
+	public void setMaxBlogsAction(int maxBlogsAction) {
+		this.maxBlogsAction = maxBlogsAction;
+	}
+
+	public int getMaxCmts() {
+		return maxCmts;
+	}
+
+	public void setMaxCmts(int maxCmts) {
+		this.maxCmts = maxCmts;
 	}
 
 	@Override

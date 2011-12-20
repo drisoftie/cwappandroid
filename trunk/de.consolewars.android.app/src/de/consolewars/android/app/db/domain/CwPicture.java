@@ -21,7 +21,7 @@ public class CwPicture extends CwEntity {
 	@DatabaseField(columnName = "url", canBeNull = false)
 	private String url;
 
-	@DatabaseField(foreign = true, foreignAutoRefresh = true, columnName = "news_id")
+	@DatabaseField(foreign = true, foreignAutoRefresh = true)
 	private CwNews cwNews;
 
 	/**

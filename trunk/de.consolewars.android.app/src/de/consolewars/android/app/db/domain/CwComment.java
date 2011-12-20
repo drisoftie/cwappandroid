@@ -51,7 +51,7 @@ public class CwComment extends CwEntity {
 	@Element(name = "usertitle", required = false)
 	private String usertitle;
 
-	@DatabaseField(foreign = true, foreignAutoRefresh = true, columnName = "news_id")
+	@DatabaseField(foreign = true, foreignAutoRefresh = true)
 	@Transient
 	private CwNews cwNews;
 

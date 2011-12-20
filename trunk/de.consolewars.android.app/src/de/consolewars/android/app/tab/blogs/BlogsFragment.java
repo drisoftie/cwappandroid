@@ -27,6 +27,7 @@ import de.consolewars.android.app.Filter;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.db.domain.CwBlog;
 import de.consolewars.android.app.tab.CwAbstractFragment;
+import de.consolewars.android.app.tab.CwAbstractFragmentActivity;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
 import de.consolewars.android.app.tab.OnSubjectSelectedListener;
 import de.consolewars.android.app.util.DateUtility;
@@ -93,8 +94,8 @@ public final class BlogsFragment extends CwAbstractFragment {
 	public BlogsFragment() {
 	}
 
-	public BlogsFragment(Filter filter, String titel) {
-		super(titel);
+	public BlogsFragment(Filter filter, String titel, int position) {
+		super(titel, position);
 		setHasOptionsMenu(true);
 		this.currentFilter = filter;
 		task = new BuildBlogsTask();
@@ -152,6 +153,14 @@ public final class BlogsFragment extends CwAbstractFragment {
 	}
 
 	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		if (((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
+			initActionBar();
+		}
+	}
+
+	@Override
 	public void onResume() {
 		super.onResume();
 		if (blogsTable.getChildCount() == 0) {
@@ -161,9 +170,6 @@ public final class BlogsFragment extends CwAbstractFragment {
 				task = new BuildBlogsTask();
 				task.execute();
 			}
-		}
-		if (isSelected()) {
-			initActionBar();
 		}
 	}
 
@@ -567,7 +573,7 @@ public final class BlogsFragment extends CwAbstractFragment {
 		if (menuInflater == null) {
 			menuInflater = getActivity().getMenuInflater();
 		}
-		if (isSelected()) {
+		if (((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
 			super.onPrepareOptionsMenu(menu);
 			menu.clear();
 			if (currentFilter.equals(Filter.BLOGS_USER) && CwApplication.cwLoginManager().isLoggedIn()) {
@@ -580,7 +586,7 @@ public final class BlogsFragment extends CwAbstractFragment {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		if (isSelected()) {
+		if (((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
 			super.onOptionsItemSelected(item);
 			// Find which menu item has been selected
 			switch (item.getItemId()) {
@@ -610,14 +616,11 @@ public final class BlogsFragment extends CwAbstractFragment {
 	}
 
 	@Override
-	public void setForeground(boolean isSelected) {
-		super.setForeground(isSelected);
-		if (isSelected) {
-			initActionBar();
-		}
+	public void backPressed() {
 	}
 
 	@Override
-	public void backPressed() {
+	public void refresh() {
+		initActionBar();
 	}
 }

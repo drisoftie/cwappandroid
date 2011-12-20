@@ -1,9 +1,7 @@
 package de.consolewars.android.app.tab.blogs;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import de.consolewars.android.app.CwApplication;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwAbstractFragment;
@@ -53,26 +51,30 @@ public class SingleBlogFragmentActivity extends CwAbstractFragmentActivity {
 		fragmentProvider = new FragmentProvider() {
 			@Override
 			public CwAbstractFragment requestFragment(int index) {
-				List<CwAbstractFragment> fragments = adapter.getFragments();
 				switch (index) {
 				case 0:
-					return adapter.switchFragmentsInfo(
-							fragments.set(index, new SingleBlogFragment(getString(R.string.blog))),
-							fragments.get(index));
+					return new SingleBlogFragment(getTitle(index), index);
 				case 1:
-					return adapter.switchFragmentsInfo(fragments.set(index, new CommentsFragment(CwApplication
-							.cwEntityManager().getSelectedBlog(), getString(R.string.comments))), fragments.get(index));
+					return new CommentsFragment(CwApplication.cwEntityManager().getSelectedBlog(), getTitle(index),
+							index);
 				}
 				throw new IllegalStateException("Not more than two fragments supported.");
 			}
 
 			@Override
-			public void initFragments() {
-				List<CwAbstractFragment> fragments = new ArrayList<CwAbstractFragment>();
-				fragments.add(new SingleBlogFragment(getString(R.string.blog)));
-				fragments.add(new CommentsFragment(CwApplication.cwEntityManager().getSelectedBlog(),
-						getString(R.string.comments)));
-				adapter.setFragments(fragments);
+			public int getCount() {
+				return 2;
+			}
+
+			@Override
+			public String getTitle(int index) {
+				switch (index) {
+				case 0:
+					return getString(R.string.blog);
+				case 1:
+					return getString(R.string.comments);
+				}
+				throw new IllegalStateException("Not more than two fragments supported.");
 			}
 		};
 		return fragmentProvider;
@@ -80,12 +82,11 @@ public class SingleBlogFragmentActivity extends CwAbstractFragmentActivity {
 
 	@Override
 	public void onBackPressed() {
-		for (int i = 0; i < adapter.getCount(); i++) {
-			if (adapter.getFragments().get(i) instanceof SingleBlogFragment) {
-				((SingleBlogFragment) adapter.getFragments().get(i)).backPressed();
-			} else if (adapter.getFragments().get(i) instanceof CommentsFragment) {
-				((CommentsFragment) adapter.getFragments().get(i)).backPressed();
-			}
+		Fragment f = getSupportFragmentManager().findFragmentByTag(
+				"android:switcher:" + R.id.pager + ":" + lastPosition);
+		if (f instanceof CwAbstractFragment) {
+			((CwAbstractFragment) f).setPosition(lastPosition);
+			((CwAbstractFragment) f).backPressed();
 		}
 		if (getParent() instanceof CwNavigationMainTabActivity) {
 			((CwNavigationMainTabActivity) getParent()).getTabHost().setCurrentTab(

@@ -23,6 +23,7 @@ import de.consolewars.android.app.R;
 import de.consolewars.android.app.db.domain.CwNews;
 import de.consolewars.android.app.db.domain.CwPicture;
 import de.consolewars.android.app.tab.CwAbstractFragment;
+import de.consolewars.android.app.tab.CwAbstractFragmentActivity;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
 import de.consolewars.android.app.view.ActionBar;
 import de.consolewars.android.app.view.ActionBar.Action;
@@ -69,8 +70,8 @@ public class PicsFragment extends CwAbstractFragment {
 	public PicsFragment() {
 	}
 
-	public PicsFragment(String title) {
-		super(title);
+	public PicsFragment(String title, int position) {
+		super(title, position);
 		setHasOptionsMenu(true);
 		task = new SetPicTask();
 	}
@@ -94,6 +95,14 @@ public class PicsFragment extends CwAbstractFragment {
 	}
 
 	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		if (((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
+			initActionBar();
+		}
+	}
+
+	@Override
 	public void onResume() {
 		super.onResume();
 		// if (CwApplication.cwEntityManager().getSelectedNews().getPictures() != null) {
@@ -109,9 +118,14 @@ public class PicsFragment extends CwAbstractFragment {
 		pic_fragment_layout = (ViewGroup) inflater.inflate(R.layout.pic_fragment_layout, null);
 		progress_layout.setVisibility(View.GONE);
 
+		if (((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
+			initActionBar();
+		}
+
 		if (CwApplication.cwEntityManager().getSelectedNews() != null
-				&& CwApplication.cwEntityManager().getSelectedNews().getCachedPictures() != null) {
-			pictures = CwApplication.cwEntityManager().getSelectedNews().getCachedPictures();
+				&& CwApplication.cwEntityManager().getSelectedNews().getPictures() != null) {
+			pictures = new ArrayList<CwPicture>();
+			pictures.addAll(CwApplication.cwEntityManager().getSelectedNews().getPictures());
 			initGallery();
 		} else {
 			if (task != null && task.getStatus().equals(AsyncTask.Status.PENDING)) {
@@ -122,9 +136,6 @@ public class PicsFragment extends CwAbstractFragment {
 			} else if (task != null && task.getStatus().equals(AsyncTask.Status.RUNNING)) {
 				task.cancel(true);
 			}
-		}
-		if (isSelected()) {
-			initActionBar();
 		}
 	}
 
@@ -143,8 +154,8 @@ public class PicsFragment extends CwAbstractFragment {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
 				if (pictures != null && pictures.size() > 0) {
-					CwApplication.cwImageLoader().displayImage(pictures.get(position).getUrl(), context, imgView,
-							false, R.drawable.cw_logo_thumb);
+					CwApplication.cwImageLoader().displayImage(pictures.toArray(new CwPicture[0])[position].getUrl(),
+							context, imgView, false, R.drawable.cw_logo_thumb);
 				}
 			}
 		});
@@ -221,15 +232,8 @@ public class PicsFragment extends CwAbstractFragment {
 		protected Void doInBackground(String... params) {
 			if (!isCancelled()) {
 				CwNews news = CwApplication.cwEntityManager().getSelectedNews();
-				if (news != null) {
-					if (news.getCachedPictures() == null && news.getUrl() != null) {
-						pictures = CwApplication.cwEntityManager().getPictures(
-								context.getString(R.string.cw_url_append, news.getUrl()));
-						news.setCachedPictures(pictures);
-						CwApplication.cwEntityManager().replaceOrSetNews(news);
-					} else if (news.getCachedPictures() != null) {
-						pictures = news.getCachedPictures();
-					}
+				if (news != null && news.getPictures() != null) {
+					pictures.addAll(news.getPictures());
 				}
 				// for (CwPicture pic : CwApplication.cwEntityManager().getPictures(
 				// context.getString(R.string.cw_url_append, news.getUrl()))) {
@@ -293,7 +297,7 @@ public class PicsFragment extends CwAbstractFragment {
 		if (menuInflater == null) {
 			menuInflater = inflater;
 		}
-		if (isSelected()) {
+		if (((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
 			super.onCreateOptionsMenu(menu, inflater);
 			menu.clear();
 			menuInflater.inflate(R.menu.pics_menu, menu);
@@ -305,7 +309,7 @@ public class PicsFragment extends CwAbstractFragment {
 		if (menuInflater == null) {
 			menuInflater = getActivity().getMenuInflater();
 		}
-		if (isSelected()) {
+		if (((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
 			super.onPrepareOptionsMenu(menu);
 			menu.clear();
 			menuInflater.inflate(R.menu.pics_menu, menu);
@@ -314,7 +318,7 @@ public class PicsFragment extends CwAbstractFragment {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		if (isSelected()) {
+		if (((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
 			// Find which menu item has been selected
 			switch (item.getItemId()) {
 			// Check for each known menu item
@@ -337,10 +341,7 @@ public class PicsFragment extends CwAbstractFragment {
 	}
 
 	@Override
-	public void setForeground(boolean isSelected) {
-		super.setForeground(isSelected);
-		if (isSelected) {
-			initActionBar();
-		}
+	public void refresh() {
+		initActionBar();
 	}
 }

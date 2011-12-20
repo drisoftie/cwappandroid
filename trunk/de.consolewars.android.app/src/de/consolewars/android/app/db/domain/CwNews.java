@@ -1,13 +1,12 @@
 package de.consolewars.android.app.db.domain;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Transient;
 
-import com.j256.ormlite.dao.ForeignCollection;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.table.DatabaseTable;
@@ -50,18 +49,14 @@ public class CwNews extends CwSubject {
 	private int picId;
 
 	@ForeignCollectionField()
-	@org.simpleframework.xml.Transient
-	private ForeignCollection<CwComment> comments;
+	@Transient
+	private Collection<CwComment> comments;
 	@ForeignCollectionField()
-	@org.simpleframework.xml.Transient
-	private ForeignCollection<CwPicture> pictures;
-
-	@DatabaseField(persisted = false)
-	@org.simpleframework.xml.Transient
-	private List<CwPicture> cachedPictures;
-	@DatabaseField(persisted = false)
-	@org.simpleframework.xml.Transient
-	private List<CwComment> cachedComments;
+	@Transient
+	private Collection<CwPicture> pictures;
+	@ForeignCollectionField()
+	@Transient
+	private Collection<CwVideo> videos;
 
 	/**
 	 * Mandatory
@@ -86,9 +81,9 @@ public class CwNews extends CwSubject {
 	 */
 	public CwNews(int authorId, String article, String author, int comments, String description, String mode,
 			int subjectId, String title, int unixtime, String url, String category, String categoryShort, int picId,
-			ForeignCollection<CwPicture> pictures) {
+			Collection<CwPicture> pictures) {
 		super(article, author, comments, description, mode, subjectId, title, unixtime, url);
-		this.setAuthorId(authorId);
+		this.authorId = authorId;
 		this.category = category;
 		this.categoryShort = categoryShort;
 		this.picId = picId;
@@ -158,7 +153,10 @@ public class CwNews extends CwSubject {
 	/**
 	 * @return the comments
 	 */
-	public ForeignCollection<CwComment> getComments() {
+	public Collection<CwComment> getComments() {
+		if (comments == null) {
+			comments = new ArrayList<CwComment>();
+		}
 		return comments;
 	}
 
@@ -166,14 +164,17 @@ public class CwNews extends CwSubject {
 	 * @param comments
 	 *            the comments to set
 	 */
-	public void setComments(ForeignCollection<CwComment> comments) {
+	public void setComments(Collection<CwComment> comments) {
 		this.comments = comments;
 	}
 
 	/**
 	 * @return the pictures
 	 */
-	public ForeignCollection<CwPicture> getPictures() {
+	public Collection<CwPicture> getPictures() {
+		if (pictures == null) {
+			pictures = new ArrayList<CwPicture>();
+		}
 		return pictures;
 	}
 
@@ -181,41 +182,26 @@ public class CwNews extends CwSubject {
 	 * @param pictures
 	 *            the pictures to set
 	 */
-	public void setPictures(ForeignCollection<CwPicture> pictures) {
+	public void setPictures(Collection<CwPicture> pictures) {
 		this.pictures = pictures;
 	}
 
 	/**
-	 * @return the cachedPictures
+	 * @return the videos
 	 */
-	public List<CwPicture> getCachedPictures() {
-		return cachedPictures;
-	}
-
-	/**
-	 * @param cachedPictures
-	 *            the cachedPictures to set
-	 */
-	public void setCachedPictures(List<CwPicture> cachedPictures) {
-		this.cachedPictures = cachedPictures;
-	}
-
-	/**
-	 * @return the cachedComments
-	 */
-	public List<CwComment> getCachedComments() {
-		if (cachedComments == null) {
-			cachedComments = new ArrayList<CwComment>();
+	public Collection<CwVideo> getVideos() {
+		if (videos == null) {
+			videos = new ArrayList<CwVideo>();
 		}
-		return cachedComments;
+		return videos;
 	}
 
 	/**
-	 * @param cachedComments
-	 *            the cachedComments to set
+	 * @param videos
+	 *            the videos to set
 	 */
-	public void setCachedComments(List<CwComment> cachedComments) {
-		this.cachedComments = cachedComments;
+	public void setVideos(Collection<CwVideo> videos) {
+		this.videos = videos;
 	}
 
 	@Override
