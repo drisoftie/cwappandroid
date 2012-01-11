@@ -1,6 +1,8 @@
-package de.consolewars.android.app.view;
+package de.consolewars.android.app.util;
 
-import android.widget.ScrollView;
+import java.util.Comparator;
+
+import de.consolewars.android.app.db.domain.CwBlog;
 
 /*
  * Copyright [2011] [Alexander Dridiger]
@@ -17,23 +19,14 @@ import android.widget.ScrollView;
  * limitations under the License.
  */
 /**
- * Interface used for callbacks in {@link ScrollDetectorScrollView}.
+ * Compares two {@link CwBlog} entities by their subjectId.
  * 
  * @author Alexander Dridiger
  */
-public interface IScrollListener {
+public class CwBlogsUnixtimeSorter implements Comparator<CwBlog> {
 
-	/**
-	 * Called when the scroll state of the {@link ScrollView} has changed.
-	 * 
-	 * @param scrollView
-	 *            The {@link ScrollView} whose state has changed.
-	 * @param x
-	 *            new x position
-	 * @param y
-	 *            new y position
-	 * @param oldx
-	 * @param oldy
-	 */
-	public void onScrollChanged(ScrollView scrollView, int x, int y, int oldx, int oldy);
+	@Override
+	public int compare(CwBlog sub1, CwBlog sub2) {
+		return sub1.getUnixtime() - sub2.getUnixtime();
+	}
 }

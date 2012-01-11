@@ -90,4 +90,14 @@ public class BlogsFragmentActivity extends CwAbstractFragmentActivity implements
 		};
 		return fragmentProvider;
 	}
+
+	@Override
+	protected String getStartActionBarTitle() {
+		return getString(R.string.blogs_area);
+	}
+	
+	@Override
+	protected boolean isHomeEnabled() {
+		return true;
+	}
 }

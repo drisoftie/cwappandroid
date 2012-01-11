@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
 import android.widget.RatingBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import de.consolewars.android.app.CwApplication;
@@ -225,7 +226,7 @@ public final class BlogsFragment extends CwAbstractFragment {
 
 					@Override
 					public int getDrawable() {
-						return R.drawable.refresh_bttn;
+						return R.drawable.refresh_blue_bttn;
 					}
 				});
 			}
@@ -277,7 +278,9 @@ public final class BlogsFragment extends CwAbstractFragment {
 
 		@Override
 		protected void onPostExecute(Void result) {
-			blogsTable.removeViewAt(blogsTable.getChildCount() - 1);
+			if (blogsTable.getChildCount() > 0) {
+				blogsTable.removeViewAt(blogsTable.getChildCount() - 1);
+			}
 			initScroll();
 			if (blogsTable.getChildCount() == 0) {
 				oldestBlogsID = -1;
@@ -298,7 +301,7 @@ public final class BlogsFragment extends CwAbstractFragment {
 			for (int i = 0; i < tempList.size(); i++) {
 				final CwBlog blog = tempList.get(i);
 				if (!isCancelled() && (oldestBlogsID == -1 || blog.getSubjectId() < oldestBlogsID)) {
-
+					// check if the blog has to be filtered
 					if (matchesFilter(blog.getUid(), blog.getMode())) {
 						// get the table row by an inflater and set the needed information
 						final View tableRow = inflater.inflate(R.layout.blogs_row_layout, blogsTable, false);
@@ -334,7 +337,7 @@ public final class BlogsFragment extends CwAbstractFragment {
 						author.setSelected(true);
 						RatingBar rating = (RatingBar) tableRow.findViewById(R.id.blogs_row_rating);
 						rating.setRating(blog.getRating());
-						if (i == 0
+						if ((i == 0 && blogsTable.getChildCount() < 2)
 								|| DateUtility
 										.getDay(DateUtility.createCalendarFromUnixtime(tempList.get(i - 1)
 												.getUnixtime() * 1000L), 0).getTimeInMillis() > blog.getUnixtime() * 1000L) {
@@ -431,7 +434,7 @@ public final class BlogsFragment extends CwAbstractFragment {
 		private void initScroll() {
 			scroll.setOnScrollListener(new IScrollListener() {
 				@Override
-				public void onScrollChanged(ScrollDetectorScrollView scrollView, int x, int y, int oldx, int oldy) {
+				public void onScrollChanged(ScrollView scrollView, int x, int y, int oldx, int oldy) {
 					if (!doesWork) {
 						// Grab the last child placed in the ScrollView, we need it to determinate the bottom position.
 						View view = (View) scrollView.getChildAt(scrollView.getChildCount() - 1);

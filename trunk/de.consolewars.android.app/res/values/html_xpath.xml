@@ -7,6 +7,10 @@
 	<string name="cw_usercenter_personal">personal</string>
 	<string name="cw_shoutbox">http://www.consolewars.de/chat</string>
 
+	<string name="cw_board_prefix">consolewars.de/messageboard/</string>
+	<string name="cw_board_standard_style_suffix">styleid=-1</string>
+	<string name="cw_board_mobile_style_suffix">"?&amp;styleid=14"</string>
+	
 
 	<string name="cw_pic_tag">picture</string>
 	<string name="cw_video_tag">video</string>

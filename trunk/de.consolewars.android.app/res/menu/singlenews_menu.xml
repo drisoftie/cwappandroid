@@ -3,7 +3,7 @@
 	android:name="Einzelnews">
 	<item
 		android:id="@+id/menu_singlenews_refresh"
-		android:title="Refresh (Netzwerk)">
+		android:title="@string/news_sync">
 	</item>
 	<item
 		android:id="@+id/menu_singlenews_save"

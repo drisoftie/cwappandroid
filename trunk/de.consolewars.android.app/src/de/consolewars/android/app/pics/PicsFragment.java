@@ -209,7 +209,7 @@ public class PicsFragment extends CwAbstractFragment {
 
 					@Override
 					public int getDrawable() {
-						return R.drawable.refresh_bttn;
+						return R.drawable.refresh_blue_bttn;
 					}
 				});
 			}
@@ -233,6 +233,7 @@ public class PicsFragment extends CwAbstractFragment {
 			if (!isCancelled()) {
 				CwNews news = CwApplication.cwEntityManager().getSelectedNews();
 				if (news != null && news.getPictures() != null) {
+					pictures.clear();
 					pictures.addAll(news.getPictures());
 				}
 				// for (CwPicture pic : CwApplication.cwEntityManager().getPictures(

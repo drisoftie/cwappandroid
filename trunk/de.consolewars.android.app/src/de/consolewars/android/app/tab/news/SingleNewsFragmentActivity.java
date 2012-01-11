@@ -81,6 +81,16 @@ public class SingleNewsFragmentActivity extends CwAbstractFragmentActivity {
 	}
 
 	@Override
+	protected String getStartActionBarTitle() {
+		return getString(R.string.singlenews_area);
+	}
+
+	@Override
+	protected boolean isHomeEnabled() {
+		return true;
+	}
+
+	@Override
 	public void onBackPressed() {
 		Fragment f = getSupportFragmentManager().findFragmentByTag(
 				"android:switcher:" + R.id.pager + ":" + lastPosition);

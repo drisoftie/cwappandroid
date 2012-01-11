@@ -3,25 +3,23 @@ package de.consolewars.android.app.tab.board;
 import roboguice.activity.RoboActivity;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 import android.webkit.WebSettings.PluginState;
 import android.webkit.WebSettings.ZoomDensity;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Button;
 
 import com.google.inject.Inject;
 
 import de.consolewars.android.app.CwLoginManager;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwBasicActivityGroup;
-import de.consolewars.android.app.util.ViewUtility;
+import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
+import de.consolewars.android.app.view.ActionBar;
+import de.consolewars.android.app.view.ActionBar.Action;
 
 /*
  * Copyright [2010] [Alexander Dridiger]
@@ -46,20 +44,15 @@ public class BoardActivity extends RoboActivity {
 
 	@Inject
 	private CwLoginManager cwLoginManager;
-	@Inject
-	private ViewUtility viewUtility;
 
 	private WebView webView;
-
-	private ViewGroup board_layout;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		board_layout = (ViewGroup) LayoutInflater.from(BoardActivity.this.getParent()).inflate(R.layout.board_layout,
-				null);
-
+		setContentView(R.layout.board_layout);
+		initActionBar();
 		new OpenBoardAsyncTask().execute();
 	}
 
@@ -68,36 +61,29 @@ public class BoardActivity extends RoboActivity {
 	 * 
 	 * @author Alexander Dridiger
 	 */
-	private class OpenBoardAsyncTask extends AsyncTask<Void, Integer, View> {
+	private class OpenBoardAsyncTask extends AsyncTask<Void, Integer, Void> {
 
 		@Override
 		protected void onPreExecute() {
-			// first set progressbar view
-			ViewGroup progress_layout = viewUtility.getCenteredProgressBarLayout(
-					LayoutInflater.from(BoardActivity.this.getParent()), R.string.board);
-			setContentView(progress_layout);
+			findViewById(R.id.progressbar).setVisibility(View.VISIBLE);
+			findViewById(R.id.board).setVisibility(View.INVISIBLE);
 		}
 
 		@Override
-		protected View doInBackground(Void... params) {
-			return loginAndOpenBoard();
+		protected Void doInBackground(Void... params) {
+			loginAndOpenBoard();
+			return null;
 		}
 
 		@Override
-		protected void onPostExecute(View result) {
-			setContentView(result);
+		protected void onPostExecute(Void result) {
+			findViewById(R.id.progressbar).setVisibility(View.INVISIBLE);
+			findViewById(R.id.board).setVisibility(View.VISIBLE);
 		}
 
-		private View loginAndOpenBoard() {
-			Button refresh = (Button) board_layout.findViewById(R.id.board_refresh);
-			refresh.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View arg0) {
-					new OpenBoardAsyncTask().execute();
-				}
-			});
+		private void loginAndOpenBoard() {
 
-			webView = (WebView) board_layout.findViewById(R.id.board);
+			webView = (WebView) findViewById(R.id.board);
 
 			webView.getSettings().setDefaultZoom(ZoomDensity.FAR);
 			webView.getSettings().setUseWideViewPort(false);
@@ -125,28 +111,74 @@ public class BoardActivity extends RoboActivity {
 			webView.setWebViewClient(new WebViewClient() {
 				@Override
 				public boolean shouldOverrideUrlLoading(WebView view, String url) {
+					if (url.contains(getString(R.string.cw_board_prefix))
+							&& !url.endsWith(getString(R.string.cw_board_standard_style_suffix))) {
+						url += getString(R.string.cw_board_mobile_style_suffix);
+					}
 					view.loadUrl(url);
 					return true;
 				}
 			});
+			CookieManager cm = CookieManager.getInstance();
 			if (!cwLoginManager.isLoggedIn()) {
 				CookieSyncManager.createInstance(BoardActivity.this);
-				CookieManager cookieManager = CookieManager.getInstance();
-				cookieManager.removeAllCookie();
+				cm.removeAllCookie();
 				CookieSyncManager.getInstance().sync();
 				webView.loadUrl(getString(R.string.cw_url_slash));
 			} else {
 				CookieSyncManager.createInstance(BoardActivity.this);
-				CookieManager cookieManager = CookieManager.getInstance();
-				cookieManager.setCookie(getString(R.string.cw_domain), getString(R.string.cw_cookie_userid) + "="
-						+ cwLoginManager.getAuthenticatedUser().getUid());
-				cookieManager.setCookie(getString(R.string.cw_domain), getString(R.string.cw_cookie_pw) + "="
-						+ cwLoginManager.getAuthenticatedUser().getPasswordHash());
-				CookieSyncManager.getInstance().sync();
-				webView.loadUrl(getString(R.string.cw_messageboard_mobile_url));
+				String cookie = cm.getCookie(getString(R.string.cw_domain));
+				if (cookie.contains(getString(R.string.cw_cookie_userid))
+						&& cookie.contains(getString(R.string.cw_cookie_userid) + "="
+								+ cwLoginManager.getAuthenticatedUser().getUid())
+						&& cookie.contains(getString(R.string.cw_cookie_pw) + "="
+								+ cwLoginManager.getAuthenticatedUser().getPasswordHash())) {
+					webView.loadUrl(getString(R.string.cw_messageboard_mobile_url));
+				} else {
+					cm.removeAllCookie();
+					cm.getCookie(getString(R.string.cw_domain)).contains(getString(R.string.cw_cookie_userid));
+					cm.setCookie(getString(R.string.cw_domain), getString(R.string.cw_cookie_userid) + "="
+							+ cwLoginManager.getAuthenticatedUser().getUid());
+					cm.setCookie(getString(R.string.cw_domain), getString(R.string.cw_cookie_pw) + "="
+							+ cwLoginManager.getAuthenticatedUser().getPasswordHash());
+					CookieSyncManager.getInstance().sync();
+					webView.loadUrl(getString(R.string.cw_messageboard_mobile_url));
+				}
 			}
-			return board_layout;
 		}
+	}
+
+	private void initActionBar() {
+		ActionBar actionBar = (ActionBar) findViewById(R.id.actionbar);
+		actionBar.removeAllActions();
+		actionBar.setTitle(getString(R.string.board));
+		actionBar.setDisplayHomeAsUpEnabled(true);
+
+		actionBar.setHomeAction(new Action() {
+			@Override
+			public void performAction(View view) {
+				((CwNavigationMainTabActivity) getParent().getParent()).getTabHost().setCurrentTab(
+						CwNavigationMainTabActivity.OVERVIEW_TAB);
+			}
+
+			@Override
+			public int getDrawable() {
+				return R.drawable.home;
+			}
+		});
+		actionBar.setDisplayHomeAsUpEnabled(true);
+
+		actionBar.addAction(new Action() {
+			@Override
+			public void performAction(View view) {
+				new OpenBoardAsyncTask().execute();
+			}
+
+			@Override
+			public int getDrawable() {
+				return R.drawable.refresh_blue_bttn;
+			}
+		});
 	}
 
 	@Override

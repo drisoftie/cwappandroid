@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.htmlcleaner.XPatherException;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -93,10 +94,12 @@ public class CwManager {
 	 * @return
 	 */
 	public AuthenticatedUser getAuthUser(String username, String password) {
-		try {
-			return api.authenticate(username, password);
-		} catch (ConsolewarsAPIException e) {
-			e.printStackTrace();
+		if (isDeviceOnline()) {
+			try {
+				return api.authenticate(username, password);
+			} catch (ConsolewarsAPIException e) {
+				e.printStackTrace();
+			}
 		}
 		return null;
 	}
@@ -109,12 +112,14 @@ public class CwManager {
 	 * @see de.consolewars.api.API#getBlogs(int[])
 	 */
 	public List<CwBlog> getBlogsByIds(int[] id) {
-		try {
-			return blogsParser.parse(id);
-		} catch (ConsolewarsAPIException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+		if (isDeviceOnline()) {
+			try {
+				return blogsParser.parse(id);
+			} catch (ConsolewarsAPIException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 		return new ArrayList<CwBlog>();
 	}
@@ -128,10 +133,12 @@ public class CwManager {
 	 * @return
 	 */
 	public List<CwBlog> getBlogs(int count, Filter filter, Date date) {
-		try {
-			return api.getBlogsList(-1, count, filter.getFilter(), date);
-		} catch (ConsolewarsAPIException e) {
-			e.printStackTrace();
+		if (isDeviceOnline()) {
+			try {
+				return api.getBlogsList(-1, count, filter.getFilter(), date);
+			} catch (ConsolewarsAPIException e) {
+				e.printStackTrace();
+			}
 		}
 		return new ArrayList<CwBlog>();
 	}
@@ -144,10 +151,12 @@ public class CwManager {
 	 * @return
 	 */
 	public List<CwBlog> getUserBlogs(int userId, int count, Date date) {
-		try {
-			return api.getBlogsList(userId, count, Filter.BLOGS_USER.getFilter(), date);
-		} catch (ConsolewarsAPIException e) {
-			e.printStackTrace();
+		if (isDeviceOnline()) {
+			try {
+				return api.getBlogsList(userId, count, Filter.BLOGS_USER.getFilter(), date);
+			} catch (ConsolewarsAPIException e) {
+				e.printStackTrace();
+			}
 		}
 		return new ArrayList<CwBlog>();
 	}
@@ -159,10 +168,12 @@ public class CwManager {
 	 * @return
 	 */
 	public CwBlog getBlogById(int blogId) {
-		try {
-			return api.getBlog(blogId);
-		} catch (ConsolewarsAPIException e) {
-			e.printStackTrace();
+		if (isDeviceOnline()) {
+			try {
+				return api.getBlog(blogId);
+			} catch (ConsolewarsAPIException e) {
+				e.printStackTrace();
+			}
 		}
 		return null;
 	}
@@ -178,12 +189,14 @@ public class CwManager {
 	 */
 	public CommentsRoot getComments(int objectId, int area, int count, int viewPage) {
 		CommentsRoot root = new CommentsRoot();
-		try {
-			root = commentsParser.parse(objectId, area, count, viewPage, -1);
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (ConsolewarsAPIException e) {
-			e.printStackTrace();
+		if (isDeviceOnline()) {
+			try {
+				root = commentsParser.parse(objectId, area, count, viewPage, -1);
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (ConsolewarsAPIException e) {
+				e.printStackTrace();
+			}
 		}
 		return root;
 	}
@@ -197,10 +210,12 @@ public class CwManager {
 	 * @return
 	 */
 	public List<CwNews> getNews(int count, Filter filter, Date date) {
-		try {
-			return api.getNewsList(count, filter.getFilter(), date);
-		} catch (ConsolewarsAPIException e) {
-			e.printStackTrace();
+		if (isDeviceOnline()) {
+			try {
+				return api.getNewsList(count, filter.getFilter(), date);
+			} catch (ConsolewarsAPIException e) {
+				e.printStackTrace();
+			}
 		}
 		return new ArrayList<CwNews>();
 	}
@@ -213,10 +228,12 @@ public class CwManager {
 	 * @see de.consolewars.api.API#getNews(int)
 	 */
 	public CwNews getNewsById(int id) {
-		try {
-			return api.getNews(id);
-		} catch (ConsolewarsAPIException e) {
-			e.printStackTrace();
+		if (isDeviceOnline()) {
+			try {
+				return api.getNews(id);
+			} catch (ConsolewarsAPIException e) {
+				e.printStackTrace();
+			}
 		}
 		return null;
 	}
@@ -229,12 +246,14 @@ public class CwManager {
 	 * @see de.consolewars.api.API#getNews(int[])
 	 */
 	public List<CwNews> getNewsByIds(int[] id) {
-		try {
-			return newsParser.parse(id);
-		} catch (ConsolewarsAPIException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+		if (isDeviceOnline()) {
+			try {
+				return newsParser.parse(id);
+			} catch (ConsolewarsAPIException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 		return new ArrayList<CwNews>();
 	}
@@ -247,7 +266,7 @@ public class CwManager {
 	 * @return
 	 */
 	public List<CwMessage> getMessages(Filter filter, int count) {
-		if (cwLoginManager.isLoggedIn()) {
+		if (cwLoginManager.isLoggedIn() && isDeviceOnline()) {
 			try {
 				return messagesParser.parse(cwLoginManager.getAuthenticatedUser().getUid(), cwLoginManager
 						.getAuthenticatedUser().getPasswordHash(), filter.getFilter(), count);
@@ -275,21 +294,23 @@ public class CwManager {
 	 */
 	public boolean sendMessage(String message, String recipient, String title, boolean saveCopy, boolean parseUrl,
 			boolean showSignature, boolean disableSmilies, boolean receipt) {
-		String securityToken = getSecurityToken();
+		if (isDeviceOnline()) {
+			String securityToken = getSecurityToken();
 
-		try {
-			String url = context.getString(R.string.cw_message_url);
-			String cookies = context.getString(R.string.cw_cookie_full, cwLoginManager.getAuthenticatedUser().getUid(),
-					cwLoginManager.getAuthenticatedUser().getPasswordHash());
-			String data = context.getString(R.string.cw_mssg_submit_data,
-					URLEncoder.encode(message, context.getString(R.string.utf8)),
-					URLEncoder.encode(recipient, context.getString(R.string.utf8)), saveCopy ? 1 : 0,
-					URLEncoder.encode(title, context.getString(R.string.utf8)), parseUrl ? 1 : 0, securityToken,
-					showSignature ? 1 : 0, disableSmilies ? 1 : 0, receipt ? 1 : 0);
-			httpPoster.sendPost(url, cookies, data);
-			return true;
-		} catch (IOException e) {
-			e.printStackTrace();
+			try {
+				String url = context.getString(R.string.cw_message_url);
+				String cookies = context.getString(R.string.cw_cookie_full, cwLoginManager.getAuthenticatedUser()
+						.getUid(), cwLoginManager.getAuthenticatedUser().getPasswordHash());
+				String data = context.getString(R.string.cw_mssg_submit_data,
+						URLEncoder.encode(message, context.getString(R.string.utf8)),
+						URLEncoder.encode(recipient, context.getString(R.string.utf8)), saveCopy ? 1 : 0,
+						URLEncoder.encode(title, context.getString(R.string.utf8)), parseUrl ? 1 : 0, securityToken,
+						showSignature ? 1 : 0, disableSmilies ? 1 : 0, receipt ? 1 : 0);
+				httpPoster.sendPost(url, cookies, data);
+				return true;
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 		return false;
 	}
@@ -307,21 +328,24 @@ public class CwManager {
 	 * @return
 	 */
 	public boolean deleteMessages(List<Integer> messageIds) {
-		String securityToken = getSecurityToken();
+		if (isDeviceOnline()) {
+			String securityToken = getSecurityToken();
 
-		try {
-			String url = context.getString(R.string.cw_message_url);
-			String cookies = context.getString(R.string.cw_cookie_full, cwLoginManager.getAuthenticatedUser(),
-					cwLoginManager.getAuthenticatedUser().getPasswordHash());
-			List<String> pms = new ArrayList<String>();
-			for (Integer messageId : messageIds) {
-				pms.add(context.getString(R.string.cw_mssg_delete_param, messageId));
+			try {
+				String url = context.getString(R.string.cw_message_url);
+				String cookies = context.getString(R.string.cw_cookie_full, cwLoginManager.getAuthenticatedUser(),
+						cwLoginManager.getAuthenticatedUser().getPasswordHash());
+				List<String> pms = new ArrayList<String>();
+				for (Integer messageId : messageIds) {
+					pms.add(context.getString(R.string.cw_mssg_delete_param, messageId));
+				}
+				String data = context
+						.getString(R.string.cw_mssg_delete_data, StringUtils.join(pms, "&"), securityToken);
+				httpPoster.sendPost(url, cookies, data);
+				return true;
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-			String data = context.getString(R.string.cw_mssg_delete_data, StringUtils.join(pms, "&"), securityToken);
-			httpPoster.sendPost(url, cookies, data);
-			return true;
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
 		return false;
 	}
@@ -331,15 +355,18 @@ public class CwManager {
 	 */
 	private String getSecurityToken() {
 		String securityToken = "";
-		try {
-			securityToken = MediaSnapper.snapWithCookies(context, context.getString(R.string.xpath_get_securitytoken),
-					context.getString(R.string.value), context.getString(R.string.cw_getsecuritytoken_url), context
-							.getString(R.string.cw_cookie_full, cwLoginManager.getAuthenticatedUser().getUid(),
-									cwLoginManager.getAuthenticatedUser().getPasswordHash()));
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		} catch (XPatherException e1) {
-			e1.printStackTrace();
+		if (isDeviceOnline()) {
+			try {
+				securityToken = MediaSnapper.snapWithCookies(context, context
+						.getString(R.string.xpath_get_securitytoken), context.getString(R.string.value), context
+						.getString(R.string.cw_getsecuritytoken_url), context.getString(R.string.cw_cookie_full,
+						cwLoginManager.getAuthenticatedUser().getUid(), cwLoginManager.getAuthenticatedUser()
+								.getPasswordHash()));
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			} catch (XPatherException e1) {
+				e1.printStackTrace();
+			}
 		}
 		return securityToken;
 	}
@@ -359,7 +386,7 @@ public class CwManager {
 	 */
 	public boolean sendBlog(String title, String content, String date, String time, boolean allowCmts, String tags,
 			boolean isVisible, boolean isNewsblog, int blogID) {
-		if (cwLoginManager.isLoggedIn()) {
+		if (cwLoginManager.isLoggedIn() && isDeviceOnline()) {
 			try {
 				String url = context.getString(
 						R.string.cw_blogpost_url,
@@ -383,7 +410,7 @@ public class CwManager {
 	}
 
 	public boolean deleteBlog(int id, String command) {
-		if (cwLoginManager.isLoggedIn()) {
+		if (cwLoginManager.isLoggedIn() && isDeviceOnline()) {
 			try {
 				String url = context.getString(R.string.cw_blogpost_url, cwLoginManager.getAuthenticatedUser()
 						.getUsername());
@@ -407,7 +434,7 @@ public class CwManager {
 	 * @return
 	 */
 	public boolean sendComment(String comment, int objectId, int area) {
-		if (cwLoginManager.isLoggedIn()) {
+		if (cwLoginManager.isLoggedIn() && isDeviceOnline()) {
 			try {
 				httpPoster.sendPost(context.getString(R.string.cw_posting_url), context.getString(
 						R.string.cw_cookie_full, cwLoginManager.getAuthenticatedUser().getUid(), cwLoginManager
@@ -429,7 +456,7 @@ public class CwManager {
 	 * @return
 	 */
 	public boolean deleteComment(int commentId, int objectId, int area) {
-		if (cwLoginManager.isLoggedIn()) {
+		if (cwLoginManager.isLoggedIn() && isDeviceOnline()) {
 			try {
 				httpPoster.sendPost(context.getString(R.string.cw_posting_url), context.getString(
 						R.string.cw_cookie_full, cwLoginManager.getAuthenticatedUser().getUid(), cwLoginManager
@@ -452,7 +479,7 @@ public class CwManager {
 	 * @return
 	 */
 	public boolean updateComment(String newText, int commentId, int objectId, int area) {
-		if (cwLoginManager.isLoggedIn()) {
+		if (cwLoginManager.isLoggedIn() && isDeviceOnline()) {
 			try {
 				httpPoster.sendPost(context.getString(R.string.cw_posting_url), context.getString(
 						R.string.cw_cookie_full, cwLoginManager.getAuthenticatedUser().getUid(), cwLoginManager
@@ -464,6 +491,14 @@ public class CwManager {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
+		return false;
+	}
+
+	public boolean isDeviceOnline() {
+		ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+		if (cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnectedOrConnecting()) {
+			return true;
 		}
 		return false;
 	}

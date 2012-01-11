@@ -14,6 +14,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.j256.ormlite.dao.Dao;
 
@@ -22,6 +23,8 @@ import de.consolewars.android.app.CwEntityManager;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.db.AppDataHandler;
 import de.consolewars.android.app.db.domain.CwUser;
+import de.consolewars.android.app.view.ActionBar;
+import de.consolewars.android.app.view.ActionBar.Action;
 import de.consolewars.android.app.view.CwPagerAdapter;
 import de.consolewars.android.app.view.CwPagerAdapter.FragmentProvider;
 import de.consolewars.android.app.view.TitlePageIndicator;
@@ -54,6 +57,7 @@ public abstract class CwAbstractFragmentActivity extends FragmentActivity implem
 
 	protected CwPagerAdapter adapter;
 	protected FragmentProvider fragmentProvider;
+	ViewPager pager;
 
 	public int lastPosition;
 
@@ -74,7 +78,7 @@ public abstract class CwAbstractFragmentActivity extends FragmentActivity implem
 		adapter = new CwPagerAdapter(getSupportFragmentManager());
 		adapter.setFragmentProvider(getFragmentProvider());
 
-		ViewPager pager = (ViewPager) findViewById(R.id.pager);
+		pager = (ViewPager) findViewById(R.id.pager);
 		pager.setAdapter(adapter);
 
 		TitlePageIndicator indicator = (TitlePageIndicator) findViewById(R.id.indicator);
@@ -84,6 +88,27 @@ public abstract class CwAbstractFragmentActivity extends FragmentActivity implem
 		// We set this on the indicator, NOT the pager
 		indicator.setOnPageChangeListener(this);
 		indicator.setCurrentItem(getInitialFragmentSelection());
+		lastPosition = getInitialFragmentSelection();
+
+		ActionBar actionBar = (ActionBar) findViewById(R.id.actionbar);
+		actionBar.setTitle(getStartActionBarTitle());
+		if (isHomeEnabled()) {
+			actionBar.setHomeAction(new Action() {
+				@Override
+				public void performAction(View view) {
+					if (getParent() instanceof CwNavigationMainTabActivity) {
+						((CwNavigationMainTabActivity) getParent()).getTabHost().setCurrentTab(
+								CwNavigationMainTabActivity.OVERVIEW_TAB);
+					}
+				}
+
+				@Override
+				public int getDrawable() {
+					return R.drawable.home;
+				}
+			});
+			actionBar.setDisplayHomeAsUpEnabled(true);
+		}
 	}
 
 	@Override
@@ -92,6 +117,7 @@ public abstract class CwAbstractFragmentActivity extends FragmentActivity implem
 		Fragment f = getSupportFragmentManager().findFragmentByTag(
 				"android:switcher:" + R.id.pager + ":" + lastPosition);
 		if (f != null && f instanceof CwAbstractFragment) {
+			((CwAbstractFragment) f).setPosition(lastPosition);
 			((CwAbstractFragment) f).refresh();
 		}
 	}
@@ -194,4 +220,14 @@ public abstract class CwAbstractFragmentActivity extends FragmentActivity implem
 	 * @return
 	 */
 	protected abstract int getInitialFragmentSelection();
+
+	/**
+	 * @return
+	 */
+	protected abstract String getStartActionBarTitle();
+
+	/**
+	 * @return
+	 */
+	protected abstract boolean isHomeEnabled();
 }

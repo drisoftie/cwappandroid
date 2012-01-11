@@ -21,6 +21,7 @@ import de.consolewars.android.app.db.domain.CwNews;
 import de.consolewars.android.app.db.domain.CwOptions;
 import de.consolewars.android.app.db.domain.CwPicture;
 import de.consolewars.android.app.db.domain.CwUser;
+import de.consolewars.android.app.db.domain.CwVideo;
 
 /*
  * Copyright [2010] [Alexander Dridiger]
@@ -55,7 +56,7 @@ public class AppDataHandler {
 	@Inject
 	private Dao<CwPicture, Integer> cwPicturesDao;
 	@Inject
-	private Dao<CwPicture, Integer> cwVideosDao;
+	private Dao<CwVideo, Integer> cwVideosDao;
 	@Inject
 	private Dao<CwOptions, Integer> cwOptionsDao;
 
@@ -121,8 +122,20 @@ public class AppDataHandler {
 	 * @throws SQLException
 	 */
 	public CwNews loadSingleSavedNews(int subjectId) throws SQLException {
-		return cwNewsDao.queryForFirst(cwNewsDao.queryBuilder().where()
+		CwNews cwNews = cwNewsDao.queryForFirst(cwNewsDao.queryBuilder().where()
 				.eq(context.getString(R.string.db_subjectid_attribute), subjectId).prepare());
+		if (cwNews != null) {
+			for (CwComment comment : cwNews.getComments()) {
+				cwCommentsDao.refresh(comment);
+			}
+			for (CwPicture pic : cwNews.getPictures()) {
+				cwPicturesDao.refresh(pic);
+			}
+			for (CwVideo video : cwNews.getVideos()) {
+				cwVideosDao.refresh(video);
+			}
+		}
+		return cwNews;
 	}
 
 	/**
@@ -175,8 +188,20 @@ public class AppDataHandler {
 	 * @throws SQLException
 	 */
 	public List<CwNews> loadSavedNews(int amount) throws SQLException {
-		return cwNewsDao.queryBuilder().orderBy(context.getString(R.string.db_subjectid_attribute), false)
+		List<CwNews> news = cwNewsDao.queryBuilder().orderBy(context.getString(R.string.db_subjectid_attribute), false)
 				.limit(amount).query();
+		for (CwNews cwNews : news) {
+			for (CwComment comment : cwNews.getComments()) {
+				cwCommentsDao.refresh(comment);
+			}
+			for (CwPicture pic : cwNews.getPictures()) {
+				cwPicturesDao.refresh(pic);
+			}
+			for (CwVideo video : cwNews.getVideos()) {
+				cwVideosDao.refresh(video);
+			}
+		}
+		return news;
 	}
 
 	/**
@@ -214,6 +239,12 @@ public class AppDataHandler {
 		for (CwNews cwNews : news) {
 			for (CwComment comment : cwNews.getComments()) {
 				cwCommentsDao.refresh(comment);
+			}
+			for (CwPicture pic : cwNews.getPictures()) {
+				cwPicturesDao.refresh(pic);
+			}
+			for (CwVideo video : cwNews.getVideos()) {
+				cwVideosDao.refresh(video);
 			}
 		}
 		return news;
@@ -257,26 +288,26 @@ public class AppDataHandler {
 	 */
 	public boolean createOrUpdateNews(CwNews news) throws SQLException {
 		boolean created = false;
-		List<CwNews> matches = cwNewsDao.queryForEq(context.getString(R.string.db_subjectid_attribute),
-				news.getSubjectId());
-		if (!matches.isEmpty()) {
-			CwNews match = matches.get(0);
-			news.setId(match.getId());
-			cwNewsDao.update(match);
-			created = false;
-		} else {
-			cwNewsDao.create(news);
-			created = true;
-		}
+		// List<CwNews> matches = cwNewsDao.queryForEq(context.getString(R.string.db_subjectid_attribute),
+		// news.getSubjectId());
+		// if (!matches.isEmpty()) {
+		// CwNews match = matches.get(0);
+		// news.setId(match.getId());
+		// cwNewsDao.update(match);
+		// created = false;
+		// } else {
+		cwNewsDao.create(news);
+		created = true;
+		// }
 		for (CwComment comment : news.getComments()) {
 			createOrUpdateComment(comment);
 		}
-		// for (CwPicture pic : news.getPictures()) {
-		//
-		// }
-		// for (CwVideo video : news.getVideos()) {
-		//
-		// }
+		for (CwPicture pic : news.getPictures()) {
+			createOrUpdatePicture(pic);
+		}
+		for (CwVideo video : news.getVideos()) {
+			createOrUpdateVideo(video);
+		}
 		return created;
 	}
 
@@ -297,8 +328,31 @@ public class AppDataHandler {
 
 	public boolean createOrUpdatePicture(CwPicture picture) throws SQLException {
 		boolean created = false;
-		cwPicturesDao.queryForEq(context.getString(R.string.db_commentid_attribute), picture.getUrl());
+		List<CwPicture> matches = cwPicturesDao.queryForEq(context.getString(R.string.db_picurl_attribute),
+				picture.getUrl());
+		if (!matches.isEmpty()) {
+			CwPicture match = matches.get(0);
+			picture.setId(match.getId());
+			created = false;
+		} else {
+			cwPicturesDao.create(picture);
+			created = true;
+		}
+		return created;
+	}
 
+	public boolean createOrUpdateVideo(CwVideo video) throws SQLException {
+		boolean created = false;
+		List<CwVideo> matches = cwVideosDao.queryForEq(context.getString(R.string.db_videourl_attribute),
+				video.getUrl());
+		if (!matches.isEmpty()) {
+			CwVideo match = matches.get(0);
+			video.setId(match.getId());
+			created = false;
+		} else {
+			cwVideosDao.create(video);
+			created = true;
+		}
 		return created;
 	}
 

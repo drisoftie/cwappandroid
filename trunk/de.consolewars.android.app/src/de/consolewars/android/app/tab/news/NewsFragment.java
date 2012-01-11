@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
-import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -23,6 +22,7 @@ import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import de.consolewars.android.app.CwApplication;
@@ -32,9 +32,10 @@ import de.consolewars.android.app.Filter;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.db.domain.CwComment;
 import de.consolewars.android.app.db.domain.CwNews;
+import de.consolewars.android.app.db.domain.CwPicture;
+import de.consolewars.android.app.db.domain.CwVideo;
 import de.consolewars.android.app.tab.CwAbstractFragment;
 import de.consolewars.android.app.tab.CwAbstractFragmentActivity;
-import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
 import de.consolewars.android.app.tab.OnSubjectSelectedListener;
 import de.consolewars.android.app.util.DateUtility;
 import de.consolewars.android.app.util.StyleSpannableStringBuilder;
@@ -151,19 +152,9 @@ public final class NewsFragment extends CwAbstractFragment {
 	}
 
 	@Override
-	public void onActivityCreated(Bundle savedInstanceState) {
-		super.onActivityCreated(savedInstanceState);
-		if (((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
-			initActionBar();
-		}
-	}
-
-	@Override
 	public void onResume() {
 		super.onResume();
-		if (((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
-			initActionBar();
-		}
+		initActionBar();
 		if (!isDetached() && newsTable.getChildCount() == 0) {
 			if (task != null && task.getStatus().equals(AsyncTask.Status.PENDING)) {
 				task.execute(true);
@@ -190,46 +181,45 @@ public final class NewsFragment extends CwAbstractFragment {
 	}
 
 	private void initActionBar() {
-		if (getActivity() != null) {
-			if (getActivity().getParent() instanceof CwNavigationMainTabActivity) {
-				ActionBar actionBar = getActionBar();
-				actionBar.removeAllActions();
-				setHomeAction();
-				actionBar.setTitle(getActivity().getString(R.string.news_area));
-				actionBar.setDisplayHomeAsUpEnabled(true);
-				actionBar.addAction(new Action() {
-					@Override
-					public void performAction(View view) {
-						if (task.getStatus().equals(AsyncTask.Status.RUNNING)) {
-							task.cancel(true);
-						}
-						task = new BuildNewsTask();
-						task.execute(true);
+		if (getActivity() != null && ((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
+			ActionBar actionBar = getActionBar();
+			actionBar.removeAllActions();
+			setHomeAction();
+			actionBar.setTitle(getActivity().getString(R.string.news_area));
+			actionBar.setDisplayHomeAsUpEnabled(true);
+			actionBar.addAction(new Action() {
+				@Override
+				public void performAction(View view) {
+					if (task.getStatus().equals(AsyncTask.Status.RUNNING)) {
+						task.cancel(true);
 					}
+					task = new BuildNewsTask();
+					task.execute(true);
+				}
 
-					@Override
-					public int getDrawable() {
-						return R.drawable.download_bttn;
+				@Override
+				public int getDrawable() {
+					return R.drawable.download_bttn;
+				}
+			});
+			actionBar.addAction(new Action() {
+				@Override
+				public void performAction(View view) {
+					if (task != null) {
+						task.cancel(true);
 					}
-				});
-				actionBar.addAction(new Action() {
-					@Override
-					public void performAction(View view) {
-						if (task != null) {
-							task.cancel(true);
-						}
-						newsTable.removeAllViews();
-						oldestNewsID = -1;
-						task = new BuildNewsTask();
-						task.execute();
-					}
+					newsTable.removeAllViews();
+					oldestNewsID = -1;
+					task = new BuildNewsTask();
+					task.execute();
+				}
 
-					@Override
-					public int getDrawable() {
-						return R.drawable.refresh_bttn;
-					}
-				});
-			}
+				@Override
+				public int getDrawable() {
+					return R.drawable.refresh_blue_bttn;
+				}
+			});
+			actionBar.invalidate();
 		}
 	}
 
@@ -343,6 +333,10 @@ public final class NewsFragment extends CwAbstractFragment {
 									if (event.getEventTime() - event.getDownTime() < 500) {
 										tableRow.setBackgroundDrawable(getActivity().getResources().getDrawable(
 												R.drawable.table_cell_bg_selected));
+										if (selectedRow != null) {
+											selectedRow.setBackgroundDrawable(getActivity().getResources().getDrawable(
+													R.drawable.table_cell_bg));
+										}
 										selectedRow = tableRow;
 										listener.onSubjectSelected(newsToAdd);
 										return true;
@@ -356,6 +350,10 @@ public final class NewsFragment extends CwAbstractFragment {
 									}
 									v.setBackgroundDrawable(getActivity().getResources().getDrawable(
 											R.drawable.table_cell_bg));
+								default:
+									v.setBackgroundDrawable(getActivity().getResources().getDrawable(
+											R.drawable.table_cell_bg));
+									break;
 								}
 								return true;
 							}
@@ -375,7 +373,7 @@ public final class NewsFragment extends CwAbstractFragment {
 						TextView author = (TextView) tableRow.findViewById(R.id.news_row_author);
 						author.setText(createAuthor(newsToAdd.getAuthor()));
 						author.setSelected(true);
-						if (i == 0
+						if ((i == 0 && newsTable.getChildCount() < 2)
 								|| DateUtility
 										.getDay(DateUtility.createCalendarFromUnixtime(tempList.get(i - 1)
 												.getUnixtime() * 1000L), 0).getTimeInMillis() > newsToAdd.getUnixtime() * 1000L) {
@@ -445,7 +443,7 @@ public final class NewsFragment extends CwAbstractFragment {
 		private void initScroll() {
 			scroll.setOnScrollListener(new IScrollListener() {
 				@Override
-				public void onScrollChanged(ScrollDetectorScrollView scrollView, int x, int y, int oldx, int oldy) {
+				public void onScrollChanged(ScrollView scrollView, int x, int y, int oldx, int oldy) {
 					if (!doesWork) {
 						// Grab the last child placed in the ScrollView, we need it to determinate the bottom position.
 						View view = (View) scrollView.getChildAt(scrollView.getChildCount() - 1);
@@ -606,6 +604,12 @@ public final class NewsFragment extends CwAbstractFragment {
 			for (CwComment comment : news.getComments()) {
 				comment.setCwNews(news);
 			}
+			for (CwPicture pic : news.getPictures()) {
+				pic.setCwNews(news);
+			}
+			for (CwVideo video : news.getVideos()) {
+				video.setCwNews(news);
+			}
 			CwApplication.cwEntityManager().replaceOrSetNews(news);
 			CwApplication.cwEntityManager().saveLoadNews(news);
 			return null;
@@ -619,11 +623,11 @@ public final class NewsFragment extends CwAbstractFragment {
 	}
 
 	/**
-	 * Asynchronous task to save news.
+	 * Asynchronous task to save all news.
 	 * 
 	 * @author Alexander Dridiger
 	 */
-	private class SaveAllNewsTask extends AsyncTask<Boolean, Void, Integer> {
+	private class SaveAllNewsTask extends AsyncTask<Void, Void, Integer> {
 
 		@Override
 		protected void onPreExecute() {
@@ -632,13 +636,77 @@ public final class NewsFragment extends CwAbstractFragment {
 		}
 
 		@Override
-		protected Integer doInBackground(Boolean... params) {
+		protected Integer doInBackground(Void... params) {
 			return CwApplication.cwEntityManager().saveAllNews();
 		}
 
 		@Override
 		protected void onPostExecute(Integer result) {
 			Toast.makeText(getActivity(), getActivity().getString(R.string.news_saved, result), Toast.LENGTH_SHORT)
+					.show();
+			getActionBar().setProgressBarVisibility(View.GONE);
+		}
+	}
+
+	/**
+	 * Asynchronous task to sync all news.
+	 * 
+	 * @author Alexander Dridiger
+	 */
+	private class SyncAllNewsTask extends AsyncTask<Void, Void, Void> {
+
+		@Override
+		protected void onPreExecute() {
+			getActionBar().setProgressBarVisibility(View.VISIBLE);
+			Toast.makeText(getActivity(), getActivity().getString(R.string.news_syncing_all), Toast.LENGTH_SHORT)
+					.show();
+		}
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			for (CwNews news : tempList) {
+				if (news.getArticle() == null) {
+					news = CwApplication.cwEntityManager().getNewsSingle(news.getSubjectId());
+				}
+				CwApplication.cwEntityManager().getFullNews(news,
+						getActivity().getString(R.string.cw_url_append, news.getUrl()));
+				news.setComments(CwApplication.cwEntityManager()
+						.getComments(news.getSubjectId(), CommentArea.AREA_NEWS, news.getCommentsAmount(), 0)
+						.getComments());
+				CwApplication.cwEntityManager().replaceOrSetNews(news);
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			Toast.makeText(getActivity(), getActivity().getString(R.string.news_synced_all), Toast.LENGTH_SHORT).show();
+			getActionBar().setProgressBarVisibility(View.GONE);
+		}
+	}
+
+	/**
+	 * Asynchronous task to save whole cw news.
+	 * 
+	 * @author Alexander Dridiger
+	 */
+	private class SaveWholeCwNewsTask extends AsyncTask<Void, Void, Void> {
+
+		@Override
+		protected void onPreExecute() {
+			getActionBar().setProgressBarVisibility(View.VISIBLE);
+			Toast.makeText(getActivity(), getActivity().getString(R.string.cw_saving_all), Toast.LENGTH_SHORT).show();
+		}
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			CwApplication.cwEntityManager().saveWholeCw();
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			Toast.makeText(getActivity(), getActivity().getString(R.string.cw_saved_all, result), Toast.LENGTH_SHORT)
 					.show();
 			getActionBar().setProgressBarVisibility(View.GONE);
 		}
@@ -676,6 +744,12 @@ public final class NewsFragment extends CwAbstractFragment {
 			// Find which menu item has been selected
 			switch (item.getItemId()) {
 			// Check for each known menu item
+			case (R.id.menu_news_sync_all):
+				new SyncAllNewsTask().execute();
+				break;
+			case (R.id.menu_news_get_cw):
+				new SaveWholeCwNewsTask().execute();
+				break;
 			case (R.id.menu_news_discard):
 				CwApplication.cwEntityManager().discardAllNews();
 				break;
@@ -721,19 +795,5 @@ public final class NewsFragment extends CwAbstractFragment {
 			return Filter.NEWS_SONY;
 		}
 		return Filter.NEWS_ALL;
-	}
-
-	/**
-	 * Custom GestureDetector to handle clicks.
-	 * 
-	 * @author Alexander Dridiger
-	 */
-	class SwipeGestureDetector extends SimpleOnGestureListener {
-
-		@Override
-		public void onLongPress(MotionEvent e) {
-			// TODO Auto-generated method stub
-			super.onLongPress(e);
-		}
 	}
 }

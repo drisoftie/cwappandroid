@@ -163,7 +163,7 @@ public class BlogsWriterActivity extends RoboActivity {
 	}
 
 	/**
-	 * Asynchronous task to submit a blog.
+	 * Asynchronous task to init ui.
 	 * 
 	 * @author Alexander Dridiger
 	 */

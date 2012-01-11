@@ -31,6 +31,10 @@
 	<string
 		name="db_article_attribute">article</string>
 	<string
+		name="db_picurl_attribute">url</string>	
+	<string
+		name="db_videourl_attribute">url</string>	
+	<string
 		name="db_cat_attribute">category</string>
 	<string
 		name="db_catshort_attribute">catShort</string>

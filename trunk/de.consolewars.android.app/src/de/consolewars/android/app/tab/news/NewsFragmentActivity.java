@@ -98,4 +98,14 @@ public class NewsFragmentActivity extends CwAbstractFragmentActivity implements 
 		};
 		return fragmentProvider;
 	}
+
+	@Override
+	protected String getStartActionBarTitle() {
+		return getString(R.string.news_area);
+	}
+
+	@Override
+	protected boolean isHomeEnabled() {
+		return true;
+	}
 }
