@@ -29,6 +29,14 @@
 		android:title="Weiteres">
 		<menu>
 			<item
+				android:id="@+id/menu_news_sync_all"
+				android:title="Sync alle News">
+			</item>
+			<item
+				android:id="@+id/menu_news_get_cw"
+				android:title="Hol dir ganz CW (dauert)!">
+			</item>
+			<item
 				android:id="@+id/menu_news_load_saved"
 				android:title="Lade nur gespeicherte News">
 			</item>

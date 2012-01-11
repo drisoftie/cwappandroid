@@ -92,6 +92,9 @@
 	<string name="comment_edited">Der Kommentar wurde erfolgreich editiert.</string>
 	<string name="quote">Zitat</string>
 	<string name="comment_fav">Favorit</string>
+	
+	<string name="cw_saving_all">Speichert alles (kann dauern)</string>
+	<string name="cw_saved_all">Alles gespeichert</string>
 
 
 
@@ -117,6 +120,8 @@
 	<string name="news_sync">Sync</string>
 	<string name="news_syncing">Lade volle News (Galerie, etc.)...</string>
 	<string name="news_synced">Volle News geladen.</string>
+	<string name="news_syncing_all">Sync alle News (Galerie, etc.)...</string>
+	<string name="news_synced_all">Alle News gesynct.</string>
 
 	<string name="news_fav">Favorit</string>
 

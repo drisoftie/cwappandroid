@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -55,8 +54,6 @@ import de.consolewars.android.app.view.ActionBar.Action;
  */
 public class OverviewFragment extends CwAbstractFragment {
 
-	private Activity context;
-
 	CwEntityManager cwEntityManager = CwApplication.cwEntityManager();
 	CwManager cwManager = CwApplication.cwManager();
 	CwLoginManager cwLoginManager = CwApplication.cwLoginManager();
@@ -85,8 +82,7 @@ public class OverviewFragment extends CwAbstractFragment {
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		context = getActivity();
-		this.inflater = LayoutInflater.from(context);
+		this.inflater = LayoutInflater.from(getActivity());
 
 		overview_layout = (ViewGroup) inflater.inflate(R.layout.fragment_progress_layout, null);
 
@@ -106,18 +102,16 @@ public class OverviewFragment extends CwAbstractFragment {
 		overview_fragment = (ViewGroup) inflater.inflate(R.layout.overview_fragment_layout, null);
 		progress_layout.setVisibility(View.GONE);
 
-		if (!isDetached()) {
-			if (((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
-				initActionBar();
-			}
-			if (task != null && task.getStatus().equals(AsyncTask.Status.PENDING)) {
-				task.execute();
-			} else if (task == null || task.getStatus().equals(AsyncTask.Status.FINISHED)) {
-				task = new BuildOverviewAsyncTask();
-				task.execute();
-			} else if (task != null && task.getStatus().equals(AsyncTask.Status.RUNNING)) {
-				task.cancel(true);
-			}
+		if (((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
+			initActionBar();
+		}
+		if (task != null && task.getStatus().equals(AsyncTask.Status.PENDING)) {
+			task.execute();
+		} else if (task == null || task.getStatus().equals(AsyncTask.Status.FINISHED)) {
+			task = new BuildOverviewAsyncTask();
+			task.execute();
+		} else if (task != null && task.getStatus().equals(AsyncTask.Status.RUNNING)) {
+			task.cancel(true);
 		}
 	}
 
@@ -138,16 +132,16 @@ public class OverviewFragment extends CwAbstractFragment {
 	 *            user id is needed to get the appropriate picture
 	 */
 	private void loadPicture(ImageView view, int uid) {
-		CwApplication.cwImageLoader().displayImage(context.getString(R.string.userpic_url, uid, 60), context,
+		CwApplication.cwImageLoader().displayImage(getString(R.string.userpic_url, uid, 60), getActivity(),
 				(ImageView) view, false, R.drawable.user_stub);
 	}
 
 	private void initActionBar() {
-		if (context != null) {
-			if (context.getParent() instanceof CwNavigationMainTabActivity) {
+		if (getActivity() != null) {
+			if (getActivity().getParent() instanceof CwNavigationMainTabActivity) {
 				ActionBar actionBar = getActionBar();
 				actionBar.removeAllActions();
-				actionBar.setTitle(context.getString(R.string.home));
+				actionBar.setTitle(getString(R.string.home));
 
 				actionBar.addAction(new Action() {
 					@Override
@@ -157,7 +151,7 @@ public class OverviewFragment extends CwAbstractFragment {
 
 					@Override
 					public int getDrawable() {
-						return R.drawable.refresh_bttn;
+						return R.drawable.refresh_blue_bttn;
 					}
 				});
 			}
@@ -196,8 +190,6 @@ public class OverviewFragment extends CwAbstractFragment {
 
 		/**
 		 * Builds and fills the view for displaying user data.
-		 * 
-		 * @param parent
 		 */
 		private void buildUserView() {
 			final ViewGroup userLoggedLayout = (ViewGroup) overview_fragment
@@ -229,11 +221,14 @@ public class OverviewFragment extends CwAbstractFragment {
 					new LogoutUserAsyncTask().execute();
 				}
 			});
+
+			initTile(R.id.overview_tile_news, CwNavigationMainTabActivity.selectedNewsTab);
+			initTile(R.id.overview_tile_blog, CwNavigationMainTabActivity.selectedBlogTab);
+			initTile(R.id.overview_tile_msgs, CwNavigationMainTabActivity.MESSAGES_TAB);
+			initTile(R.id.overview_tile_board, CwNavigationMainTabActivity.BOARD_TAB);
+			initTile(R.id.overview_tile_shout, CwNavigationMainTabActivity.SHOUTBOX_TAB);
 		}
 
-		/**
-		 * @param parent
-		 */
 		private void createBanner() {
 			ViewFlipper flipper = (ViewFlipper) overview_fragment.findViewById(R.id.overview_banner_flipper);
 			int newsAmount = 0;
@@ -269,14 +264,14 @@ public class OverviewFragment extends CwAbstractFragment {
 			flipper.addView(createBannerCell(getString(R.string.tab_news_tag), R.drawable.banner_news,
 					getString(R.string.overview_banner_news_title),
 					getString(R.string.overview_banner_details, newsAmount, "News")));
-			flipper.addView(createBannerCell(getString(R.string.tab_blogs_tag), R.drawable.banner_blogs,
+			flipper.addView(createBannerCell(getString(R.string.tab_blogs_tag), R.drawable.banner_blogs_blue,
 					getString(R.string.overview_banner_blogs_title),
 					getString(R.string.overview_banner_details, blogsAmount, "Blogs")));
 			flipper.addView(createBannerCell(getString(R.string.tab_msgs_tag), R.drawable.banner_msgs,
 					getString(R.string.overview_banner_msgs_title),
 					getString(R.string.overview_banner_details, msgsAmount, "Nachrichten")));
-			flipper.setInAnimation(AnimationUtils.loadAnimation(context, R.anim.overview_marquee_in));
-			flipper.setOutAnimation(AnimationUtils.loadAnimation(context, R.anim.overview_marquee_out));
+			flipper.setInAnimation(AnimationUtils.loadAnimation(getActivity(), R.anim.overview_marquee_in));
+			flipper.setOutAnimation(AnimationUtils.loadAnimation(getActivity(), R.anim.overview_marquee_out));
 			flipper.setFlipInterval(3000);
 			flipper.startFlipping();
 		}
@@ -307,6 +302,21 @@ public class OverviewFragment extends CwAbstractFragment {
 		}
 	}
 
+	private void initTile(int tileRes, final int tab) {
+		overview_fragment.findViewById(tileRes).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				switchTab(tab);
+			}
+		});
+	}
+
+	private void switchTab(int tab) {
+		if (getActivity().getParent() instanceof CwNavigationMainTabActivity) {
+			((CwNavigationMainTabActivity) getActivity().getParent()).getTabHost().setCurrentTab(tab);
+		}
+	}
+
 	/**
 	 * Asynchronous task to login a user.
 	 * 
@@ -319,10 +329,9 @@ public class OverviewFragment extends CwAbstractFragment {
 		@Override
 		protected void onPreExecute() {
 			if (cwLoginManager.isLoggedIn()) {
-				Toast.makeText(context, getResources().getString(R.string.already_logged_in), Toast.LENGTH_SHORT)
-						.show();
+				Toast.makeText(getActivity(), getString(R.string.already_logged_in), Toast.LENGTH_SHORT).show();
 			} else {
-				Toast.makeText(context, getResources().getString(R.string.try_login), Toast.LENGTH_SHORT).show();
+				Toast.makeText(getActivity(), getString(R.string.try_login), Toast.LENGTH_SHORT).show();
 				doWork = true;
 			}
 		}
@@ -347,12 +356,12 @@ public class OverviewFragment extends CwAbstractFragment {
 				icon.setImageBitmap(result);
 				setVisibility(View.INVISIBLE, userLoggedLayout, loginBttn);
 				setVisibility(View.VISIBLE, logoutBttn);
-				Toast.makeText(context, context.getString(R.string.logged_in), Toast.LENGTH_SHORT).show();
+				Toast.makeText(getActivity(), getString(R.string.logged_in), Toast.LENGTH_SHORT).show();
 			} else if (doWork) {
 				icon.setImageBitmap(result);
 				setVisibility(View.VISIBLE, userLoggedLayout, loginBttn);
 				setVisibility(View.INVISIBLE, logoutBttn);
-				Toast.makeText(context, context.getString(R.string.login_failed), Toast.LENGTH_SHORT).show();
+				Toast.makeText(getActivity(), getString(R.string.login_failed), Toast.LENGTH_SHORT).show();
 			}
 		}
 	}
@@ -379,7 +388,7 @@ public class OverviewFragment extends CwAbstractFragment {
 			} else {
 				usrnmEdttxt.setError(null);
 				passwEdttxt.setError(null);
-				Toast.makeText(context, getResources().getString(R.string.try_login), Toast.LENGTH_SHORT).show();
+				Toast.makeText(getActivity(), getString(R.string.try_login), Toast.LENGTH_SHORT).show();
 				doWork = true;
 			}
 		}
@@ -410,12 +419,12 @@ public class OverviewFragment extends CwAbstractFragment {
 				icon.setImageBitmap(result);
 				setVisibility(View.INVISIBLE, userLoggedLayout, loginBttn);
 				setVisibility(View.VISIBLE, logoutBttn);
-				Toast.makeText(context, context.getString(R.string.logged_in), Toast.LENGTH_SHORT).show();
+				Toast.makeText(getActivity(), getString(R.string.logged_in), Toast.LENGTH_SHORT).show();
 			} else if (doWork) {
 				icon.setImageBitmap(result);
 				setVisibility(View.VISIBLE, userLoggedLayout, loginBttn);
 				setVisibility(View.INVISIBLE, logoutBttn);
-				Toast.makeText(context, context.getString(R.string.login_failed), Toast.LENGTH_SHORT).show();
+				Toast.makeText(getActivity(), getString(R.string.login_failed), Toast.LENGTH_SHORT).show();
 			}
 		}
 	}
@@ -429,7 +438,7 @@ public class OverviewFragment extends CwAbstractFragment {
 
 		@Override
 		protected void onPreExecute() {
-			Toast.makeText(context, context.getString(R.string.logging_out), Toast.LENGTH_SHORT).show();
+			Toast.makeText(getActivity(), getString(R.string.logging_out), Toast.LENGTH_SHORT).show();
 		}
 
 		@Override
@@ -449,7 +458,7 @@ public class OverviewFragment extends CwAbstractFragment {
 			usrnmTxt.setText("");
 			setVisibility(View.VISIBLE, userLoggedLayout, loginBttn);
 			setVisibility(View.INVISIBLE, logoutBttn);
-			Toast.makeText(context, context.getString(R.string.logged_out), Toast.LENGTH_SHORT).show();
+			Toast.makeText(getActivity(), getString(R.string.logged_out), Toast.LENGTH_SHORT).show();
 		}
 	}
 

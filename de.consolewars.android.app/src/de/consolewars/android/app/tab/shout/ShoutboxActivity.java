@@ -3,24 +3,22 @@ package de.consolewars.android.app.tab.shout;
 import roboguice.activity.RoboActivity;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 import android.webkit.WebSettings.PluginState;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Button;
 
 import com.google.inject.Inject;
 
 import de.consolewars.android.app.CwLoginManager;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwBasicActivityGroup;
-import de.consolewars.android.app.util.ViewUtility;
+import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
+import de.consolewars.android.app.view.ActionBar;
+import de.consolewars.android.app.view.ActionBar.Action;
 
 /*
  * Copyright [2010] [Alexander Dridiger]
@@ -44,18 +42,14 @@ import de.consolewars.android.app.util.ViewUtility;
 public class ShoutboxActivity extends RoboActivity {
 
 	@Inject
-	private ViewUtility viewUtility;
-	@Inject
 	private CwLoginManager cwLoginManager;
-
-	private ViewGroup shoutbox_layout;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		shoutbox_layout = (ViewGroup) LayoutInflater.from(ShoutboxActivity.this.getParent()).inflate(
-				R.layout.shoutbox_layout, null);
+		setContentView(R.layout.shoutbox_layout);
+		initActionBar();
 
 		new BuildShoutboxAsyncTask().execute();
 	}
@@ -65,36 +59,28 @@ public class ShoutboxActivity extends RoboActivity {
 	 * 
 	 * @author Alexander Dridiger
 	 */
-	private class BuildShoutboxAsyncTask extends AsyncTask<Void, Integer, View> {
+	private class BuildShoutboxAsyncTask extends AsyncTask<Void, Void, Void> {
 
 		@Override
 		protected void onPreExecute() {
-			// first set progressbar view
-			ViewGroup progress_layout = viewUtility.getCenteredProgressBarLayout(
-					LayoutInflater.from(ShoutboxActivity.this.getParent()), R.string.shoutbox);
-			setContentView(progress_layout);
+			findViewById(R.id.progressbar).setVisibility(View.VISIBLE);
+			findViewById(R.id.shoutbox).setVisibility(View.INVISIBLE);
 		}
 
 		@Override
-		protected View doInBackground(Void... params) {
-			return loginAndOpenShoutbox();
+		protected Void doInBackground(Void... params) {
+			loginAndOpenShoutbox();
+			return null;
 		}
 
 		@Override
-		protected void onPostExecute(View result) {
-			setContentView(result);
+		protected void onPostExecute(Void result) {
+			findViewById(R.id.progressbar).setVisibility(View.INVISIBLE);
+			findViewById(R.id.shoutbox).setVisibility(View.VISIBLE);
 		}
 
-		private View loginAndOpenShoutbox() {
-			Button refresh = (Button) shoutbox_layout.findViewById(R.id.shoutbox_refresh);
-			refresh.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View arg0) {
-					new BuildShoutboxAsyncTask().execute();
-				}
-			});
-
-			WebView webView = (WebView) shoutbox_layout.findViewById(R.id.shoutbox);
+		private void loginAndOpenShoutbox() {
+			WebView webView = (WebView) findViewById(R.id.shoutbox);
 
 			webView.getSettings().setUseWideViewPort(false);
 			webView.getSettings().setPluginState(PluginState.ON);
@@ -142,8 +128,40 @@ public class ShoutboxActivity extends RoboActivity {
 				CookieSyncManager.getInstance().sync();
 				webView.loadUrl(getString(R.string.cw_shoutbox));
 			}
-			return shoutbox_layout;
 		}
+	}
+
+	private void initActionBar() {
+		ActionBar actionBar = (ActionBar) findViewById(R.id.actionbar);
+		actionBar.removeAllActions();
+		actionBar.setTitle(getString(R.string.shoutbox));
+		actionBar.setDisplayHomeAsUpEnabled(true);
+
+		actionBar.setHomeAction(new Action() {
+			@Override
+			public void performAction(View view) {
+				((CwNavigationMainTabActivity) getParent().getParent()).getTabHost().setCurrentTab(
+						CwNavigationMainTabActivity.OVERVIEW_TAB);
+			}
+
+			@Override
+			public int getDrawable() {
+				return R.drawable.home;
+			}
+		});
+		actionBar.setDisplayHomeAsUpEnabled(true);
+
+		actionBar.addAction(new Action() {
+			@Override
+			public void performAction(View view) {
+				new BuildShoutboxAsyncTask().execute();
+			}
+
+			@Override
+			public int getDrawable() {
+				return R.drawable.refresh_blue_bttn;
+			}
+		});
 	}
 
 	@Override

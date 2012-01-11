@@ -17,6 +17,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.widget.ImageView;
 
 import com.google.inject.Singleton;
@@ -35,7 +36,7 @@ public class ImageLoader {
 		fileCache = new FileCache(context);
 	}
 
-	public void displayImage(String url, Activity activity, ImageView imageView, boolean thumb, int stubId) {
+	public synchronized void displayImage(String url, Activity activity, ImageView imageView, boolean thumb, int stubId) {
 		imageViews.put(imageView, url);
 		Bitmap bitmap = memoryCache.get(url);
 		if (bitmap != null)
@@ -46,7 +47,7 @@ public class ImageLoader {
 		}
 	}
 
-	private void queuePhoto(String url, Activity activity, ImageView imageView, boolean thumb, int stubId) {
+	private synchronized void queuePhoto(String url, Activity activity, ImageView imageView, boolean thumb, int stubId) {
 		// This ImageView may be used for other images before. So there may be some old tasks in the queue. We need to
 		// discard them.
 		photosQueue.clean(imageView);
@@ -57,8 +58,12 @@ public class ImageLoader {
 		}
 
 		// start thread if it's not started yet
-		if (photoLoaderThread.getState() == Thread.State.NEW)
+		if (Thread.State.NEW.equals(photoLoaderThread.getState())
+				&& !Thread.State.RUNNABLE.equals(photoLoaderThread.getState())) {
+			Log.i("THREADSTATE", photoLoaderThread.getState().toString());
+
 			photoLoaderThread.start();
+		}
 	}
 
 	public Bitmap getBitmap(String url, boolean thumb) {

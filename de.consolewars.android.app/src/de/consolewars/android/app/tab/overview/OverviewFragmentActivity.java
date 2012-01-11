@@ -74,4 +74,14 @@ public class OverviewFragmentActivity extends CwAbstractFragmentActivity {
 		};
 		return fragmentProvider;
 	}
+
+	@Override
+	protected String getStartActionBarTitle() {
+		return getString(R.string.home);
+	}
+
+	@Override
+	protected boolean isHomeEnabled() {
+		return false;
+	}
 }

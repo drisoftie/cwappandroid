@@ -112,7 +112,8 @@
                 android:id="@+id/overview_tile_news"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="15dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
                 android:background="@drawable/overview_tiles_bg"
                 android:src="@drawable/tab_news" />
 
@@ -120,7 +121,8 @@
                 android:id="@+id/overview_tile_blog"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="15dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
                 android:background="@drawable/overview_tiles_bg"
                 android:src="@drawable/tab_blogs" />
 
@@ -128,25 +130,17 @@
                 android:id="@+id/overview_tile_msgs"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="15dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
                 android:background="@drawable/overview_tiles_bg"
                 android:src="@drawable/tab_msgs" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/overview_tiles_row2_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/overview_tiles_row1_layout"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:orientation="horizontal" >
 
             <ImageView
                 android:id="@+id/overview_tile_board"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="15dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
                 android:background="@drawable/overview_tiles_bg"
                 android:src="@drawable/tab_board" />
 
@@ -154,7 +148,8 @@
                 android:id="@+id/overview_tile_shout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="15dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
                 android:background="@drawable/overview_tiles_bg"
                 android:src="@drawable/tab_shout" />
         </LinearLayout>

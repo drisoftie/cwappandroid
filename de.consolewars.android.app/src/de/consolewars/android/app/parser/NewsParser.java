@@ -12,6 +12,7 @@ import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 
 import roboguice.inject.InjectResource;
+import android.util.Log;
 
 import com.google.inject.Singleton;
 
@@ -56,6 +57,8 @@ public class NewsParser {
 		newslistURL.addArgument("id", id);
 
 		URL url = new URL(newslistURL.toString());
+
+		Log.d("API-URL", newslistURL.toString());
 
 		URLConnection conn = url.openConnection();
 		String encoding = "UTF-8";

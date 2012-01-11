@@ -19,9 +19,12 @@ import android.webkit.WebSettings.PluginState;
 import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import de.consolewars.android.app.CwApplication;
 import de.consolewars.android.app.R;
+import de.consolewars.android.app.db.domain.CwComment;
 import de.consolewars.android.app.db.domain.CwNews;
+import de.consolewars.android.app.db.domain.CwPicture;
 import de.consolewars.android.app.db.domain.CwVideo;
 import de.consolewars.android.app.tab.CwAbstractFragment;
 import de.consolewars.android.app.tab.CwAbstractFragmentActivity;
@@ -178,7 +181,7 @@ public class SingleNewsFragment extends CwAbstractFragment {
 
 					@Override
 					public int getDrawable() {
-						return R.drawable.refresh_bttn;
+						return R.drawable.refresh_blue_bttn;
 					}
 				});
 			}
@@ -305,15 +308,15 @@ public class SingleNewsFragment extends CwAbstractFragment {
 			final ImageView usericon = (ImageView) parent.findViewById(R.id.header_descr_usericon);
 			loadPicture(usericon, news);
 
-//			final QuickAction action = initQuickAction();
-//			action.setOnActionItemClickListener(new QuickAction.OnActionItemClickListener() {
-//				@Override
-//				public void onItemClick(int pos) {
-//					if (pos == 0) {
-//					} else if (pos == 1) {
-//					}
-//				}
-//			});
+			// final QuickAction action = initQuickAction();
+			// action.setOnActionItemClickListener(new QuickAction.OnActionItemClickListener() {
+			// @Override
+			// public void onItemClick(int pos) {
+			// if (pos == 0) {
+			// } else if (pos == 1) {
+			// }
+			// }
+			// });
 			// usericon.setOnClickListener(new OnClickListener() {
 			// @Override
 			// public void onClick(View v) {
@@ -373,13 +376,59 @@ public class SingleNewsFragment extends CwAbstractFragment {
 	private class RefreshSingleNewsTask extends AsyncTask<Void, Void, Void> {
 
 		@Override
-		protected Void doInBackground(Void... params) {
+		protected void onPreExecute() {
 			getActionBar().setProgressBarVisibility(View.VISIBLE);
+			Toast.makeText(getActivity(), getString(R.string.news_syncing), Toast.LENGTH_SHORT).show();
+		}
+
+		@Override
+		protected Void doInBackground(Void... params) {
 			CwApplication.cwEntityManager().getFullNews(news, context.getString(R.string.cw_url_append, news.getUrl()));
-			getActionBar().setProgressBarVisibility(View.GONE);
 			return null;
 		}
 
+		@Override
+		protected void onPostExecute(Void result) {
+			Toast.makeText(getActivity(), getString(R.string.news_synced), Toast.LENGTH_SHORT).show();
+			getActionBar().setProgressBarVisibility(View.GONE);
+		}
+	}
+
+	/**
+	 * Asynchronous task to save a news.
+	 * 
+	 * @author Alexander Dridiger
+	 */
+	private class SaveNewsTask extends AsyncTask<CwNews, Void, Void> {
+
+		@Override
+		protected void onPreExecute() {
+			getActionBar().setProgressBarVisibility(View.VISIBLE);
+			Toast.makeText(getActivity(), getString(R.string.news_single_saving), Toast.LENGTH_SHORT).show();
+		}
+
+		@Override
+		protected Void doInBackground(CwNews... newsParams) {
+			CwNews news = newsParams[0];
+			for (CwComment comment : news.getComments()) {
+				comment.setCwNews(news);
+			}
+			for (CwPicture pic : news.getPictures()) {
+				pic.setCwNews(news);
+			}
+			for (CwVideo video : news.getVideos()) {
+				video.setCwNews(news);
+			}
+			CwApplication.cwEntityManager().replaceOrSetNews(news);
+			CwApplication.cwEntityManager().saveLoadNews(news);
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			Toast.makeText(getActivity(), getString(R.string.news_single_saved), Toast.LENGTH_SHORT).show();
+			getActionBar().setProgressBarVisibility(View.GONE);
+		}
 	}
 
 	private MenuInflater menuInflater;
@@ -411,6 +460,9 @@ public class SingleNewsFragment extends CwAbstractFragment {
 			// Check for each known menu item
 			case (R.id.menu_singlenews_refresh):
 				new RefreshSingleNewsTask().execute();
+				break;
+			case (R.id.menu_singlenews_save):
+				new SaveNewsTask().execute(news);
 				break;
 			}
 		}

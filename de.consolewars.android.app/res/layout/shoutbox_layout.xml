@@ -1,17 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="fill_parent"
-	android:layout_height="fill_parent">
-	<WebView
-		android:id="@+id/shoutbox"
-		android:layout_width="fill_parent"
-		android:layout_height="fill_parent"/>
-	<Button
-		android:id="@+id/shoutbox_refresh"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_alignParentRight="true"
-		android:layout_alignParentTop="true"
-		android:background="@drawable/refresh_bump"/>
-</RelativeLayout>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <de.consolewars.android.app.view.ActionBar
+        android:id="@+id/actionbar"
+        style="@style/ActionBar" />
+
+    <RelativeLayout
+        android:id="@+id/content"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+
+        <include
+            android:id="@+id/progressbar"
+            android:layout_centerInParent="true"
+            layout="@layout/centered_progressbar" />
+
+        <WebView
+            android:id="@+id/shoutbox"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:visibility="invisible" />
+    </RelativeLayout>
+
+</LinearLayout>

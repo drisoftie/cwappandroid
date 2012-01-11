@@ -188,8 +188,9 @@ public class CommentsFragment extends CwAbstractFragment {
 				actionBar.addAction(new Action() {
 					@Override
 					public void performAction(View view) {
-						if (task.getStatus().equals(AsyncTask.Status.RUNNING)
-								|| task.viewtask.getStatus().equals(AsyncTask.Status.RUNNING)) {
+						if (task != null
+								&& (task.getStatus().equals(AsyncTask.Status.RUNNING) || task.viewtask.getStatus()
+										.equals(AsyncTask.Status.RUNNING))) {
 							task.cancel(true);
 						}
 						task = new BuildCommentsTask();
@@ -198,7 +199,7 @@ public class CommentsFragment extends CwAbstractFragment {
 
 					@Override
 					public int getDrawable() {
-						return R.drawable.refresh_bttn;
+						return R.drawable.refresh_blue_bttn;
 					}
 				});
 			}
@@ -252,7 +253,7 @@ public class CommentsFragment extends CwAbstractFragment {
 							comment = CwApplication.cwEntityManager().getRefreshedComment(comment);
 						}
 					}
-				} else {
+				} else if (subject != null) {
 					root = CwApplication.cwEntityManager().getComments(subject.getSubjectId(), area, results, currpage);
 					maxpage = root.getMaxPage() != 1 ? root.getMaxPage() : 1;
 					comments.clear();
@@ -487,8 +488,9 @@ public class CommentsFragment extends CwAbstractFragment {
 					@Override
 					public void onClick(View v) {
 						currpage++;
-						if (task.getStatus().equals(AsyncTask.Status.RUNNING)
-								|| task.viewtask.getStatus().equals(AsyncTask.Status.RUNNING)) {
+						if (task != null
+								&& (task.getStatus().equals(AsyncTask.Status.RUNNING) || task.viewtask.getStatus()
+										.equals(AsyncTask.Status.RUNNING))) {
 							task.cancel(true);
 						}
 						task = new BuildCommentsTask();
@@ -500,8 +502,9 @@ public class CommentsFragment extends CwAbstractFragment {
 					public void onClick(View v) {
 						currpage--;
 						cancel(true);
-						if (task.getStatus().equals(AsyncTask.Status.RUNNING)
-								|| task.viewtask.getStatus().equals(AsyncTask.Status.RUNNING)) {
+						if (task != null
+								&& (task.getStatus().equals(AsyncTask.Status.RUNNING) || task.viewtask.getStatus()
+										.equals(AsyncTask.Status.RUNNING))) {
 							task.cancel(true);
 						}
 						task = new BuildCommentsTask();
@@ -689,8 +692,9 @@ public class CommentsFragment extends CwAbstractFragment {
 				((ScrollView) cmmts_layout.findViewById(R.id.comments_scroll_view)).fullScroll(ScrollView.FOCUS_UP);
 				break;
 			case (R.id.menu_cmts_refresh):
-				if (task.getStatus().equals(AsyncTask.Status.RUNNING)
-						|| task.viewtask.getStatus().equals(AsyncTask.Status.RUNNING)) {
+				if (task != null
+						&& (task.getStatus().equals(AsyncTask.Status.RUNNING) || task.viewtask.getStatus().equals(
+								AsyncTask.Status.RUNNING))) {
 					task.cancel(true);
 				}
 				task = new BuildCommentsTask();
