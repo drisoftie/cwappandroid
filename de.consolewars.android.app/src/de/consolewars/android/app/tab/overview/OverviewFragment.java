@@ -294,7 +294,8 @@ public class OverviewFragment extends CwAbstractFragment {
 				@Override
 				public void onClick(View v) {
 					if (v.getTag() instanceof String && ((String) v.getTag()).matches(tag)) {
-						((CwNavigationMainTabActivity) getActivity().getParent()).getTabHost().setCurrentTabByTag(tag);
+						((CwNavigationMainTabActivity) getActivity().getParent()).getUsedTabHost().setCurrentTabByTag(
+								tag);
 					}
 				}
 			});
@@ -313,7 +314,7 @@ public class OverviewFragment extends CwAbstractFragment {
 
 	private void switchTab(int tab) {
 		if (getActivity().getParent() instanceof CwNavigationMainTabActivity) {
-			((CwNavigationMainTabActivity) getActivity().getParent()).getTabHost().setCurrentTab(tab);
+			((CwNavigationMainTabActivity) getActivity().getParent()).setTab(tab);
 		}
 	}
 

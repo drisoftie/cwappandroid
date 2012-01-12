@@ -157,6 +157,14 @@
                 android:layout_margin="15dp"
                 android:background="@drawable/overview_tiles_bg"
                 android:src="@drawable/tab_shout" />
+
+            <ImageView
+                android:id="@+id/overview_tile_options"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="15dp"
+                android:background="@drawable/overview_tiles_bg"
+                android:src="@drawable/tab_options" />
         </LinearLayout>
     </RelativeLayout>
 

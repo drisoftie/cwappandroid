@@ -157,8 +157,8 @@ public class BoardActivity extends RoboActivity {
 		actionBar.setHomeAction(new Action() {
 			@Override
 			public void performAction(View view) {
-				((CwNavigationMainTabActivity) getParent().getParent()).getTabHost().setCurrentTab(
-						CwNavigationMainTabActivity.OVERVIEW_TAB);
+				((CwNavigationMainTabActivity) getParent().getParent())
+						.setTab(CwNavigationMainTabActivity.OVERVIEW_TAB);
 			}
 
 			@Override

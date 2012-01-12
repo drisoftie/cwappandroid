@@ -97,8 +97,8 @@ public abstract class CwAbstractFragment extends Fragment {
 			@Override
 			public void performAction(View view) {
 				if (getActivity().getParent() instanceof CwNavigationMainTabActivity) {
-					((CwNavigationMainTabActivity) getActivity().getParent()).getTabHost().setCurrentTab(
-							CwNavigationMainTabActivity.OVERVIEW_TAB);
+					((CwNavigationMainTabActivity) getActivity().getParent())
+							.setTab(CwNavigationMainTabActivity.OVERVIEW_TAB);
 				}
 			}
 

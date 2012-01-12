@@ -26,7 +26,6 @@ import de.consolewars.android.app.db.domain.CwUser;
 import de.consolewars.android.app.view.ActionBar;
 import de.consolewars.android.app.view.ActionBar.Action;
 import de.consolewars.android.app.view.CwPagerAdapter;
-import de.consolewars.android.app.view.CwPagerAdapter.FragmentProvider;
 import de.consolewars.android.app.view.TitlePageIndicator;
 import de.consolewars.android.app.view.TitlePageIndicator.IndicatorStyle;
 
@@ -49,14 +48,14 @@ import de.consolewars.android.app.view.TitlePageIndicator.IndicatorStyle;
  * 
  * @author Alexander Dridiger
  */
-public abstract class CwAbstractFragmentActivity extends FragmentActivity implements ViewPager.OnPageChangeListener {
+public abstract class CwAbstractFragmentActivity extends FragmentActivity implements ViewPager.OnPageChangeListener,
+		FragmentProvider {
 
 	protected CwEntityManager cwEntityManager;
 	protected AppDataHandler cwAppDataHandler;
 	protected Dao<CwUser, Integer> cwUserDao;
 
 	protected CwPagerAdapter adapter;
-	protected FragmentProvider fragmentProvider;
 	ViewPager pager;
 
 	public int lastPosition;
@@ -76,7 +75,7 @@ public abstract class CwAbstractFragmentActivity extends FragmentActivity implem
 		// View layout = LayoutInflater.from(this).inflate(R.layout.fragment_pager_layout, null);
 
 		adapter = new CwPagerAdapter(getSupportFragmentManager());
-		adapter.setFragmentProvider(getFragmentProvider());
+		adapter.setFragmentProvider(this);
 
 		pager = (ViewPager) findViewById(R.id.pager);
 		pager.setAdapter(adapter);
@@ -97,8 +96,7 @@ public abstract class CwAbstractFragmentActivity extends FragmentActivity implem
 				@Override
 				public void performAction(View view) {
 					if (getParent() instanceof CwNavigationMainTabActivity) {
-						((CwNavigationMainTabActivity) getParent()).getTabHost().setCurrentTab(
-								CwNavigationMainTabActivity.OVERVIEW_TAB);
+						((CwNavigationMainTabActivity) getParent()).setTab(CwNavigationMainTabActivity.OVERVIEW_TAB);
 					}
 				}
 
@@ -211,10 +209,17 @@ public abstract class CwAbstractFragmentActivity extends FragmentActivity implem
 		return super.onOptionsItemSelected(item);
 	}
 
-	/**
-	 * @return
-	 */
-	protected abstract FragmentProvider getFragmentProvider();
+	@Override
+	public CwAbstractFragment requestFragment(int index) {
+		CwAbstractFragment f = getFragmentForIndex(index);
+		if (f != null) {
+			return f;
+		}
+		throw new IllegalStateException(getResources().getQuantityString(R.plurals.exc_supported_fragments, getCount(),
+				getCount()));
+	}
+
+	protected abstract CwAbstractFragment getFragmentForIndex(int index);
 
 	/**
 	 * @return

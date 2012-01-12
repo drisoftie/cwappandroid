@@ -3,7 +3,7 @@ package de.consolewars.android.app.view;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import de.consolewars.android.app.tab.CwAbstractFragment;
+import de.consolewars.android.app.tab.FragmentProvider;
 
 /*
  * Copyright [2011] [Alexander Dridiger]
@@ -58,21 +58,5 @@ public class CwPagerAdapter extends FragmentPagerAdapter implements TitleProvide
 	 */
 	public void setFragmentProvider(FragmentProvider fragmentProvider) {
 		this.fragmentProvider = fragmentProvider;
-	}
-
-	/**
-	 * <h1>Made under the following assumption:</h1><br>
-	 * {@link FragmentPagerAdapter} only invokes {@link FragmentPagerAdapter#getItem(int)}, if it <b>really</b> needs a
-	 * new {@link Fragment}, otherwise it uses internal caching. In our case it's necessary to return a new
-	 * {@link Fragment} within {@link FragmentPagerAdapter#getItem(int)} and store it, because we need references to the
-	 * fragments to handle back button clicks, menu button clicks, etc. <br>
-	 * Therefore this provider returns new fragments on request and retains it for further processing.
-	 */
-	public interface FragmentProvider {
-		public CwAbstractFragment requestFragment(int index);
-
-		public int getCount();
-
-		public String getTitle(int index);
 	}
 }

@@ -105,11 +105,32 @@ public class CwManager {
 	}
 
 	/**
-	 * Method wrapper for {@link API.getBlogs()}.
+	 * Method wrapper for {@link BlogsParser#parse(int)}.
+	 * 
+	 * @param blogId
+	 * @return the found blog
+	 */
+	public CwBlog getBlogById(int blogId) {
+		if (isDeviceOnline()) {
+			try {
+				List<CwBlog> blogs = blogsParser.parse(blogId);
+				if (!blogs.isEmpty()) {
+					return blogs.get(0);
+				}
+			} catch (ConsolewarsAPIException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Method wrapper for {@link BlogsParser#parse(int[])}.
 	 * 
 	 * @param id
-	 * @return
-	 * @see de.consolewars.api.API#getBlogs(int[])
+	 * @return list of blogs
 	 */
 	public List<CwBlog> getBlogsByIds(int[] id) {
 		if (isDeviceOnline()) {
@@ -162,30 +183,13 @@ public class CwManager {
 	}
 
 	/**
-	 * Method wrapper for {@link API.getBlog(int id)}.
-	 * 
-	 * @param blogId
-	 * @return
-	 */
-	public CwBlog getBlogById(int blogId) {
-		if (isDeviceOnline()) {
-			try {
-				return api.getBlog(blogId);
-			} catch (ConsolewarsAPIException e) {
-				e.printStackTrace();
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * Method wrapper for {@link API.getComments()}.
+	 * Method wrapper for {@link CommentsParser#parse(int, int, int, int, int)}.
 	 * 
 	 * @param objectId
 	 * @param area
 	 * @param count
 	 * @param viewPage
-	 * @return
+	 * @return found comments
 	 */
 	public CommentsRoot getComments(int objectId, int area, int count, int viewPage) {
 		CommentsRoot root = new CommentsRoot();
@@ -221,17 +225,21 @@ public class CwManager {
 	}
 
 	/**
-	 * Method wrapper for {@link API.getNews()}.
+	 * Method wrapper for {@link NewsParser#parse(int)}.
 	 * 
 	 * @param id
-	 * @return
-	 * @see de.consolewars.api.API#getNews(int)
+	 * @return the found news
 	 */
 	public CwNews getNewsById(int id) {
 		if (isDeviceOnline()) {
 			try {
-				return api.getNews(id);
+				List<CwNews> news = newsParser.parse(id);
+				if (!news.isEmpty()) {
+					return news.get(0);
+				}
 			} catch (ConsolewarsAPIException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
@@ -239,11 +247,10 @@ public class CwManager {
 	}
 
 	/**
-	 * Method wrapper for {@link API.getNews()}.
+	 * Method wrapper for {@link NewsParser#parse(int[])}.
 	 * 
 	 * @param id
-	 * @return
-	 * @see de.consolewars.api.API#getNews(int[])
+	 * @return list of news
 	 */
 	public List<CwNews> getNewsByIds(int[] id) {
 		if (isDeviceOnline()) {

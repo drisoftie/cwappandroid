@@ -45,6 +45,10 @@ public class NewsParser {
 	@InjectResource(R.string.api_key)
 	private String APIKey;
 
+	public List<CwNews> parse(int id) throws ConsolewarsAPIException, IOException {
+		return parse(new int[] { id });
+	}
+
 	public List<CwNews> parse(int[] id) throws ConsolewarsAPIException, IOException {
 		List<CwNews> news = new ArrayList<CwNews>();
 

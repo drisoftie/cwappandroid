@@ -219,7 +219,6 @@ public final class NewsFragment extends CwAbstractFragment {
 					return R.drawable.refresh_blue_bttn;
 				}
 			});
-			actionBar.invalidate();
 		}
 	}
 

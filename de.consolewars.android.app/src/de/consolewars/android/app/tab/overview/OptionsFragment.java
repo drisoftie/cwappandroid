@@ -2,7 +2,6 @@ package de.consolewars.android.app.tab.overview;
 
 import java.sql.SQLException;
 
-import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -41,10 +40,6 @@ import de.consolewars.android.app.view.ActionBar;
  */
 public class OptionsFragment extends CwAbstractFragment {
 
-	private Context context;
-
-	private LayoutInflater inflater;
-
 	public OptionsFragment() {
 	}
 
@@ -57,8 +52,6 @@ public class OptionsFragment extends CwAbstractFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		// see this issue http://code.google.com/p/android/issues/detail?id=5067
-		context = getActivity();
-		this.inflater = LayoutInflater.from(context);
 		ViewGroup options_layout = (ViewGroup) inflater.inflate(R.layout.options_fragment_layout, null);
 		Button save_bttn = (Button) options_layout.findViewById(R.id.bttn_opt_save);
 		save_bttn.setOnClickListener(new OnClickListener() {
@@ -148,11 +141,11 @@ public class OptionsFragment extends CwAbstractFragment {
 	}
 
 	private void initActionBar() {
-		if (context != null) {
+		if (getActivity() != null) {
 			if (getActivity().getParent() instanceof CwNavigationMainTabActivity) {
 				ActionBar actionBar = getActionBar();
 				actionBar.removeAllActions();
-				actionBar.setTitle(context.getString(R.string.home));
+				actionBar.setTitle(getString(R.string.home));
 			}
 		}
 	}

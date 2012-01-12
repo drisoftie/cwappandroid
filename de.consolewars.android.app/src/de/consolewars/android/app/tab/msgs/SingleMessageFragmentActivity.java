@@ -1,13 +1,16 @@
-package de.consolewars.android.app.tab.blogs;
+package de.consolewars.android.app.tab.msgs;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import de.consolewars.android.app.CwApplication;
 import de.consolewars.android.app.R;
+import de.consolewars.android.app.pics.PicsFragment;
 import de.consolewars.android.app.tab.CwAbstractFragment;
 import de.consolewars.android.app.tab.CwAbstractFragmentActivity;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
+import de.consolewars.android.app.tab.FragmentProvider;
 import de.consolewars.android.app.tab.cmts.CommentsFragment;
+import de.consolewars.android.app.tab.news.SingleNewsFragment;
 
 /*
  * Copyright [2011] [Alexander Dridiger]
@@ -24,11 +27,11 @@ import de.consolewars.android.app.tab.cmts.CommentsFragment;
  * limitations under the License.
  */
 /**
- * 
+ * Activity showing and handling a single message.
  * 
  * @author Alexander Dridiger
  */
-public class SingleBlogFragmentActivity extends CwAbstractFragmentActivity {
+public class SingleMessageFragmentActivity extends CwAbstractFragmentActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -36,46 +39,45 @@ public class SingleBlogFragmentActivity extends CwAbstractFragmentActivity {
 	}
 
 	@Override
-	protected void onResume() {
-		super.onResume();
-	}
-
-	@Override
 	protected int getInitialFragmentSelection() {
-		return 0;
+		return 1;
 	}
 
 	@Override
 	protected CwAbstractFragment getFragmentForIndex(int index) {
 		switch (index) {
 		case 0:
-			return new SingleBlogFragment(getTitle(index), index);
+			return new PicsFragment(getTitle(index), index);
 		case 1:
-			return new CommentsFragment(CwApplication.cwEntityManager().getSelectedBlog(), getTitle(index), index);
+			return new SingleNewsFragment(getTitle(index), index);
+		case 2:
+			return new CommentsFragment(CwApplication.cwEntityManager().getSelectedNews(), getTitle(index), index);
 		}
 		return null;
 	}
 
 	@Override
 	public int getCount() {
-		return 2;
+		return 3;
 	}
 
 	@Override
 	public String getTitle(int index) {
 		switch (index) {
 		case 0:
-			return getString(R.string.blog);
+			return getString(R.string.gallery);
 		case 1:
+			return getString(R.string.news);
+		case 2:
 			return getString(R.string.comments);
 		default:
-			return getString(R.string.blog);
+			return getString(R.string.gallery);
 		}
 	}
 
 	@Override
 	protected String getStartActionBarTitle() {
-		return getString(R.string.singleblog_area);
+		return getString(R.string.singlenews_area);
 	}
 
 	@Override
@@ -87,13 +89,13 @@ public class SingleBlogFragmentActivity extends CwAbstractFragmentActivity {
 	public void onBackPressed() {
 		Fragment f = getSupportFragmentManager().findFragmentByTag(
 				"android:switcher:" + R.id.pager + ":" + lastPosition);
-		if (f instanceof CwAbstractFragment) {
+		if (f != null && f instanceof CwAbstractFragment) {
 			((CwAbstractFragment) f).setPosition(lastPosition);
 			((CwAbstractFragment) f).backPressed();
 		}
 		if (getParent() instanceof CwNavigationMainTabActivity) {
-			((CwNavigationMainTabActivity) getParent()).setTab(CwNavigationMainTabActivity.BLOGS_TAB);
-			CwNavigationMainTabActivity.selectedBlogTab = CwNavigationMainTabActivity.BLOGS_TAB;
+			((CwNavigationMainTabActivity) getParent()).setTab(CwNavigationMainTabActivity.MESSAGES_TAB);
+			CwNavigationMainTabActivity.selectedNewsTab = CwNavigationMainTabActivity.NEWS_TAB;
 		}
 	}
 }

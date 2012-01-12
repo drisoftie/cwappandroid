@@ -1,10 +1,9 @@
-package de.consolewars.android.app.tab.blogs;
+package de.consolewars.android.app.tab.msgs;
 
 import android.os.Bundle;
 import de.consolewars.android.app.CwApplication;
-import de.consolewars.android.app.Filter;
 import de.consolewars.android.app.R;
-import de.consolewars.android.app.db.domain.CwBlog;
+import de.consolewars.android.app.db.domain.CwNews;
 import de.consolewars.android.app.db.domain.CwSubject;
 import de.consolewars.android.app.tab.CwAbstractFragment;
 import de.consolewars.android.app.tab.CwAbstractFragmentActivity;
@@ -26,10 +25,11 @@ import de.consolewars.android.app.tab.OnSubjectSelectedListener;
  * limitations under the License.
  */
 /**
- * @author Alexander Dridiger
+ * Central Activity to handle the ui for news.
  * 
+ * @author Alexander Dridiger
  */
-public class BlogsFragmentActivity extends CwAbstractFragmentActivity implements OnSubjectSelectedListener {
+public class MessagesFragmentActivity extends CwAbstractFragmentActivity implements OnSubjectSelectedListener {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -43,10 +43,10 @@ public class BlogsFragmentActivity extends CwAbstractFragmentActivity implements
 
 	@Override
 	public void onSubjectSelected(CwSubject subject) {
-		CwApplication.cwEntityManager().setSelectedBlog((CwBlog) subject);
+		CwApplication.cwEntityManager().setSelectedNews((CwNews) subject);
 		if (getParent() instanceof CwNavigationMainTabActivity) {
-			((CwNavigationMainTabActivity) getParent()).setTab(CwNavigationMainTabActivity.SINGLEBLOG_TAB);
-			CwNavigationMainTabActivity.selectedBlogTab = CwNavigationMainTabActivity.SINGLEBLOG_TAB;
+			((CwNavigationMainTabActivity) getParent()).setTab(CwNavigationMainTabActivity.SINGLEMESSAGES_TAB);
+			CwNavigationMainTabActivity.selectedMsgsTab = CwNavigationMainTabActivity.SINGLEMESSAGES_TAB;
 		}
 	}
 
@@ -59,9 +59,9 @@ public class BlogsFragmentActivity extends CwAbstractFragmentActivity implements
 	protected CwAbstractFragment getFragmentForIndex(int index) {
 		switch (index) {
 		case 0:
-			return new BlogsFragment(Filter.BLOGS_NORMAL, getTitle(index), index);
+			return new MessagesFragment(getTitle(index), index);
 		case 1:
-			return new BlogsFragment(Filter.BLOGS_USER, getTitle(index), index);
+			return new MessagesFragment(getTitle(index), index);
 		}
 		return null;
 	}
@@ -75,17 +75,15 @@ public class BlogsFragmentActivity extends CwAbstractFragmentActivity implements
 	public String getTitle(int index) {
 		switch (index) {
 		case 0:
-			return getString(R.string.blogs_filter_all);
-		case 1:
-			return getString(R.string.blogs_filter_own);
+			return getString(R.string.messages_filter_inbox);
 		default:
-			return getString(R.string.blogs_filter_all);
+			return getString(R.string.messages_filter_outbox);
 		}
 	}
 
 	@Override
 	protected String getStartActionBarTitle() {
-		return getString(R.string.blogs_area);
+		return getString(R.string.messages_area);
 	}
 
 	@Override

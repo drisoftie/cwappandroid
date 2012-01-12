@@ -4,7 +4,6 @@ import android.os.Bundle;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.CwAbstractFragment;
 import de.consolewars.android.app.tab.CwAbstractFragmentActivity;
-import de.consolewars.android.app.view.CwPagerAdapter.FragmentProvider;
 
 /*
  * Copyright [2011] [Alexander Dridiger]
@@ -43,36 +42,31 @@ public class OverviewFragmentActivity extends CwAbstractFragmentActivity {
 	}
 
 	@Override
-	protected FragmentProvider getFragmentProvider() {
-		fragmentProvider = new FragmentProvider() {
-			@Override
-			public CwAbstractFragment requestFragment(int index) {
-				switch (index) {
-				case 0:
-					return new OverviewFragment(getTitle(index), index);
-				case 1:
-					return new OptionsFragment(getTitle(index), index);
-				}
-				throw new IllegalStateException("Not more than two fragment supported.");
-			}
+	protected CwAbstractFragment getFragmentForIndex(int index) {
+		switch (index) {
+		case 0:
+			return new OverviewFragment(getTitle(index), index);
+		case 1:
+			return new OptionsFragment(getTitle(index), index);
+		}
+		return null;
+	}
 
-			@Override
-			public int getCount() {
-				return 2;
-			}
+	@Override
+	public int getCount() {
+		return 2;
+	}
 
-			@Override
-			public String getTitle(int index) {
-				switch (index) {
-				case 0:
-					return getString(R.string.overview);
-				case 1:
-					return getString(R.string.options);
-				}
-				throw new IllegalStateException("Not more than two fragment supported.");
-			}
-		};
-		return fragmentProvider;
+	@Override
+	public String getTitle(int index) {
+		switch (index) {
+		case 0:
+			return getString(R.string.overview);
+		case 1:
+			return getString(R.string.options);
+		default:
+			return getString(R.string.overview);
+		}
 	}
 
 	@Override

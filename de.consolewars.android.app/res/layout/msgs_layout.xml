@@ -1,33 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="fill_parent"
-	android:layout_height="fill_parent">
-	<RelativeLayout
-		android:id="@+id/msg_filter"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content">
-		<Button
-			android:id="@+id/msg_bttn_refresh"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_alignParentRight="true"
-			android:background="@drawable/refresh_bump"/>
-		<Button
-			android:id="@+id/msg_bttn_new_mssg"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_toLeftOf="@id/msg_bttn_refresh"
-			android:background="@drawable/def_bttn_new_mssg"/>
-		<Spinner
-			android:id="@+id/msg_filter_spinner"
-			android:layout_width="fill_parent"
-			android:layout_height="wrap_content"
-			android:layout_toLeftOf="@id/msg_bttn_new_mssg"
-			android:prompt="@string/msg_option"/>
-	</RelativeLayout>
-	<ListView android:id="@+id/msgs_list_view"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <ListView
+        android:id="@+id/msgs_list_view"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_below="@+id/msg_filter"/>
+        android:layout_height="fill_parent" />
+
 </RelativeLayout>
