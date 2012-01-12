@@ -14,7 +14,7 @@ import de.consolewars.android.app.R;
 import de.consolewars.android.app.tab.blogs.BlogsFragmentActivity;
 import de.consolewars.android.app.tab.blogs.SingleBlogFragmentActivity;
 import de.consolewars.android.app.tab.board.BoardActivityGroup;
-import de.consolewars.android.app.tab.msgs.MessagesActivityGroup;
+import de.consolewars.android.app.tab.msgs.MessagesFragmentActivity;
 import de.consolewars.android.app.tab.news.NewsFragmentActivity;
 import de.consolewars.android.app.tab.news.SingleNewsFragmentActivity;
 import de.consolewars.android.app.tab.overview.OverviewFragmentActivity;
@@ -54,9 +54,11 @@ public class CwNavigationMainTabActivity extends RoboTabActivity {
 	public static final int SHOUTBOX_TAB = 5;
 	public static final int SINGLENEWS_TAB = 6;
 	public static final int SINGLEBLOG_TAB = 7;
+	public static final int SINGLEMESSAGES_TAB = 8;
 
 	public static int selectedNewsTab = NEWS_TAB;
 	public static int selectedBlogTab = BLOGS_TAB;
+	public static int selectedMsgsTab = MESSAGES_TAB;
 
 	/**
 	 * The {@link TabHost} for this {@link TabActivity}. Before used, check for null since the activity might not have
@@ -87,7 +89,7 @@ public class CwNavigationMainTabActivity extends RoboTabActivity {
 		addTab(R.string.tab_overv_tag, OverviewFragmentActivity.class);
 		addTab(R.string.tab_news_tag, NewsFragmentActivity.class);
 		addTab(R.string.tab_blogs_tag, BlogsFragmentActivity.class);
-		addTab(R.string.tab_msgs_tag, MessagesActivityGroup.class);
+		addTab(R.string.tab_msgs_tag, MessagesFragmentActivity.class);
 		addTab(R.string.tab_board_tag, BoardActivityGroup.class);
 		addTab(R.string.tab_shout_tag, ShoutboxActivityGroup.class);
 		// invisible tabs
@@ -123,6 +125,10 @@ public class CwNavigationMainTabActivity extends RoboTabActivity {
 		return true;
 	}
 
+	public void setTab(int tabId) {
+		getUsedTabHost().setCurrentTab(tabId);
+	}
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		super.onOptionsItemSelected(item);
@@ -130,31 +136,31 @@ public class CwNavigationMainTabActivity extends RoboTabActivity {
 		switch (item.getItemId()) {
 		// Check for each known menu item
 		case (R.id.menu_overview):
-			getTabHost().setCurrentTab(OVERVIEW_TAB);
+			getUsedTabHost().setCurrentTab(OVERVIEW_TAB);
 			break;
 		case (R.id.menu_news):
 			if (selectedNewsTab == SINGLENEWS_TAB) {
-				getTabHost().setCurrentTab(SINGLENEWS_TAB);
+				getUsedTabHost().setCurrentTab(SINGLENEWS_TAB);
 			} else {
-				getTabHost().setCurrentTab(NEWS_TAB);
+				getUsedTabHost().setCurrentTab(NEWS_TAB);
 				selectedNewsTab = NEWS_TAB;
 			}
 			break;
 		case (R.id.menu_blogs):
 			if (selectedBlogTab == SINGLEBLOG_TAB) {
-				getTabHost().setCurrentTab(SINGLEBLOG_TAB);
+				getUsedTabHost().setCurrentTab(SINGLEBLOG_TAB);
 			} else {
-				getTabHost().setCurrentTab(BLOGS_TAB);
+				getUsedTabHost().setCurrentTab(BLOGS_TAB);
 			}
 			break;
 		case (R.id.menu_msgs):
-			getTabHost().setCurrentTab(MESSAGES_TAB);
+			getUsedTabHost().setCurrentTab(MESSAGES_TAB);
 			break;
 		case (R.id.menu_board):
-			getTabHost().setCurrentTab(BOARD_TAB);
+			getUsedTabHost().setCurrentTab(BOARD_TAB);
 			break;
 		case (R.id.menu_shoutbox):
-			getTabHost().setCurrentTab(SHOUTBOX_TAB);
+			getUsedTabHost().setCurrentTab(SHOUTBOX_TAB);
 			break;
 		}
 		return true;

@@ -9,7 +9,6 @@ import de.consolewars.android.app.tab.CwAbstractFragment;
 import de.consolewars.android.app.tab.CwAbstractFragmentActivity;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
 import de.consolewars.android.app.tab.cmts.CommentsFragment;
-import de.consolewars.android.app.view.CwPagerAdapter.FragmentProvider;
 
 /*
  * Copyright [2011] [Alexander Dridiger]
@@ -43,41 +42,35 @@ public class SingleNewsFragmentActivity extends CwAbstractFragmentActivity {
 	}
 
 	@Override
-	protected FragmentProvider getFragmentProvider() {
-		fragmentProvider = new FragmentProvider() {
-			@Override
-			public CwAbstractFragment requestFragment(int index) {
-				switch (index) {
-				case 0:
-					return new PicsFragment(getTitle(index), index);
-				case 1:
-					return new SingleNewsFragment(getTitle(index), index);
-				case 2:
-					return new CommentsFragment(CwApplication.cwEntityManager().getSelectedNews(), getTitle(index),
-							index);
-				}
-				throw new IllegalStateException("Not more than three fragments supported.");
-			}
+	protected CwAbstractFragment getFragmentForIndex(int index) {
+		switch (index) {
+		case 0:
+			return new PicsFragment(getTitle(index), index);
+		case 1:
+			return new SingleNewsFragment(getTitle(index), index);
+		case 2:
+			return new CommentsFragment(CwApplication.cwEntityManager().getSelectedNews(), getTitle(index), index);
+		}
+		return null;
+	}
 
-			@Override
-			public int getCount() {
-				return 3;
-			}
+	@Override
+	public int getCount() {
+		return 3;
+	}
 
-			@Override
-			public String getTitle(int index) {
-				switch (index) {
-				case 0:
-					return getString(R.string.gallery);
-				case 1:
-					return getString(R.string.news);
-				case 2:
-					return getString(R.string.comments);
-				}
-				throw new IllegalStateException("Not more than three fragments supported.");
-			}
-		};
-		return fragmentProvider;
+	@Override
+	public String getTitle(int index) {
+		switch (index) {
+		case 0:
+			return getString(R.string.gallery);
+		case 1:
+			return getString(R.string.news);
+		case 2:
+			return getString(R.string.comments);
+		default:
+			return getString(R.string.gallery);
+		}
 	}
 
 	@Override
@@ -99,8 +92,7 @@ public class SingleNewsFragmentActivity extends CwAbstractFragmentActivity {
 			((CwAbstractFragment) f).backPressed();
 		}
 		if (getParent() instanceof CwNavigationMainTabActivity) {
-			((CwNavigationMainTabActivity) getParent()).getTabHost()
-					.setCurrentTab(CwNavigationMainTabActivity.NEWS_TAB);
+			((CwNavigationMainTabActivity) getParent()).setTab(CwNavigationMainTabActivity.NEWS_TAB);
 			CwNavigationMainTabActivity.selectedNewsTab = CwNavigationMainTabActivity.NEWS_TAB;
 		}
 	}

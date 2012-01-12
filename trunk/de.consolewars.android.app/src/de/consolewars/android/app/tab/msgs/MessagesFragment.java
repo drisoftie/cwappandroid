@@ -3,10 +3,7 @@ package de.consolewars.android.app.tab.msgs;
 import java.util.ArrayList;
 import java.util.List;
 
-import roboguice.activity.RoboActivity;
-import android.app.ActivityGroup;
 import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.style.ForegroundColorSpan;
@@ -15,24 +12,23 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-
-import com.google.inject.Inject;
-
-import de.consolewars.android.app.CwManager;
+import de.consolewars.android.app.CwApplication;
 import de.consolewars.android.app.Filter;
 import de.consolewars.android.app.R;
 import de.consolewars.android.app.db.domain.CwMessage;
-import de.consolewars.android.app.tab.CwBasicActivityGroup;
+import de.consolewars.android.app.tab.CwAbstractFragment;
+import de.consolewars.android.app.tab.CwAbstractFragmentActivity;
+import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
 import de.consolewars.android.app.util.DateUtility;
 import de.consolewars.android.app.util.StyleSpannableStringBuilder;
-import de.consolewars.android.app.util.ViewUtility;
+import de.consolewars.android.app.view.ActionBar;
+import de.consolewars.android.app.view.ActionBar.Action;
 
 /*
- * Copyright [2010] [Alexander Dridiger]
+ * Copyright [2011] [Alexander Dridiger]
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,26 +42,44 @@ import de.consolewars.android.app.util.ViewUtility;
  * limitations under the License.
  */
 /**
- * Central Activity to handle the ui for messages.
+ * Activity showing and handling options.
  * 
  * @author Alexander Dridiger
  */
-public class MessagesActivity extends RoboActivity {
-
-	@Inject
-	private CwManager cwManager;
-	@Inject
-	private ViewUtility viewUtility;
+public class MessagesFragment extends CwAbstractFragment {
 
 	private List<CwMessage> msgs = new ArrayList<CwMessage>();
 
-	private Filter currentFilter = Filter.MSGS_INBOX;
+	ViewGroup msgs_layout;
+
+	public MessagesFragment() {
+	}
+
+	public MessagesFragment(String title, int position) {
+		super(title, position);
+		setHasOptionsMenu(true);
+	}
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		msgs_layout = (ViewGroup) inflater.inflate(R.layout.msgs_layout, null);
+		return msgs_layout;
+	}
 
+	@Override
+	public void onResume() {
+		super.onResume();
+		if (((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
+			initActionBar();
+		}
 		new BuildMessagesAsyncTask().execute();
+	}
+
+	@Override
+	public void refresh() {
+		if (((CwAbstractFragmentActivity) getActivity()).lastPosition == getPosition()) {
+			initActionBar();
+		}
 	}
 
 	/**
@@ -77,55 +91,38 @@ public class MessagesActivity extends RoboActivity {
 
 		@Override
 		protected void onPreExecute() {
-			// first set progressbar view
-			ViewGroup progress_layout = viewUtility.getCenteredProgressBarLayout(
-					LayoutInflater.from(MessagesActivity.this.getParent()), R.string.tab_msgs_head);
-			setContentView(progress_layout);
+			getActionBar().setProgressBarVisibility(View.VISIBLE);
 		}
 
 		@Override
 		protected List<CwMessage> doInBackground(Void... params) {
-			msgs = cwManager.getMessages(currentFilter, 10);
+			msgs = CwApplication.cwManager().getMessages(getFilter(getPosition()), 10);
 			return msgs;
 		}
 
 		@Override
 		protected void onPostExecute(List<CwMessage> result) {
 			// sets the messages view for this Activity
-			ViewGroup msgs_layout = (ViewGroup) LayoutInflater.from(MessagesActivity.this.getParent()).inflate(
-					R.layout.msgs_layout, null);
-			initRefreshBttn(msgs_layout);
-			initSendMsgBttn(msgs_layout);
 			ListView msgsListView = (ListView) msgs_layout.findViewById(R.id.msgs_list_view);
-			msgsListView.setAdapter(new MessageRowAdapter(MessagesActivity.this, result));
-			setContentView(msgs_layout);
-		}
-
-		private void initRefreshBttn(final View parentView) {
-			Button refresh = (Button) parentView.findViewById(2);
-			refresh.setOnClickListener(new OnClickListener() {
-
-				public void onClick(View view) {
-					new BuildMessagesAsyncTask().execute();
-				}
-			});
+			msgsListView.setAdapter(new MessageRowAdapter(getActivity(), result));
+			getActionBar().setProgressBarVisibility(View.INVISIBLE);
 		}
 
 		private void initSendMsgBttn(final View parentView) {
-			Button new_bttn = (Button) parentView.findViewById(1);
-			new_bttn.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View arg0) {
-					Intent newMsgIntent = new Intent(MessagesActivity.this, MessageWriterActivity.class);
-
-					View view = ((ActivityGroup) getParent())
-							.getLocalActivityManager()
-							.startActivity(MessageWriterActivity.class.getSimpleName(),
-									newMsgIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
-					// replace the view
-					((MessagesActivityGroup) getParent()).replaceView(view);
-				}
-			});
+			// Button new_bttn = (Button) parentView.findViewById(R.id.msg_bttn_new_mssg);
+			// new_bttn.setOnClickListener(new OnClickListener() {
+			// @Override
+			// public void onClick(View arg0) {
+			// // Intent newMsgIntent = new Intent(MessagesActivity.this, MessageWriterActivity.class);
+			// //
+			// // View view = ((ActivityGroup) getParent())
+			// // .getLocalActivityManager()
+			// // .startActivity(MessageWriterActivity.class.getSimpleName(),
+			// // newMsgIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
+			// // // replace the view
+			// // ((MessagesActivityGroup) getParent()).replaceView(view);
+			// }
+			// });
 		}
 	}
 
@@ -185,16 +182,16 @@ public class MessagesActivity extends RoboActivity {
 		 * @param text
 		 */
 		private void getSingleMessage(String text) {
-			Intent singleMessageIntent = new Intent(MessagesActivity.this, SingleMessageActivity.class);
-
-			singleMessageIntent.putExtra(MessagesActivity.class.getName(), text);
-
-			View view = ((ActivityGroup) getParent())
-					.getLocalActivityManager()
-					.startActivity(SingleMessageActivity.class.getSimpleName(),
-							singleMessageIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
-			// replace the view
-			((MessagesActivityGroup) getParent()).replaceView(view);
+			// Intent singleMessageIntent = new Intent(MessagesActivity.this, SingleMessageActivity.class);
+			//
+			// singleMessageIntent.putExtra(MessagesActivity.class.getName(), text);
+			//
+			// View view = ((ActivityGroup) getParent())
+			// .getLocalActivityManager()
+			// .startActivity(SingleMessageActivity.class.getSimpleName(),
+			// singleMessageIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)).getDecorView();
+			// // replace the view
+			// ((MessagesActivityGroup) getParent()).replaceView(view);
 		}
 
 		private int createMessageIcon(boolean read) {
@@ -251,10 +248,44 @@ public class MessagesActivity extends RoboActivity {
 		}
 	}
 
-	@Override
-	public void onBackPressed() {
-		if (getParent() instanceof CwBasicActivityGroup) {
-			((CwBasicActivityGroup) getParent()).back();
+	private void initActionBar() {
+		if (getActivity() != null) {
+			if (getActivity().getParent() instanceof CwNavigationMainTabActivity) {
+				ActionBar actionBar = getActionBar();
+				actionBar.removeAllActions();
+				setHomeAction();
+				actionBar.setTitle(getActivity().getString(R.string.messages_area));
+				actionBar.setDisplayHomeAsUpEnabled(true);
+				actionBar.addAction(new Action() {
+					@Override
+					public void performAction(View view) {
+					}
+
+					@Override
+					public int getDrawable() {
+						return R.drawable.def_bttn_new_mssg;
+					}
+				});
+				actionBar.addAction(new Action() {
+					@Override
+					public void performAction(View view) {
+						new BuildMessagesAsyncTask().execute();
+					}
+
+					@Override
+					public int getDrawable() {
+						return R.drawable.refresh_blue_bttn;
+					}
+				});
+			}
 		}
+	}
+
+	private static Filter getFilter(int position) {
+		return (Filter.MSGS_INBOX.getPosition() == position) ? Filter.MSGS_INBOX : Filter.MSGS_OUTBOX;
+	}
+
+	@Override
+	public void backPressed() {
 	}
 }

@@ -29,7 +29,6 @@ import de.consolewars.android.app.db.domain.CwPicture;
 import de.consolewars.android.app.db.domain.CwUser;
 import de.consolewars.android.app.db.domain.CwVideo;
 import de.consolewars.android.app.parser.CommentsRoot;
-import de.consolewars.android.app.util.CwBlogsIdSorter;
 import de.consolewars.android.app.util.CwBlogsUnixtimeSorter;
 import de.consolewars.android.app.util.CwCommentsIdSorter;
 import de.consolewars.android.app.util.CwNewsIdSorter;
@@ -83,7 +82,6 @@ public class CwEntityManager {
 	private CwBlog selectedBlog;
 
 	private CwNewsIdSorter cwNewsIdSorter = new CwNewsIdSorter();
-	private CwBlogsIdSorter cwBlogsIdSorter = new CwBlogsIdSorter();
 	private CwBlogsUnixtimeSorter cwBlogsUnixtimeSorter = new CwBlogsUnixtimeSorter();
 	private CwCommentsIdSorter cwCommentsIdSorter = new CwCommentsIdSorter();
 

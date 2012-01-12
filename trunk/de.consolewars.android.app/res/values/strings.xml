@@ -20,8 +20,8 @@
 	<string name="copy">Kopieren</string>
 	<string name="copying_text">Text wurde in die Zwischenablage kopiert</string>
 
-	<string name="pull_to_load">Ziehen zum Refreshen...</string>
-	<string name="release_to_load">Jetzt loslassen...</string>
+	<string name="pull_to_load">Ziehen zum Refreshen</string>
+	<string name="release_to_load">Jetzt loslassen</string>
 
 	<!-- Tab specific -->
 	<string name="tab_news_tag">news</string>
@@ -168,6 +168,10 @@
 	<string name="blogmode_normal">normal</string>
 
 	<!-- messages -->
+	<string name="messages_area">Nachrichten</string>
+	<string name="messages_filter_inbox">Eingang</string>
+	<string name="messages_filter_outbox">Ausgang</string>
+	
 	<string name="messagewriter_sending">Nachricht wird gesendet...</string>
 	<string name="messagewriter_sent">Nachricht wurde erfolgreich versendet.</string>
 	<string name="messagewriter_recipients">Empfänger:</string>

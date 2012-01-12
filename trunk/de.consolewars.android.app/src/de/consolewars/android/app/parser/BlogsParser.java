@@ -43,6 +43,10 @@ public class BlogsParser {
 	@InjectResource(R.string.api_key)
 	private String APIKey;
 
+	public List<CwBlog> parse(int id) throws ConsolewarsAPIException, IOException {
+		return parse(new int[] { id });
+	}
+
 	public List<CwBlog> parse(int[] id) throws ConsolewarsAPIException, IOException {
 		// name of the api-php file
 		String apiname = "getblogs";

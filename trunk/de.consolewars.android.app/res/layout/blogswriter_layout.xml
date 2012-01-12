@@ -1,149 +1,172 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:id="@+id/blogswriter_scroll_view"
-	android:layout_width="fill_parent"
-	android:layout_height="fill_parent"
-	android:background="@drawable/overview_bg">
-	<RelativeLayout
-		android:layout_width="fill_parent"
-		android:layout_height="fill_parent">
-		<LinearLayout
-			android:id="@+id/blogswriter_fill_layout"
-			android:layout_width="fill_parent"
-			android:layout_height="wrap_content"
-			android:orientation="vertical">
-			<TextView
-				android:id="@+id/blogswriter_txt_title"
-				android:layout_width="fill_parent"
-				android:layout_height="wrap_content"
-				android:textColor="@color/writer_text"
-				android:layout_marginLeft="@dimen/writer_text_margin"
-				android:layout_marginTop="@dimen/writer_text_margin"
-				android:textStyle="bold"
-				android:text="@string/blogswriter_blogtitle"/>
-			<EditText
-				android:id="@+id/blogswriter_edttxt_title"
-				android:layout_width="fill_parent"
-				android:layout_height="wrap_content"
-				android:height="2dp"
-				android:singleLine="true"
-				android:textSize="15dp"/>
-			<TextView
-				android:id="@+id/blogswriter_txt_content"
-				android:layout_width="fill_parent"
-				android:layout_height="wrap_content"
-				android:textColor="@color/writer_text"
-				android:layout_marginLeft="@dimen/writer_text_margin"
-				android:layout_marginTop="@dimen/writer_text_margin"
-				android:textStyle="bold"
-				android:text="@string/blogswriter_blogcontent"/>
-			<EditText
-				android:id="@+id/blogswriter_edttxt_content"
-				android:layout_width="fill_parent"
-				android:layout_height="wrap_content"
-				android:minLines="7"
-				android:scrollbars="vertical"
-				android:gravity="top"
-				android:textSize="15dp"/>
-			<TextView
-				android:id="@+id/blogswriter_txt_tags"
-				android:layout_width="fill_parent"
-				android:layout_height="wrap_content"
-				android:textColor="@color/writer_text"
-				android:layout_marginLeft="@dimen/writer_text_margin"
-				android:layout_marginTop="@dimen/writer_text_margin"
-				android:textStyle="bold"
-				android:text="@string/blogswriter_tags"/>
-			<EditText
-				android:id="@+id/blogswriter_edttxt_tags"
-				android:layout_width="fill_parent"
-				android:layout_height="wrap_content"
-				android:textSize="15dp"/>
-			<TextView
-				android:id="@+id/blogswriter_txt_date"
-				android:layout_width="fill_parent"
-				android:layout_height="wrap_content"
-				android:textColor="@color/writer_text"
-				android:layout_marginLeft="@dimen/writer_text_margin"
-				android:layout_marginTop="@dimen/writer_text_margin"
-				android:textStyle="bold"
-				android:text="@string/blogswriter_date"/>
-			<RelativeLayout
-				android:id="@+id/blogswriter_date_layout"
-				android:layout_width="fill_parent"
-				android:layout_height="wrap_content">
-				<Button
-					android:id="@+id/blogswriter_bttn_date"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_alignParentRight="true"
-					android:text="Datum"/>
-				<TextView
-					android:id="@+id/blogswriter_txt_showdate"
-					android:layout_width="fill_parent"
-					android:layout_height="wrap_content"
-					android:layout_centerVertical="true"
-					android:layout_toLeftOf="@id/blogswriter_bttn_date"
-					android:textColor="@color/writer_text"
-					android:layout_marginLeft="@dimen/writer_text_margin"/>
-			</RelativeLayout>
-			<TextView
-				android:id="@+id/blogswriter_txt_time"
-				android:layout_width="fill_parent"
-				android:layout_height="wrap_content"
-				android:textColor="@color/writer_text"
-				android:layout_marginLeft="@dimen/writer_text_margin"
-				android:layout_marginTop="@dimen/writer_text_margin"
-				android:textStyle="bold"
-				android:text="@string/blogswriter_time"/>
-			<RelativeLayout
-				android:id="@+id/blogswriter_time_layout"
-				android:layout_width="fill_parent"
-				android:layout_height="wrap_content">
-				<Button
-					android:id="@+id/blogswriter_bttn_time"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_alignParentRight="true"
-					android:text="Zeit"/>
-				<TextView
-					android:id="@+id/blogswriter_txt_showtime"
-					android:layout_width="fill_parent"
-					android:layout_height="wrap_content"
-					android:layout_centerVertical="true"
-					android:layout_toLeftOf="@id/blogswriter_bttn_date"
-					android:textColor="@color/writer_text"
-					android:layout_marginLeft="@dimen/writer_text_margin"/>
-			</RelativeLayout>
-			<CheckBox
-				android:id="@+id/blogswriter_check_visible"
-				android:layout_width="fill_parent"
-				android:layout_height="wrap_content"
-				android:textColor="@color/writer_text"
-				android:layout_marginLeft="@dimen/writer_text_margin"
-				android:text="@string/blogswriter_visible"/>
-			<CheckBox
-				android:id="@+id/blogswriter_check_comments_allowed"
-				android:layout_width="fill_parent"
-				android:layout_height="wrap_content"
-				android:textColor="@color/writer_text"
-				android:layout_marginLeft="@dimen/writer_text_margin"
-				android:text="@string/blogswriter_comments_allowed"/>
-			<CheckBox
-				android:id="@+id/blogswriter_check_newsblog"
-				android:layout_width="fill_parent"
-				android:layout_height="wrap_content"
-				android:textColor="@color/writer_text"
-				android:layout_marginLeft="@dimen/writer_text_margin"
-				android:text="@string/blogswriter_newsblog"/>
-		</LinearLayout>
-		<Button
-			android:id="@+id/blogswriter_bttn_submit"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_below="@id/blogswriter_fill_layout"
-			android:layout_alignParentLeft="true"
-			android:text="Abschicken"/>
-	</RelativeLayout>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/blogswriter_scroll_view"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/overview_bg" >
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+
+        <LinearLayout
+            android:id="@+id/blogswriter_fill_layout"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/blogswriter_txt_title"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/writer_text_margin"
+                android:layout_marginTop="@dimen/writer_text_margin"
+                android:text="@string/blogswriter_blogtitle"
+                android:textColor="@color/writer_text"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/blogswriter_edttxt_title"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:height="2dp"
+                android:inputType="text"
+                android:singleLine="true"
+                android:textSize="15dp" />
+
+            <TextView
+                android:id="@+id/blogswriter_txt_content"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/writer_text_margin"
+                android:layout_marginTop="@dimen/writer_text_margin"
+                android:text="@string/blogswriter_blogcontent"
+                android:textColor="@color/writer_text"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/blogswriter_edttxt_content"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="top"
+                android:inputType="text"
+                android:minLines="7"
+                android:scrollbars="vertical"
+                android:textSize="15dp" />
+
+            <TextView
+                android:id="@+id/blogswriter_txt_tags"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/writer_text_margin"
+                android:layout_marginTop="@dimen/writer_text_margin"
+                android:text="@string/blogswriter_tags"
+                android:textColor="@color/writer_text"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/blogswriter_edttxt_tags"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:textSize="15dp" />
+
+            <TextView
+                android:id="@+id/blogswriter_txt_date"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/writer_text_margin"
+                android:layout_marginTop="@dimen/writer_text_margin"
+                android:text="@string/blogswriter_date"
+                android:textColor="@color/writer_text"
+                android:textStyle="bold" />
+
+            <RelativeLayout
+                android:id="@+id/blogswriter_date_layout"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" >
+
+                <Button
+                    android:id="@+id/blogswriter_bttn_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:text="Datum" />
+
+                <TextView
+                    android:id="@+id/blogswriter_txt_showdate"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="@dimen/writer_text_margin"
+                    android:layout_toLeftOf="@id/blogswriter_bttn_date"
+                    android:textColor="@color/writer_text" />
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/blogswriter_txt_time"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/writer_text_margin"
+                android:layout_marginTop="@dimen/writer_text_margin"
+                android:text="@string/blogswriter_time"
+                android:textColor="@color/writer_text"
+                android:textStyle="bold" />
+
+            <RelativeLayout
+                android:id="@+id/blogswriter_time_layout"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" >
+
+                <Button
+                    android:id="@+id/blogswriter_bttn_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:text="Zeit" />
+
+                <TextView
+                    android:id="@+id/blogswriter_txt_showtime"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="@dimen/writer_text_margin"
+                    android:layout_toLeftOf="@id/blogswriter_bttn_date"
+                    android:textColor="@color/writer_text" />
+            </RelativeLayout>
+
+            <CheckBox
+                android:id="@+id/blogswriter_check_visible"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/writer_text_margin"
+                android:text="@string/blogswriter_visible"
+                android:textColor="@color/writer_text" />
+
+            <CheckBox
+                android:id="@+id/blogswriter_check_comments_allowed"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/writer_text_margin"
+                android:text="@string/blogswriter_comments_allowed"
+                android:textColor="@color/writer_text" />
+
+            <CheckBox
+                android:id="@+id/blogswriter_check_newsblog"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/writer_text_margin"
+                android:text="@string/blogswriter_newsblog"
+                android:textColor="@color/writer_text" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/blogswriter_bttn_submit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/blogswriter_fill_layout"
+            android:text="Abschicken" />
+    </RelativeLayout>
+
 </ScrollView>

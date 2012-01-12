@@ -10,7 +10,6 @@ import de.consolewars.android.app.tab.CwAbstractFragment;
 import de.consolewars.android.app.tab.CwAbstractFragmentActivity;
 import de.consolewars.android.app.tab.CwNavigationMainTabActivity;
 import de.consolewars.android.app.tab.OnSubjectSelectedListener;
-import de.consolewars.android.app.view.CwPagerAdapter.FragmentProvider;
 
 /*
  * Copyright [2011] [Alexander Dridiger]
@@ -47,8 +46,7 @@ public class NewsFragmentActivity extends CwAbstractFragmentActivity implements 
 	public void onSubjectSelected(CwSubject subject) {
 		CwApplication.cwEntityManager().setSelectedNews((CwNews) subject);
 		if (getParent() instanceof CwNavigationMainTabActivity) {
-			((CwNavigationMainTabActivity) getParent()).getTabHost().setCurrentTab(
-					CwNavigationMainTabActivity.SINGLENEWS_TAB);
+			((CwNavigationMainTabActivity) getParent()).setTab(CwNavigationMainTabActivity.SINGLENEWS_TAB);
 			CwNavigationMainTabActivity.selectedNewsTab = CwNavigationMainTabActivity.SINGLENEWS_TAB;
 		}
 	}
@@ -59,44 +57,39 @@ public class NewsFragmentActivity extends CwAbstractFragmentActivity implements 
 	}
 
 	@Override
-	protected FragmentProvider getFragmentProvider() {
-		fragmentProvider = new FragmentProvider() {
-			@Override
-			public CwAbstractFragment requestFragment(int index) {
-				switch (index) {
-				case 0:
-					return new NewsFragment(Filter.NEWS_ALL, getTitle(index), index);
-				case 1:
-					return new NewsFragment(Filter.NEWS_MS, getTitle(index), index);
-				case 2:
-					return new NewsFragment(Filter.NEWS_NIN, getTitle(index), index);
-				case 3:
-					return new NewsFragment(Filter.NEWS_SONY, getTitle(index), index);
-				}
-				throw new IllegalStateException("Not more than four fragments supported.");
-			}
+	protected CwAbstractFragment getFragmentForIndex(int index) {
+		switch (index) {
+		case 0:
+			return new NewsFragment(Filter.NEWS_ALL, getTitle(index), index);
+		case 1:
+			return new NewsFragment(Filter.NEWS_MS, getTitle(index), index);
+		case 2:
+			return new NewsFragment(Filter.NEWS_NIN, getTitle(index), index);
+		case 3:
+			return new NewsFragment(Filter.NEWS_SONY, getTitle(index), index);
+		}
+		return null;
+	}
 
-			@Override
-			public int getCount() {
-				return 4;
-			}
+	@Override
+	public int getCount() {
+		return 4;
+	}
 
-			@Override
-			public String getTitle(int index) {
-				switch (index) {
-				case 0:
-					return getString(R.string.news_filter_all);
-				case 1:
-					return getString(R.string.news_filter_only_ms);
-				case 2:
-					return getString(R.string.news_filter_only_nin);
-				case 3:
-					return getString(R.string.news_filter_only_sony);
-				}
-				throw new IllegalStateException("Not more than four fragments supported.");
-			}
-		};
-		return fragmentProvider;
+	@Override
+	public String getTitle(int index) {
+		switch (index) {
+		case 0:
+			return getString(R.string.news_filter_all);
+		case 1:
+			return getString(R.string.news_filter_only_ms);
+		case 2:
+			return getString(R.string.news_filter_only_nin);
+		case 3:
+			return getString(R.string.news_filter_only_sony);
+		default:
+			return getString(R.string.news_filter_all);
+		}
 	}
 
 	@Override
